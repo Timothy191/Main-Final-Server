@@ -1,10 +1,14 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { createServiceRoleClient } from '@repo/supabase/service-role'
+import { createServerSupabaseClient } from '@repo/supabase/server'
 import { cacheSet, cacheGet } from '@repo/redis/cache'
 import { generateLocalFallbackEmbedding } from '@/lib/ai/embedding-provider'
+import { requireAdmin } from '@/lib/api/auth'
 
 export async function GET(_req: NextRequest) {
+  const auth = await requireAdmin()
+  if ('error' in auth) return auth.error
+
   const startedAt = Date.now()
   const components: Record<string, string> = {
     postgres: 'skipped',
@@ -13,7 +17,7 @@ export async function GET(_req: NextRequest) {
   }
 
   try {
-    const supabase = createServiceRoleClient()
+    const supabase = await createServerSupabaseClient()
     const { error: pgError } = await supabase.from('departments').select('id').limit(1)
 
     if (pgError) {
@@ -22,7 +26,6 @@ export async function GET(_req: NextRequest) {
       components.postgres = 'ok'
     }
 
-    // Warm-up pgvector HNSW index by executing a dummy vector match query
     try {
       const dummyVec = generateLocalFallbackEmbedding('system warmup ping 1536d vector')
       const { error: vecError } = await supabase.rpc('match_memories', {

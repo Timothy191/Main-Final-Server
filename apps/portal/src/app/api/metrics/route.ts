@@ -17,8 +17,12 @@
  */
 import { getCacheStats } from '@repo/redis'
 import { getObservabilityMetrics } from '@/lib/observability/metrics'
+import { requireAdmin } from '@/lib/api/auth'
 
 export async function GET() {
+  const auth = await requireAdmin()
+  if ('error' in auth) return auth.error
+
   const cacheStats = await getCacheStats()
   const { jobMetrics, dbMetrics } = await getObservabilityMetrics()
   let body = ''

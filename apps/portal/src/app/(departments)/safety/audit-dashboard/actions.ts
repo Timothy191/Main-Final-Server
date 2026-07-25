@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { UnauthorizedError, ForbiddenError } from '@repo/errors'
 
 export async function triggerManualAudit() {
   const { createServerSupabaseClient } = await import('@repo/supabase/server')
@@ -11,10 +12,9 @@ export async function triggerManualAudit() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    throw new Error('Unauthorized')
+    throw new UnauthorizedError()
   }
 
-  // Validate user role is admin, manager or safety officer
   const { data: employee } = await supabase
     .from('employees')
     .select('role')
@@ -25,10 +25,11 @@ export async function triggerManualAudit() {
     !employee ||
     (employee.role !== 'admin' && employee.role !== 'manager' && employee.role !== 'safety')
   ) {
-    throw new Error('Unauthorized')
+    throw new ForbiddenError(
+      'Only admins, managers, or safety officers can trigger a manual audit.'
+    )
   }
 
-  // Trigger manual generation event via Inngest
   await inngest.send({
     name: 'report/automated-audit',
     data: {},

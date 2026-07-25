@@ -21,6 +21,10 @@ jest.mock('@repo/redis', () => ({
   }),
 }))
 
+jest.mock('@/lib/api/auth', () => ({
+  requireAdmin: jest.fn().mockResolvedValue({ supabase: {}, user: { id: 'admin-1' } }),
+}))
+
 describe('GET /api/metrics', () => {
   beforeEach(() => {
     clearObservabilityMetrics()

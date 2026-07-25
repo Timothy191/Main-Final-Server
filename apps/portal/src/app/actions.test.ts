@@ -61,7 +61,9 @@ describe('actions', () => {
         },
       })
 
-      await expect(speculativeEmbedShiftLog('test shift log note')).rejects.toThrow('Unauthorized')
+      await expect(speculativeEmbedShiftLog('test shift log note')).rejects.toThrow(
+        'Authentication required.'
+      )
       expect(inngest.send).not.toHaveBeenCalled()
     })
 
@@ -106,7 +108,9 @@ describe('actions', () => {
         },
       })
 
-      await expect(generateMonthlyReport({ title: 'Test' })).rejects.toThrow('Unauthorized')
+      await expect(generateMonthlyReport({ title: 'Test' })).rejects.toThrow(
+        'Authentication required.'
+      )
     })
 
     it('throws error if user is not admin or manager', async () => {
@@ -126,7 +130,9 @@ describe('actions', () => {
         from: jest.fn().mockReturnValue({ select: mockSelect }),
       } as any)
 
-      await expect(generateMonthlyReport({ title: 'Test' })).rejects.toThrow('Unauthorized')
+      await expect(generateMonthlyReport({ title: 'Test' })).rejects.toThrow(
+        'Only admins and managers can generate monthly reports.'
+      )
     })
 
     it('generates report and returns signed URL for authorized users', async () => {
@@ -176,7 +182,7 @@ describe('actions', () => {
         },
       })
 
-      await expect(updateCacheTags(['tag-1'])).rejects.toThrow('Unauthorized')
+      await expect(updateCacheTags(['tag-1'])).rejects.toThrow('Authentication required.')
     })
 
     it('updates tags when user is authenticated', async () => {

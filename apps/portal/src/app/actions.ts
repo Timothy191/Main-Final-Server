@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidateTag, updateTag } from 'next/cache'
+import { UnauthorizedError, ForbiddenError, ValidationError } from '@repo/errors'
 
 export async function speculativeEmbedShiftLog(text: string) {
   const { createServerSupabaseClient } = await import('@repo/supabase/server')
@@ -12,7 +13,7 @@ export async function speculativeEmbedShiftLog(text: string) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    throw new Error('Unauthorized')
+    throw new UnauthorizedError()
   }
 
   if (!text || text.trim() === '') return
@@ -26,7 +27,6 @@ export async function speculativeEmbedShiftLog(text: string) {
       },
     })
   } catch (err) {
-    // Log error but do not fail the user's critical operation path
     logError(err instanceof Error ? err : new Error(String(err)), {
       context: 'speculative_embed_queue_failed',
     })
@@ -41,7 +41,7 @@ export async function revalidateRSC(tags: string[]) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    throw new Error('Unauthorized')
+    throw new UnauthorizedError()
   }
 
   for (const tag of tags) {
@@ -58,7 +58,7 @@ export async function updateCacheTags(tags: string[]) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    throw new Error('Unauthorized')
+    throw new UnauthorizedError()
   }
 
   for (const tag of tags) {
@@ -79,10 +79,9 @@ export async function generateMonthlyReport(
   } = await supabase.auth.getUser()
 
   if (!user) {
-    throw new Error('Unauthorized')
+    throw new UnauthorizedError()
   }
 
-  // Validate user role is admin or manager
   const { data: employee } = await supabase
     .from('employees')
     .select('role, department_id')
@@ -90,7 +89,7 @@ export async function generateMonthlyReport(
     .single()
 
   if (employee?.role !== 'admin' && employee?.role !== 'manager') {
-    throw new Error('Unauthorized')
+    throw new ForbiddenError('Only admins and managers can generate monthly reports.')
   }
 
   try {
@@ -98,10 +97,9 @@ export async function generateMonthlyReport(
     const { ReportTemplate } = await import('@/features/analytics/components/ReportTemplate')
     const React = await import('react')
 
-    // Use employee department ID as fallback for folder categorization
     const deptId = departmentId || employee.department_id
     if (!deptId) {
-      throw new Error('Department ID is required to determine storage permissions')
+      throw new ValidationError('Department ID is required to determine storage permissions.')
     }
 
     const doc = React.createElement(ReportTemplate, { data: reportData }) as unknown as Parameters<
@@ -119,7 +117,7 @@ export async function generateMonthlyReport(
       })
 
     if (uploadError) {
-      throw new Error(`Upload failed: ${uploadError.message}`)
+      throw new ValidationError(`Upload failed: ${uploadError.message}`)
     }
 
     const { data: signedData, error: signedError } = await supabase.storage
@@ -127,7 +125,7 @@ export async function generateMonthlyReport(
       .createSignedUrl(filename, 3600)
 
     if (signedError) {
-      throw new Error(`Signed URL creation failed: ${signedError.message}`)
+      throw new ValidationError(`Signed URL creation failed: ${signedError.message}`)
     }
 
     return { success: true, url: signedData.signedUrl }

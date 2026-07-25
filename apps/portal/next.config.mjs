@@ -48,8 +48,6 @@ const nextConfig = {
     "@repo/rate-limiter",
     "@repo/logger",
     "@repo/contract",
-    "@repo/departments/ui",
-    "@repo/monitor",
   ],
   images: {
     formats: ["image/avif", "image/webp"],
