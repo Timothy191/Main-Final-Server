@@ -31,15 +31,5 @@
     "**/*.ts",
     "**/*.tsx"
   ],
-  "exclude": [
-    "node_modules",
-    ".next",
-    "src.backup",
-    "components",
-    "hooks",
-    "lib",
-    "plugins",
-    "assets",
-    "e2e"
-  ]
+  "exclude": ["node_modules", ".next", "src.backup"]
 }

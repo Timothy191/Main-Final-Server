@@ -100,6 +100,12 @@ CLAUDE.local.md
 .agents/ORIGINAL_REQUEST.md
 ORIGINAL_REQUEST.md
 
+# scratch_board/ — concurrent-agent presence signalling
+# Keep the protocol doc + template; ignore all live check-in files.
+scratch_board/*
+!scratch_board/README.md
+!scratch_board/ACTIVE_TEMPLATE.md
+
 # Embedded git repos / independent projects
 agentic-system/
 python-web-scraper/
@@ -134,3 +140,9 @@ apps/portal/src.backup/
 **/.codewhale/*
 !**/.codewhale/constitution.json
 .deepseek/
+
+# Agent memory substrate (acc)
+acc.db
+acc.db-shm
+acc.db-wal
+

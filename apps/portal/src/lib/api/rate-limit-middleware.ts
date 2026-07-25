@@ -298,8 +298,10 @@ export async function withRateLimit(
     skipIf?: (_request: Request | NextRequest) => boolean
   }
 ): Promise<NextResponse> {
-  // Allow disabling rate limit for load testing and development
-  if (process.env.DISABLE_RATE_LIMIT === 'true') {
+  // Skip rate limiting only for explicitly trusted internal requests.
+  // The legacy DISABLE_RATE_LIMIT toggle is intentionally ignored in
+  // production because it is a single-host bypass that defeats DDoS protection.
+  if (process.env.DISABLE_RATE_LIMIT === 'true' && process.env.NODE_ENV !== 'production') {
     return handler()
   }
 
@@ -308,7 +310,7 @@ export async function withRateLimit(
     return handler()
   }
 
-  // 1. IP Whitelist Bypass check
+  // 1. IP Whitelist Bypass check (production-only use: Docker/internal subnets)
   const clientIp = getClientIp(request)
   if (isIpWhitelisted(clientIp)) {
     return handler()

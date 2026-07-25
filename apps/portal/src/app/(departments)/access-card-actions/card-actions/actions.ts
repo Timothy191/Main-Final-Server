@@ -1,7 +1,8 @@
 'use server'
 
 import type { PersonnelRow, BadgesRow, IssuedCardsRow } from '@repo/supabase'
-import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes'
+import { DatabaseError } from '@/lib/errors/error-classes'
+import { assertDeptRole } from '@/lib/dept-access'
 import { submitCupsPrintJob } from '../lib/printer-detection'
 
 /* ------------------------------------------------------------------ */
@@ -31,27 +32,7 @@ export interface PersonnelDetail extends PersonnelRow {
 /* ------------------------------------------------------------------ */
 
 async function assertAccessCardActionsRole() {
-  const { createServerSupabaseClient } = await import('@repo/supabase/server')
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new AuthError('Unauthorized')
-
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role')
-    .eq('auth_id', user.id)
-    .single()
-
-  if (!employee || !['admin', 'access_control'].includes(employee.role)) {
-    throw new ForbiddenError('Forbidden: access_control or admin role required', {
-      resource: 'card_actions',
-      action: 'assert_role',
-    })
-  }
-
-  return { supabase, user, employee }
+  return assertDeptRole(['admin', 'access_control'], 'card_actions')
 }
 
 /* ------------------------------------------------------------------ */

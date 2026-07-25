@@ -1,11 +1,12 @@
 import { Suspense } from 'react'
 import { getDepartmentContext } from '@/lib/dept-context'
-import { GlassCard } from '@repo/ui/GlassCard'
 import { Skeleton } from '@repo/ui/components/ui/skeleton'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Satellite, Radio, Eye, Layers3, ArrowRight, Activity } from 'lucide-react'
-import { getSatelliteMetrics, type SatelliteMetrics } from './actions'
+import { Radio, Eye, Layers3, ArrowRight } from 'lucide-react'
+import { getSatelliteMetrics } from './actions'
+import { getSystemHealth, getAlertMetrics } from './system-health-actions'
+import { MonitoringDashboard } from './MonitoringDashboard'
 
 export const metadata: Metadata = {
   title: 'Satellite Monitoring | Arch OS',
@@ -17,8 +18,12 @@ export const metadata: Metadata = {
 /* ------------------------------------------------------------------ */
 
 async function SatelliteMetricsSection({ deptId }: { deptId: string }) {
-  const metrics = await getSatelliteMetrics(deptId)
-  return <SatelliteOverview metrics={metrics} />
+  const [metrics, health, alerts] = await Promise.all([
+    getSatelliteMetrics(deptId),
+    getSystemHealth(deptId),
+    getAlertMetrics(deptId),
+  ])
+  return <MonitoringDashboard metrics={metrics} health={health} alerts={alerts} />
 }
 
 /* ------------------------------------------------------------------ */
@@ -54,97 +59,6 @@ const PRODUCT_SECTIONS = [
     border: 'border-cyan-500/20',
   },
 ]
-
-function SatelliteOverview({ metrics }: { metrics: SatelliteMetrics }) {
-  return (
-    <div className="space-y-6">
-      {/* KPI summary row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <GlassCard>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-400/10 rounded-lg flex-shrink-0">
-              <Satellite className="w-5 h-5 text-indigo-400" />
-            </div>
-            <div>
-              <p className="text-arch-text-muted text-xs font-medium uppercase tracking-wider">
-                Total Sensors
-              </p>
-              <p className="text-2xl font-bold text-arch-text-primary mt-0.5">
-                {metrics.totalSensors}
-              </p>
-            </div>
-          </div>
-        </GlassCard>
-        <GlassCard>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-accent-green/10 rounded-lg flex-shrink-0">
-              <Activity className="w-5 h-5 text-accent-green" />
-            </div>
-            <div>
-              <p className="text-arch-text-muted text-xs font-medium uppercase tracking-wider">
-                Active Sensors
-              </p>
-              <p className="text-2xl font-bold text-accent-green mt-0.5">{metrics.activeSensors}</p>
-            </div>
-          </div>
-        </GlassCard>
-        <GlassCard>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-400/10 rounded-lg flex-shrink-0">
-              <Layers3 className="w-5 h-5 text-blue-400" />
-            </div>
-            <div>
-              <p className="text-arch-text-muted text-xs font-medium uppercase tracking-wider">
-                Recent Passes
-              </p>
-              <p className="text-2xl font-bold text-arch-text-primary mt-0.5">
-                {metrics.recentLogsCount}
-              </p>
-            </div>
-          </div>
-        </GlassCard>
-        <GlassCard>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-cyan-400/10 rounded-lg flex-shrink-0">
-              <Eye className="w-5 h-5 text-cyan-400" />
-            </div>
-            <div>
-              <p className="text-arch-text-muted text-xs font-medium uppercase tracking-wider">
-                Last Pass Date
-              </p>
-              <p className="text-sm font-semibold text-arch-text-primary mt-1">
-                {metrics.lastLogDate ?? '—'}
-              </p>
-            </div>
-          </div>
-        </GlassCard>
-      </div>
-
-      {/* Sensor type breakdown */}
-      {metrics.machineTypes.length > 0 && (
-        <GlassCard>
-          <h3 className="text-sm font-semibold text-arch-text-primary uppercase tracking-wider mb-4">
-            Sensor Inventory by Type
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {metrics.machineTypes.map(({ type, count, active }) => (
-              <div
-                key={type}
-                className="flex items-center justify-between p-3 rounded-lg bg-white/5"
-              >
-                <div>
-                  <p className="text-sm font-medium text-arch-text-primary">{type}</p>
-                  <p className="text-xs text-arch-text-muted mt-0.5">{active} active</p>
-                </div>
-                <span className="text-lg font-bold text-arch-text-primary">{count}</span>
-              </div>
-            ))}
-          </div>
-        </GlassCard>
-      )}
-    </div>
-  )
-}
 
 function ProductSectionCards() {
   return (
@@ -184,13 +98,18 @@ export default async function SatelliteMonitoringPage() {
       {/* Product section navigation cards (static — no data fetch needed) */}
       <ProductSectionCards />
 
-      {/* Sensor inventory metrics — cached, streamed independently */}
+      {/* Sensor inventory metrics & system health — cached, streamed */}
       <Suspense
         fallback={
           <div className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="h-[88px] w-full" />
+              ))}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={`ring-${i}`} className="h-[120px] w-full rounded-xl" />
               ))}
             </div>
             <Skeleton className="h-[160px] w-full" />

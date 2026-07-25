@@ -1,7 +1,9 @@
 'use server'
 
-import { cacheTag } from 'next/cache'
-import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes'
+import { cacheTag, cacheLife } from 'next/cache'
+import { DatabaseError } from '@/lib/errors/error-classes'
+import { assertDeptRole } from '@/lib/dept-access'
+import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -32,27 +34,7 @@ export interface RecentSafetyIncident {
 /* ------------------------------------------------------------------ */
 
 async function assertSafetyRole() {
-  const { createServerSupabaseClient } = await import('@repo/supabase/server')
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new AuthError('Unauthorized')
-
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role, department_id')
-    .eq('auth_id', user.id)
-    .single()
-
-  if (!employee || !['admin', 'safety', 'supervisor'].includes(employee.role)) {
-    throw new ForbiddenError('Forbidden: safety or admin role required', {
-      resource: 'safety',
-      action: 'assert_role',
-    })
-  }
-
-  return { supabase, user, employee }
+  return assertDeptRole(['admin', 'safety', 'supervisor'], 'safety')
 }
 
 /* ------------------------------------------------------------------ */
@@ -61,7 +43,12 @@ async function assertSafetyRole() {
 
 async function _getCachedSafetyMetrics(deptId: string): Promise<SafetyMetrics> {
   'use cache'
-  cacheTag(`dept:${deptId}`, 'table:safety_incidents', 'department-safety', 'department-dashboard')
+  cacheLife('5 minutes')
+  cacheTag(
+    DEPARTMENT_CACHE_TAGS.SAFETY,
+    DEPARTMENT_CACHE_TAGS.TABLE_SAFETY_INCIDENTS,
+    `dept:safety:${deptId}`
+  )
 
   const { createAdminClient } = await import('@repo/supabase/server')
   const supabase = createAdminClient()

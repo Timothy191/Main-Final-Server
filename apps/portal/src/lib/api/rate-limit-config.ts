@@ -49,6 +49,12 @@ const RATE_LIMIT_CONFIGS = {
     windowMs: 60_000, // 1 minute
     maxRequests: 10000,
   } as RateLimitConfig,
+
+  // Manual cache/cleanup trigger - restrictive to prevent abuse
+  cleanup: {
+    windowMs: 60_000, // 1 minute
+    maxRequests: 5, // 5 requests per minute max
+  } as RateLimitConfig,
 } as const
 
 type RateLimitType = keyof typeof RATE_LIMIT_CONFIGS
@@ -64,6 +70,7 @@ function getRateLimitType(path: string): RateLimitType {
   if (path.startsWith('/api/admin/')) return 'admin'
   if (path.startsWith('/api/webhooks/')) return 'webhooks'
   if (path.startsWith('/api/c66')) return 'hardware'
+  if (path.startsWith('/api/cleanup/')) return 'cleanup'
   return 'general'
 }
 

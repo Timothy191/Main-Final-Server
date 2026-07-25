@@ -2,6 +2,24 @@ import { GlassCard } from '@repo/ui/GlassCard'
 import { getDepartmentContext } from '@/lib/dept-context'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Building2, Sparkles } from 'lucide-react'
+import { cacheLife, cacheTag } from 'next/cache'
+import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
+
+async function getDepartmentMetadata(deptId: string) {
+  'use cache'
+  cacheLife('24 hours')
+  cacheTag(DEPARTMENT_CACHE_TAGS.DEPARTMENT_METADATA, `dept:metadata:${deptId}`)
+
+  const supabase = await (await import('@repo/supabase/server')).createServerSupabaseClient()
+  
+  const { data: dbDept } = await supabase
+    .from('departments')
+    .select('personality, display_name, description')
+    .eq('id', deptId)
+    .single()
+
+  return dbDept
+}
 
 export default async function DepartmentDashboard({
   params,
@@ -14,11 +32,7 @@ export default async function DepartmentDashboard({
   })
 
   // Fetch personality and details directly from database to show dynamic department info
-  const { data: dbDept } = await supabase
-    .from('departments')
-    .select('personality, display_name, description')
-    .eq('id', deptId)
-    .single()
+  const dbDept = await getDepartmentMetadata(deptId)
 
   return (
     <ErrorBoundary context={`Department Dashboard: ${deptSlug}`}>

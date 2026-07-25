@@ -1,16 +1,38 @@
-import type { NextRequest} from "next/server";
-import { NextResponse } from "next/server";
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import { getRedisClient } from '@repo/redis'
 
 export async function GET(_req: NextRequest) {
-  const startedAt = Date.now();
-  const degraded = false;
+  const startedAt = Date.now()
 
-  return NextResponse.json(
-    {
-      status: degraded ? "degraded" : "healthy",
-      latencyMs: Date.now() - startedAt,
-      timestamp: new Date().toISOString(),
-    },
-    { status: degraded ? 503 : 200 }
-  );
+  try {
+    const redis = getRedisClient()
+    let connected = redis.status === 'ready'
+    if (!connected) {
+      const pong = await redis.ping()
+      connected = pong === 'PONG'
+    }
+
+    return NextResponse.json(
+      {
+        status: connected ? 'healthy' : 'degraded',
+        latencyMs: Date.now() - startedAt,
+        timestamp: new Date().toISOString(),
+        connected,
+      },
+      { status: connected ? 200 : 503 }
+    )
+  } catch (err: unknown) {
+    return NextResponse.json(
+      {
+        status: 'unhealthy',
+        latencyMs: Date.now() - startedAt,
+        timestamp: new Date().toISOString(),
+        connected: false,
+        error: err instanceof Error ? err.message : String(err),
+      },
+      { status: 503 }
+    )
+  }
 }
+

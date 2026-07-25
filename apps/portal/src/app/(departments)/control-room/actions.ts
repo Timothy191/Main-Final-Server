@@ -1,7 +1,9 @@
 'use server'
 
-import { cacheTag } from 'next/cache'
-import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes'
+import { cacheTag, cacheLife } from 'next/cache'
+import { DatabaseError } from '@/lib/errors/error-classes'
+import { assertDeptRole } from '@/lib/dept-access'
+import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -31,27 +33,7 @@ export interface RecentMachineOperation {
 /* ------------------------------------------------------------------ */
 
 async function assertControlRoomRole() {
-  const { createServerSupabaseClient } = await import('@repo/supabase/server')
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new AuthError('Unauthorized')
-
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role, department_id')
-    .eq('auth_id', user.id)
-    .single()
-
-  if (!employee || !['admin', 'control_room', 'supervisor'].includes(employee.role)) {
-    throw new ForbiddenError('Forbidden: control_room or admin role required', {
-      resource: 'control-room',
-      action: 'assert_role',
-    })
-  }
-
-  return { supabase, user, employee }
+  return assertDeptRole(['admin', 'control_room', 'supervisor'], 'control-room')
 }
 
 /* ------------------------------------------------------------------ */
@@ -60,14 +42,11 @@ async function assertControlRoomRole() {
 
 async function _getCachedControlRoomMetrics(deptId: string): Promise<ControlRoomMetrics> {
   'use cache'
+  cacheLife('5 minutes')
   cacheTag(
-    `dept:${deptId}`,
-    'table:machine_operations',
-    'table:excavator_activity',
-    'table:operational_delays',
-    'table:hourly_loads',
-    'department-control-room',
-    'department-dashboard'
+    DEPARTMENT_CACHE_TAGS.CONTROL_ROOM,
+    DEPARTMENT_CACHE_TAGS.TABLE_MACHINES,
+    `dept:control-room:${deptId}`
   )
 
   const { createAdminClient } = await import('@repo/supabase/server')

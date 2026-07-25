@@ -8,6 +8,7 @@ import { shiftCompletenessCheckFn } from '@/lib/jobs/shift-completeness-check'
 import { orphanedRecordDetectionFn } from '@/lib/jobs/orphaned-record-detection'
 import { shiftIntegrityReportFn } from '@/lib/reports/shift-integrity'
 import { automatedAuditFn } from '@/lib/jobs/automated-audit'
+import { cacheCleanupFn } from '@/lib/jobs/cache-cleanup'
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -20,5 +21,6 @@ export const { GET, POST, PUT } = serve({
     orphanedRecordDetectionFn,
     shiftIntegrityReportFn,
     automatedAuditFn,
+    cacheCleanupFn,
   ],
 })

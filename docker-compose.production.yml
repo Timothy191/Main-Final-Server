@@ -1,12 +1,15 @@
 # ══════════════════════════════════════════════════════════════════════════════
-# Arch-Systems — Production Docker Compose Configuration
+# Arch Systems — Production Docker Compose Configuration
 #
-# Full-stack production deployment with resource limits, health monitoring,
-# SSL termination via nginx, and managed services.
+# Full-stack single-host production deployment:
+#   nginx reverse proxy, Next.js portal, ops-gateway, Redis, FUXA SCADA.
 #
 # Usage:
-#   docker compose -f docker-compose.production.yml --env-file .env.production up -d
-#   ./scripts/deploy-production.sh --yes
+#   docker compose -f docker-compose.production.yml --env-file apps/portal/.env.production up -d
+#
+# Note: the legacy `api` service is intentionally omitted. The monorepo only
+# has portal + ops-gateway applications; the API surface lives inside the
+# Next.js App Router.
 #
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -22,26 +25,15 @@ services:
     restart: always
     ports:
       - '${NGINX_HTTP_PORT:-80}:80'
-      - '${NGINX_HTTPS_PORT:-443}:443'
     environment:
       DOMAIN: ${DOMAIN:-localhost}
-      INTERNAL_API_SECRET: ${INTERNAL_API_SECRET}
-    volumes:
-      - ./certs:/etc/nginx/ssl:ro
-      - ./.certbot-webroot:/var/www/certbot:ro
+      PORTAL_HOST: portal:3000
+      FUXA_HOST: fuxa:1881
     depends_on:
       portal:
         condition: service_healthy
-      api:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 128M
-        reservations:
-          cpus: '0.1'
-          memory: 64M
+      fuxa:
+        condition: service_started
     healthcheck:
       test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:80/health']
       interval: 30s
@@ -72,15 +64,19 @@ services:
       NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-      REDIS_URL: ${REDIS_URL}
-      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      DATABASE_URL: ${DATABASE_URL:-}
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
       PORT: 3000
       HOSTNAME: '0.0.0.0'
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Arch Systems}
+      NEXT_PUBLIC_FUXA_URL: ${NEXT_PUBLIC_FUXA_URL:-/scada}
       SENTRY_DSN: ${SENTRY_DSN:-}
       NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      INTERNAL_API_SECRET: ${INTERNAL_API_SECRET}
     deploy:
       resources:
         limits:
@@ -90,64 +86,8 @@ services:
           cpus: '0.5'
           memory: 512M
     healthcheck:
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3000/']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: '10m'
-        max-file: '3'
-    networks:
-      - arch-net-prod
-
-  # ── API Backend (NestJS) ─────────────────────────────────────────────────────
-  api:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
-      target: production
-    container_name: arch-api-prod
-    restart: always
-    expose:
-      - '3001'
-    environment:
-      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-      SUPABASE_URL: ${SUPABASE_URL:-}
-      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY:-}
-      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
-      REDIS_URL: ${REDIS_URL}
-      DATABASE_URL: ${DATABASE_URL}
-      PORT: 3001
-      NODE_ENV: production
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:80}
-      TRUST_PROXY: ${TRUST_PROXY:-true}
-      DISABLE_RATE_LIMIT: ${DISABLE_RATE_LIMIT:-false}
-      INTERNAL_API_SECRET: ${INTERNAL_API_SECRET}
-      SENTRY_DSN: ${SENTRY_DSN:-}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-    healthcheck:
       test:
-        [
-          'CMD',
-          'wget',
-          '--no-verbose',
-          '--tries=1',
-          '--spider',
-          'http://localhost:3001/api/health/live',
-        ]
+        ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -157,6 +97,9 @@ services:
       options:
         max-size: '10m'
         max-file: '3'
+    depends_on:
+      redis:
+        condition: service_healthy
     networks:
       - arch-net-prod
 
@@ -171,9 +114,9 @@ services:
     expose:
       - '3100'
     environment:
-      OPS_API_URL: http://api:3001/api/ops
+      OPS_API_URL: http://portal:3000/api/ops
       OPS_SECRET: ${INTERNAL_API_SECRET}
-      REDIS_URL: ${REDIS_URL}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       MCP_PORT: 3100
       MCP_HOST: 0.0.0.0
       NODE_ENV: production
@@ -194,8 +137,61 @@ services:
       retries: 3
       start_period: 30s
     depends_on:
-      api:
+      portal:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    networks:
+      - arch-net-prod
+
+  # ── Redis ────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: arch-redis-prod
+    restart: always
+    expose:
+      - '6379'
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --loglevel warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    networks:
+      - arch-net-prod
+
+  # ── FUXA SCADA ───────────────────────────────────────────────────────────────
+  fuxa:
+    image: frangoteam/fuxa:latest
+    container_name: arch-fuxa-prod
+    restart: always
+    expose:
+      - '1881'
+    environment:
+      NODE_ENV: production
+      FUXA_UI_PORT: 1881
+      FUXA_UI_HOST: 0.0.0.0
+    volumes:
+      - fuxa_data:/usr/src/app/_appdata
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:1881/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     logging:
       driver: 'json-file'
       options:
@@ -210,3 +206,8 @@ networks:
     driver: bridge
     driver_opts:
       com.docker.network.bridge.name: br-arch-prod
+
+# ── Volumes ───────────────────────────────────────────────────────────────────
+volumes:
+  redis_data:
+  fuxa_data:

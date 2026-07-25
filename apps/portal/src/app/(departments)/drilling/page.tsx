@@ -4,8 +4,22 @@ import { createReadReplicaClient } from '@repo/supabase/read-replica'
 import { Drill, Clock, AlertTriangle } from 'lucide-react'
 import { Suspense } from 'react'
 import { Skeleton } from '@repo/ui/components/ui/skeleton'
+import { cacheLife, cacheTag } from 'next/cache'
+import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
 
 async function getDrillingDashboardData(deptId: string, today: string) {
+  'use cache'
+  cacheLife('5 minutes')
+  cacheTag(
+    DEPARTMENT_CACHE_TAGS.DRILLING,
+    DEPARTMENT_CACHE_TAGS.TABLE_DAILY_LOGS,
+    DEPARTMENT_CACHE_TAGS.TABLE_MACHINES,
+    DEPARTMENT_CACHE_TAGS.TABLE_DRILL_OPERATIONS,
+    DEPARTMENT_CACHE_TAGS.TABLE_OPERATIONAL_DELAYS,
+    `dept:drilling:${deptId}`,
+    `dept:drilling:${deptId}:${today}`
+  )
+
   const db = await createReadReplicaClient()
 
   const [

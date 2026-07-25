@@ -1,80 +1,252 @@
-# AGENTS.md
+# Repository Guidelines
 
-This file provides guidance to the AI agent when working with code in this repository.
+## Project Overview
 
-## Project shape
+**Arch Systems Portal** is a Turborepo monorepo (pnpm 9, Node >=22) providing an enterprise mining portal built with Next.js 16 App Router. The system includes:
 
-Turborepo 2 + pnpm 9 monorepo. Node `>=22` (Volta pins `24.15.0`), pnpm `9.15.9`.
+- **Supabase** (PostgreSQL, Auth, Realtime, Storage) for data and authentication
+- **Redis** for caching and distributed rate limiting
+- **Ops Gateway** as an MCP bridge/control-plane
+- **API Gateway** with GraphQL Mesh layer
+- **Portal UI** with strict server/client boundaries
 
-- `apps/portal/` — primary Next.js 16 App Router UI. Has its own `apps/portal/AGENTS.md`; **consult it for portal specifics** (auth via `proxy.ts` not `middleware.ts`, department routes, RSC/Server Actions patterns).
-- `apps/ops-gateway/` — MCP bridge / control-plane service.
-- `apps/api-gateway/` — GraphQL Mesh gateway (CommonJS).
-- `packages/*` — framework-agnostic libs: `@repo/contract`, `@repo/database`, `@repo/errors`, `@repo/redis`, `@repo/supabase`, `@repo/theme`, `@repo/ui`, `@repo/utils`, `@repo/rate-limiter`, `@repo/logger`, `@repo/llm-config`, `@repo/departments`, `@repo/eslint-config`, `@repo/typescript-config`.
+## Architecture & Data Flow
 
-Boundary: never import from `apps/*` inside `packages/*`. Never add application logic to `packages/*`.
+The system follows a layered monorepo architecture:
 
-## Commands the AI would guess wrong
+```
+┌─────────────────────────────────────────────────────────┐
+│                    apps/                                │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │ portal       │  │ api-gateway  │  │ ops-gateway  │  │
+│  │ (Next.js 16) │  │ (GraphQL)    │  │ (MCP bridge) │  │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  │
+└─────────┼─────────────────┼─────────────────┼──────────┘
+          │                 │                 │
+┌─────────┴─────────────────┴─────────────────┴──────────┐
+│                    packages/ (@repo/*)                   │
+│  ┌────────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐        │
+│  │ errors │ │ theme│ │  ui  │ │ utils│ │ supabase│      │
+│  └────────┘ └──────┘ └──────┘ └──────┘ └──────┘        │
+└─────────────────────────────────────────────────────────┘
+```
 
-- `pnpm dev` runs `scripts/dev.sh` (Redis via `docker compose --profile infra`, then Supabase, then portal Turbopack). Use `pnpm dev --quick` or `pnpm dev --no-infra` for portal-only, no-Docker dev.
-- `pnpm quality` = `turbo run lint type-check test --concurrency=4 && pnpm format:check`. The `quality` task defined in `turbo.json` is unused — do **not** invoke `turbo run quality`.
-- Colon-separated, not space: `pnpm ai:check` (drift/guardrails validator, `scripts/ai.sh check`), `pnpm ai:fix`, `pnpm ai:init`. `pnpm ai` alone runs status.
-- `pnpm agent:delegate` — task delegation via `scripts/delegate-agent.sh`.
-- `pnpm audit:rls` — `node tools/audit-rls.cjs`; run after touching `packages/database/migrations/`.
-- `pnpm supabase:start|stop|status` — invokes `pnpm dlx supabase --workdir packages`.
-- Single-file test: `pnpm --filter=portal test -- path/to/file.test.ts`. Name pattern: `pnpm --filter=portal test -- -t "pattern"`.
+**Data Flow:**
+1. User interacts with Next.js 16 App Router UI (`apps/portal`)
+2. Server Actions and API routes handle business logic
+3. Supabase provides PostgreSQL database, authentication, and real-time subscriptions
+4. Redis handles distributed rate limiting and caching
+5. API Gateway (`apps/api-gateway`) provides GraphQL Mesh layer
+6. Ops Gateway (`apps/ops-gateway`) serves as MCP bridge/control-plane
 
-## Code conventions
+## Key Directories
 
-- TypeScript strict; no `any`, no `@ts-ignore`. Prefer `unknown` + type guards, `satisfies` over widening.
-- **Prettier: `semi: false`, `singleQuote: true`**, `tabWidth: 2`, `trailingComma: "es5"`, `printWidth: 100`. A PostToolUse hook auto-runs `prettier --write` after every Write/Edit.
-- Use `import type { X }` for type-only imports (enforced by `consistent-type-imports`). Prefer `@repo/*` aliases over relative imports across packages.
-- Errors: throw typed `AppError` subclasses from `@repo/errors` — never raw `new Error()` for domain errors.
-- Validation: Zod at every external boundary. All workspaces are pinned to zod `^3.24.0`; do not upgrade a single package to v4 without a monorepo-wide migration.
-- Styling: Tailwind via `@repo/theme` preset; **light-mode only** (macOS Ventura/Sonoma liquid-glass palette). See `.qoder/rules/code-style.md`.
-- Two Redis clients coexist by design: `ioredis` in `@repo/redis`, `redis` v4 in `ops-gateway`. Match the client the surrounding package already uses.
-- `neverthrow` is **not** a dependency despite older docs — don't add it without a decision.
+| Directory | Purpose |
+|-----------|---------|
+| `apps/portal/` | Next.js 16 App Router portal application |
+| `apps/api-gateway/` | GraphQL Mesh API gateway |
+| `apps/ops-gateway/` | MCP bridge and control-plane |
+| `packages/errors/` | AppError subclasses with Zod validation |
+| `packages/theme/` | Design tokens and Tailwind preset |
+| `packages/ui/` | shadcn-style UI primitives |
+| `packages/utils/` | Shared utilities (caching, signing, rate limiting) |
+| `packages/supabase/` | Supabase client/server integration |
+| `packages/database/` | SQL migrations and database utilities |
+| `packages/contract/` | API contracts and validation schemas |
+| `packages/redis/` | Redis caching layer |
+| `packages/rate-limiter/` | Rate limiting implementation |
+| `packages/logger/` | Logging utilities |
+| `packages/eslint-config/` | Shared ESLint configurations |
+| `packages/typescript-config/` | Shared TypeScript configurations |
+| `scripts/` | Development, validation, and deployment scripts |
+| `.cursor/rules/` | Cursor agent rules and policies |
+| `.cursor/skills/` | AI agent skills |
+| `.cursor/agents/` | Project subagents |
 
-## Testing
+## Development Commands
 
-- Jest 30 with `@swc/jest`, `jsdom`. Portal config: `apps/portal/jest.config.cjs`.
-- Portal coverage thresholds: 40% lines, 30% branches, 35% functions, 40% statements.
-- Co-locate unit tests (`foo.ts` → `foo.test.ts`). Integration tests in `__tests__/` under the feature.
-- Mock Supabase / Redis / Inngest at the boundary. Never mock `@repo/utils` or `@repo/errors`.
-- Run `pnpm quality` before marking any task done.
+### Package Manager
+```bash
+pnpm 9          # Required package manager (never npm/yarn)
+```
 
-## Security & boundaries
+### Core Commands
+```bash
+pnpm dev        # Start development stack (Redis, Supabase, portal)
+pnpm quality    # Run lint, type-check, and tests
+pnpm build      # Build all packages
+pnpm test       # Run all tests
+pnpm lint       # Run ESLint
+pnpm type-check # Run TypeScript type checking
+```
 
-- Never expose `SUPABASE_SERVICE_ROLE_KEY` or any non-`NEXT_PUBLIC_` env var to the client.
-- Never import `@repo/supabase/server` or `@repo/redis` from a `"use client"` file. `"use client"` never on layouts.
-- A PreToolUse hook blocks writes to `.env*.local` files and destructive Bash (`rm -rf /`, `git push --force main/master`, `npm|yarn install|add`).
+### Portal-Specific
+```bash
+cd apps/portal
+pnpm dev        # Start Next.js dev server with Turbopack
+pnpm test       # Run portal tests
+```
 
-## Spec-driven workflow
+### AI System
+```bash
+pnpm ai          # Check AI system status
+pnpm ai check    # Validate AI surfaces
+pnpm ai fix      # Repair AI surfaces
+```
 
-- Multi-file changes: create `.kiro/specs/<feature-slug>/{requirements,design,tasks}.md` before implementation. Templates in `.kiro/templates/`.
-- Caveat: `.kiro/specs/` is `.gitignore`d — specs are local per developer. Persist durable, cross-agent decisions in `.agents/knowledge/` (repowiki) instead.
+### Agent Delegation
+```bash
+pnpm agent:delegate <agent> "<task>"  # Delegate to subagent
+```
 
-## Shared knowledge base
+### Scripts
+```bash
+pnpm dev        # Start development stack (Redis → Supabase → Ops Gateway → Next.js portal)
+pnpm shutdown   # Stop portal and optional infrastructure (Supabase, Redis)
+pnpm portal-watchdog  # Monitor Next.js dev server, auto-restart on crash with cache clearing
+pnpm smoke-test   # Validate health endpoints, routes, Supabase auth/realtime, Redis cache, and stack health
+pnpm validate-env # Validate required environment variables before deployment
+pnpm pre-flight   # Run pre-flight validation (type-check) and scope determination
+```
 
-- `.agents/knowledge/` is the cross-agent source of truth. Read `.agents/knowledge/index.md` before non-trivial work; add durable, dated, evidence-cited learnings and update `index.md` — supersede, never delete.
+## Code Conventions & Common Patterns
 
-## Commits
+### Formatting & Linting
+- **Formatter**: Prettier with consistent settings across packages
+- **Linter**: ESLint with shared configs in `packages/eslint-config/`
+- **Import Style**: Use `@repo/*` for package imports, `@/` for portal-internal imports
+- **Line Length**: ~100 characters
 
-- Conventional commits enforced by commitlint: `type(scope): subject`. Types: `feat|fix|chore|refactor|docs|test|style|perf|build|ci|revert`. Scope matches the app/package (`portal`, `ops-gateway`, `repo/supabase`, …). Subject is not sentence-case.
-- Husky runs `pnpm exec lint-staged` on pre-commit (prettier + eslint on staged TS files) and `commitlint` on commit-msg.
+### Naming Conventions
+- **Files**: kebab-case for files (e.g., `rate-limit-middleware.ts`)
+- **Components**: PascalCase (e.g., `LoginForm.tsx`)
+- **Functions**: camelCase (e.g., `createServerSupabaseClient`)
+- **Constants**: UPPER_SNAKE_CASE for true constants
 
-## Local overrides
+### Error Handling
+- Use `@repo/errors` AppError subclasses for domain errors
+- Zod v3.24.0 for all input validation
+- Never use `any` — use `unknown` with type guards
+- Errors should be caught and transformed into AppError instances
 
-- Create `AGENTS.local.md` (gitignored) for personal, per-user rules that shouldn't be committed. It loads with higher priority than this file.
+### Async Patterns
+- Server Actions for form submissions and mutations
+- RSC (React Server Components) for data fetching
+- `async/await` over Promise chains
+- Proper error boundaries for client components
 
-## Detailed rules & skills
+### State Management
+- React Server Components for server-side data
+- Client components for interactive UI
+- Server Actions for mutations
+- No client-side state libraries (keep it simple)
 
-Path-scoped rules loaded automatically:
-- `.qoder/rules/code-style.md` — TS/TSX naming, styling
-- `.qoder/rules/security.md` — server/client boundary details
-- `.qoder/rules/testing.md` — Jest patterns
-- `.qoder/rules/spec-driven-workflow.md` — spec phase enforcement
-- `.qoder/rules/alignment-scoring.md` — OBSERVE→VERIFY→ACT→SCORE loop
+### Dependency Injection
+- Import directly from `@repo/*` packages
+- Supabase clients created via `createServerSupabaseClient` / `createBrowserSupabaseClient`
+- Redis connections managed through `@repo/redis`
 
-On-demand skills (invoke with `/<name>`): `dev`, `quality`, `verify` (portal-scoped quality), `specs`, `rls-audit`, `deploy`.
+## Important Files
 
-Portal-specific rules and Next.js 16 breaking-change notes live at `apps/portal/AGENTS.md`.
+### Entry Points
+- `apps/portal/src/app/layout.tsx` — Main layout with header/navigation
+- `apps/portal/src/app/(auth)/login/page.tsx` — Login page
+- `apps/portal/src/app/api/auth/login/route.ts` — Login API endpoint
+- `apps/portal/src/lib/api/auth.ts` — Authentication middleware
+
+### Configuration
+- `package.json` — Root package definition (v1.5.1, private)
+- `pnpm-workspace.yaml` — Workspace package list and security settings
+- `turbo.json` — Task runner configuration
+- `prisma/schema.prisma` — Database schema
+- `prisma.config.ts` — Prisma configuration
+
+### Key Modules
+- `apps/portal/src/lib/api/rate-limit-middleware.ts` — Redis-backed rate limiting
+- `apps/portal/src/lib/api/rate-limit-config.ts` — Rate limit configurations
+- `apps/portal/src/features/auth/components/LoginForm.tsx` — Login form component
+- `packages/errors/src/` — Error class hierarchy
+- `packages/contract/validation/` — API validation schemas
+
+## Runtime/Tooling Preferences
+
+### Required Runtime
+- **Node.js**: >=22 (tested with Node 24.15.0)
+- **Package Manager**: pnpm 9 (pinned via Volta in `package.json`)
+- **TypeScript**: Strict mode enabled across all packages
+
+### Tooling Constraints
+- **Never use npm or yarn** — pnpm 9 only
+- **Icons**: lucide-react only
+- **Toasts**: sonner only
+- **UI Components**: Use `@repo/ui` primitives, not custom implementations
+- **Validation**: Zod v3.24.0 for all external input
+- **Errors**: `@repo/errors` AppError subclasses for domain errors
+
+### Build Tooling
+- **Bundler**: Turbopack (Next.js 16)
+- **Task Runner**: Turborepo 2
+- **Transpiler**: TypeScript with strict settings
+
+## Testing & QA
+
+### Test Framework
+- **Jest** for unit and integration tests
+- Tests organized by package in `__tests__/` directories
+
+### Test Structure
+```
+packages/<package>/src/__tests__/     # Package tests
+packages/database/tests/             # Database migration tests
+apps/portal/src/lib/__tests__/       # Portal-specific tests
+apps/portal/src/app/(departments)/<dept>/lib/__tests__/  # Department tests
+```
+
+### Running Tests
+```bash
+pnpm test                           # All tests
+pnpm test --filter @repo/utils      # Specific package
+pnpm test -- --watch                # Watch mode
+```
+
+### Coverage Expectations
+- Domain logic: 100% coverage
+- Error paths: Must be tested
+- API routes: Test with mocked dependencies
+- Database migrations: Include rollback safety checks
+
+### Quality Gates
+- `pnpm quality` runs lint + type-check + test
+- Pre-commit hooks enforce quality checks
+- Alignment score >= 80 required for completion
+- `pnpm ai check` validates AI surfaces
+
+## Additional Notes
+
+### Portal-Specific Conventions
+- Next.js 16 App Router with RSC
+- Authentication via `proxy.ts` middleware
+- Department routes under `src/app/(departments)/`
+- Server Actions for mutations
+- lucide-react for icons, sonner for toasts
+
+### Agent System
+- Cursor rules in `.cursor/rules/` enforce policies
+- Subagents in `.cursor/agents/` for specialized tasks
+- Skills in `.cursor/skills/` for reusable procedures
+- Shared knowledge base in `.agents/knowledge/`
+- **Concurrent-agent coordination** via `scratch_board/` — every subagent that will mutate files MUST post a check-in there before its first write and remove it (or set `status: done`) on completion. Protocol: [`scratch_board/README.md`](scratch_board/README.md). Enforced by [`.qoder/rules/scratch-board.md`](.qoder/rules/scratch-board.md). Pattern evidence: [`.agents/knowledge/patterns/scratch-board-coordination.md`](.agents/knowledge/patterns/scratch-board-coordination.md).
+- **Bash contract** for every subagent using `Bash` is fixed by [`.qoder/rules/agent-computer-interface.md`](.qoder/rules/agent-computer-interface.md) (output/runtime caps, no-TTY, forbidden-command set). Pattern: [`.agents/knowledge/patterns/agent-computer-interface.md`](.agents/knowledge/patterns/agent-computer-interface.md).
+
+## Scripts Overview
+
+The `scripts/` directory contains essential development and operational tools:
+
+- `dev.sh`: Boots the full development stack (Redis → Supabase → Ops Gateway → Next.js portal)
+- `shutdown.sh`: Stops the portal and optional infrastructure (Supabase, Redis)
+- `portal-watchdog.sh`: Monitors the Next.js dev server, auto-restarts on crash with cache clearing
+- `smoke-test.sh`: Validates health endpoints, routes, Supabase auth/realtime, Redis cache, and stack health
+- `validate-env.sh`: Validates required environment variables before deployment
+- `pre-flight.sh`: Runs pre-flight validation (type-check) and scope determination
+
+These scripts ensure consistent development experience and operational reliability.

@@ -1,7 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes'
+import { DatabaseError } from '@/lib/errors/error-classes'
+import { assertDeptRole } from '@/lib/dept-access'
 import { detectAllPrinters } from './lib/printer-detection'
 
 // AGENT-TRACE: Error handling pattern - Server Actions use typed error classes
@@ -13,27 +14,7 @@ import { detectAllPrinters } from './lib/printer-detection'
 /* ------------------------------------------------------------------ */
 
 export async function assertAccessCardActionsRole() {
-  const { createServerSupabaseClient } = await import('@repo/supabase/server')
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new AuthError('Unauthorized')
-
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role, department_id')
-    .eq('auth_id', user.id)
-    .single()
-
-  if (!employee || !['admin', 'access_control'].includes(employee.role)) {
-    throw new ForbiddenError('Forbidden: access_control or admin role required', {
-      resource: 'access_card_actions',
-      action: 'assert_role',
-    })
-  }
-
-  return { supabase, user, employee }
+  return assertDeptRole(['admin', 'access_control'], 'access_card_actions')
 }
 
 /* ------------------------------------------------------------------ */

@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@repo/supabase/server'
 import { withRateLimit } from '@/lib/api/rate-limit-middleware'
+import { isValidRequestOrigin } from '@/lib/api/csrf-guard'
 
 /**
  * @swagger
@@ -117,42 +118,8 @@ export async function POST(request: NextRequest) {
   }
 
   // ── CSRF protection (production only) ────────────────────────────────
-  if (process.env.NODE_ENV === 'production') {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL
-    if (appUrl) {
-      // Parse the app URL origin once; fail closed if config is invalid
-      let appOrigin: string
-      try {
-        appOrigin = new URL(appUrl).origin
-      } catch {
-        return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 })
-      }
-
-      const origin = request.headers.get('origin')
-      const referer = request.headers.get('referer')
-
-      if (origin) {
-        // Origin header is always protocol + host + port; compare directly
-        if (origin !== appOrigin) {
-          return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 })
-        }
-      } else if (referer) {
-        // Referer includes full path; parse it and compare origins to
-        // prevent subdomain suffix attacks (e.g., app.example.com.evil.com)
-        try {
-          const refUrl = new URL(referer)
-          if (refUrl.origin !== appOrigin) {
-            return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 })
-          }
-        } catch {
-          // Invalid Referer URL — reject
-          return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 })
-        }
-      } else {
-        // Neither Origin nor Referer present — reject
-        return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 })
-      }
-    }
+  if (!isValidRequestOrigin(request)) {
+    return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 })
   }
 
   return withRateLimit(

@@ -1,7 +1,9 @@
 'use server'
 
-import { cacheTag } from 'next/cache'
-import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes'
+import { cacheTag, cacheLife } from 'next/cache'
+import { DatabaseError } from '@/lib/errors/error-classes'
+import { assertDeptRole } from '@/lib/dept-access'
+import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -30,27 +32,7 @@ export interface RecentProductionLog {
 /* ------------------------------------------------------------------ */
 
 async function assertProductionRole() {
-  const { createServerSupabaseClient } = await import('@repo/supabase/server')
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new AuthError('Unauthorized')
-
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role, department_id')
-    .eq('auth_id', user.id)
-    .single()
-
-  if (!employee || !['admin', 'production', 'supervisor'].includes(employee.role)) {
-    throw new ForbiddenError('Forbidden: production or admin role required', {
-      resource: 'production',
-      action: 'assert_role',
-    })
-  }
-
-  return { supabase, user, employee }
+  return assertDeptRole(['admin', 'production', 'supervisor'], 'production')
 }
 
 /* ------------------------------------------------------------------ */
@@ -59,12 +41,12 @@ async function assertProductionRole() {
 
 async function _getCachedProductionMetrics(deptId: string): Promise<ProductionMetrics> {
   'use cache'
+  cacheLife('5 minutes')
   cacheTag(
-    `dept:${deptId}`,
-    'table:production_logs',
-    'table:daily_logs',
-    'table:machines',
-    'department-production'
+    DEPARTMENT_CACHE_TAGS.PRODUCTION,
+    DEPARTMENT_CACHE_TAGS.TABLE_MACHINES,
+    DEPARTMENT_CACHE_TAGS.TABLE_DAILY_LOGS,
+    `dept:production:${deptId}`
   )
 
   const { createAdminClient } = await import('@repo/supabase/server')

@@ -1,7 +1,9 @@
 'use server'
 
-import { cacheTag } from 'next/cache'
-import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes'
+import { cacheTag, cacheLife } from 'next/cache'
+import { DatabaseError } from '@/lib/errors/error-classes'
+import { assertDeptRole } from '@/lib/dept-access'
+import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -19,28 +21,8 @@ export interface SatelliteMetrics {
 /*  Auth helper                                                        */
 /* ------------------------------------------------------------------ */
 
-async function assertSatelliteRole() {
-  const { createServerSupabaseClient } = await import('@repo/supabase/server')
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new AuthError('Unauthorized')
-
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role, department_id')
-    .eq('auth_id', user.id)
-    .single()
-
-  if (!employee || !['admin', 'satellite', 'supervisor'].includes(employee.role)) {
-    throw new ForbiddenError('Forbidden: satellite or admin role required', {
-      resource: 'satellite-monitoring',
-      action: 'assert_role',
-    })
-  }
-
-  return { supabase, user, employee }
+export async function assertSatelliteRole() {
+  return assertDeptRole(['admin', 'satellite', 'supervisor'], 'satellite-monitoring')
 }
 
 /* ------------------------------------------------------------------ */
@@ -49,12 +31,12 @@ async function assertSatelliteRole() {
 
 async function _getCachedSatelliteMetrics(deptId: string): Promise<SatelliteMetrics> {
   'use cache'
+  cacheLife('5 minutes')
   cacheTag(
-    `dept:${deptId}`,
-    'table:machines',
-    'table:daily_logs',
-    'department-satellite',
-    'department-dashboard'
+    DEPARTMENT_CACHE_TAGS.SATELLITE_MONITORING,
+    DEPARTMENT_CACHE_TAGS.TABLE_MACHINES,
+    DEPARTMENT_CACHE_TAGS.TABLE_DAILY_LOGS,
+    `dept:satellite-monitoring:${deptId}`
   )
 
   const { createAdminClient } = await import('@repo/supabase/server')

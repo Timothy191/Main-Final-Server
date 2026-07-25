@@ -20,8 +20,7 @@ pnpm-lock.yaml
 .agents/
 agent-harnesses/
 openspec/
-.kiro/agents/
-.kiro/specs/
+.kiro/
 .github/skills/
 AGENTS.md
 CLAUDE.md

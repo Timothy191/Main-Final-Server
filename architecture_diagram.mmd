@@ -1,0 +1,37 @@
+graph TD
+    subgraph App
+        A[App Router] --> C[Department Routes]
+        B[Hub Layout] --> F[SplitWindowLayout]
+    end
+    subgraph Lib
+        G[Shared Utilities]
+        H[Security Middleware]
+        I[Data Layer]
+    end
+    subgraph UI
+        N[UI Components]
+        O[Theme System]
+    end
+    subgraph Data
+        K[Supabase]
+        L[Redis Caching]
+    end
+    subgraph Error
+        Q[Custom Error Classes]
+    end
+    subgraph Observability
+        S[Metrics]
+        T[Audit Logs]
+    end
+
+    A --> C
+    B --> F
+    G --> H
+    G --> I
+    I --> K
+    I --> L
+    M --> N
+    M --> O
+    P --> Q
+    R --> S
+    R --> T

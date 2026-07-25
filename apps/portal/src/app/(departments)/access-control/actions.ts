@@ -2,8 +2,10 @@
 
 import { encodeCursor, decodeCursor } from '@repo/ui/components/ui/pagination-cursor'
 import { revalidatePath } from 'next/cache'
-import { cacheTag } from 'next/cache'
-import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes'
+import { cacheTag, cacheLife } from 'next/cache'
+import { DatabaseError } from '@/lib/errors/error-classes'
+import { assertDeptRole } from '@/lib/dept-access'
+import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -53,27 +55,7 @@ export interface BadgeStatusDistribution {
 /* ------------------------------------------------------------------ */
 
 async function assertAccessControlRole() {
-  const { createServerSupabaseClient } = await import('@repo/supabase/server')
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new AuthError('Unauthorized')
-
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role, department_id')
-    .eq('auth_id', user.id)
-    .single()
-
-  if (!employee || !['admin', 'access_control'].includes(employee.role)) {
-    throw new ForbiddenError('Forbidden: access_control or admin role required', {
-      resource: 'access_control',
-      action: 'assert_role',
-    })
-  }
-
-  return { supabase, user, employee }
+  return assertDeptRole(['admin', 'access_control'], 'access_control')
 }
 
 /* ------------------------------------------------------------------ */
@@ -82,12 +64,10 @@ async function assertAccessControlRole() {
 
 async function _getCachedMetrics(deptId: string): Promise<AccessControlMetrics> {
   'use cache'
+  cacheLife('5 minutes')
   cacheTag(
-    `dept:${deptId}`,
-    'table:badges',
-    'table:access_logs',
-    'table:personnel',
-    'access-control-metrics'
+    DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL,
+    `dept:access-control:${deptId}`
   )
   const { createAdminClient } = await import('@repo/supabase/server')
   const supabase = createAdminClient()
@@ -212,13 +192,10 @@ export async function getRecentAccessActivity(
 
 async function _getCachedEntityBadgeStatus(deptId: string): Promise<EntityBadgeStatus[]> {
   'use cache'
+  cacheLife('5 minutes')
   cacheTag(
-    `dept:${deptId}`,
-    'table:badges',
-    'table:personnel',
-    'table:fleet',
-    'table:equipment',
-    'access-control-badge-status'
+    DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL_TAG,
+    `dept:access-control:${deptId}:badges`
   )
   const { createAdminClient } = await import('@repo/supabase/server')
   const supabase = createAdminClient()
@@ -326,7 +303,11 @@ async function _getCachedBadgeStatusDistribution(
   deptId: string
 ): Promise<BadgeStatusDistribution[]> {
   'use cache'
-  cacheTag(`dept:${deptId}`, 'table:badges', 'access-control-distribution')
+  cacheLife('5 minutes')
+  cacheTag(
+    DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL_TAG,
+    `dept:access-control:${deptId}:distribution`
+  )
   const { createAdminClient } = await import('@repo/supabase/server')
   const supabase = createAdminClient()
 

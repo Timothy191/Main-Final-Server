@@ -29,6 +29,8 @@ Single source of truth for cross-agent codebase knowledge. Read
   provider, background jobs, external AI tools, and the product `memory_embeddings` runtime feature.
 - [Health checks & observability](architecture/health-and-observability.md) — Kubernetes
   readiness/liveness probes, Prometheus metrics, and health endpoint map.
+- [Performance Bottleneck Analysis & Recommendations](architecture/performance-bottlenecks.md) —
+  audit of 1.7GB node_modules, 4GB pnpm cache, tsconfig type-checking gaps, and build size.
 
 ## Decisions
 
@@ -44,6 +46,11 @@ Single source of truth for cross-agent codebase knowledge. Read
 - [Auto-formatting & Spec-First Global Policy](patterns/auto-formatting-and-specs.md) — background code formatting and mandatory spec-first cycle for multi-file tasks.
 - [High-Scale Systems, Microservices, and Design Patterns](patterns/high-scale-system-patterns.md) — extracted patterns from system-design-101, microservices, and design patterns.
 - [Redis Cache v2 — L1+L2 Two-Tier Pattern](patterns/redis-cache-v2.md) — in-memory L1 + Redis L2 with request coalescing and tag-based invalidation.
+- [Minimal Agent Scaffolding](patterns/minimal-agent-scaffolding.md) — evidence from mini-swe-agent (>74% SWE-bench Verified in ~100 lines, bash-only) for preferring linear primitive tools over deep scaffolding in our agent/skill designs.
+- [Agent-Computer Interface (ACI)](patterns/agent-computer-interface.md) — SWE-agent-derived contract every Bash-using agent inherits: output/runtime caps, no-TTY rule, forbidden-command set, minimal-child prelude.
+- [Scratch Board Coordination](patterns/scratch-board-coordination.md) — concurrent-agent presence signalling via root `scratch_board/`: check-in / conflict-check / check-out protocol grounded in Aakash Gupta's Parallel Claude Code Agents guide and CoAgent's file-based concurrency primitives.
+- [Dynamic MCP & Skill Loading Strategy](patterns/dynamic-mcp-and-skill-loading.md) — Smithery CLI, `defer_loading` pattern, and on-demand tool discovery to reduce agent bloat.
+- [Agent & Skill Bloat Audit — Smithery Migration Plan](patterns/bloat-audit-and-smithery-migration.md) — audit of 45 agent/skill entries (~1.2 MB), migration priorities, and quick wins.
 
 
 ## Reference

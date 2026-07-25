@@ -2,6 +2,7 @@ import { getDepartmentContext } from '@/lib/dept-context'
 import { GlassCard } from '@repo/ui/GlassCard'
 import { createReadReplicaClient } from '@repo/supabase/read-replica'
 import Link from 'next/link'
+import { cacheLife, cacheTag } from 'next/cache'
 import {
   AlertTriangle,
   CircleDot,
@@ -10,8 +11,17 @@ import {
   TrendingUp,
   ArrowRight,
 } from 'lucide-react'
+import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
 
 async function getEngineeringHubData(deptId: string) {
+  'use cache'
+  cacheLife('5 minutes')
+  cacheTag(
+    DEPARTMENT_CACHE_TAGS.ENGINEERING,
+    DEPARTMENT_CACHE_TAGS.TABLE_BREAKDOWNS,
+    `dept:engineering:${deptId}`
+  )
+
   const db = await createReadReplicaClient()
 
   const [
