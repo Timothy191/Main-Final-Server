@@ -30,3 +30,4 @@ SOUL.md
 
 # Generated files
 packages/contract/openapi.generated.json
+apps/portal/next-env.d.ts
