@@ -1,0 +1,1 @@
+../../cursor/agents/ai-maintenance-checker.md

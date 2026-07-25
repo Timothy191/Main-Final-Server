@@ -70,7 +70,8 @@ CLAUDE.local.md
 
 # Third-party agent runtime (Claude Code, claude-flow, swarm, etc.)
 .claude-flow/
-.claude/
+.claude/hooks/state/
+.claude/settings.local.json
 .claude-plugin/
 .swarm/
 .crush/

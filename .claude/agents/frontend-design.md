@@ -1,0 +1,1 @@
+../../cursor/agents/frontend-design.md

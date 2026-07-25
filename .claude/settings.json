@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": ["bash", "read", "write", "edit"],
+    "warn": ["git:push", "git:reset", "git:checkout"]
+  },
+  "hooks": {
+    "alignment-gate": "hooks/alignment-gate.mjs",
+    "block-forbidden": "hooks/block-forbidden.mjs"
+  },
+  "ignore": ["**/node_modules/**", "**/.next/**", "**/dist/**"]
+}

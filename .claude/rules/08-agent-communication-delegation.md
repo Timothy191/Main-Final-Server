@@ -1,0 +1,1 @@
+../../cursor/rules/08-agent-communication-delegation.mdc

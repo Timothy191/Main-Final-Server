@@ -1,0 +1,1 @@
+../../cursor/rules/11-permanent-fixes.mdc

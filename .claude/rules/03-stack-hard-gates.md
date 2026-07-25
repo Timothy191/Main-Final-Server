@@ -1,0 +1,1 @@
+../../cursor/rules/03-stack-hard-gates.mdc

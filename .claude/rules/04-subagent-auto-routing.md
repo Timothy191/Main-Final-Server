@@ -1,0 +1,1 @@
+../../cursor/rules/04-subagent-auto-routing.mdc

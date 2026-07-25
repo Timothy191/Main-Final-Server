@@ -1,0 +1,1 @@
+../../cursor/rules/12-skill-evolution-notifications.mdc

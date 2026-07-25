@@ -1,0 +1,1 @@
+../../cursor/agents/fast-outliner.md

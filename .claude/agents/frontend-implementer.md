@@ -1,0 +1,1 @@
+../../cursor/agents/frontend-implementer.md

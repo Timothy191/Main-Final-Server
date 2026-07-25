@@ -1,0 +1,1 @@
+../../cursor/agents/vercel-brand-sync.md
