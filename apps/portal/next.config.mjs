@@ -20,11 +20,14 @@ const enableHeavyPlugins = isCI || process.env.ENABLE_HEAVY_PLUGINS === "true";
 const nextConfig = {
   cacheComponents: true,
   // AGENT-TRACE: Redis-backed distributed cache handler for multi-pod deployments.
-  // Implements the Next.js 16 CacheHandler interface using @repo/redis L2 layer.
-  // Gracefully degrades to no-op if REDIS_URL is not configured.
-  cacheHandlers: {
-    default: fileURLToPath(new URL("./src/lib/next-cache-handler.ts", import.meta.url)),
-  },
+  // DISABLED: ./src/lib/next-cache-handler.ts does not implement the Next.js 16
+  // CacheHandler interface (exports a class instead of an object with the
+  // required get/set/refreshTags/getExpiration/updateTags methods and correct
+  // signatures). Re-enable after rewriting against Next 16's contract.
+  // Followup: .kiro/specs/redis-cache-handler/ + .agents/knowledge/patterns/nextjs16-cache-handler-interface.md
+  // cacheHandlers: {
+  //   default: fileURLToPath(new URL("./src/lib/next-cache-handler.ts", import.meta.url)),
+  // },
   turbopack: {
     // AGENT-TRACE: Root must include workspaceRoot to allow dependencies from packages/ to be compiled
     root: workspaceRoot,

@@ -20,6 +20,20 @@ interface LoginFormProps {
 
 const LOGIN_MUTED_TEXT = 'login-muted-text text-[13px] font-medium tracking-wide'
 
+const STATIC_ASSET_RE = /\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/i
+
+function safeSameOriginPath(candidate: string | null | undefined): string | null {
+  if (!candidate) return null
+  try {
+    const url = new URL(candidate, window.location.origin)
+    if (url.origin !== window.location.origin) return null
+    if (STATIC_ASSET_RE.test(url.pathname)) return null
+    return url.pathname
+  } catch {
+    return null
+  }
+}
+
 export function LoginForm({ className }: LoginFormProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -66,23 +80,20 @@ export function LoginForm({ className }: LoginFormProps) {
             /* ignore */
           }
 
-          const redirectParam = searchParams.get('redirect')
-          let redirectPath = '/hub'
-
-          if (redirectParam) {
-            try {
-              const url = new URL(redirectParam, window.location.origin)
-              if (url.origin === window.location.origin) {
-                if (
-                  !/\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/i.test(url.pathname)
-                ) {
-                  redirectPath = url.pathname
-                }
-              }
-            } catch {
-              // Invalid URL, use default
+          let serverRedirect: string | undefined
+          try {
+            const data = (await response.json()) as { redirectTo?: unknown }
+            if (typeof data.redirectTo === 'string') {
+              serverRedirect = data.redirectTo
             }
+          } catch {
+            /* ignore parse errors */
           }
+
+          const redirectPath =
+            safeSameOriginPath(searchParams.get('redirect')) ??
+            safeSameOriginPath(serverRedirect) ??
+            '/hub'
 
           router.push(redirectPath)
           router.refresh()

@@ -2,7 +2,7 @@
 title: Knowledge Base Index
 tags: [index, meta]
 updated: 2026-07-25
-source_agent: claude-code
+source_agent: buffy
 status: active
 ---
 
@@ -25,8 +25,8 @@ Single source of truth for cross-agent codebase knowledge. Read
   product/agentic split, `@repo/*` packages, and hard boundary rules.
 - [Portal auth & routing](architecture/portal-auth-and-routing.md) — `proxy.ts`
   enforcement, route groups, departments, path aliases.
-- [AI orchestration & memory](architecture/ai-orchestration-and-memory.md) — LangGraph
-  agent graph, `lib/ai/` subsystem, and the product `memory_embeddings` runtime feature.
+- [AI orchestration & memory](architecture/ai-orchestration-and-memory.md) — embedding
+  provider, background jobs, external AI tools, and the product `memory_embeddings` runtime feature.
 - [Health checks & observability](architecture/health-and-observability.md) — Kubernetes
   readiness/liveness probes, Prometheus metrics, and health endpoint map.
 
