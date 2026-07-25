@@ -21,6 +21,7 @@ Industrial mining-operations portal — a pnpm + Nx monorepo.
 | `@repo/database`                                                                | SQL migrations source of truth                      |
 | `@repo/theme`                                                                   | Design tokens + Tailwind preset                     |
 | `@repo/ui`                                                                      | shadcn-style primitives                             |
+| [orchestrator.md](orchestrator.md)                                              | Workflow management, task coordination              | [orchestrator/](orchestrator/) |
 | `@repo/redis`                                                                   | Caching                                             |
 | `@repo/rate-limiter`                                                            | Rate limiting                                       |
 | `@repo/eval`                                                                    | Python LLM eval suite                               |
