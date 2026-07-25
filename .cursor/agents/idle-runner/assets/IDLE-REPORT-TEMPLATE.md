@@ -1,0 +1,23 @@
+## Blocker context
+
+- Waiting on: …
+- Locked paths: …
+
+## Idle work taken
+
+- …
+
+## Changes / findings
+
+- …
+
+## Still safe / leftover idle queue
+
+- …
+
+## Merge note for parent
+
+- Apply after … completes: …
+- Conflicts risk: none | low | …
+
+Next owner: parent — <one line>
