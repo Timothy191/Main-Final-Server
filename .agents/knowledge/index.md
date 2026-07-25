@@ -1,7 +1,7 @@
 ---
 title: Knowledge Base Index
 tags: [index, meta]
-updated: 2026-07-23
+updated: 2026-07-25
 source_agent: claude-code
 status: active
 ---
@@ -40,6 +40,7 @@ Single source of truth for cross-agent codebase knowledge. Read
 - [Patterns index](patterns/README.md) — reusable solutions, gotchas, and recipes.
 - [Layout Stability, Scripts & Telemetry](patterns/layout-stability-and-telemetry.md) — CLS minimization, script strategies, and Web Vitals client-side reporting.
 - [Next.js 16 Server Actions & Turbopack gotchas](patterns/nextjs16-server-actions.md) — isolating client-imported server actions to prevent module factory errors.
+- [Next.js 16 CacheHandler interface](patterns/nextjs16-cache-handler-interface.md) — the exact `get/set/refreshTags/getExpiration/updateTags` contract for custom `cacheHandlers.default`; why exporting a class produces `cacheHandler.get is not a function`.
 - [Auto-formatting & Spec-First Global Policy](patterns/auto-formatting-and-specs.md) — background code formatting and mandatory spec-first cycle for multi-file tasks.
 - [High-Scale Systems, Microservices, and Design Patterns](patterns/high-scale-system-patterns.md) — extracted patterns from system-design-101, microservices, and design patterns.
 - [Redis Cache v2 — L1+L2 Two-Tier Pattern](patterns/redis-cache-v2.md) — in-memory L1 + Redis L2 with request coalescing and tag-based invalidation.

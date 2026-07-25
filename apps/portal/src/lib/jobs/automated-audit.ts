@@ -1,4 +1,3 @@
-import type { InngestFunction } from 'inngest'
 import { inngest } from '@repo/utils/inngest'
 import { createServiceRoleClient } from '@repo/supabase/service-role'
 import { renderToFile } from '@react-pdf/renderer'
@@ -11,7 +10,7 @@ import { AuditReportDocument } from '../reports/templates/AuditReportDocument'
 import { logError } from '@/lib/errors/error-logger'
 import { recordJobExecution } from '@/lib/observability/metrics'
 
-export const automatedAuditFn = inngest.createFunction(
+export const automatedAuditFn: ReturnType<typeof inngest.createFunction> = inngest.createFunction(
   {
     id: 'automated-audit-report',
     triggers: [{ cron: '0 8 * * *' }, { event: 'report/automated-audit' }], // Daily at 08:00 AM or manual event trigger
@@ -36,10 +35,7 @@ export const automatedAuditFn = inngest.createFunction(
 
       // 2. Aggregate metrics for the past 24 hours
       const targetDate = new Date()
-      const reportData = await getAggregatedAuditData(
-        supabase as unknown as Parameters<typeof getAggregatedAuditData>[0],
-        targetDate
-      )
+      const reportData = await getAggregatedAuditData(supabase, targetDate)
 
       // 3. Render PDF layout to a local temporary file
       const tempDir = os.tmpdir()
@@ -47,7 +43,7 @@ export const automatedAuditFn = inngest.createFunction(
       tempFilePath = path.join(tempDir, fileName)
 
       await renderToFile(
-        React.createElement(AuditReportDocument, { data: reportData }) as unknown as Parameters<
+        React.createElement(AuditReportDocument, { data: reportData }) as Parameters<
           typeof renderToFile
         >[0],
         tempFilePath
@@ -134,4 +130,4 @@ export const automatedAuditFn = inngest.createFunction(
       recordJobExecution('automated-audit-report', performance.now() - start, success)
     }
   }
-) as unknown as InngestFunction.Any
+)
