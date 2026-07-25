@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Recreates the RLS audit script removed during the partial-checkout purge.
-// Iterates packages/database/migrations/*.sql, flags any file that creates
+// Iterates packages/supabase/migrations/*.sql, flags any file that creates
 // a table without also enabling RLS in the same file. Child partitions
 // inherit RLS from parents in PostgreSQL, so dynamic partition CREATE
 // TABLE statements inside format() calls are excluded.
@@ -8,7 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const MIGRATIONS_DIR = path.resolve(__dirname, '..', 'packages', 'database', 'migrations');
+const MIGRATIONS_DIR = path.resolve(__dirname, '..', 'packages', 'supabase', 'migrations');
 const PARTITION_HEURISTIC = /\bformat\s*\(/i; // CREATE TABLE inside format() is a child partition
 
 function* migrations() {

@@ -12,8 +12,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./types": "./src/types.ts",
-    "./query-builder": "./src/query-builder.ts",
-    "./migrations/*": "./migrations/*"
+    "./query-builder": "./src/query-builder.ts"
   },
   "private": true,
   "scripts": {
