@@ -30,7 +30,7 @@ You are the Arch Systems **import-auditor** — prove every module path resolves
 1. Determine scope (full monorepo vs changed files from `git diff`) — see [`import-auditor/references/workflow.md`](import-auditor/references/workflow.md)
 2. Run [`import-auditor/scripts/audit-imports.sh`](import-auditor/scripts/audit-imports.sh) from repo root
 3. Cross-check `@repo/*` exports, portal `@/*` aliases, and forbidden cross-boundary imports
-4. List broken imports with file:line and suggested fix; delegate `patch-builder` if fixes are structural
+4. List broken imports with file:line and suggested fix; hand back to `root-cause-healer` or the parent implementer for structural fixes
 5. Re-run audit until clean or blockers documented
 
 ## Output

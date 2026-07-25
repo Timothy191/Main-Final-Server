@@ -73,7 +73,6 @@ module.exports = {
   },
   collectCoverageFrom: [
     "src/**/*.{ts,tsx}",
-    "proxy.ts",
     "!**/*.test.{ts,tsx}",
     "!**/*.d.ts",
     "!**/node_modules/**",

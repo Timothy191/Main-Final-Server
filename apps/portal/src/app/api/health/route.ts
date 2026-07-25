@@ -23,13 +23,14 @@ export async function GET() {
     // 1b. Synthetic health check assertion for pgvector HNSW index
     try {
       const pingVector = generateLocalFallbackEmbedding('synthetic health check ping')
-      const { error: vecError } = await supabase.rpc('match_memories', {
-        query_embedding: pingVector,
-        match_threshold: 0.0,
+      const { error: vecError } = await supabase.rpc('search_memories_semantic', {
+        p_user_id: '00000000-0000-0000-0000-000000000000',
+        query_embedding: pingVector as unknown as string,
+        similarity_threshold: 0.0,
         match_count: 1,
       })
 
-      if (vecError && !vecError.message.includes('function match_memories does not exist')) {
+      if (vecError && !vecError.message.includes('search_memories_semantic')) {
         checks.pgvector_hnsw = { status: 'degraded', error: vecError.message }
         status = 'degraded'
       } else {

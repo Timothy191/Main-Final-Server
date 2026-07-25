@@ -27,9 +27,9 @@
     "audit:rls": "node tools/audit-rls.cjs",
     "build": "turbo run build",
     "clean": "turbo run clean && find . -name '.next' -type d -not -path '*/node_modules/*' | xargs rm -rf",
-    "deploy:dev": "bash ../scripts/dev-deploy-login.sh",
-    "deploy:live": "bash ../scripts/live-deployment.sh",
-    "launch:ai": "bash ../scripts/launch-ai-nextjs.sh",
+    "deploy:dev": "bash scripts/dev-deploy-login.sh",
+    "deploy:live": "bash scripts/live-deployment.sh",
+    "launch:ai": "bash scripts/launch-ai-nextjs.sh",
     "deploy:local": "bash scripts/dev.sh",
     "dev": "bash scripts/dev.sh",
     "dev:no-infra": "bash scripts/dev.sh --no-infra",
@@ -44,7 +44,6 @@
     "mcp:start": "bash scripts/mcp-manager.sh start",
     "mcp:status": "bash scripts/mcp-manager.sh status",
     "mcp:stop": "bash scripts/mcp-manager.sh stop",
-    "provider:route": "bash scripts/provider-router.sh",
     "quality": "turbo run lint type-check test --concurrency=4 && pnpm format:check",
     "shutdown": "bash scripts/shutdown.sh",
     "supabase:start": "pnpm dlx supabase@^2.26.0 start --workdir packages",
@@ -69,7 +68,7 @@
     "tsx": "^4.0.0",
     "turbo": "^2.10.2",
     "typescript": "^5.7.0",
-    "zod": "^4.4.3"
+    "zod": "^3.24.0"
   },
   "dependencies": {
     "streamdown": "^2.5.0"

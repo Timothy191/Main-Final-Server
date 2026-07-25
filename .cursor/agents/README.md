@@ -1,53 +1,56 @@
 # Project Subagents
 
-Cursor loads **flat entry files** only: `.cursor/agents/<name>.md`.  
+Cursor loads **flat entry files** only: `.cursor/agents/<name>.md`.
 Collateral: `.cursor/agents/<name>/{references,scripts,assets}/`.
 
-**Layout standard:** [`.cursor/standards/agent-layout/STANDARD.md`](../standards/agent-layout/STANDARD.md)  
+**Layout standard:** [`.cursor/standards/agent-layout/STANDARD.md`](../standards/agent-layout/STANDARD.md)
 **Auto-routing:** [`.cursor/rules/04-subagent-auto-routing.mdc`](../rules/04-subagent-auto-routing.mdc)
 
 ## Agents
 
-| Entry                                                  | Role                               | Collateral                                         |
-| ------------------------------------------------------ | ---------------------------------- | -------------------------------------------------- |
-| [fast-outliner.md](fast-outliner.md)                   | Pre-flight scope, gaps, handoffs   | [fast-outliner/](fast-outliner/)                   |
-| [frontend-design.md](frontend-design.md)               | Branded/landing visual composition | [frontend-design/](frontend-design/)               |
-| [frontend-implementer.md](frontend-implementer.md)     | Portal UI implementation           | [frontend-implementer/](frontend-implementer/)     |
-| [nextjs-fullstack.md](nextjs-fullstack.md)             | Next.js full-stack vertical slices | [nextjs-fullstack/](nextjs-fullstack/)             |
-| [ai-docs-sync.md](ai-docs-sync.md)                     | AI surfaces + docs drift           | [ai-docs-sync/](ai-docs-sync/)                     |
-| [sceptic.md](sceptic.md)                               | Adversarial review                 | [sceptic/](sceptic/)                               |
-| [idle-runner.md](idle-runner.md)                       | Parallel safe work while blocked   | [idle-runner/](idle-runner/)                       |
-| [ai-maintenance-checker.md](ai-maintenance-checker.md) | Background AI layout janitor       | [ai-maintenance-checker/](ai-maintenance-checker/) |
-| [auto-formatter.md](auto-formatter.md)                 | Background workspace code formatter| [auto-formatter/](auto-formatter/)                 |
-| [reverse-engineer.md](reverse-engineer.md)             | External repo analysis & extraction| [reverse-engineer/](reverse-engineer/)             |
-| [vercel-brand-sync.md](vercel-brand-sync.md)           | Vercel-family brand assets         | [vercel-brand-sync/](vercel-brand-sync/)           |
-| [openspec.md](openspec.md)                             | OpenSpec change lifecycle (CLI)    | [openspec/](openspec/)                             |
-| [aider.md](aider.md)                                   | Aider surgical headless edits      | [aider/](aider/)                                   |
-| [goose.md](goose.md)                                   | Goose recipes / MCP automation     | [goose/](goose/)                                   |
-| [omp.md](omp.md)                                       | omp heavy headless coding          | [omp/](omp/)                                       |
-| [security.md](security.md)                             | AppSec, vuln review, threat model  | [security/](security/)                             |
-| [test-engineer.md](test-engineer.md)                   | Test automation, flake diagnosis   | [test-engineer/](test-engineer/)                   |
-| [db-optimizer.md](db-optimizer.md)                     | PostgreSQL/Supabase performance    | [db-optimizer/](db-optimizer/)                     |
-| [backend-architect.md](backend-architect.md)           | API design, service architecture   | [backend-architect/](backend-architect/)           |
-| [root-cause-healer.md](root-cause-healer.md)           | Verify hypothesis → fix → harden   | [root-cause-healer/](root-cause-healer/)           |
-| [import-auditor.md](import-auditor.md)                 | Import/path connectivity audit     | [import-auditor/](import-auditor/)                 |
-| [agency-lead.md](agency-lead.md)                       | Background self-healing loops      | [agency-lead/](agency-lead/)                       |
-| [gap-analyst.md](gap-analyst.md)                       | Compile/gap log analysis           | [gap-analyst/](gap-analyst/)                       |
-| [spec-auditor.md](spec-auditor.md)                     | OpenSpec/AGENTS compliance         | [spec-auditor/](spec-auditor/)                     |
-| [routing-optimizer.md](routing-optimizer.md)           | Provider latency/cooldowns         | [routing-optimizer/](routing-optimizer/)           |
-| [patch-builder.md](patch-builder.md)                   | Structural auto-patches            | [patch-builder/](patch-builder/)                   |
-| [ai-system-optimizer.md](ai-system-optimizer.md)       | AI surface bloat/compliance        | [ai-system-optimizer/](ai-system-optimizer/)       |
-| [agents-memory-updater.md](agents-memory-updater.md)     | Agent memory from transcripts       | [agents-memory-updater/](agents-memory-updater/)   |
+| Entry                                                    | Role                                     | Collateral                                             |
+| -------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------ |
+| [agents-memory-updater.md](agents-memory-updater.md)     | AI-surface + docs drift; agent memory    | [agents-memory-updater/](agents-memory-updater/)       |
+| [backend-architect.md](backend-architect.md)             | API design, service architecture         | [backend-architect/](backend-architect/)               |
+| [db-optimizer.md](db-optimizer.md)                       | PostgreSQL / Supabase performance        | [db-optimizer/](db-optimizer/)                         |
+| [frontend-design.md](frontend-design.md)                 | Branded / landing visual composition     | [frontend-design/](frontend-design/)                   |
+| [frontend-implementer.md](frontend-implementer.md)       | Portal UI implementation                 | [frontend-implementer/](frontend-implementer/)         |
+| [import-auditor.md](import-auditor.md)                   | Import / path connectivity audit         | [import-auditor/](import-auditor/)                     |
+| [nextjs-fullstack.md](nextjs-fullstack.md)               | Next.js full-stack vertical slices       | [nextjs-fullstack/](nextjs-fullstack/)                 |
+| [reverse-engineer.md](reverse-engineer.md)               | External repo analysis & extraction      | [reverse-engineer/](reverse-engineer/)                 |
+| [root-cause-healer.md](root-cause-healer.md)             | Verify hypothesis → fix → harden         | [root-cause-healer/](root-cause-healer/)               |
+| [sceptic.md](sceptic.md)                                 | Adversarial review                       | [sceptic/](sceptic/)                                   |
+| [test-engineer.md](test-engineer.md)                     | Test automation, flake diagnosis         | [test-engineer/](test-engineer/)                       |
+| [vercel-brand-sync.md](vercel-brand-sync.md)             | Vercel-family brand assets               | [vercel-brand-sync/](vercel-brand-sync/)               |
+
+> **Pruned 2026-07-25.** ~50 external-brand stubs (aider, devin, goose, opencode, omp, openspec, open-swe, adk/gaai/dev-tools-specialist, zeroclaw) and duplicates of `.qoder/` agents/skills were removed. Some surviving agents' `references/` subfolders still mention removed agents (e.g. `patch-builder`, `ai-docs-sync`, `gap-analyst`, `spec-auditor`, `routing-optimizer`, `agency-lead`, `ai-system-optimizer`, `fast-outliner`) — treat those mentions as historical; use the survivors above or `.qoder/skills/` counterparts.
 
 ## Shared
 
 - [_shared/references/](_shared/references/) — gold contract, skills runtime, ACI, CLI matrix, knowledge base
-- [_shared/references/agent-families.md](_shared/references/agent-families.md) — superagent families (orchestrators + specialists; not flattened agents)
+- [_shared/references/agent-families.md](_shared/references/agent-families.md) — superagent families (references some pruned agents; historical)
+
+## Cross-tool counterparts
+
+Prefer these `.qoder/` surfaces where they exist:
+
+| Concern                            | Qoder surface                              |
+| ---------------------------------- | ------------------------------------------ |
+| Multi-agent orchestration          | `.qoder/agents/prompt-orchestrator.md`     |
+| Adversarial review + telemetry     | `.qoder/agents/overwatch.md`               |
+| Security implementation            | `.qoder/agents/secure-builder.md`          |
+| Research / codebase scholar        | `.qoder/agents/code-scholar.md`            |
+| AI-surface engineering             | `.qoder/agents/agent-engineer.md`          |
+| Spec lifecycle                     | `.qoder/skills/specs/`                     |
+| Quality gate / verify              | `.qoder/skills/quality/`, `.qoder/skills/verify/` |
+| Deploy                             | `.qoder/skills/deploy/`                    |
+| Dev stack orchestration            | `.qoder/skills/dev/`                       |
+| RLS migration audit                | `.qoder/skills/rls-audit/`                 |
 
 ## Validate
 
 ```bash
-pnpm ai check
+pnpm ai:check
 ```
 
 ## Related

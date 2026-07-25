@@ -82,7 +82,7 @@ BEGIN
   END IF;
   
   -- Set the adaptive ef_search for this query
-  SET LOCAL hnsw.ef_search = adaptive_ef_search;
+  PERFORM set_config('hnsw.ef_search', adaptive_ef_search::text, true);
   
   RETURN QUERY
   SELECT
@@ -90,7 +90,7 @@ BEGIN
     m.session_id,
     m.content,
     m.metadata,
-    m.memory_type,
+    m.memory_type::text,
     m.created_at,
     (1 - (m.embedding <=> query_embedding))::FLOAT AS semantic_score,
     COALESCE(
@@ -115,7 +115,7 @@ BEGIN
   FROM memory_embeddings m
   WHERE m.user_id = p_user_id
     AND (p_session_id IS NULL OR m.session_id = p_session_id)
-    AND (p_memory_type IS NULL OR m.memory_type = p_memory_type)
+    AND (p_memory_type IS NULL OR m.memory_type::text = p_memory_type)
   ORDER BY combined_score DESC
   LIMIT match_count;
 END;
@@ -161,7 +161,7 @@ BEGIN
   END IF;
   
   -- Set the adaptive ef_search for this query
-  SET LOCAL hnsw.ef_search = adaptive_ef_search;
+  PERFORM set_config('hnsw.ef_search', adaptive_ef_search::text, true);
   
   RETURN QUERY
   SELECT
@@ -169,13 +169,13 @@ BEGIN
     m.session_id,
     m.content,
     m.metadata,
-    m.memory_type,
+    m.memory_type::text,
     m.created_at,
     (1 - (m.embedding <=> query_embedding))::FLOAT AS similarity
   FROM memory_embeddings m
   WHERE m.user_id = p_user_id
     AND (p_session_id IS NULL OR m.session_id = p_session_id)
-    AND (p_memory_type IS NULL OR m.memory_type = p_memory_type)
+    AND (p_memory_type IS NULL OR m.memory_type::text = p_memory_type)
     AND (1 - (m.embedding <=> query_embedding)) >= similarity_threshold
   ORDER BY m.embedding <=> query_embedding
   LIMIT match_count;

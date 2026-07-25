@@ -1,141 +1,80 @@
-# Repository Guidelines
+# AGENTS.md
 
-## Project Overview
-This project is an AI-orchestrated, monorepo-based application featuring a primary UI built with Next.js 16 (App Router) and a control-plane bridge for MCP (Model Context Protocol) operations. It emphasizes rigorous AI-agent integration, spec-driven development, and strict adherence to architectural boundaries between the product monorepo and agentic AI surfaces.
+This file provides guidance to the AI agent when working with code in this repository.
 
-## Architecture & Data Flow
-The architecture follows a strict separation between:
-- **Product Monorepo**: `Server/apps/`, `Server/packages/`, product scripts (in `Server/scripts/`), and `turbo` build tasks.
-- **Agentic AI**: `.cursor/`, `.claude/`, agents, skills, `pnpm ai` tools, and maintenance scripts.
+## Project shape
 
-Data flow for core features typically involves:
-- **Portal (`Server/apps/portal/`)**: Handles UI, user interactions, and calls library/feature-based data fetching functions.
-- **Backend/Lib (`Server/apps/portal/src/lib/` & `Server/packages/`)**: Contains shared business logic, API clients, and data access layers (`@repo/supabase`).
-- **Control Plane (`Server/apps/ops-gateway/`)**: Manages external integrations, MCP tools, and event-driven tasks.
+Turborepo 2 + pnpm 9 monorepo. Node `>=22` (Volta pins `24.15.0`), pnpm `9.15.9`.
 
-## Key Directories
-- `Server/apps/portal/`: Primary deployable Next.js 16 UI.
-- `Server/apps/ops-gateway/`: MCP bridge, dispatcher, and subscriber services.
-- `Server/packages/`: Framework-agnostic shared libraries (e.g., `@repo/contract`, `@repo/database`, `@repo/ui`).
-- `.cursor/`: Project-specific agents, skills, and layout standards.
-- `.claude/`: Claude Code harness configuration and surfaces.
-- `Server/scripts/`: Shared scripts for development, deployment, and AI maintenance.
-- `.agents/knowledge/`: Shared cross-agent knowledge base (repowiki) — single source of truth.
+- `apps/portal/` — primary Next.js 16 App Router UI. Has its own `apps/portal/AGENTS.md`; **consult it for portal specifics** (auth via `proxy.ts` not `middleware.ts`, department routes, RSC/Server Actions patterns).
+- `apps/ops-gateway/` — MCP bridge / control-plane service.
+- `apps/api-gateway/` — GraphQL Mesh gateway (CommonJS).
+- `packages/*` — framework-agnostic libs: `@repo/contract`, `@repo/database`, `@repo/errors`, `@repo/redis`, `@repo/supabase`, `@repo/theme`, `@repo/ui`, `@repo/utils`, `@repo/rate-limiter`, `@repo/logger`, `@repo/llm-config`, `@repo/departments`, `@repo/eslint-config`, `@repo/typescript-config`.
 
-## Shared Knowledge Base (Repowiki)
-Single source of truth for cross-agent codebase knowledge: `.agents/knowledge/`.
-- READ `.agents/knowledge/index.md` before non-trivial work.
-- WRITE durable learnings (dated, evidence-cited) and update `index.md`; supersede, never delete.
-- Tool paths resolve here via symlinks (`.claude/knowledge`, `.cursor/knowledge`, `.qoder/repowiki`), created by `.claude/scripts/sync-surfaces.sh`.
-- Not for end-user product memory (`packages/database/migrations/009_ai_memory.sql`).
-- Enforced by `pnpm ai check`. Full protocol: `.agents/knowledge/README.md`.
+Boundary: never import from `apps/*` inside `packages/*`. Never add application logic to `packages/*`.
 
-## Development Commands
-### Product (Standalone)
-- `pnpm dev`: Full stack dev mode (Docker + Next.js).
-- `pnpm dev --quick`: Portal-only dev, skips infra.
-- `pnpm build`: Full project build (Turborepo).
-- `pnpm quality`: Pre-commit check (lint + type-check + test + prettier).
+## Commands the AI would guess wrong
 
-#### Fast Local Development (Next.js convention)
-For iterative development on the portal app, use watch mode:
+- `pnpm dev` runs `scripts/dev.sh` (Redis via `docker compose --profile infra`, then Supabase, then portal Turbopack). Use `pnpm dev --quick` or `pnpm dev --no-infra` for portal-only, no-Docker dev.
+- `pnpm quality` = `turbo run lint type-check test --concurrency=4 && pnpm format:check`. The `quality` task defined in `turbo.json` is unused — do **not** invoke `turbo run quality`.
+- Colon-separated, not space: `pnpm ai:check` (drift/guardrails validator, `scripts/ai.sh check`), `pnpm ai:fix`, `pnpm ai:init`. `pnpm ai` alone runs status.
+- `pnpm agent:delegate` — task delegation via `scripts/delegate-agent.sh`.
+- `pnpm audit:rls` — `node tools/audit-rls.cjs`; run after touching `packages/database/migrations/`.
+- `pnpm supabase:start|stop|status` — invokes `pnpm dlx supabase --workdir packages`.
+- Single-file test: `pnpm --filter=portal test -- path/to/file.test.ts`. Name pattern: `pnpm --filter=portal test -- -t "pattern"`.
 
-1. **Start watch build** (auto-rebuilds on file changes):
-   ```bash
-   cd apps/portal && pnpm dev
-   ```
+## Code conventions
 
-2. **Run focused tests** — see testing section below for mode-specific commands.
+- TypeScript strict; no `any`, no `@ts-ignore`. Prefer `unknown` + type guards, `satisfies` over widening.
+- **Prettier: `semi: false`, `singleQuote: true`**, `tabWidth: 2`, `trailingComma: "es5"`, `printWidth: 100`. A PostToolUse hook auto-runs `prettier --write` after every Write/Edit.
+- Use `import type { X }` for type-only imports (enforced by `consistent-type-imports`). Prefer `@repo/*` aliases over relative imports across packages.
+- Errors: throw typed `AppError` subclasses from `@repo/errors` — never raw `new Error()` for domain errors.
+- Validation: Zod at every external boundary. All workspaces are pinned to zod `^3.24.0`; do not upgrade a single package to v4 without a monorepo-wide migration.
+- Styling: Tailwind via `@repo/theme` preset; **light-mode only** (macOS Ventura/Sonoma liquid-glass palette). See `.qoder/rules/code-style.md`.
+- Two Redis clients coexist by design: `ioredis` in `@repo/redis`, `redis` v4 in `ops-gateway`. Match the client the surrounding package already uses.
+- `neverthrow` is **not** a dependency despite older docs — don't add it without a decision.
 
-3. **For type errors only** — use `pnpm --filter=portal type-check` instead of full build.
+## Testing
 
-4. **Always run `pnpm quality` before marking a task as done** — this runs lint, type-check, test, and format in sequence.
+- Jest 30 with `@swc/jest`, `jsdom`. Portal config: `apps/portal/jest.config.cjs`.
+- Portal coverage thresholds: 40% lines, 30% branches, 35% functions, 40% statements.
+- Co-locate unit tests (`foo.ts` → `foo.test.ts`). Integration tests in `__tests__/` under the feature.
+- Mock Supabase / Redis / Inngest at the boundary. Never mock `@repo/utils` or `@repo/errors`.
+- Run `pnpm quality` before marking any task done.
 
-### Agentic AI
-- `pnpm ai`: AI system health check.
-- `pnpm ai check`: Validate AI surfaces drift/compliance.
-- `pnpm agent:delegate`: Delegate tasks to subagents.
+## Security & boundaries
 
-## Code Conventions & Common Patterns
-- **TypeScript**: Strict (TS 5.7+), no `any`, no `@ts-ignore`.
-- **Validation**: Zod (all external input).
-- **Errors**: `@repo/errors` (typed `AppError` subclasses).
-- **Styling**: Tailwind CSS (via `@repo/theme`, light-mode only). Standardized on macOS semi-transparent white palette (`rgba(255, 255, 255, 0.72)` translucency, `backdrop-filter: blur(28px) saturate(180%)`, specular hairlines, and high-contrast text primitives).
-- **Async/Jobs**: Inngest 4 for background jobs.
-- **Boundary**: Never import from `apps/` inside `packages/`. Never add application logic to `packages/`.
-- **Output & Response**: Always at the end of an output, present the user with 3 Recommended Follow-ups. Under each follow-up, include an `Outcome:` line describing the expected result. Never waste recommendation slots suggesting `.kiro/specs/` spec creation (apply `.kiro/specs/` spec-first cycles automatically for tasks); keep recommendations focused on technical & architectural next steps.
-- **Spec-First Requirement**: Always create a new spec under `.kiro/specs/<feature-slug>/` for any upcoming multi-file feature or task before implementation.
+- Never expose `SUPABASE_SERVICE_ROLE_KEY` or any non-`NEXT_PUBLIC_` env var to the client.
+- Never import `@repo/supabase/server` or `@repo/redis` from a `"use client"` file. `"use client"` never on layouts.
+- A PreToolUse hook blocks writes to `.env*.local` files and destructive Bash (`rm -rf /`, `git push --force main/master`, `npm|yarn install|add`).
 
-## Important Files
-- `package.json`: Main workspace configuration.
-- `pnpm-workspace.yaml`: Workspace definition.
-- `turbo.json`: Build pipeline configuration.
-- `apps/portal/.env.example`: Env var templates.
-- `AGENTS.md`: Canonical AI policy.
+## Spec-driven workflow
 
-## Runtime/Tooling Preferences
-- **Runtime**: Node.js >= 22 (Volta pinned: 24).
-- **Package Manager**: pnpm 9 (strict).
-- **Build**: Turborepo 2.
+- Multi-file changes: create `.kiro/specs/<feature-slug>/{requirements,design,tasks}.md` before implementation. Templates in `.kiro/templates/`.
+- Caveat: `.kiro/specs/` is `.gitignore`d — specs are local per developer. Persist durable, cross-agent decisions in `.agents/knowledge/` (repowiki) instead.
 
-## Testing & QA
-- **Framework**: Jest (`turbo run test`).
-- **Quality Gate**: `pnpm quality` must pass before marking tasks as "done".
-- **Coverage**: Expected for all permanent feature changes and API modifications.
+## Shared knowledge base
 
-### Testing Patterns (from Next.js conventions)
+- `.agents/knowledge/` is the cross-agent source of truth. Read `.agents/knowledge/index.md` before non-trivial work; add durable, dated, evidence-cited learnings and update `index.md` — supersede, never delete.
 
-**Running focused tests:**
-```bash
-# Test a specific file
-pnpm --filter=portal test -- path/to/file.test.ts
+## Commits
 
-# Test with a name pattern
-pnpm --filter=portal test -- -t "should render dashboard"
-```
+- Conventional commits enforced by commitlint: `type(scope): subject`. Types: `feat|fix|chore|refactor|docs|test|style|perf|build|ci|revert`. Scope matches the app/package (`portal`, `ops-gateway`, `repo/supabase`, …). Subject is not sentence-case.
+- Husky runs `pnpm exec lint-staged` on pre-commit (prettier + eslint on staged TS files) and `commitlint` on commit-msg.
 
-**Test conventions:**
-- Place tests alongside source files: `component.tsx` → `component.test.tsx`
-- Integration tests go in `__tests__/` directories under the relevant feature folder
-- Use `@testing-library/react` for component tests
-- Mock external services at the boundary (Supabase, Inngest, Redis)
-- Never use `any` in test files (override in eslint config allows in test/match config)
+## Local overrides
 
-### Code Style Guidelines (from Next.js conventions)
+- Create `AGENTS.local.md` (gitignored) for personal, per-user rules that shouldn't be committed. It loads with higher priority than this file.
 
-**Imports:**
-- Use `import type { X }` for type-only imports (enforced by `consistent-type-imports`)
-- Group: built-in → external → internal → relative
-- `@repo/*` aliases preferred over relative imports for cross-package references
+## Detailed rules & skills
 
-**Error handling:**
-- Throw typed `AppError` subclasses from `@repo/errors` — never raw `Error`
-- Catch at the boundary (route handler, server action boundary)
-- Use `neverthrow` Result patterns for expected failure cases
+Path-scoped rules loaded automatically:
+- `.qoder/rules/code-style.md` — TS/TSX naming, styling
+- `.qoder/rules/security.md` — server/client boundary details
+- `.qoder/rules/testing.md` — Jest patterns
+- `.qoder/rules/spec-driven-workflow.md` — spec phase enforcement
+- `.qoder/rules/alignment-scoring.md` — OBSERVE→VERIFY→ACT→SCORE loop
 
-**Commit conventions:**
-- Conventional commits: `type(scope): message`
-- Valid types: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `style`, `perf`
-- Scope matches the package/app name (e.g., `portal`, `ops-gateway`, `repo/supabase`)
-- Breaking changes: `feat!:` or `fix!:` with `BREAKING CHANGE:` in body
+On-demand skills (invoke with `/<name>`): `dev`, `quality`, `verify` (portal-scoped quality), `specs`, `rls-audit`, `deploy`.
 
----
-
-## Next.js 16 Caching & Data Fetching
-When applying the native `"use cache"` directive to Server Components or data-fetching functions:
-- **Do not read `cookies()` or `headers()` inside a `"use cache"` scope.** This includes indirect calls via `createServerSupabaseClient` or `assertAccessControlRole()`.
-- **Decouple Auth from Caching**: To cache global/department data securely, split your function. Use an outer, un-cached function to verify authorization (`assertAccessControlRole`), then call an inner `_getCached...` function containing `"use cache"` and `cacheTag`.
-- **Use `createAdminClient()` in Cache**: The inner cached function should fetch data using `createAdminClient()` to avoid requiring user cookies, as the outer function has already validated access.
-
----
-*For canonical rulebook, see AGENTS.md in project root.*
-
-### Common Gotchas & Debugging (from Next.js conventions)
-
-- **Snapshot tests and env flags**: Tests with inline snapshots can produce different output depending on env flags. When updating snapshots, run with the exact flags CI uses.
-- **`app-page.ts` is a build template**: Any `require()` in template files is traced by the bundler at build time. You cannot require internal modules with relative paths — export helpers from `entry-base.ts` instead.
-- **Stale `.next` cache**: If the portal produces unexpected errors after switching branches, delete `apps/portal/.next/` and retry.
-- **`"use cache"` rule**: Never read `cookies()` or `headers()` inside a `"use cache"` scope. Decouple auth from caching — verify auth in an outer function, then call an inner cached function using `createAdminClient()`. See [Next.js 16 Caching](#nextjs-16-caching--data-fetching) for details.
-- **Client-imported Server Actions**: Avoid importing Server Actions from files that contain heavy server-only imports (e.g. `@react-pdf/renderer`, Inngest) into Client Components. This triggers Turbopack client-side bundling errors ("module factory not available"). Isolate these actions into dedicated lightweight files (e.g., `logout-action.ts`).
-- **Source maps**: `findSourceMap()` needs `--enable-source-maps` flag. Source map paths vary between bundlers — try multiple formats.
-- **Console output in tests**: `console.log` output may be captured by Jest. Use `--verbose` or `--debug` flags to see full output when debugging tests.
+Portal-specific rules and Next.js 16 breaking-change notes live at `apps/portal/AGENTS.md`.

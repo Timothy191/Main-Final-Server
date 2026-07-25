@@ -3,8 +3,9 @@ name: agents-memory-updater
 description: >-
   Update AGENTS.md and the shared knowledge base (.agents/knowledge/) with high-signal
   recurring user corrections and durable workspace facts from processed transcripts.
-  Anti-trigger: do not use for real-time decisions; do not store secrets or one-off
-  details; do not replace ai-docs-sync.
+  Now also owns AI-surface + docs drift (formerly ai-docs-sync). Anti-trigger: do not
+  use for real-time decisions; do not store secrets or one-off details; do not
+  rewrite policy on speculation without evidence.
 ---
 
 # Agents Memory Updater

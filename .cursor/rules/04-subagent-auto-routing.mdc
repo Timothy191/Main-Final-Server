@@ -11,82 +11,55 @@ Project subagents live in `.cursor/agents/`. When a user task matches a row belo
 
 | User task signals | Auto-use agent | Timing | Anti-triggers (do not use for) |
 |---|---|---|---|
-| Non-trivial multi-step work, map critical aspects/gaps/handoffs, pre-flight outline, "outline first", scout scope before specialists | `fast-outliner` | **Before** other agents | Implementation, visual design, docs sync, idle fill, adversarial review |
-| Landing/branded/marketing UI, hero, first viewport, visual composition, "looks AI", brand hierarchy | `frontend-design` | **Before** implementing UI | App Router plumbing, CRUD without branded need, docs sync, outlining, sceptic review |
-| Portal pages/components/forms, App Router, Server Actions UI, Tailwind in `apps/portal`, a11y wiring | `frontend-implementer` | **When** building/changing portal UI | End-to-end vertical slice (nextjs-fullstack), branded first-viewport, docs sync, outlining, idle, sceptic |
-| End-to-end portal feature, Next.js fullstack slice, RSC+Server Actions+data+UI together, "fullstack", vertical slice | `nextjs-fullstack` | **When** feature spans UI + server data/actions | UI-only paint, branded hero only, pure API architecture, AI docs, sceptic |
-| Skills, rules, agents, hooks, AGENTS drift, CLAUDE.md, wiki, docs sync | `ai-docs-sync` | **When** auditing/changing AI/docs surfaces | Product UI, visual design, formal alignment score, adversarial code review |
-| Review, reality-check, "is this done", verify fix, PR/diff critique, production readiness, sceptic/skeptic | `sceptic` | **After** non-trivial changes, **before** claiming done | Formal score emission, UI implementation, docs sync, outlining |
-| Independent side work while blocked/waiting, parallel idle tasks, fill wait time | `idle-runner` | **While** other agents wait/blocked | Critical path files, main feature implementation, marking done, quality/score |
+| Landing/branded/marketing UI, hero, first viewport, visual composition, "looks AI", brand hierarchy | `frontend-design` | **Before** implementing UI | App Router plumbing, CRUD without branded need, docs sync, sceptic review |
+| Portal pages/components/forms, App Router, Server Actions UI, Tailwind in `apps/portal`, a11y wiring | `frontend-implementer` | **When** building/changing portal UI | End-to-end vertical slice (nextjs-fullstack), branded first-viewport, docs sync, sceptic |
+| End-to-end portal feature, Next.js fullstack slice, RSC+Server Actions+data+UI together, "fullstack", vertical slice | `nextjs-fullstack` | **When** feature spans UI + server data/actions | UI-only paint, branded hero only, pure API architecture, docs, sceptic |
+| Skills, rules, agents, hooks, AGENTS drift, wiki, docs sync, transcript-derived durable patterns | `agents-memory-updater` | **When** auditing/changing AI/docs surfaces | Product UI, visual design, formal alignment score, adversarial code review |
+| Review, reality-check, "is this done", verify fix, PR/diff critique, production readiness, sceptic/skeptic | `sceptic` | **After** non-trivial changes, **before** claiming done | Formal score emission, UI implementation, docs sync |
 | Vercel, eve, v0 logos, Geist Brands, partner marks in taskbar/login chrome | `vercel-brand-sync` | **When** auditing/updating Vercel-family brand assets | General UI impl, docs sync, sceptic |
-| OpenSpec change proposal / validate / status / instructions / archive under `openspec/` | `openspec` | **When** multi-file change lifecycle or user names OpenSpec | Portal paint, branded hero, pure lint |
-| Bounded surgical edit on known files, one-shot pair fix via Aider | `aider` | **When** file set is known and edit is bounded | Open research, MCP recipes, large refactor, design |
-| Goose recipes / MCP multi-tool automation / `goose run` | `goose` | **When** recipe or research→act automation | Tiny single-file edit, OpenSpec-only validate |
-| Large refactor / deep multi-file coding via omp | `omp` | **When** aider too narrow for the coding scope | Spec-only, brand, docs drift |
-| Security audits, vulnerability reviews, threat modeling, RLS checks, auth flow security, CSP/CORS audit, dependency scanning | `security` | **When** security-critical work or user names security/vuln/pen test | General UI, docs sync, outlining, performance |
+| Security audits, vulnerability reviews, threat modeling, RLS checks, auth flow security, CSP/CORS audit, dependency scanning | `.qoder/agents/secure-builder.md` (Qoder counterpart — no `.cursor` agent) | **When** security-critical work or user names security/vuln/pen test | General UI, docs sync, performance |
 | Test strategy, flake diagnosis, E2E test writing, test infrastructure, CI test config, "tests are flaky" | `test-engineer` | **When** test quality issues or E2E needs | Product UI, docs sync, visual design, security |
 | Slow query diagnosis, index optimization, schema review, migration performance, N+1 detection, EXPLAIN ANALYZE | `db-optimizer` | **When** database performance or schema design | General UI, docs sync, visual design, security |
 | API design, service decomposition, error handling architecture, caching strategy, background job design | `backend-architect` | **When** architecture decisions or backend refactoring | UI components, visual design, docs sync, branding |
-| Background system-healing daemon, running analyze-implement feedback loops, orchestrating self-healing | `agency-lead` | **Start/Background** | Direct single-file edits, frontend UI design |
-| Scans typescript/build compilation logs, finds syntax/tooling/provider errors | `gap-analyst` | **Round 1 (Analyze)** | Writing patches, updating spec files |
-| Audits compliance of file edits with OpenSpec and AGENTS.md constraints | `spec-auditor` | **Round 1 (Analyze)** | Writing code, running external API requests |
-| Probes provider status, checks key cooldown states, recommends priority lists | `routing-optimizer` | **Round 1 (Analyze)** | Modifying workspace files, coding |
-| Executes automatic structural patches, updates cooldowns, resolves compiler warnings | `patch-builder` | **Round 2 (Implement)** | Large architectural changes, analysis design |
 | Root cause hypothesis provided, deploy fix after diagnosis, heal from stated cause, close incident loop, fix + harden AI surfaces | `root-cause-healer` | **When hypothesis exists** | Pure analysis without hypothesis, UI-only, formal score |
 | Audit imports/paths, broken module resolution, after file moves/renames/refactors, tsconfig path map review | `import-auditor` | **After** import/path changes | Security review, UI, performance-only |
-| **System optimization, bloat detection, compliance enforcement, skill rot pruning, token cache optimization, unbloating AI surfaces** | `ai-system-optimizer` | **Background/maint cycles** | Product features, frontend UI, security audits, test writing |
-| **Agent memory updates from transcripts, high-signal pattern extraction, AGENTS.md integration** | `agents-memory-updater` | **When** processing transcripts for memory | Real-time decisions, secrets storage, one-off details, ai-docs-sync |
-| Repeatable procedure after 3+ successes, 5+ tool-call task, error recovery, user correction, or Alignment FAIL with pattern | `skill-self-improve` **skill** | **After** done or FAIL (parent runs skill) | Inventing AGENTS policy; duplicate skills; replacing sceptic/score |
-| **Every user prompt** — background layout/sync/dedupe; parent awaits on AI-surface work | `ai-maintenance-checker` | **Start** of prompt (background) | Product features, AGENTS policy edits, ai-docs-sync rewrites, sceptic |
+| Clone external OSS repo to `/tmp`, extract patterns into `@repo/*`, run their tests to learn intent | `reverse-engineer` | **When** studying external code to import ideas | Green-field implementation, UI paint, docs sync |
 
 ## Rules
 
 1. **Match → delegate.** Prefer the specialist; parent synthesizes results.
-2. **Multiple matches → parallel.** e.g. user prompt → `ai-maintenance-checker` (background) + task specialists; large task = `fast-outliner` first; after code = `sceptic`; while blocked = `idle-runner`.
-3. **Always launch `ai-maintenance-checker`** at prompt start (background). Await before final reply when AI surfaces were touched. See `.cursor/rules/06-ai-maintenance-background.mdc`.
-4. **Always run `sceptic`** before saying done on multi-file or production-facing work (unless user explicitly skips review).
-5. **Always run `ai-system-optimizer`** during maintenance or when user says "optimize AI", "unbloat", "prune skills", "compliance check".
-6. **Formal Alignment Score** → `agent-alignment-score` skill after sceptic (or when scoring requested). Include extended fields (Code quality, Pro bar, Tokens saved, 3 actions, Adaptive next).
-7. **Unified AI check** → `pnpm ai` (not scattered validate scripts).
-8. **Adaptive distill** → when Adaptive next or Hermes criteria match → `skill-self-improve` skill (see `.cursor/rules/07-adaptive-skill-loop.mdc`).
-9. **Descriptions win.** Each agent's `description` frontmatter is the trigger source of truth.
-10. **Do not invent agents.** Only route to files under `.cursor/agents/` (skills are separate).
-11. **User override.** If the user names an agent, use that agent even if another also matches.
-12. **Swarm edge / Critique→Refine** (on demand): `.cursor/agents/_shared/references/swarm-edge-critique-refine.md` — score handoffs, prune dead routes; Generate→Critique(`sceptic`)→Refine→Score(`agent-alignment-score`).
+2. **Multiple matches → parallel.** e.g. large task = plan-then-delegate; after code = `sceptic`; import/path changes after any refactor = `import-auditor`.
+3. **Always run `sceptic`** before saying done on multi-file or production-facing work (unless user explicitly skips review).
+4. **Formal Alignment Score** → `agent-alignment-score` skill after sceptic (or when scoring requested). Include extended fields (Code quality, Pro bar, Tokens saved, 3 actions, Adaptive next).
+5. **Unified AI check** → `pnpm ai:check` (not scattered validate scripts).
+6. **Adaptive distill** → when Adaptive next or Hermes criteria match → `skill-self-improve` skill (see `.cursor/rules/07-adaptive-skill-loop.mdc`).
+7. **Descriptions win.** Each agent's `description` frontmatter is the trigger source of truth.
+8. **Do not invent agents.** Only route to files under `.cursor/agents/` (skills are separate).
+9. **User override.** If the user names an agent, use that agent even if another also matches.
+10. **Cross-tool counterparts.** For security work, prefer `.qoder/agents/secure-builder.md`; for spec lifecycle, prefer `.qoder/skills/specs/`; for quality/verify, `.qoder/skills/quality/` or `.qoder/skills/verify/`.
+11. **Swarm edge / Critique→Refine** (on demand): `.cursor/agents/_shared/references/swarm-edge-critique-refine.md` — score handoffs, prune dead routes; Generate→Critique(`sceptic`)→Refine→Score(`agent-alignment-score`).
 
 ## Inventory (keep in sync)
 
 | Agent | Entry | Collateral | Anti-triggers (summary) |
 |---|---|---|---|
-| fast-outliner | `fast-outliner.md` | `fast-outliner/` | No implementation, design, docs, idle, sceptic |
-| frontend-design | `frontend-design.md` | `frontend-design/` | No plumbing, CRUD-only, docs, outline, sceptic |
-| frontend-implementer | `frontend-implementer.md` | `frontend-implementer/` | No fullstack slice, branded hero, docs, outline, idle, sceptic |
-| nextjs-fullstack | `nextjs-fullstack.md` | `nextjs-fullstack/` | No UI-only, brand hero, pure API arch, docs, sceptic |
-| ai-docs-sync | `ai-docs-sync.md` | `ai-docs-sync/` | No UI, design, formal score, sceptic |
-| sceptic | `sceptic.md` | `sceptic/` | No formal score, UI, docs, outline |
-| idle-runner | `idle-runner.md` | `idle-runner/` | No critical path, main feature, done-claims |
-| ai-maintenance-checker | `ai-maintenance-checker.md` | `ai-maintenance-checker/` | No product features, policy edits, docs rewrites |
-| vercel-brand-sync | `vercel-brand-sync.md` | `vercel-brand-sync/` | No general UI, docs sync, sceptic |
-| openspec | `openspec.md` | `openspec/` | No portal paint, brand hero, pure lint |
-| aider | `aider.md` | `aider/` | No research/MCP, large refactor, design |
-| goose | `goose.md` | `goose/` | No tiny single-file, OpenSpec-only, brand |
-| omp | `omp.md` | `omp/` | No spec-only, brand, docs drift |
-| security | `security.md` | `security/` | No general UI, docs, outline, perf |
-| test-engineer | `test-engineer.md` | `test-engineer/` | No product UI, docs, design, security |
-| db-optimizer | `db-optimizer.md` | `db-optimizer/` | No general UI, docs, design, security |
-| backend-architect | `backend-architect.md` | `backend-architect/` | No UI components, visual, docs, branding |
-| agency-lead | `agency-lead.md` | `agency-lead/` | No direct file editing or frontend styling |
-| gap-analyst | `gap-analyst.md` | `gap-analyst/` | No coding or writing patches/specs |
-| spec-auditor | `spec-auditor.md` | `spec-auditor/` | No coding or running external providers |
-| routing-optimizer | `routing-optimizer.md` | `routing-optimizer/` | No coding or modifying workspace |
-| patch-builder | `patch-builder.md` | `patch-builder/` | No analysis or architecture design |
-| root-cause-healer | `root-cause-healer.md` | `root-cause-healer/` | No hypothesis, UI-only, formal score |
+| agents-memory-updater | `agents-memory-updater.md` | `agents-memory-updater/` | Real-time decisions, secrets, one-off details, speculative policy edits |
+| backend-architect | `backend-architect.md` | `backend-architect/` | UI components, visual, docs, branding |
+| db-optimizer | `db-optimizer.md` | `db-optimizer/` | General UI, docs, design, security |
+| frontend-design | `frontend-design.md` | `frontend-design/` | Plumbing, CRUD-only, docs, sceptic |
+| frontend-implementer | `frontend-implementer.md` | `frontend-implementer/` | Fullstack slice, branded hero, docs, sceptic |
 | import-auditor | `import-auditor.md` | `import-auditor/` | Security, UI, implementing fixes |
-| ai-system-optimizer | `ai-system-optimizer.md` | (collateral optional) | No product features, UI, security, tests |
-| agents-memory-updater | `agents-memory-updater.md` | `agents-memory-updater/` | Real-time decisions, secrets storage, one-off details, ai-docs-sync |
+| nextjs-fullstack | `nextjs-fullstack.md` | `nextjs-fullstack/` | UI-only, brand hero, pure API arch, docs, sceptic |
+| reverse-engineer | `reverse-engineer.md` | `reverse-engineer/` | Green-field implementation, UI paint, docs |
+| root-cause-healer | `root-cause-healer.md` | `root-cause-healer/` | No hypothesis, UI-only, formal score |
+| sceptic | `sceptic.md` | `sceptic/` | Formal score, UI, docs |
+| test-engineer | `test-engineer.md` | `test-engineer/` | Product UI, docs, design, security |
+| vercel-brand-sync | `vercel-brand-sync.md` | `vercel-brand-sync/` | General UI, docs sync, sceptic |
 
-Layout standard: `.cursor/standards/agent-layout/STANDARD.md`  
-AI system command: `pnpm ai` · `.cursor/standards/ai-system/STANDARD.md`  
+> **Pruned 2026-07-25.** The following agents were removed from this router; do not delegate to them: `fast-outliner`, `ai-docs-sync`, `idle-runner`, `openspec`, `aider`, `goose`, `omp`, `security`, `agency-lead`, `gap-analyst`, `spec-auditor`, `routing-optimizer`, `patch-builder`, `ai-system-optimizer`, `ai-maintenance-checker`, `reflection`, `memory-manager`, `insight-monitor`, `sub-agent-coordinator`, `professional-advisor`, `research-specialist`, `auto-formatter`, `ai-company-orchestrator`, `loop-engineer`, `dev-tools-specialist`, `adk-specialist`, `gaai-specialist`, `zeroclaw`, `devin`, `open-swe`, `opencode`.
+
+Layout standard: `.cursor/standards/agent-layout/STANDARD.md`
+AI system command: `pnpm ai` · `.cursor/standards/ai-system/STANDARD.md`
 Shared refs: `.cursor/agents/_shared/references/` · families (orchestrators, not flattened agents): `_shared/references/agent-families.md`
 
 When adding a new project agent, update this table in the same change.

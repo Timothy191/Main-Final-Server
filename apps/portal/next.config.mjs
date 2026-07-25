@@ -23,7 +23,7 @@ const nextConfig = {
   // Implements the Next.js 16 CacheHandler interface using @repo/redis L2 layer.
   // Gracefully degrades to no-op if REDIS_URL is not configured.
   cacheHandlers: {
-    default: new URL("./src/lib/next-cache-handler.ts", import.meta.url).pathname,
+    default: fileURLToPath(new URL("./src/lib/next-cache-handler.ts", import.meta.url)),
   },
   turbopack: {
     // AGENT-TRACE: Root must include workspaceRoot to allow dependencies from packages/ to be compiled

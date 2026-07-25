@@ -28,13 +28,14 @@ export async function GET(_req: NextRequest) {
 
     try {
       const dummyVec = generateLocalFallbackEmbedding('system warmup ping 1536d vector')
-      const { error: vecError } = await supabase.rpc('match_memories', {
-        query_embedding: dummyVec,
-        match_threshold: 0.0,
+      const { error: vecError } = await supabase.rpc('search_memories_semantic', {
+        p_user_id: '00000000-0000-0000-0000-000000000000',
+        query_embedding: dummyVec as unknown as string,
+        similarity_threshold: 0.0,
         match_count: 1,
       })
 
-      if (vecError && !vecError.message.includes('function match_memories does not exist')) {
+      if (vecError && !vecError.message.includes('search_memories_semantic')) {
         components.pgvector_hnsw = `warn: ${vecError.message}`
       } else {
         components.pgvector_hnsw = 'ok'

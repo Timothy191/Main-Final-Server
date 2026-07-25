@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { DEPARTMENTS, getDepartmentTabs } from './departments'
-import { isValidRedirect } from '../../proxy'
+import { isValidRedirect } from '../proxy'
 
 const APP_DIR = path.join(__dirname, '..', 'app')
 
