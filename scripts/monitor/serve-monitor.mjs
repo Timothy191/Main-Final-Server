@@ -219,30 +219,27 @@ const server = http.createServer((req, res) => {
   res.end('Not found')
 })
 
-server.listen(PORT, '127.0.0.1', () => {
+const HOST = process.env.HOST || '0.0.0.0'
+server.listen(PORT, HOST, () => {
   console.log(
-    `\x1b[36m[Monitor]\x1b[0m 3D Architecture Monitor running at http://127.0.0.1:${PORT}/`
+    `\x1b[36m[Monitor]\x1b[0m 3D Architecture Monitor running at http://${HOST}:${PORT}/`
   )
 
-  const startURL = `http://127.0.0.1:${PORT}`
-  let command
-  switch (process.platform) {
-    case 'darwin':
-      command = `open ${startURL}`
-      break
-    case 'win32':
-      command = `start ${startURL}`
-      break
-    default:
-      command = `xdg-open ${startURL}`
-      break
-  }
-
-  exec(command, (err) => {
-    if (err) {
-      console.log(
-        `\x1b[33m[Monitor]\x1b[0m Could not open browser automatically. Please open ${startURL} manually.`
-      )
+  if (process.env.OPEN_BROWSER !== 'false') {
+    const startURL = `http://127.0.0.1:${PORT}`
+    let command
+    switch (process.platform) {
+      case 'darwin':
+        command = `open ${startURL}`
+        break
+      case 'win32':
+        command = `start ${startURL}`
+        break
+      default:
+        command = `xdg-open ${startURL}`
+        break
     }
-  })
+
+    exec(command, () => {})
+  }
 })
