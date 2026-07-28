@@ -1,0 +1,13 @@
+---
+description: Mandatory durable knowledge logging and Knowledge Base synchronization.
+alwaysApply: true
+---
+
+# Durable Knowledge Logging
+
+For every non-trivial task:
+
+1. **Log Findings:** All non-trivial findings, architectural decisions, or reusable patterns discovered MUST be logged to a new or existing file in `.agents/knowledge/`.
+2. **Update Index:** After logging, you MUST update `.agents/knowledge/index.md` to include a reference to the new/updated file.
+3. **Verify:** Confirm the entry is present and indexed in `index.md` before yielding.
+4. **Final Output Requirement:** Include a `Context Saved` section in your final output, summarizing what was saved to the Knowledge Base.

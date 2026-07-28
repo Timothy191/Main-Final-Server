@@ -48,6 +48,7 @@ Detailed path for NestJS to Next.js migration and modular conversions.
 Optimizations and client/server efficiency research.
 - [Client-Side Computing Improvements](file:///home/arch/Desktop/New%20Folder/arch-systems-portal/docs/performance/client-side-computing-improvements.md) — Optimization plan for client-side computing resource allocation.
 - [CSS Selector Costs](file:///home/arch/Desktop/New%20Folder/arch-systems-portal/docs/performance/css-selector-costs.md) — Analysis of CSS selector rendering overhead.
+- [DevTools Performance Insights Index](file:///home/arch/Desktop/New%20Folder/arch-systems-portal/docs/performance/insights/README.md) — Reference guides and optimization strategies for DevTools Performance Panel insights.
 
 ### ✨ [Superpowers](file:///home/arch/Desktop/New%20Folder/arch-systems-portal/docs/superpowers/)
 Experimental capabilities and visual system plan logs.

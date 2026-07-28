@@ -18,16 +18,38 @@ const enableHeavyPlugins = isCI || process.env.ENABLE_HEAVY_PLUGINS === "true";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: ["192.168.0.151", "localhost", "127.0.0.1"],
   cacheComponents: true,
-  // AGENT-TRACE: Redis-backed distributed cache handler for multi-pod deployments.
-  // ENABLED: Using @repo/redis cache handler for L2 Redis + tag invalidation.
+  // Custom cacheLife profiles used across department pages and hub
+  cacheLife: {
+    "1 minute": {
+      stale: 0,
+      revalidate: 60,
+      expire: 60,
+    },
+    "5 minutes": {
+      stale: 30,
+      revalidate: 300,
+      expire: 300,
+    },
+    "24 hours": {
+      stale: 300,
+      revalidate: 86400,
+      expire: 86400,
+    },
+  },
+  // Custom cache handler backed by Redis for distributed L2 caching (Next.js 16)
   experimental: {
     cacheHandlers: {
-      default: require.resolve('./src/lib/next-cache-handler.ts')
-    }
+      default: require.resolve('./src/lib/next-cache-handler.ts'),
+    },
+    optimizePackageImports: ["lucide-react", "framer-motion", "@tremor/react"],
+    inlineCss: true,
+    webVitalsAttribution: ["CLS", "LCP", "FCP", "TTFB", "INP"],
+    viewTransition: true,
   },
   turbopack: {
-    // AGENT-TRACE: Root must include workspaceRoot to allow dependencies from packages/ to be compiled
+    // AGENT-TRACE: Root must include workspaceRoot so packages/ deps compile
     root: workspaceRoot,
   },
   output: enableHeavyPlugins ? "standalone" : undefined,
@@ -35,9 +57,7 @@ const nextConfig = {
     PORTAL_VERSION,
   },
   typescript: {
-    // !! DANGER !!
-    // Only allow skipping type checks in local development!
-    // Never skip type checking in CI.
+    // Only allow skipping type checks in local development — never in CI.
     ignoreBuildErrors: process.env.SKIP_TYPE_CHECK === "true" && process.env.CI !== "true",
   },
   transpilePackages: [
@@ -49,6 +69,7 @@ const nextConfig = {
     "@repo/rate-limiter",
     "@repo/logger",
     "@repo/contract",
+    "@repo/database",
   ],
   images: {
     formats: ["image/avif", "image/webp"],
@@ -71,19 +92,13 @@ const nextConfig = {
     if (!isServer) {
       config.performance = {
         hints: "warning",
-        maxAssetSize: 512000, // 500 KB
-        maxEntrypointSize: 1024000, // 1 MB
+        maxAssetSize: 512000,
+        maxEntrypointSize: 1024000,
         assetFilter: (assetFilename) =>
           assetFilename.endsWith(".js") || assetFilename.endsWith(".css"),
       };
     }
     return config;
-  },
-  experimental: {
-    optimizePackageImports: ["lucide-react", "framer-motion", "@tremor/react"],
-    inlineCss: true,
-    webVitalsAttribution: ["CLS", "LCP", "FCP", "TTFB", "INP"],
-    viewTransition: true,
   },
   async headers() {
     return [
@@ -152,6 +167,10 @@ const nextConfig = {
                 {
                   key: "Cache-Control",
                   value: "public, max-age=0, must-revalidate",
+                },
+                {
+                  key: "Service-Worker-Allowed",
+                  value: "/",
                 },
               ],
             },

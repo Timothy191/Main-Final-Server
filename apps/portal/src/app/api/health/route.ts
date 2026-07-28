@@ -53,7 +53,7 @@ export async function GET() {
 
   // 2. Check Redis Cache connectivity (ioredis — status === "ready")
   try {
-    const redis = getRedisClient()
+    const redis = await getRedisClient()
     let redisConnected = redis.status === 'ready'
     if (!redisConnected) {
       try {

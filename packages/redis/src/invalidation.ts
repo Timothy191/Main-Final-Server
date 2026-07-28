@@ -1,4 +1,4 @@
-import { getRedisClient } from "@repo/redis/client";
+import { getRedisClient } from "./client.ts";
 
 const TAG_PREFIX = "arch:__tags__";
 

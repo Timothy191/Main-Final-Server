@@ -52,6 +52,11 @@
     "supabase:stop": "pnpm dlx supabase@^2.26.0 stop --workdir packages",
     "test": "turbo run test",
     "type-check": "turbo run type-check",
+    "production-test": "bash scripts/production-test-suite.sh",
+    "production-test:url": "bash scripts/production-test-suite.sh --url",
+    "production-test:strict": "bash scripts/production-test-suite.sh --strict",
+    "production-test:json": "bash scripts/production-test-suite.sh --json",
+    "production-test:ci": "bash scripts/production-test-suite.sh --strict --json",
     "wiki:lint": "markdownlint '.agents/knowledge/**/*.md'"
   },
   "devDependencies": {

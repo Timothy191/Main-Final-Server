@@ -2,7 +2,6 @@
 
 import { cacheTag, cacheLife } from 'next/cache'
 import { getObservabilityMetrics } from '@/lib/observability/metrics'
-import { DatabaseError } from '@/lib/errors/error-classes'
 import { assertSatelliteRole } from './actions'
 import type { Alert } from '@/features/monitoring/types'
 import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
@@ -36,10 +35,7 @@ export interface AlertMetrics {
 async function _getCachedSystemHealth(deptId: string): Promise<SystemHealthMetrics> {
   'use cache'
   cacheLife('1 minute')
-  cacheTag(
-    DEPARTMENT_CACHE_TAGS.SATELLITE_MONITORING,
-    `dept:satellite-monitoring:${deptId}:health`
-  )
+  cacheTag(DEPARTMENT_CACHE_TAGS.SATELLITE_MONITORING, `dept:satellite-monitoring:${deptId}:health`)
 
   const { createAdminClient } = await import('@repo/supabase/server')
   const supabase = createAdminClient()
@@ -111,10 +107,10 @@ async function _getCachedAlertMetrics(deptId: string): Promise<AlertMetrics> {
     .limit(20)
 
   if (alertsError) {
-    throw new DatabaseError('Failed to load alerts', {
-      operation: 'select',
-      context: { error: alertsError.message },
-    })
+    console.warn(
+      `shift_completeness_alerts query failed (${alertsError.code ?? 'unknown'}), returning empty alerts:`,
+      alertsError.message
+    )
   }
 
   const alerts = (dbAlerts ?? []).map(

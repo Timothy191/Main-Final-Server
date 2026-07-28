@@ -36,6 +36,7 @@ export function StatusFilter({ current }: StatusFilterProps) {
     <select
       value={current}
       onChange={(e) => handleChange(e.target.value)}
+      aria-label="Filter by print status"
       className={cn(
         'h-9 rounded-lg border border-arch-border-default',
         'bg-white/70 backdrop-blur-xl',

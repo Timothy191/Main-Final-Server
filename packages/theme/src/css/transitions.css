@@ -25,14 +25,7 @@
     --theme-transition-duration: 0ms !important;
   }
 
-  .animate-float-slow,
-  .animate-float-delayed,
-  .animate-grid-drift,
-  .animate-pulse-slow,
-  .animate-perpetual-pulse,
-  .animate-perpetual-float,
-  .animate-shimmer,
-  .animate-gradient-flow {
+  .animate-shimmer {
     animation: none !important;
   }
 }

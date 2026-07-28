@@ -357,11 +357,11 @@
   --os-shell-surface:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.88) 0%,
-      rgba(255, 255, 255, 0.78) 45%,
-      rgba(246, 246, 250, 0.84) 100%
+      rgba(255, 255, 255, 0.40) 0%,
+      rgba(255, 255, 255, 0.20) 45%,
+      rgba(246, 246, 250, 0.30) 100%
     ),
-    rgba(255, 255, 255, 0.85);
+    rgba(255, 255, 255, 0.25);
   --os-shell-border: 1px solid var(--palette-border-glass);
   --os-shell-shadow:
     var(--palette-glass-shadow-ambient), var(--palette-glass-shadow-contact),
@@ -369,21 +369,20 @@
     inset 0 -1px 0 var(--palette-glass-contact-bottom),
     inset 1px 0 0 var(--palette-glass-specular-side),
     inset -1px 0 0 var(--palette-glass-specular-side);
-  --os-shell-backdrop: var(--palette-glass-backdrop);
+  --os-shell-backdrop: blur(20px) saturate(180%);
   --os-shell-radius-lg: 24px;
   --os-shell-radius-full: 9999px;
   --os-shell-font: var(--font-sans);
-  /* Taskbar chrome: denser fill + lighter blur/shadow so video backdrop
-     does not wash contrast (login/dock keep full liquid glass). */
+  /* Taskbar chrome: ultra translucent liquid glass fill + enhanced blur */
   --os-shell-taskbar-surface:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.88) 0%,
-      rgba(255, 255, 255, 0.78) 45%,
-      rgba(246, 246, 250, 0.84) 100%
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(255, 255, 255, 0.25) 45%,
+      rgba(246, 246, 250, 0.35) 100%
     ),
-    rgba(246, 246, 250, 0.92);
-  --os-shell-taskbar-backdrop: blur(12px) saturate(135%);
+    rgba(246, 246, 250, 0.30);
+  --os-shell-taskbar-backdrop: blur(20px) saturate(180%);
   --os-shell-taskbar-shadow:
     0 4px 14px rgba(4, 12, 24, 0.14), 0 1px 3px rgba(4, 12, 24, 0.1),
     inset 0 1px 0 var(--palette-glass-specular-top),

@@ -9,6 +9,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 <!-- END:nextjs-agent-rules -->
 
 > **Canonical policy:** the monorepo root `AGENTS.md` is the source of truth. **Shared knowledge base:** `.agents/knowledge/` (repowiki) — read `index.md` before non-trivial work; write durable learnings per `.agents/knowledge/README.md`.
+- **Shared Knowledge Base:** `.agents/knowledge/` (repowiki) — read `index.md` before non-trivial work; write durable learnings per `.agents/knowledge/README.md`.
 
 ## Portal Agent Rules
 

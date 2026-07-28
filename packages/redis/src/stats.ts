@@ -6,7 +6,7 @@
  * (for cross-pod aggregation under `stats:cache` and `stats:latencies`).
  */
 
-import { getRedisClient, getClientIfOpen } from "@repo/redis/client";
+import { getRedisClient, getClientIfOpen } from "./client.ts";
 
 /** Point-in-time snapshot of cache performance counters. */
 interface CacheStatsSnapshot {
@@ -64,67 +64,65 @@ function buildSnapshot(): CacheStatsSnapshot {
 
 /** Record a cache hit from the specified layer with its latency. */
 export function recordCacheHit(source: "l1" | "l2", latencyMs: number): void {
-  // 1. Local update
   stats.hits++;
   if (source === "l1") stats.l1Hits++;
   else stats.l2Hits++;
   addLatency(latencyMs);
 
-  // 2. Redis sync (fire-and-forget, only if already connected)
   const redis = getClientIfOpen();
-  if (redis) {
+  if (redis && typeof redis.hincrby === "function") {
     redis.hincrby("stats:cache", "hits", 1).catch(() => {});
     redis.hincrby("stats:cache", source === "l1" ? "l1Hits" : "l2Hits", 1).catch(() => {});
-    redis
-      .lpush("stats:latencies", latencyMs.toString())
-      .then(() => {
-        redis.ltrim("stats:latencies", 0, 999).catch(() => {});
-      })
-      .catch(() => {});
+    if (typeof redis.lpush === "function") {
+      redis
+        .lpush("stats:latencies", latencyMs.toString())
+        .then(() => {
+          if (typeof redis.ltrim === "function") {
+            redis.ltrim("stats:latencies", 0, 999).catch(() => {});
+          }
+        })
+        .catch(() => {});
+    }
   }
 }
 
 /** Record a cache miss with its latency. */
 export function recordCacheMiss(latencyMs: number): void {
-  // 1. Local update
   stats.misses++;
   addLatency(latencyMs);
 
-  // 2. Redis sync (fire-and-forget, only if already connected)
   const redis = getClientIfOpen();
-  if (redis) {
+  if (redis && typeof redis.hincrby === "function") {
     redis.hincrby("stats:cache", "misses", 1).catch(() => {});
-    redis
-      .lpush("stats:latencies", latencyMs.toString())
-      .then(() => {
-        redis.ltrim("stats:latencies", 0, 999).catch(() => {});
-      })
-      .catch(() => {});
+    if (typeof redis.lpush === "function") {
+      redis
+        .lpush("stats:latencies", latencyMs.toString())
+        .then(() => {
+          if (typeof redis.ltrim === "function") {
+            redis.ltrim("stats:latencies", 0, 999).catch(() => {});
+          }
+        })
+        .catch(() => {});
+    }
   }
 }
 
-/** Increment the Redis error counter (local + remote). */
+/** Increment the Redis error counter. */
 export function recordRedisError(): void {
-  // 1. Local update
   stats.redisErrors++;
-
-  // 2. Redis sync (fire-and-forget, only if already connected)
   const redis = getClientIfOpen();
-  if (redis) {
+  if (redis && typeof redis.hincrby === "function") {
     redis.hincrby("stats:cache", "redisErrors", 1).catch(() => {});
   }
 }
 
-/**
- * Retrieve the aggregated cache statistics snapshot.
- * Prefers Redis-backed data; falls back to the in-process counters on failure.
- */
+/** Retrieve cache statistics snapshot. */
 export async function getCacheStats(): Promise<CacheStatsSnapshot> {
   try {
     const redis = await getRedisClient();
-    if (redis?.status === "ready") {
+    if (redis?.status === "ready" && typeof redis.hgetall === "function") {
       const data = await redis.hgetall("stats:cache");
-      const latencyStrs = await redis.lrange("stats:latencies", 0, 999);
+      const latencyStrs = typeof redis.lrange === "function" ? await redis.lrange("stats:latencies", 0, 999) : [];
       const sorted = latencyStrs
         .map(Number)
         .filter((v: number) => !isNaN(v))
@@ -146,12 +144,12 @@ export async function getCacheStats(): Promise<CacheStatsSnapshot> {
       };
     }
   } catch {
-    // ignore and fallback to local buildSnapshot
+    // fallback
   }
   return buildSnapshot();
 }
 
-/** Reset all local and Redis-backed cache statistics. */
+/** Reset stats. */
 export function resetCacheStats(): void {
   stats.hits = 0;
   stats.misses = 0;
@@ -162,7 +160,7 @@ export function resetCacheStats(): void {
 
   getRedisClient()
     .then((redis) => {
-      if (redis?.status === "ready") {
+      if (redis?.status === "ready" && typeof redis.del === "function") {
         redis.del("stats:cache").catch(() => {});
         redis.del("stats:latencies").catch(() => {});
       }

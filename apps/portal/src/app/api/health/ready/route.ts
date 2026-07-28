@@ -66,7 +66,7 @@ export async function GET() {
 
   // Check Redis
   try {
-    const redis = getRedisClient()
+    const redis = await getRedisClient()
     let connected = redis.status === 'ready'
     if (!connected) {
       const pong = await redis.ping()

@@ -14,6 +14,7 @@ Hard fails: <none | list>
 Code quality: <n>/10 — <lint/types/tests/smell one-liner; not part of /100>
 Pro bar: <pct>% — <band vs shipping senior>
 Tokens saved: ~<n> (~<pct>%) — <progressive disclosure / specialist routing basis>
+Docs updated: <list of docs updated each time, or "none">
 Recommended actions:
 1. <highest-ROI gap close>
 2. <second>

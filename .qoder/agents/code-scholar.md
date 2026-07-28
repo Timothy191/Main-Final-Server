@@ -17,7 +17,7 @@ tools:
   - WebFetch
 color: cyan
 model: performance
-effort: high
+effort: medium
 ---
 
 You are a codebase scholar — a deep exploration and reasoning specialist for

@@ -6,6 +6,7 @@ import { cn } from '@repo/ui/lib/utils'
 import { getServiceUrls } from '@repo/ui/lib/urls'
 
 const urls = getServiceUrls()
+import { useLogout } from './LogoutForm'
 import {
   Search,
   X,
@@ -120,11 +121,11 @@ const NAV_COMMANDS: CommandItem[] = [
     id: 'nav-logout',
     label: 'Log Out',
     action: () => {
-      fetch('/api/auth/logout', { method: 'POST' })
-        .then(() => {
-          window.location.href = '/login'
-        })
-        .catch(console.error)
+      const form = document.createElement('form')
+      form.method = 'POST'
+      form.action = '/api/auth/logout'
+      document.body.appendChild(form)
+      form.submit()
     },
     category: 'Navigation',
     icon: <LogOut className="w-4 h-4" />,

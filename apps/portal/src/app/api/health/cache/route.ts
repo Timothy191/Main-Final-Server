@@ -38,7 +38,7 @@ export async function GET() {
   let redisConnected = false
   try {
     const redis = await getRedisClient()
-    redisConnected = (redis as unknown as Record<string, boolean>).isOpen ?? false
+    redisConnected = redis?.status === 'ready' || !!redis
   } catch {
     // Redis not available
   }

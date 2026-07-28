@@ -118,7 +118,7 @@ export default async function SchedulesPage({
             evaluations.
           </p>
         </div>
-        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-arch-accent-charcoal text-[var(--bg-secondary)] text-sm font-medium rounded-lg hover:opacity-90 transition-all shadow-card">
+        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-arch-accent-charcoal text-[var(--bg-secondary)] text-sm font-medium rounded-lg hover:opacity-90 transition-all shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/30">
           <Plus className="w-4 h-4" />
           <span>Book Session</span>
         </button>
@@ -212,7 +212,7 @@ export default async function SchedulesPage({
                     }}
                   />
                 </div>
-                <button className="h-8 px-3 text-xs bg-arch-surface-chrome border border-arch-border-default hover:bg-arch-surface-chrome-medium font-semibold text-arch-text-primary rounded-lg transition-colors">
+                <button className="h-8 px-3 text-xs bg-arch-surface-chrome border border-arch-border-default hover:bg-arch-surface-chrome-medium font-semibold text-arch-text-primary rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/30">
                   Manage Roster
                 </button>
               </div>

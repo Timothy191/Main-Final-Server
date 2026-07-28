@@ -120,7 +120,7 @@ export default async function CertificationsPage({
             Audit and manage site-wide equipment licenses, regulatory tickets, and safety training.
           </p>
         </div>
-        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-arch-accent-charcoal text-[var(--bg-secondary)] text-sm font-medium rounded-lg hover:opacity-90 transition-all shadow-card">
+        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-arch-accent-charcoal text-[var(--bg-secondary)] text-sm font-medium rounded-lg hover:opacity-90 transition-all shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/30">
           <Plus className="w-4 h-4" />
           <span>Issue Endorsement</span>
         </button>

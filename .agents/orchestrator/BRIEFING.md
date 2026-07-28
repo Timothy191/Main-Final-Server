@@ -19,7 +19,7 @@ Fulfill all user requirements for Arch Systems Portal monorepo: architecture map
 4. **Succession**: Self-succeed at spawn count >= 16 when subagents complete.
 - **Work items**:
   1. Milestone 1: Spec Creation (`.kiro/specs/arch-systems-portal-verification/spec.md`) [completed]
-  2. Milestone 2: R1 - Codebase Mapping (`Codebase-maps/`) [completed]
+  2. Milestone 2: R1 - Codebase Mapping (`docs/codebase-maps/`) [completed]
   3. Milestone 3: R2 & R3 - Build, Unit Tests (57/57), Smoke Test (27/27), `pnpm ai check` [completed]
   4. Milestone 4: Remediation of Rate Limiter algorithms & `@repo/errors` test suite [completed]
   5. Milestone 5: Final Verification Gate Panel (Reviewers, Challengers, Auditor) [completed]
@@ -41,7 +41,7 @@ Fulfill all user requirements for Arch Systems Portal monorepo: architecture map
 - Scheduled 10-minute heartbeat cron task-21 (terminated upon completion).
 - Received Worker 2 handoff report at `/home/timothy/Projects/.agents/teamwork_preview_worker_m2/handoff.md`.
 - Executed Phase 4 Verification Panel (Reviewers 1 & 2, Challengers 1 & 2, Forensic Auditor).
-- Confirmed full monorepo build success, 57/57 portal unit test suites (413/413 tests), 27/27 operational health smoke checks, `pnpm ai check` 0 errors/0 warnings, `Codebase-maps/` created, and Forensic Audit CLEAN verdict.
+- Confirmed full monorepo build success, 57/57 portal unit test suites (413/413 tests), 27/27 operational health smoke checks, `pnpm ai check` 0 errors/0 warnings, `docs/codebase-maps/` created, and Forensic Audit CLEAN verdict.
 
 ## Team Roster
 | Agent | Type | Work Item | Status | Conv ID |

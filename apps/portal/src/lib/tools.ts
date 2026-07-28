@@ -1,6 +1,4 @@
 import { cacheLife, cacheTag } from 'next/cache'
-import { createReadReplicaClient } from '@repo/supabase/read-replica'
-import { serverLogger } from '@repo/logger'
 import { PRODUCTIVITY_TOOLS } from '@/lib/departments'
 
 interface Tool {
@@ -22,48 +20,18 @@ interface ExternalTool {
 }
 
 /**
- * Fetch productivity tools from database.
- * Falls back to PRODUCTIVITY_TOOLS constant if database query fails.
+ * Productivity tools — served from the static constant.
+ * The `tools` database table does not exist; the constant is the source of truth.
  */
 export async function getTools(): Promise<Tool[]> {
   'use cache'
   cacheLife('hours')
   cacheTag('tools')
-  const db = await createReadReplicaClient()
 
-  const { data, error } = await db
-    .from('tools')
-    .select('id, name, display_name, description, icon, color')
-    .eq('active', true)
-    .order('sort_order', { ascending: true })
-
-  if (error) {
-    serverLogger().warn('Failed to fetch tools from database, falling back to constant:', error)
-    return PRODUCTIVITY_TOOLS.map((t, i) => ({
-      id: String(i),
-      name: t.name,
-      displayName: t.displayName,
-      description: t.description,
-      icon: t.icon,
-      color: t.color,
-    }))
-  }
-
-  if (!data || data.length === 0) {
-    return PRODUCTIVITY_TOOLS.map((t, i) => ({
-      id: String(i),
-      name: t.name,
-      displayName: t.displayName,
-      description: t.description,
-      icon: t.icon,
-      color: t.color,
-    }))
-  }
-
-  return data.map((t) => ({
-    id: t.id,
+  return PRODUCTIVITY_TOOLS.map((t, i) => ({
+    id: String(i),
     name: t.name,
-    displayName: t.display_name,
+    displayName: t.displayName,
     description: t.description,
     icon: t.icon,
     color: t.color,

@@ -25,6 +25,7 @@ import {
   ClipboardList,
 } from 'lucide-react'
 import { fetchWeather, getWindDirection, type WeatherData } from '@/lib/weather-api'
+import { useLogout } from '../LogoutForm'
 
 /* ------------------------------------------------------------------ */
 //  Shift helpers
@@ -101,6 +102,7 @@ export function ServicesDropdown() {
   const [locked, setLocked] = useState(false)
   const [sleeping, setSleeping] = useState(false)
   const [shutDown, setShutDown] = useState(false)
+  const submitLogout = useLogout()
 
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [weatherLoading, setWeatherLoading] = useState(true)
@@ -152,7 +154,7 @@ export function ServicesDropdown() {
               'active:scale-[0.97]',
               'transition-all duration-150 ease-in-out',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/50',
-              'cursor-default select-none',
+              'cursor-pointer select-none',
               open && 'bg-black/[0.06]'
             )}
           >
@@ -350,10 +352,11 @@ export function ServicesDropdown() {
               <span className="text-[12px] font-medium text-arch-text-primary">Sleep</span>
             </DropdownMenuItem>
 
-            <form action="/api/auth/logout" method="POST">
+            
               <DropdownMenuItem asChild className="rounded-md">
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={submitLogout}
                   className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-left hover:bg-black/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/50"
                 >
                   <LogOut className="h-3.5 w-3.5 text-arch-text-secondary shrink-0" />
@@ -361,7 +364,7 @@ export function ServicesDropdown() {
                   <span className="ml-auto text-[10px] text-arch-text-muted">⇧⌘Q</span>
                 </button>
               </DropdownMenuItem>
-            </form>
+            
 
             <DropdownMenuItem
               className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-left hover:bg-black/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/50"

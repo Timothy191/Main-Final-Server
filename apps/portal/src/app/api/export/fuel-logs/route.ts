@@ -135,10 +135,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
 
   let query = supabase
     .from('daily_logs')
-    .select(
-      'id, log_date, shift, department_id, fuel_logs(id, diesel_litres, machine_id, machines(name, machine_type))',
-      { count: 'estimated' }
-    )
+    .select('id, log_date, shift, department_id', { count: 'estimated' })
     .gte('log_date', fromDate)
     .lte('log_date', toDate)
     .order('log_date', { ascending: false })
@@ -158,38 +155,58 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     return applyCors(req, NextResponse.json({ error: 'Database query failed' }, { status: 500 }))
   }
 
-  // Flatten fuel logs from daily_logs into rows for CSV export
-  interface FuelLogEntry {
+  const logs = (data ?? []) as {
     id: string
-    diesel_litres: number | null
-    machine_id: string
-    machines: { name: string | null; machine_type: string | null } | null
-  }
-
-  const rows: Array<Record<string, string>> = []
-  const logs = (data ?? []) as unknown as Array<{
     log_date: string
     shift: string
     department_id: string
-    fuel_logs: FuelLogEntry | FuelLogEntry[] | null
-  }>
+  }[]
+
+  // Fetch fuel_logs separately (batched by daily_log_id)
+  const logIds = logs.map((l) => l.id)
+  const { data: fuelLogsRaw } =
+    logIds.length > 0
+      ? await supabase
+          .from('fuel_logs')
+          .select('id, diesel_litres, machine_id, daily_log_id')
+          .in('daily_log_id', logIds)
+      : { data: null }
+
+  // Fetch machine names for the fuel logs
+  const machineIds = [...new Set((fuelLogsRaw ?? []).map((f) => f.machine_id))]
+  const { data: machinesRaw } =
+    machineIds.length > 0
+      ? await supabase.from('machines').select('id, name, machine_type').in('id', machineIds)
+      : { data: null }
+
+  const machineMap = new Map<string, { name: string | null; machine_type: string | null }>()
+  for (const m of machinesRaw ?? []) {
+    machineMap.set(m.id, { name: m.name, machine_type: m.machine_type })
+  }
+
+  const fuelByLogId = new Map<
+    string,
+    { id: string; diesel_litres: number | null; machine_id: string }[]
+  >()
+  for (const fl of fuelLogsRaw ?? []) {
+    const arr = fuelByLogId.get(fl.daily_log_id) ?? []
+    arr.push({ id: fl.id, diesel_litres: fl.diesel_litres, machine_id: fl.machine_id })
+    fuelByLogId.set(fl.daily_log_id, arr)
+  }
+
+  const rows: Array<Record<string, string>> = []
   for (const log of logs) {
-    const fLogs: FuelLogEntry[] = Array.isArray(log.fuel_logs)
-      ? (log.fuel_logs as FuelLogEntry[])
-      : log.fuel_logs
-        ? [log.fuel_logs as FuelLogEntry]
-        : []
+    const fLogs = fuelByLogId.get(log.id) ?? []
     for (const fl of fLogs) {
-      const machineName = fl.machines?.name ?? 'Unknown'
-      const machineType = fl.machines?.machine_type ?? 'Unknown'
+      const machine = machineMap.get(fl.machine_id)
       rows.push({
         id: fl.id,
         log_date: log.log_date,
         shift: log.shift,
         department_id: log.department_id,
         machine_id: fl.machine_id,
-        machine_name: machineName,
-        machine_type: machineType,
+        machine_name: machine?.name ?? 'Unknown',
+        machine_type: machine?.machine_type ?? 'Unknown',
         diesel_litres: Number(fl.diesel_litres ?? 0).toFixed(2),
       })
     }

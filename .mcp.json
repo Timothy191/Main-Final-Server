@@ -1,8 +1,20 @@
 {
   "mcpServers": {
+    "acc": {
+      "alwaysLoad": true,
+      "args": [
+        "--db",
+        "acc.db",
+        "mcp"
+      ],
+      "command": "acc"
+    },
     "next-devtools": {
+      "args": [
+        "-y",
+        "next-devtools-mcp@latest"
+      ],
       "command": "npx",
-      "args": ["-y", "next-devtools-mcp@latest"],
       "env": {
         "NEXT_DEVTOOLS_PORT": "3000"
       }

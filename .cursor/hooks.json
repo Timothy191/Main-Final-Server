@@ -1,10 +1,8 @@
 {
-  "version": 1,
   "hooks": {
-    "sessionStart": [
+    "afterFileEdit": [
       {
-        "command": "node .cursor/hooks/alignment-gate.mjs",
-        "timeout": 10
+        "command": "acc hook post-tool --host cursor"
       }
     ],
     "beforeShellExecution": [
@@ -13,6 +11,23 @@
         "failClosed": true,
         "timeout": 10
       }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "acc hook turn-start --host cursor"
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": "node .cursor/hooks/alignment-gate.mjs",
+        "timeout": 10
+      }
+    ],
+    "stop": [
+      {
+        "command": "acc hook turn-end --host cursor"
+      }
     ]
-  }
+  },
+  "version": 1
 }

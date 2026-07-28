@@ -10,8 +10,7 @@ interface BrandLogo {
 }
 
 const BRAND_LOGOS: BrandLogo[] = [
-  { src: '/logo.svg', name: 'Arch', width: 72, height: 20 },
-  { src: '/archlinux-logo-black-scalable.svg', name: 'Arch Linux', width: 72, height: 20 },
+  { src: '/logo.svg', name: 'Arch Linux', width: 72, height: 20 },
   { name: 'Plantcor', width: 80, height: 22 },
   { src: '/branding/ai/anthropic.svg', name: 'Anthropic', width: 20, height: 20 },
   { src: '/branding/ai/google.svg', name: 'Google', width: 20, height: 20 },

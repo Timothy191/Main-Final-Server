@@ -24,6 +24,7 @@ Project subagents live in `.cursor/agents/`. When a user task matches a row belo
 | Root cause hypothesis provided, deploy fix after diagnosis, heal from stated cause, close incident loop, fix + harden AI surfaces | `root-cause-healer` | **When hypothesis exists** | Pure analysis without hypothesis, UI-only, formal score |
 | Audit imports/paths, broken module resolution, after file moves/renames/refactors, tsconfig path map review | `import-auditor` | **After** import/path changes | Security review, UI, performance-only |
 | Clone external OSS repo to `/tmp`, extract patterns into `@repo/*`, run their tests to learn intent | `reverse-engineer` | **When** studying external code to import ideas | Green-field implementation, UI paint, docs sync |
+| Smoke testing, final E2E validation, alignment score enforcement | `test-verify-specialist` | **After** non-trivial changes, **before** claiming done | General UI, docs sync, security |
 
 ## Rules
 
@@ -55,6 +56,7 @@ Project subagents live in `.cursor/agents/`. When a user task matches a row belo
 | sceptic | `sceptic.md` | `sceptic/` | Formal score, UI, docs |
 | test-engineer | `test-engineer.md` | `test-engineer/` | Product UI, docs, design, security |
 | vercel-brand-sync | `vercel-brand-sync.md` | `vercel-brand-sync/` | General UI, docs sync, sceptic |
+| test-verify-specialist | `test-verify-specialist.md` | `test-verify-specialist/` | UI, docs, branding |
 
 > **Pruned 2026-07-25.** The following agents were removed from this router; do not delegate to them: `fast-outliner`, `ai-docs-sync`, `idle-runner`, `openspec`, `aider`, `goose`, `omp`, `security`, `agency-lead`, `gap-analyst`, `spec-auditor`, `routing-optimizer`, `patch-builder`, `ai-system-optimizer`, `ai-maintenance-checker`, `reflection`, `memory-manager`, `insight-monitor`, `sub-agent-coordinator`, `professional-advisor`, `research-specialist`, `auto-formatter`, `ai-company-orchestrator`, `loop-engineer`, `dev-tools-specialist`, `adk-specialist`, `gaai-specialist`, `zeroclaw`, `devin`, `open-swe`, `opencode`.
 

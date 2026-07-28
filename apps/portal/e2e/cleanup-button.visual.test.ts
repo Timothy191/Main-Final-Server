@@ -30,13 +30,15 @@ test.describe('Cache Cleanup — authenticated tests', () => {
   // Run with: PLAYWRIGHT_AUTH=1 pnpm exec playwright test --config=e2e/playwright.config.ts
   const isAuth = !!process.env.PLAYWRIGHT_AUTH
 
-  test.skip(isAuth === false, 'auth session required', async ({ page }) => {
+  test('Clear Cache button is visible', async ({ page }) => {
+    test.skip(isAuth === false, 'auth session required')
     await page.goto('/satellite-monitoring', { waitUntil: 'domcontentloaded', timeout: 60000 })
     const button = page.locator('button', { hasText: 'Clear Cache' })
     await expect(button).toBeVisible({ timeout: 30000 })
   })
 
-  test.skip(isAuth === false, 'auth session required', async ({ page }) => {
+  test('clicking Clear Cache button triggers request', async ({ page }) => {
+    test.skip(isAuth === false, 'auth session required')
     await page.goto('/satellite-monitoring', { waitUntil: 'domcontentloaded', timeout: 60000 })
     await page.route('**/api/cleanup/trigger', (route) => {
       route.fulfill({ status: 200, body: 'OK' })
@@ -50,7 +52,8 @@ test.describe('Cache Cleanup — authenticated tests', () => {
     await expect(doneButton).toBeVisible({ timeout: 5000 })
   })
 
-  test.skip(isAuth === false, 'auth session required', async ({ page }) => {
+  test('Clear Cache button shows loading state', async ({ page }) => {
+    test.skip(isAuth === false, 'auth session required')
     await page.goto('/satellite-monitoring', { waitUntil: 'domcontentloaded', timeout: 60000 })
     await page.route('**/api/cleanup/trigger', async (route) => {
       await new Promise((r) => setTimeout(r, 2000))

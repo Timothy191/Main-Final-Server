@@ -42,6 +42,18 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
     import('@/hooks/useOfflineQueue').then((mod) => {
       mod.initOfflineQueueListeners()
     })
+
+    // Initialize client-side data cache (IndexedDB-backed)
+    import('@/lib/client-data-cache').then((mod) => {
+      // Start periodic cleanup of expired entries
+      const stopCleanup = mod.startClientCacheCleanup(60_000)
+      // Warm cache with common data after page load
+      mod.warmClientCache()
+      // Store cleanup reference for potential teardown
+      if (typeof window !== 'undefined') {
+        ;(window as unknown as Record<string, unknown>).__clientCacheCleanup = stopCleanup
+      }
+    })
   }, [])
 
   return <SmoothScrollProvider>{children}</SmoothScrollProvider>

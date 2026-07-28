@@ -190,7 +190,7 @@ export default function ReportsPage() {
           <h3 className="font-semibold text-sm text-arch-text-primary">
             Generated Audits & Exports
           </h3>
-          <button className="text-xs px-2.5 py-1 bg-arch-surface-chrome border border-arch-border-default hover:bg-arch-surface-chrome-medium rounded-md font-semibold transition-colors">
+          <button className="text-xs px-2.5 py-1 bg-arch-surface-chrome border border-arch-border-default hover:bg-arch-surface-chrome-medium rounded-md font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/30">
             Generate Custom Report
           </button>
         </div>

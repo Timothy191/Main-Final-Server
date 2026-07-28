@@ -1,11 +1,105 @@
 {
-  "permissions": {
-    "allow": ["bash", "read", "write", "edit"],
-    "warn": ["git:push", "git:reset", "git:checkout"]
-  },
   "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "acc hook post-tool --host claude-code",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "command": "acc hook compact --host claude-code",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "command": "acc hook session-end --host claude-code",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "acc hook session-start --host claude-code",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "acc hook turn-end --host claude-code",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "command": "acc hook subagent-start --host claude-code",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "command": "acc hook subagent-end --host claude-code",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "acc hook turn-start --host claude-code",
+            "type": "command"
+          }
+        ]
+      }
+    ],
     "alignment-gate": "hooks/alignment-gate.mjs",
     "block-forbidden": "hooks/block-forbidden.mjs"
   },
-  "ignore": ["**/node_modules/**", "**/.next/**", "**/dist/**"]
+  "ignore": [
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/dist/**"
+  ],
+  "permissions": {
+    "allow": [
+      "bash",
+      "read",
+      "write",
+      "edit"
+    ],
+    "warn": [
+      "git:push",
+      "git:reset",
+      "git:checkout"
+    ]
+  }
 }

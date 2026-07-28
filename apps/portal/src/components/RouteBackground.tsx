@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 
 /** Permanent ambient background — muted 120s H.264 wave under public/background/. */
-const BACKGROUND_VIDEO_SRC = '/background/ps3-wave.1920x1080.mp4'
+const BACKGROUND_VIDEO_SRC = '/assets/video/background.mp4'
 /** Poster shown before the first decoded frame (matches the wave clip). */
 const BACKGROUND_POSTER_SRC = '/auth-bg-poster.jpg'
 /** Approved ambient speed (65% of source). */

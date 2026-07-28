@@ -4,6 +4,9 @@
 
 * {
   @apply border-border;
+}
+
+a, button, input, select, textarea, [role="button"] {
   -webkit-tap-highlight-color: transparent;
 }
 

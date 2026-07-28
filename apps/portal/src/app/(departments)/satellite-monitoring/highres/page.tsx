@@ -1,16 +1,17 @@
-import { DepartmentSectionShell } from '@/components/departments/DepartmentSectionShell'
+import { DynamicTable } from '@/components/departments/DynamicTable'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'High-Resolution Imagery | Arch OS',
-  description: 'This section is ready for navigation.',
+  title: 'High-Res | Arch OS',
+  description: 'High-resolution satellite imagery.',
 }
 
 export default function Page() {
   return (
-    <DepartmentSectionShell
-      title="High-Resolution Imagery"
-      description="This section is ready for navigation."
+    <DynamicTable
+      title="High-Res"
+      description="High-resolution satellite imagery."
+      tableName="machines"
     />
   )
 }

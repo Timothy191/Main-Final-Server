@@ -6,7 +6,7 @@ export async function GET(_req: NextRequest) {
   const startedAt = Date.now()
 
   try {
-    const redis = getRedisClient()
+    const redis = await getRedisClient()
     let connected = redis.status === 'ready'
     if (!connected) {
       const pong = await redis.ping()

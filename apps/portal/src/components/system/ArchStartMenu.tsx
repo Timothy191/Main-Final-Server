@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@repo/ui/lib/utils'
 import { ARCH_LOCK_EVENT } from './ArchLockOverlay'
+import { useLogout } from '../LogoutForm'
 
 export interface ArchStartMenuProps {
   onClose: () => void
@@ -64,6 +65,7 @@ const START_APPS: StartApp[] = [
  */
 export function ArchStartMenu({ onClose }: ArchStartMenuProps) {
   const [query, setQuery] = useState('')
+  const submitLogout = useLogout()
 
   const normalized = query.trim().toLowerCase()
 
@@ -187,18 +189,16 @@ export function ArchStartMenu({ onClose }: ArchStartMenuProps) {
           >
             <Lock className="h-4 w-4" aria-hidden />
           </button>
-          <form
-            action="/api/auth/logout"
-            method="POST"
-            onSubmit={() => {
-              onClose()
-            }}
-          >
+          
             <button
-              type="submit"
+              type="button"
               role="menuitem"
               aria-label="Sign out"
               title="Sign out"
+              onClick={() => {
+                onClose()
+                submitLogout()
+              }}
               className={cn(
                 'flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[12px] font-medium',
                 'text-arch-text-secondary hover:bg-black/[0.06] hover:text-arch-text-primary',
@@ -208,7 +208,7 @@ export function ArchStartMenu({ onClose }: ArchStartMenuProps) {
               <LogOut className="h-3.5 w-3.5" aria-hidden />
               Sign out
             </button>
-          </form>
+          
         </div>
       </div>
     </div>

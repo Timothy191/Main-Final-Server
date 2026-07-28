@@ -9,12 +9,15 @@ import { getConfiguredeves } from './dispatcher/eve-dispatcher.js'
 import { config } from './config.js'
 import { startHttpServer } from './http-server.js'
 
+import { startMiniSWEAgentWorker } from './agent/mini-swe-worker.js'
+
 const logger = new Logger('main')
 
 async function main(): Promise<void> {
   logger.info('Starting Ops Gateway (Meta-Backend)...')
 
-  // 1. Start system pollers and HTTP server
+  // 1. Start Mini-SWE-Agent Native Logic Engine & system pollers
+  startMiniSWEAgentWorker()
   startHttpServer()
   startHealthPoller()
   startMetricsPoller()

@@ -115,7 +115,7 @@ export default async function CoursesPage({
             Create, manage, and assign technical learning plans and regulatory safety modules.
           </p>
         </div>
-        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-arch-accent-charcoal text-[var(--bg-secondary)] text-sm font-medium rounded-lg hover:opacity-90 transition-all shadow-card">
+        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-arch-accent-charcoal text-[var(--bg-secondary)] text-sm font-medium rounded-lg hover:opacity-90 transition-all shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/30">
           <Plus className="w-4 h-4" />
           <span>New Course</span>
         </button>
@@ -210,7 +210,7 @@ export default async function CoursesPage({
                   </div>
                 </div>
 
-                <button className="w-full h-8 flex items-center justify-center gap-1.5 bg-arch-surface-chrome border border-arch-border-default rounded-lg text-xs font-semibold text-arch-text-primary hover:bg-arch-surface-chrome-medium transition-colors">
+                <button className="w-full h-8 flex items-center justify-center gap-1.5 bg-arch-surface-chrome border border-arch-border-default rounded-lg text-xs font-semibold text-arch-text-primary hover:bg-arch-surface-chrome-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/30">
                   <PlayCircle className="w-4 h-4 text-arch-text-muted" />
                   <span>Configure Modules</span>
                 </button>

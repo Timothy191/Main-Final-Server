@@ -3,41 +3,17 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@repo/supabase/server'
 import { InternalError } from '@repo/errors'
 
-/**
- * @swagger
- * /api/auth/logout:
- *   post:
- *     summary: Sign out current user
- *     description: Terminates the Supabase user session and clears authentication cookies
- *     tags:
- *       - Authentication
- *     responses:
- *       200:
- *         description: Logout successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 redirectUrl:
- *                   type: string
- *                   example: "/login"
- *       500:
- *         description: Internal server error during logout
- */
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient()
     await supabase.auth.signOut()
 
-    return NextResponse.json({ success: true, redirectUrl: '/login' }, { status: 200 })
+    // Redirect to login page instead of returning JSON
+    return NextResponse.redirect(new URL('/login', request.url), 303)
   } catch (error) {
     console.error('Logout error:', error)
-    const err = new InternalError('An error occurred during logout')
-    return NextResponse.json(err.toJSON(), { status: err.status })
+    // Even on error, it's safer to redirect to login when using form posts
+    return NextResponse.redirect(new URL('/login', request.url), 303)
   }
 }
 
@@ -46,9 +22,9 @@ export async function GET(request: NextRequest) {
     const supabase = await createServerSupabaseClient()
     await supabase.auth.signOut()
 
-    return NextResponse.redirect(new URL('/login', request.url))
+    return NextResponse.redirect(new URL('/login', request.url), 303)
   } catch (error) {
     console.error('Logout error:', error)
-    return NextResponse.redirect(new URL('/login', request.url))
+    return NextResponse.redirect(new URL('/login', request.url), 303)
   }
 }

@@ -90,10 +90,24 @@ export async function getAggregatedAuditData(
   })
 
   // 3. Fetch production logs metrics for yesterday
-  const { data: prodLogs, error: prodError } = await supabase
-    .from('production_logs')
-    .select('coal_tonnes, waste_tonnes, daily_logs!inner(log_date)')
-    .eq('daily_logs.log_date', yesterdayStr)
+  // Get daily_log IDs for yesterday, then fetch production_logs by those IDs
+  const { data: yesterdayLogs, error: logsFkError } = await supabase
+    .from('daily_logs')
+    .select('id')
+    .eq('log_date', yesterdayStr)
+
+  if (logsFkError) {
+    throw new Error(`Failed to fetch daily logs: ${logsFkError.message}`)
+  }
+
+  const logIds = (yesterdayLogs ?? []).map((l) => l.id)
+  const { data: prodLogs, error: prodError } =
+    logIds.length > 0
+      ? await supabase
+          .from('production_logs')
+          .select('coal_tonnes, waste_tonnes')
+          .in('daily_log_id', logIds)
+      : { data: [], error: null }
 
   if (prodError) {
     throw new Error(`Failed to fetch production logs: ${prodError.message}`)

@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/api/auth'
-import { getRedis } from '@repo/redis'
+import { getRedis, getNativeEventBus } from '@repo/redis'
 
 /* ── POST /api/ops/trigger ──────────────────────────────────── */
 export async function POST(request: NextRequest) {
@@ -14,6 +14,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'triggerType is required' }, { status: 400 })
     }
 
+    const eventBus = getNativeEventBus()
+    const event = await eventBus.emit(triggerType, 'ops-module', context ?? {})
+
     const redis = await getRedis()
     const payload = {
       triggerType,
@@ -23,12 +26,11 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     }
 
-    // Publish to Redis Stream for agent consumption
     const streamId = await redis.xadd('agent:triggers', '*', 'payload', JSON.stringify(payload))
 
     return NextResponse.json({
       success: true,
-      data: { queued: true, streamId },
+      data: { queued: true, streamId, eventId: event.id },
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'

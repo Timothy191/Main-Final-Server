@@ -32,7 +32,7 @@ export const orphanedRecordDetectionFn = inngest.createFunction(
       // AGENT-TRACE: Check machine operations without valid machine_id
       const { data: invalidMachineOps, error: opsError } = await serviceRole
         .from('machine_operations')
-        .select('id, machine_id, operator_id, operation_date')
+        .select('id, machine_id, operator_id, shift_date')
         .not('machine_id', 'in', serviceRole.from('machines').select('id'))
 
       if (opsError) throw opsError
@@ -90,7 +90,7 @@ export const orphanedRecordDetectionFn = inngest.createFunction(
       // AGENT-TRACE: Check for machine operations without valid operator
       const { data: invalidOps, error: invalidOpsError } = await serviceRole
         .from('machine_operations')
-        .select('id, operator_id, operation_date')
+        .select('id, operator_id, shift_date')
         .not('operator_id', 'in', serviceRole.from('employees').select('id'))
 
       if (invalidOpsError) throw invalidOpsError

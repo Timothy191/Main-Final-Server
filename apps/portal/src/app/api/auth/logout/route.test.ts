@@ -15,7 +15,7 @@ describe('POST /api/auth/logout', () => {
     jest.clearAllMocks()
   })
 
-  it('signs out and returns success response', async () => {
+  it('signs out and redirects to login', async () => {
     const signOut = jest.fn().mockResolvedValue({ error: null })
     createServerSupabaseClient.mockResolvedValue({ auth: { signOut } })
 
@@ -24,15 +24,12 @@ describe('POST /api/auth/logout', () => {
     })
 
     const res = await POST(req)
-    expect(res.status).toBe(200)
-
-    const json = await res.json()
-    expect(json.success).toBe(true)
-    expect(json.redirectUrl).toBe('/login')
+    expect(res.status).toBe(303)
+    expect(res.headers.get('location')).toBe('http://localhost:3000/login')
     expect(signOut).toHaveBeenCalledTimes(1)
   })
 
-  it('returns 500 status on sign out error', async () => {
+  it('redirects to login on sign out error', async () => {
     createServerSupabaseClient.mockRejectedValue(new Error('Supabase error'))
 
     const req = new NextRequest('http://localhost:3000/api/auth/logout', {
@@ -40,11 +37,8 @@ describe('POST /api/auth/logout', () => {
     })
 
     const res = await POST(req)
-    expect(res.status).toBe(500)
-
-    const json = await res.json()
-    expect(json.error.code).toBe('INTERNAL_ERROR')
-    expect(json.error.message).toBe('An error occurred during logout')
+    expect(res.status).toBe(303)
+    expect(res.headers.get('location')).toBe('http://localhost:3000/login')
   })
 })
 
@@ -58,7 +52,7 @@ describe('GET /api/auth/logout', () => {
     })
 
     const res = await GET(req)
-    expect(res.status).toBe(307)
+    expect(res.status).toBe(303)
     expect(res.headers.get('location')).toBe('http://localhost:3000/login')
   })
 })

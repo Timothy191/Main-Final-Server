@@ -26,6 +26,8 @@ export function LoginEveNotice() {
           className="h-[18px] w-auto object-contain"
           style={{ width: 'auto', height: 'auto' }}
           unoptimized
+          priority
+          fetchPriority="high"
         />
       </Link>
 

@@ -2,7 +2,7 @@
 
 ## 1. Milestone State
 - **Milestone 1: Spec Creation** (`.kiro/specs/arch-systems-portal-verification/spec.md`) — **DONE**
-- **Milestone 2: R1 Codebase Mapping** (`Codebase-maps/`) — **DONE**
+- **Milestone 2: R1 Codebase Mapping** (`docs/codebase-maps/`) — **DONE**
   - `workspace-packages.md`: Monorepo architecture & 14 `@repo/*` packages
   - `api-routes.md`: 51 Next.js 16 App Router API endpoints
   - `dataflow-pipelines.md`: Telemetry ingestion buffer & 8 Inngest background jobs
@@ -21,7 +21,7 @@
   - Reviewer 1: **APPROVE**
   - Reviewer 2: **APPROVE**
   - Challenger 1: **PASSED** (Monorepo build 2/2 tasks, 57/57 portal suites / 413 tests, rate-limiter 8/8 tests, errors 12/12 tests)
-  - Challenger 2: **PASSED** (27/27 operational smoke checks, `pnpm ai check` 0 errors/0 warnings, `Codebase-maps/` verified)
+  - Challenger 2: **PASSED** (27/27 operational smoke checks, `pnpm ai check` 0 errors/0 warnings, `docs/codebase-maps/` verified)
   - Forensic Auditor: **CLEAN** (binary verdict)
 
 ## 2. Active Subagents
@@ -39,7 +39,7 @@
 - `/home/timothy/Projects/.agents/orchestrator/plan.md`
 - `/home/timothy/Projects/.agents/orchestrator/PROJECT.md`
 - `/home/timothy/Projects/.kiro/specs/arch-systems-portal-verification/spec.md`
-- `/home/timothy/Projects/Codebase-maps/`
+- `/home/timothy/Projects/docs/codebase-maps/`
   - `workspace-packages.md`
   - `api-routes.md`
   - `dataflow-pipelines.md`

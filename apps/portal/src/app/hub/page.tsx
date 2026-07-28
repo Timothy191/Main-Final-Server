@@ -186,11 +186,14 @@ async function getRecentAlertEvents(
     .slice(0, 8)
 }
 
-async function getEmployeeDepartments(userId: string) {
+async function getEmployeeDepartments(
+  userId: string,
+  cookieList: Array<{ name: string; value: string }>
+) {
   'use cache'
   cacheLife('hours')
   cacheTag(`auth:${userId}`, 'table:employees', 'table:departments')
-  return resolveAccessibleDepartmentNames(userId)
+  return resolveAccessibleDepartmentNames(userId, cookieList)
 }
 
 export default async function HubPage({
@@ -220,7 +223,7 @@ export default async function HubPage({
   const [{ incidentCount, breakdownCount, offlineMachineCount }, access, tools, alertEvents] =
     await Promise.all([
       getDashboardCounts(today, cookieList),
-      getEmployeeDepartments(userId),
+      getEmployeeDepartments(userId, cookieList),
       getTools(),
       getRecentAlertEvents(today, cookieList),
     ])

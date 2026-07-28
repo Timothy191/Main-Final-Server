@@ -35,12 +35,9 @@
 .glass-premium,
 .glass-input,
 .glass-button,
-.glass-badge,
-.glass-modal,
 .glass-video,
 .glass-dark,
-.glass-macos,
-.layer-telemetry-dock {
+.glass-macos {
   font-family: var(--font-sans), sans-serif;
 }
 
@@ -233,80 +230,6 @@
   transform: scale(0.97);
 }
 
-.glass-badge {
-  background:
-    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
-    var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(8px) saturate(140%);
-  backdrop-filter: blur(8px) saturate(140%);
-  border: 1px solid transparent;
-  border-radius: var(--radius-full);
-  color: var(--text-on-glass);
-  font-size: 0.75rem;
-  line-height: 1;
-  padding: 0.25rem 0.75rem;
-}
-
-.glass-divider {
-  height: 1px;
-  background: linear-gradient(90deg,
-      transparent,
-      var(--glass-border) 20%,
-      var(--glass-border) 80%,
-      transparent);
-}
-
-.glass-modal-overlay {
-  background: rgba(5, 5, 8, 0.6);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-}
-
-.glass-modal {
-  background:
-    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
-    var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid transparent;
-  box-shadow: var(--shadow-elevated);
-  border-radius: var(--radius-xl);
-  color: var(--text-on-glass);
-}
-
-.glass-nav-item {
-  color: var(--text-muted);
-  border-radius: var(--radius-button);
-  transition:
-    background var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.glass-nav-item:hover {
-  background: var(--glass-surface);
-  color: var(--text-heading);
-}
-
-.glass-nav-item.active {
-  background: var(--glass-surface-hover);
-  color: var(--accent-charcoal);
-  border-left: 2px solid var(--accent-charcoal);
-}
-
-.glass-shine-sweep {
-  background: linear-gradient(135deg,
-      transparent 40%,
-      rgba(255, 255, 255, 0.08) 50%,
-      transparent 60%);
-}
-
-.glass-spinner {
-  border: 2px solid var(--glass-border);
-  border-top-color: var(--accent-charcoal);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
 .badge-pulse-dot {
   width: 6px;
   height: 6px;
@@ -316,53 +239,7 @@
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* ── Glow Effects ── */
 
-.glow-border {
-  border: 1px solid rgba(28, 28, 30, 0.2);
-  box-shadow: 0 0 12px rgba(28, 28, 30, 0.08);
-}
-
-.glow-border-strong {
-  border: 1px solid rgba(28, 28, 30, 0.35);
-  box-shadow: 0 0 20px rgba(28, 28, 30, 0.15);
-}
-
-/* ── Text Effects ── */
-
-.text-gradient {
-  background: linear-gradient(135deg, var(--accent-charcoal), var(--accent-charcoal));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-subtle {
-  background: linear-gradient(135deg, var(--text-heading), var(--text-primary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-glow {
-  text-shadow: 0 0 20px rgba(28, 28, 30, 0.3);
-}
-
-/* ── Liquid Glass (Premium) ── */
-
-.liquid-border {
-  border: 1px solid transparent;
-  background-clip: padding-box, border-box;
-  background-origin: padding-box, border-box;
-  background-image:
-    linear-gradient(var(--glass-surface), var(--glass-surface)), var(--liquid-border-gradient);
-}
-
-.liquid-border-hover:hover {
-  background-image:
-    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)),
-    var(--liquid-border-gradient-hover);
-}
 
 /* ── Liquid Glass Utility Classes ──
  * Documented for future maintainers:
@@ -376,7 +253,6 @@
  * 7. .liquid-glass-interactive: Enhances panels with scale transitions, click reactions, and continuous fluid swell animation on hover.
  * 8. .liquid-glass-input: Morphing border-radius input control with transitions. Custom focus and hover state radiuses.
  * 9. .liquid-glass-button: Morphing border-radius button control with glow transitions on hover.
- * 10. .liquid-grain-overlay: SVG-based noise grain overlay animating on steps.
  */
 
 .liquid-glass {
@@ -508,17 +384,6 @@
   }
 }
 
-.glass-elevated {
-  background:
-    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
-    var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid transparent;
-  box-shadow: var(--shadow-card-hover);
-  color: var(--text-on-glass);
-}
-
 /* ── Premium Glass — highest-tier surface (Apple / Stripe / Linear aesthetic) ──
    Matches the exact glassmorphism spec:
    • Background: linear-gradient(135deg, rgba(255,255,255,0.45) → rgba(255,255,255,0.15))
@@ -556,24 +421,6 @@
   transform: translateY(0);
 }
 
-/* Electric-blue CTA accent variant */
-.glass-premium-electric {
-  border-color: var(--accent-electric-blue-border);
-  box-shadow: var(--glass-premium-shadow), var(--shadow-glow-electric-blue);
-}
-
-/* Mint positive/active accent variant */
-.glass-premium-mint {
-  border-color: var(--accent-mint-border);
-  box-shadow: var(--glass-premium-shadow), var(--shadow-glow-mint);
-}
-
-/* Amber warning accent variant */
-.glass-premium-amber {
-  border-color: var(--accent-amber-border);
-  box-shadow: var(--glass-premium-shadow), var(--shadow-glow-amber);
-}
-
 /* ── Glass-on-Video — light blurred glass over dark media ──
    macOS-vibrancy style: white translucent surface over dark video.
    Use for hub hero cards, overlay panels, sidebars over video.
@@ -594,14 +441,6 @@
     box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.glass-video-hover:hover {
-  background:
-    var(--glass-video-surface-hover) padding-box,
-    var(--glass-border-gradient) border-box;
-  box-shadow: var(--glass-video-shadow), var(--glass-video-sheen);
-  transform: translateY(-1px);
-}
-
 /* Dark glass — opaque dark panels for data-heavy dashboards */
 
 .glass-dark {
@@ -616,13 +455,6 @@
     0 8px 32px -8px rgba(0, 0, 0, 0.35);
   border-radius: var(--radius-card);
   color: var(--text-on-dark-glass);
-}
-
-.glass-dark-hover:hover {
-  background:
-    var(--dark-glass-surface-hover) padding-box,
-    var(--glass-border-gradient) border-box;
-  transform: translateY(-1px);
 }
 
 /* ── macOS Glass Utility — Premium Translucency ── */
@@ -655,26 +487,6 @@
 .glass-top-border {
   border-top-color: var(--glass-border-top);
 }
-
-/* ── Layer-Telemetry-Dock ──
-   For secondary info panels: system status, weather, support.
-   Softer blur, lower opacity, less saturation to sit behind the primary card.
-   background-clip + will-change + translateZ(0) prevent sub-pixel artifacts
-   on rounded corners. */
-.layer-telemetry-dock {
-  background:
-    rgba(255, 255, 255, 0.4) padding-box,
-    var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(12px) saturate(110%);
-  backdrop-filter: blur(12px) saturate(110%);
-  border: 1px solid transparent;
-  box-shadow:
-    0 2px 4px -1px rgba(0, 0, 0, 0.03),
-    0 12px 16px -4px rgba(0, 0, 0, 0.02);
-  will-change: transform, opacity;
-  transform: translateZ(0);
-}
-
 
 /* ── Border Sweep Animation ── */
 @keyframes border-glow-sweep {
@@ -755,13 +567,7 @@
   transform: scale(0.97) !important;
 }
 
-/* ── Specular SVG Film Grain overlay ── */
-.liquid-grain-overlay {
-  background-image: url('/background/grain.png');
-  background-size: 150px 150px;
-  animation: grain-dance 8s steps(10) infinite;
-}
-
+/* ── Grain dance keyframes (used by route-bg-grain) ── */
 @keyframes grain-dance {
 
   0%,
@@ -806,11 +612,6 @@
   }
 }
 
-/* ── High Contrast Text Lift ── */
-.liquid-text-lift {
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
-}
-
 /* ── Reduced Motion Fallback ── */
 @media (prefers-reduced-motion: reduce) {
 
@@ -821,50 +622,9 @@
     transition: none !important;
     animation: none !important;
   }
-
-  .liquid-grain-overlay {
-    animation: none !important;
-  }
 }
 
-/* ── Hairline Border ── */
 
-.border-hairline {
-  border: 1px solid;
-  border-image: var(--glass-border-gradient) 1;
-}
-
-/* ── Data Layouts ── */
-
-.data-section {
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.data-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.375rem 0;
-  border-bottom: 1px solid rgba(var(--arch4), 0.3);
-}
-
-.divide-subtle>*+* {
-  border-top: 1px solid var(--border-subtle);
-}
-
-/* ── Tactile Button ── */
-
-.tactile-button {
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
-
-.tactile-button:active {
-  transform: scale(0.98) translateY(1px);
-}
 
 /* ══════════════════════════════════════════════════════════════════════════
    ROUTE BACKGROUND — Wave Canvas Layers
@@ -872,14 +632,6 @@
    needed. All geometry and token refs live here; animation classes live
    in animations.css (.animate-wave-canvas-a/b/c).
    ══════════════════════════════════════════════════════════════════════════ */
-
-/* Base canvas: dark wash matching the permanent wave MP4 */
-.route-bg-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: -10;
-  background: var(--canvas-gradient, linear-gradient(160deg, #05070c, #121820));
-}
 
 /* Video container — fixed to the viewport; uses dvh/dvw so mobile browser
    chrome does not leave gaps. Sits at --z-background (above body paint, below UI).
@@ -896,18 +648,6 @@
   overflow: hidden;
   pointer-events: none;
   background-color: #05070c;
-}
-
-.route-bg-video-stack {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-/* Opacity is reserved for future layered effects; single-video path stays opaque. */
-.route-bg-video-layer {
-  transition: none;
 }
 
 /* Video element — cover-fill: scales past container edges so no letterboxing */
@@ -970,7 +710,7 @@
   position: fixed;
   inset: 0;
   z-index: calc(var(--z-background) + 2);
-  background-image: url('/background/grain.png');
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 140px 140px;
   opacity: 0.024;
   /* extremely subtle but prevents gradient banding and feels sharp */
@@ -1116,33 +856,6 @@
     backdrop-filter: none !important;
     border-image: none !important;
   }
-
-  .active-badge-liquid {
-    animation: none !important;
-    box-shadow: var(--shadow-none, none) !important;
-    background-color: rgba(16, 185, 129, 0.1) !important;
-    border-color: rgba(16, 185, 129, 0.3) !important;
-  }
-}
-
-.active-badge-liquid {
-  color: var(--accent-mint-hover) !important;
-  animation: active-beacon-pulse 6s cubic-bezier(0.25, 1.15, 0.45, 1) infinite;
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  transition: all 0.65s cubic-bezier(0.25, 1.15, 0.45, 1);
-}
-
-.active-badge-liquid .badge-pulse-dot {
-  animation: pulse-glow 6s cubic-bezier(0.25, 1.15, 0.45, 1) infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-  .active-badge-liquid,
-  .active-badge-liquid .badge-pulse-dot {
-    animation: none !important;
-  }
 }
 
 .liquid-sheen-sweep {
@@ -1164,44 +877,6 @@
   }
 }
 
-/* ── Liquid Layer-Stacking Hierarchy (Isolation) ── */
-
-.liquid-stack-context {
-  isolation: isolate;
-  position: relative;
-}
-
-.liquid-bg-layer {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  transform: translateZ(0);
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  border-radius: inherit;
-}
-
-@supports not (backdrop-filter: blur(1px)) {
-  .liquid-bg-layer {
-    background: rgba(255, 255, 255, 0.95) !important;
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-  }
-}
-
-.liquid-sheen-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  overflow: hidden;
-}
-
-.liquid-content-layer {
-  position: relative;
-  z-index: 10;
-}
 
 /* ── Adaptive Performance Fallback ── */
 .low-perf-fallback .liquid-glass-surface,

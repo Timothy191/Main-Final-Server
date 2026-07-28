@@ -11,7 +11,7 @@ Current iteration: 4 / 32
 - [x] Initialized `ORIGINAL_REQUEST.md`, `BRIEFING.md`, `plan.md`, `progress.md`
 - [x] Milestone 1: Initial Codebase Exploration & Synthesis (3 parallel Explorers complete)
 - [x] Milestone 1: Spec Creation (`.kiro/specs/arch-systems-portal-verification/spec.md`)
-- [x] Milestone 2: R1 - Full Architecture & Codebase Mapping (`Codebase-maps/`)
+- [x] Milestone 2: R1 - Full Architecture & Codebase Mapping (`docs/codebase-maps/`)
 - [x] Milestone 3: Initial Quality & Operational Verification (Build, Tests 57/57, Smoke Test 27/27, `pnpm ai check`)
 - [x] Initial Verification Panel (2 Reviewers, 2 Challengers, 1 Auditor)
 - [x] Milestone 4: Remediation of Rate Limiter algorithms & `@repo/errors` test suite (Worker 2 complete)

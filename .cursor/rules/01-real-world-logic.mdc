@@ -13,11 +13,16 @@ Agents must reason like operators shipping production software, not like autocom
 OBSERVE → HYPOTHESIZE → VERIFY → ACT → SCORE
 ```
 
+
+### Verification Requirement
+You MUST verify the effect of significant behavioral changes before yielding: run the specific test, command, or scenario that covers your change. No "should work".
+
 1. **Observe** — Read code, configs, errors, logs, or runtime output. Cite paths/lines.
 2. **Hypothesize** — State what you believe and why (one sentence).
-3. **Verify** — Prove or falsify with a tool call (read, test, grep, run). No "should work".
+3. **Verify** — Prove or falsify with a tool call (read, test, grep, run).
 4. **Act** — Change only what evidence supports. Minimal diff.
 5. **Score** — Before claiming done, run the alignment score (see `02-agent-scoring.mdc`).
+
 
 ## Real-World Engineering Principles
 

@@ -2,7 +2,7 @@
 
 ## Overview
 Fulfill user requirements for Arch Systems Portal monorepo:
-1. R1: Full Architecture & Codebase Mapping (`Codebase-maps/`)
+1. R1: Full Architecture & Codebase Mapping (`docs/codebase-maps/`)
 2. R2: Real-World Heavy Enterprise Pattern Verification
 3. R3: Automated Quality & Performance Guardrails
 
@@ -13,7 +13,7 @@ Fulfill user requirements for Arch Systems Portal monorepo:
 - Dispatch Explorers to map workspace apps, packages, scripts, tests, health routes, build setup, and `.size-limit.json`.
 
 ### Milestone 2: R1 - Full Architecture & Codebase Mapping
-- Generate visual and reference maps under `Codebase-maps/`:
+- Generate visual and reference maps under `docs/codebase-maps/`:
   - `workspace-packages.md` (or `.svg`/diagrams as applicable)
   - `api-routes.md`
   - `dataflow-pipelines.md`

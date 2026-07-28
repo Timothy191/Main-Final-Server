@@ -8,8 +8,4 @@
 @import "./animations.css" layer(theme);
 @import "./transitions.css" layer(theme);
 @import "./focus.css" layer(theme);
-@import "./buttons.css" layer(components);
-@import "./tabs.css" layer(components);
-@import "./loaders.css" layer(components);
-@import "./checks.css" layer(components);
 @import "./cards.css" layer(components);

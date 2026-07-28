@@ -19,7 +19,7 @@ interface ReviewCardProps {
 function ReviewCard({ img, name, username, body }: ReviewCardProps) {
   return (
     <div className="w-[300px] shrink-0">
-      <GlassCard className="h-full bg-arch-surface-tertiary/40 border border-arch-border-primary hover:border-white/40 transition-all duration-300">
+      <GlassCard className="h-full bg-gradient-to-br from-arch-surface-secondary/25 via-transparent to-arch-surface-tertiary/15 border border-arch-border-primary hover:border-white/40 transition-all duration-300">
         <div className="p-4 flex flex-col justify-between h-full select-none">
           <div className="flex flex-row items-center gap-3">
             <Image

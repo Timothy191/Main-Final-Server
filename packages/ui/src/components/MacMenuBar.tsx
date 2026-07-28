@@ -100,7 +100,7 @@ export function MacMenuBar({
   return (
     <header
       className={cn(
-        'os-shell os-shell--taskbar os-shell-enter-1 fixed top-2 left-3 right-3 z-50 flex h-8 items-center gap-2 px-3',
+        'os-shell os-shell--taskbar os-shell-enter-1 fixed top-2 left-3 right-3 z-50 flex h-8 items-center gap-2 px-3 !overflow-visible',
         'sm:left-4 sm:right-4',
         className
       )}

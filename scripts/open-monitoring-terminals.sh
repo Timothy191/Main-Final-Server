@@ -15,16 +15,23 @@ if command -v tmux >/dev/null 2>&1; then
   # Start new session, detached, running portal logs
   tmux new-session -d -s "arch-monitor" -n "Services" "echo -e '\033[1;35m=== PORTAL WEB SERVICE LOGS ===\033[0m' && tail -F '${PORTAL_LOG}'"
 
-  # Split horizontally to create right pane for Redis
+  # Split horizontally to create middle column
   tmux split-window -h -t "arch-monitor:0" "echo -e '\033[1;32m=== REDIS CACHE ENGINE LOGS ===\033[0m' && docker logs -f arch-redis"
 
-  # Split right pane vertically for Supabase Kong
+  # Split middle column horizontally to create right column
+  tmux split-window -h -t "arch-monitor:0.1" "clear && echo -e '\033[1;36m      /\\\\\n     /  \\\\\n    /\\\\\\   \\\\\n   /  __  \\\\\n  /  (  )  \\\\\n /  (    )  \\\\\n/____________\\\\\033[0m\n\033[1;34m   ARCH LINUX SYSTEMS MONITOR\033[0m\n' && (command -v htop >/dev/null && htop || top)"
+
+  # Split middle column vertically to stack Supabase logs under Redis
   tmux split-window -v -t "arch-monitor:0.1" "echo -e '\033[1;36m=== SUPABASE GATEWAY LOGS ===\033[0m' && docker logs -f supabase_kong_supabase"
 
-  # Configure layout (even split horizontally, then right side split vertically)
-  tmux select-layout -t "arch-monitor" main-horizontal
-  # Make left pane (portal log) take 60% of width
-  tmux resize-pane -t "arch-monitor:0.0" -x "60%"
+  # Split right column vertically to stack interactive CLI under resources
+  tmux split-window -v -t "arch-monitor:0.2" "echo -e '\033[1;33m=== ARCH INTERACTIVE SHELL ===\033[0m\nUse this pane to execute workspace commands.\n' && bash"
+
+  # Configure layout sizes
+  tmux select-layout -t "arch-monitor" tiled
+  tmux resize-pane -t "arch-monitor:0.0" -x "45%"
+  tmux resize-pane -t "arch-monitor:0.1" -x "27%"
+  tmux resize-pane -t "arch-monitor:0.2" -x "28%"
 
   # Apply styling to make it look "official"
   tmux set-option -t "arch-monitor" status-style "bg=colour235,fg=colour136" # Dark grey status bar, gold text

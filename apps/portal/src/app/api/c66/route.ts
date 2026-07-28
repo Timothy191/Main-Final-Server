@@ -223,11 +223,11 @@ async function handlePost(request: Request) {
     } else if (badge.entity_type === 'visitor' && badge.visitor_id) {
       const { data: visitor } = await supabase
         .from('visitors')
-        .select('name, status')
+        .select('first_name, surname, status')
         .eq('id', badge.visitor_id)
         .single()
       if (visitor) {
-        entityName = visitor.name
+        entityName = `${visitor.first_name} ${visitor.surname}`
         if (visitor.status !== 'Checked In') {
           isAuthorized = false
           denialReason = `DENIED - Visitor Status: ${visitor.status}`

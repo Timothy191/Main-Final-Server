@@ -5,7 +5,7 @@
  * Falls back to anon key if READ_REPLICA_URL is not configured.
  */
 import 'server-only'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 function getEnv(key: string, fallback?: string): string {
   const val = process.env[key] ?? fallback
@@ -29,27 +29,16 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
   const url = getEnv('NEXT_PUBLIC_SUPABASE_READ_REPLICA_URL', getEnv('NEXT_PUBLIC_SUPABASE_URL'))
   const key = getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
 
-  const client = createSupabaseClient(url, key, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
+  const cookies = cookieList ?? []
+
+  return createServerClient(url, key, {
+    cookies: {
+      getAll() {
+        return cookies
+      },
+      // Read-only client — no cookie writes needed
+      setAll(_cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {},
     },
   })
-
-  // If cookies are provided, set the auth session for RLS
-  if (cookieList && cookieList.length > 0) {
-    const authCookie = cookieList.find((c) => c.name.startsWith('sb-'))
-    if (authCookie) {
-      try {
-        await client.auth.setSession({
-          access_token: authCookie.value,
-          refresh_token: '',
-        })
-      } catch {
-        // Session may be invalid — proceed without RLS context
-      }
-    }
-  }
-
-  return client
 }
+

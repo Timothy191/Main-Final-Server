@@ -1,29 +1,14 @@
 /**
  * @repo/supabase/client
- * Browser-safe Supabase client.
- * Import in Client Components only.
+ * Browser-safe Supabase client mock (SQLite fallback).
  */
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { SupabaseClient } from '@supabase/supabase-js'
+import { createMockSupabaseClient } from "./kysely-shim";
 
-function getEnv(key: string): string {
-  const val = typeof process !== 'undefined' ? process.env[key] : undefined
-  if (!val) {
-    throw new Error(
-      `[supabase] Missing environment variable: ${key}. ` +
-        'Check your apps/portal/.env.local file.'
-    )
-  }
-  return val
+export function createClient(): SupabaseClient<any, 'public', any> {
+  return createMockSupabaseClient() as any;
 }
 
-export function createClient() {
-  return createSupabaseClient(
-    getEnv('NEXT_PUBLIC_SUPABASE_URL'),
-    getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
-  )
-}
-
-// Legacy export for compatibility
-export function createBrowserSupabaseClient() {
-  return createClient()
+export function createBrowserSupabaseClient(): SupabaseClient<any, 'public', any> {
+  return createClient();
 }

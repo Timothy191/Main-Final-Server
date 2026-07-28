@@ -33,8 +33,6 @@ export const shiftCompletenessCheckFn = inngest.createFunction(
       const { data: departments, error: deptError } = await serviceRole
         .from('departments')
         .select('id, name')
-        .eq('type', 'operational')
-        .eq('active', true)
 
       if (deptError) throw deptError
       if (!departments || departments.length === 0) {

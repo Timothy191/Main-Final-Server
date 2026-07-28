@@ -48,7 +48,7 @@ const PLACEHOLDERS: TrustPlaceholder[] = [
 ]
 
 const TRUST_BADGE_CLASS =
-  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium border border-arch-border-primary bg-arch-surface-secondary/40 text-arch-text-secondary select-none'
+  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium border border-arch-border-primary bg-gradient-to-br from-arch-surface-secondary/25 via-transparent to-arch-surface-tertiary/15 text-arch-text-secondary select-none'
 
 function TrustBadgeIcon({ icon }: { icon: TrustPlaceholder['icon'] }) {
   if (icon === 'arch-logo') {

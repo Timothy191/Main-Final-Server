@@ -1,9 +1,9 @@
-import { recordCacheHit, recordCacheMiss, recordRedisError, getCacheStats } from "@repo/redis/stats";
+import { recordCacheHit, recordCacheMiss, recordRedisError, getCacheStats } from "./stats.ts";
 import {
   cacheInvalidateTags,
   cacheInvalidatePrefixes,
   indexCacheKeyByTags,
-} from "@repo/redis/invalidation";
+} from "./invalidation.ts";
 
 // ------------------------------------------------------------------
 // L1 In-Memory Cache with TTL + LRU eviction
@@ -29,7 +29,6 @@ function memoryGet<T>(key: string): T | null {
 }
 
 function memorySet<T>(key: string, value: T, ttlSeconds: number): void {
-  // Evict oldest entry if at capacity (simple LRU: delete first insertion)
   if (memoryCache.size >= L1_MAX_ENTRIES && !memoryCache.has(key)) {
     const firstKey = memoryCache.keys().next().value;
     if (firstKey !== undefined) {
@@ -55,39 +54,24 @@ function memoryDeleteByPrefix(prefix: string): void {
   }
 }
 
-// ------------------------------------------------------------------
-// Redis client safe wrapper
-// ------------------------------------------------------------------
-
 async function getRedisClientSafe() {
   try {
-    const { getRedisClient } = await import("@repo/redis/client");
+    const { getRedisClient } = await import("./client.ts");
     return await getRedisClient();
   } catch {
     return null;
   }
 }
 
-// ------------------------------------------------------------------
-// Core cache operations with stats
-// ------------------------------------------------------------------
-
-/**
- * Get a cached value by key.
- * Checks L1 (In-Memory) first for ultra-low latency, then falls back to L2 (Redis).
- * Returns null if not found or on error.
- */
 export async function cacheGet<T>(key: string): Promise<T | null> {
   const start = performance.now();
 
-  // 1. Check L1 Cache (Local Memory) first - speed: < 0.1ms
   const l1Value = memoryGet<T>(key);
   if (l1Value !== null) {
     recordCacheHit("l1", performance.now() - start);
     return l1Value;
   }
 
-  // 2. Miss in L1, check L2 Cache (Redis)
   try {
     const redis = await getRedisClientSafe();
     if (!redis) {
@@ -97,8 +81,6 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
     const value = await redis.get(key);
     if (value) {
       const parsed = JSON.parse(value) as T;
-
-      // Populate L1 cache with a short TTL (15s) to accelerate subsequent near-term reads
       memorySet(key, parsed, 15);
       recordCacheHit("l2", performance.now() - start);
       return parsed;
@@ -112,10 +94,6 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
   }
 }
 
-/**
- * Get a cached value and report which layer served it.
- * Returns { value, source } where source is "l1", "l2", or null.
- */
 export async function cacheGetWithStats<T>(
   key: string
 ): Promise<{ value: T | null; source: "l1" | "l2" | null }> {
@@ -149,29 +127,24 @@ export async function cacheGetWithStats<T>(
   }
 }
 
-/**
- * Store a value in cache with a TTL (seconds).
- * Writes to both L1 (Memory) and L2 (Redis) - Write-Through.
- */
 export async function cacheSet<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
-  // 1. Write to L1 Cache (Local Memory) - cap L1 TTL at 30s to keep memory footprint lean
   const l1Ttl = Math.min(ttlSeconds, 30);
   memorySet(key, value, l1Ttl);
 
-  // 2. Write to L2 Cache (Redis)
   try {
     const redis = await getRedisClientSafe();
     if (redis) {
-      await redis.setex(key, ttlSeconds, JSON.stringify(value));
+      if (typeof redis.setex === "function") {
+        await redis.setex(key, ttlSeconds, JSON.stringify(value));
+      } else {
+        await redis.set(key, JSON.stringify(value), "EX", ttlSeconds);
+      }
     }
   } catch {
     recordRedisError();
   }
 }
 
-/**
- * Store a value in cache with a TTL and associate it with tags for later invalidation.
- */
 export async function cacheSetWithTags<T>(
   key: string,
   value: T,
@@ -184,11 +157,6 @@ export async function cacheSetWithTags<T>(
   }
 }
 
-/**
- * Wrap a function with Redis caching.
- * If the key exists in cache, returns it; otherwise calls fn, stores result, and returns it.
- */
-// Request Coalescing (Single-Flight) map for active computations
 const activeFetches = new Map<string, Promise<any>>();
 
 export async function cacheWrap<T>(
@@ -215,10 +183,6 @@ export async function cacheWrap<T>(
   return activeFetch as Promise<T>;
 }
 
-/**
- * Delete a specific key from cache.
- * Also removes from memory cache if Redis unavailable.
- */
 export async function cacheDelete(key: string): Promise<void> {
   memoryDelete(key);
 
@@ -228,126 +192,56 @@ export async function cacheDelete(key: string): Promise<void> {
       await redis.del(key);
     }
   } catch {
-    // Silent fail - memory cache already deleted
+    // Silent fail
   }
 }
 
-/**
- * Delete all keys matching a pattern.
- * @deprecated Use cacheInvalidatePrefixes for safe SCAN-based deletion.
- */
 export async function cacheDeletePattern(pattern: string): Promise<void> {
-  // Delete matching keys from memory cache
   const prefix = pattern.replace("*", "");
   memoryDeleteByPrefix(prefix);
-
-  // Delegate to safe SCAN-based invalidation
   await cacheInvalidatePrefixes([prefix]);
 }
 
 export { cacheInvalidateTags, cacheInvalidatePrefixes };
 
-/**
- * Evict keys from the L1 in-memory cache by prefix.
- * Useful in middleware where Redis may not be available.
- */
 export function cacheEvictL1ByPrefix(prefix: string): void {
   memoryDeleteByPrefix(prefix);
 }
 
-/**
- * Clear the entire L1 in-memory cache.
- * Useful in test environments to prevent state leakage between tests.
- */
 export function clearMemoryCache(): void {
   memoryCache.clear();
 }
 
-// ------------------------------------------------------------------
-// Unified Cache Class & Global Singleton (@repo/redis v2 API)
-// ------------------------------------------------------------------
-
 export interface CacheOptions {
-  ttl?: number;
+  ttlSeconds?: number;
   tags?: string[];
-  prefix?: string;
 }
 
 export class Cache {
-  private defaultUrl: string;
-
-  constructor(defaultUrl?: string) {
-    this.defaultUrl = defaultUrl ?? process.env["REDIS_URL"] ?? "";
+  async get<T>(key: string): Promise<T | null> {
+    return cacheGet<T>(key);
   }
 
-  private buildKey(key: string, prefix?: string): string {
-    return prefix ? `${prefix}:${key}` : key;
-  }
-
-  async get<T>(key: string, prefix?: string): Promise<T | null> {
-    const fullKey = this.buildKey(key, prefix);
-    return cacheGet<T>(fullKey);
-  }
-
-  async set<T>(key: string, value: T, opts?: CacheOptions): Promise<void> {
-    const fullKey = this.buildKey(key, opts?.prefix);
-    const ttl = opts?.ttl ?? 3600;
-    if (opts?.tags && opts.tags.length > 0) {
-      await cacheSetWithTags(fullKey, value, ttl, opts.tags);
+  async set<T>(key: string, value: T, options?: CacheOptions): Promise<void> {
+    const ttl = options?.ttlSeconds ?? 3600;
+    if (options?.tags) {
+      await cacheSetWithTags(key, value, ttl, options.tags);
     } else {
-      await cacheSet(fullKey, value, ttl);
+      await cacheSet(key, value, ttl);
     }
   }
 
-  async wrap<T>(key: string, fn: () => Promise<T>, opts?: CacheOptions): Promise<T> {
-    const fullKey = this.buildKey(key, opts?.prefix);
-    const cached = await this.get<T>(key, opts?.prefix);
-    if (cached !== null) return cached;
-
-    let activeFetch = activeFetches.get(fullKey);
-    if (!activeFetch) {
-      activeFetch = fn()
-        .then(async (result) => {
-          await this.set(key, result, opts);
-          return result;
-        })
-        .finally(() => {
-          activeFetches.delete(fullKey);
-        });
-      activeFetches.set(fullKey, activeFetch);
-    }
-
-    return activeFetch as Promise<T>;
+  async delete(key: string): Promise<void> {
+    await cacheDelete(key);
   }
 
   async invalidateTags(tags: string[]): Promise<number> {
     return cacheInvalidateTags(tags);
   }
 
-  async invalidatePrefix(prefix: string): Promise<number> {
-    return cacheInvalidatePrefixes([prefix]);
-  }
-
-  async clear(): Promise<void> {
-    clearMemoryCache();
-    try {
-      const redis = await getRedisClientSafe();
-      if (redis) {
-        await redis.flushdb();
-      }
-    } catch {
-      // Graceful fallback if Redis unavailable
-    }
-  }
-
-  get isConnected(): boolean {
-    return Boolean(process.env["REDIS_URL"]);
-  }
-
-  get stats() {
-    return getCacheStats();
+  async invalidatePrefixes(prefixes: string[]): Promise<number> {
+    return cacheInvalidatePrefixes(prefixes);
   }
 }
 
 export const cache = new Cache();
-

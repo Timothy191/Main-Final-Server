@@ -17,7 +17,7 @@ Monitor project execution, maintain user briefing, run sentinel reporting/livene
 - **Last user request**: Full project architecture mapping, enterprise pattern verification, and automated quality/performance guardrails.
 - **Pending clarifications**: none
 - **Delivered results**:
-  - Architectural & Codebase Maps under `Codebase-maps/` (5 complete reference maps)
+  - Architectural & Codebase Maps under `docs/codebase-maps/` (5 complete reference maps)
   - Spec document `.kiro/specs/arch-systems-portal-verification/spec.md`
   - Enterprise pattern implementation in `@repo/rate-limiter` and `@repo/errors`
   - Clean monorepo build (`pnpm build`)

@@ -36,38 +36,51 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   CreditCard,
 }
 
+const IMAGE_MAP: Record<string, string> = {
+  drilling: '/icons/icon_drilling.jpg',
+  production: '/icons/icon_production.jpg',
+  'access-control': '/icons/icon_access_control.jpg',
+  'access-card-actions': '/icons/icon_access_card.jpg',
+  engineering: '/icons/icon_engineering.jpg',
+  'control-room': '/icons/icon_control_room.jpg',
+  safety: '/icons/icon_safety.jpg',
+  training: '/icons/icon_training.jpg',
+  'satellite-monitoring': '/icons/icon_satellite.jpg',
+  admin: '/icons/icon_admin.jpg',
+}
+
 const COLOR_MAP: Record<string, { bg: string; text: string }> = {
   amber: {
-    bg: 'border-accent-amber/20 text-accent-amber bg-accent-amber/5',
-    text: 'text-accent-amber',
+    bg: 'border-arch-accent-amber/20 text-arch-accent-amber bg-arch-accent-amber/5',
+    text: 'text-arch-accent-amber',
   },
   emerald: {
-    bg: 'border-accent-green/20 text-accent-green bg-accent-green/5',
-    text: 'text-accent-green',
+    bg: 'border-arch-accent-green/20 text-arch-accent-green bg-arch-accent-green/5',
+    text: 'text-arch-accent-green',
   },
   blue: {
-    bg: 'border-accent-blue/20 text-accent-blue bg-accent-blue/5',
-    text: 'text-accent-blue',
+    bg: 'border-arch-accent-blue/20 text-arch-accent-blue bg-arch-accent-blue/5',
+    text: 'text-arch-accent-blue',
   },
   violet: {
-    bg: 'border-accent-blue/20 text-accent-blue bg-accent-blue/5',
-    text: 'text-accent-blue',
+    bg: 'border-arch-accent-blue/20 text-arch-accent-blue bg-arch-accent-blue/5',
+    text: 'text-arch-accent-blue',
   },
   red: {
-    bg: 'border-accent-red/20 text-accent-red bg-accent-red/5',
-    text: 'text-accent-red',
+    bg: 'border-arch-accent-red/20 text-arch-accent-red bg-arch-accent-red/5',
+    text: 'text-arch-accent-red',
   },
   orange: {
-    bg: 'border-accent-amber/20 text-accent-amber bg-accent-amber/5',
-    text: 'text-accent-amber',
+    bg: 'border-arch-accent-amber/20 text-arch-accent-amber bg-arch-accent-amber/5',
+    text: 'text-arch-accent-amber',
   },
   cyan: {
-    bg: 'border-accent-blue/20 text-accent-blue bg-accent-blue/5',
-    text: 'text-accent-blue',
+    bg: 'border-arch-accent-blue/20 text-arch-accent-blue bg-arch-accent-blue/5',
+    text: 'text-arch-accent-blue',
   },
   indigo: {
-    bg: 'border-accent-blue/20 text-accent-blue bg-accent-blue/5',
-    text: 'text-accent-blue',
+    bg: 'border-arch-accent-blue/20 text-arch-accent-blue bg-arch-accent-blue/5',
+    text: 'text-arch-accent-blue',
   },
 }
 
@@ -149,7 +162,7 @@ export function DepartmentCard({ department, index, accessible = false }: Depart
           </span>
         ) : null}
         {/* Banner area */}
-        <div className={cn('uiverse-card-banner', `uiverse-card-banner-${department.name}`)}>
+        <div className={cn('uiverse-card-banner', 'bg-gradient-to-br from-arch-surface-secondary/25 via-transparent to-arch-surface-tertiary/15')}>
           {/* Save/Pin Button */}
           <button
             type="button"
@@ -166,8 +179,16 @@ export function DepartmentCard({ department, index, accessible = false }: Depart
           </button>
 
           {/* Department Icon Bubble */}
-          <div className={cn('uiverse-card-icon-bubble border-arch-border-emphasis/25', config.bg)}>
-            <Icon className="w-5 h-5" />
+          <div className={cn('uiverse-card-icon-bubble border-arch-border-emphasis/25 overflow-hidden', config.bg)}>
+            {IMAGE_MAP[department.name] ? (
+              <img 
+                src={IMAGE_MAP[department.name]} 
+                alt={`${department.displayName} icon`} 
+                className="w-full h-full object-cover mix-blend-multiply" 
+              />
+            ) : (
+              <Icon className="w-5 h-5" />
+            )}
           </div>
         </div>
 

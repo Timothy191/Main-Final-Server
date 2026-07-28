@@ -61,11 +61,20 @@ async function handle(
     const pathSegments = paramsObj.path ?? []
     const subPath = pathSegments.join('/')
 
-    const opsGatewayUrl = process.env.OPS_GATEWAY_URL ?? 'http://ops-gateway:3100'
-    const searchParams = request.nextUrl.search
+    // Intercept health check directly (matches old HTTP Server)
+    if (subPath === 'health' || subPath === '') {
+      return NextResponse.json({
+        name: 'arch-ops-gateway',
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        services: {
+          'ops-gateway': 'healthy',
+        },
+      })
+    }
 
-    const cleanBaseUrl = opsGatewayUrl.endsWith('/') ? opsGatewayUrl.slice(0, -1) : opsGatewayUrl
-    const targetUrl = `${cleanBaseUrl}/${subPath}${searchParams}`
+    const searchParams = request.nextUrl.search
+    const targetUrl = `http://127.0.0.1:3000/api/ops/${subPath}${searchParams}`
 
     // Build headers for the outgoing request
     const outgoingHeaders: Record<string, string> = {}
@@ -77,7 +86,7 @@ async function handle(
     })
 
     // Enforce target host and secret signatures
-    outgoingHeaders['host'] = 'ops-gateway:3100'
+    outgoingHeaders['host'] = '127.0.0.1:3000'
     if (secret) {
       outgoingHeaders['x-ops-secret'] = secret
     }

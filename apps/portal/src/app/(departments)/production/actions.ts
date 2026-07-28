@@ -60,14 +60,7 @@ async function _getCachedProductionMetrics(deptId: string): Promise<ProductionMe
   ] = await Promise.all([
     supabase
       .from('daily_logs')
-      .select(
-        `
-        id,
-        shift,
-        notes,
-        production_logs (coal_tonnes, waste_tonnes)
-      `
-      )
+      .select('id, shift, notes')
       .eq('department_id', deptId)
       .eq('log_date', today),
     supabase
@@ -94,18 +87,27 @@ async function _getCachedProductionMetrics(deptId: string): Promise<ProductionMe
     })
   }
 
-  type RawLog = {
-    id: string
-    shift: string
-    notes: string | null
-    production_logs: { coal_tonnes: number; waste_tonnes: number }[]
-  }
-
+  type RawLog = { id: string; shift: string; notes: string | null }
   const logs = (todayLogs ?? []) as RawLog[]
+
   let coalTonnesToday = 0
   let wasteTonnesToday = 0
-  for (const log of logs) {
-    for (const pl of log.production_logs ?? []) {
+
+  if (logs.length > 0) {
+    const logIds = logs.map((l) => l.id)
+    const { data: prodLogs, error: prodError } = await supabase
+      .from('production_logs')
+      .select('daily_log_id, coal_tonnes, waste_tonnes')
+      .in('daily_log_id', logIds)
+
+    if (prodError) {
+      throw new DatabaseError('Failed to load production metrics', {
+        operation: 'select',
+        context: { error: prodError.message },
+      })
+    }
+
+    for (const pl of prodLogs ?? []) {
       coalTonnesToday += Number(pl.coal_tonnes) || 0
       wasteTonnesToday += Number(pl.waste_tonnes) || 0
     }
@@ -141,15 +143,7 @@ export async function getRecentProductionLogs(
 
   const { data, error } = await supabase
     .from('daily_logs')
-    .select(
-      `
-      id,
-      log_date,
-      shift,
-      notes,
-      production_logs (coal_tonnes, waste_tonnes)
-    `
-    )
+    .select('id, log_date, shift, notes')
     .eq('department_id', deptId)
     .order('log_date', { ascending: false })
     .order('shift', { ascending: false })
@@ -162,23 +156,35 @@ export async function getRecentProductionLogs(
     })
   }
 
-  type RawLog = {
-    id: string
-    log_date: string
-    shift: 'day' | 'night'
-    notes: string | null
-    production_logs: { coal_tonnes: number; waste_tonnes: number }[]
+  type RawLog = { id: string; log_date: string; shift: 'day' | 'night'; notes: string | null }
+  const logs = (data ?? []) as RawLog[]
+
+  if (logs.length === 0) return []
+
+  const logIds = logs.map((l) => l.id)
+  const { data: prodLogs, error: prodError } = await supabase
+    .from('production_logs')
+    .select('daily_log_id, coal_tonnes, waste_tonnes')
+    .in('daily_log_id', logIds)
+
+  if (prodError) {
+    throw new DatabaseError('Failed to load recent production logs', {
+      operation: 'select',
+      context: { error: prodError.message },
+    })
   }
 
-  return ((data ?? []) as RawLog[]).map((log) => {
-    const coalTonnes = (log.production_logs ?? []).reduce(
-      (sum, pl) => sum + (Number(pl.coal_tonnes) || 0),
-      0
-    )
-    const wasteTonnes = (log.production_logs ?? []).reduce(
-      (sum, pl) => sum + (Number(pl.waste_tonnes) || 0),
-      0
-    )
+  const prodByLogId = new Map<string, { coal_tonnes: number; waste_tonnes: number }[]>()
+  for (const pl of prodLogs ?? []) {
+    const arr = prodByLogId.get(pl.daily_log_id) ?? []
+    arr.push({ coal_tonnes: pl.coal_tonnes, waste_tonnes: pl.waste_tonnes })
+    prodByLogId.set(pl.daily_log_id, arr)
+  }
+
+  return logs.map((log) => {
+    const entries = prodByLogId.get(log.id) ?? []
+    const coalTonnes = entries.reduce((sum, pl) => sum + (Number(pl.coal_tonnes) || 0), 0)
+    const wasteTonnes = entries.reduce((sum, pl) => sum + (Number(pl.waste_tonnes) || 0), 0)
     return {
       id: log.id,
       logDate: log.log_date,

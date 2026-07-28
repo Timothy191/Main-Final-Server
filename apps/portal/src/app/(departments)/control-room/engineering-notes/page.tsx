@@ -1,16 +1,17 @@
-import { DepartmentSectionShell } from '@/components/departments/DepartmentSectionShell'
+import { DynamicTable } from '@/components/departments/DynamicTable'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Engineering Notes | Arch OS',
-  description: 'This section is ready for navigation.',
+  description: 'Engineering notes.',
 }
 
 export default function Page() {
   return (
-    <DepartmentSectionShell
+    <DynamicTable
       title="Engineering Notes"
-      description="This section is ready for navigation."
+      description="Engineering notes."
+      tableName="engineering_notes"
     />
   )
 }

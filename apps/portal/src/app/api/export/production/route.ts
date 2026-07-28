@@ -131,7 +131,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
 
   let query = supabase
     .from('daily_logs')
-    .select('id, log_date, shift, department_id, production_logs(coal_tonnes, waste_tonnes)', {
+    .select('id, log_date, shift, department_id', {
       count: 'estimated',
     })
     .gte('log_date', fromDate)
@@ -153,21 +153,37 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     return applyCors(req, NextResponse.json({ error: 'Database query failed' }, { status: 500 }))
   }
 
-  type ProdLog = { coal_tonnes: number | null; waste_tonnes: number | null }
   type DailyLogRow = {
     id: string
     log_date: string
     shift: string
     department_id: string
-    production_logs: ProdLog[] | ProdLog | null
   }
 
-  const rows = (data as DailyLogRow[]).map((log) => {
-    const prods = Array.isArray(log.production_logs)
-      ? log.production_logs
-      : log.production_logs
-        ? [log.production_logs]
-        : []
+  const logs = (data ?? []) as DailyLogRow[]
+
+  // Fetch production_logs separately (batched by daily_log_id)
+  const logIds = logs.map((l) => l.id)
+  const { data: prodLogs } =
+    logIds.length > 0
+      ? await supabase
+          .from('production_logs')
+          .select('daily_log_id, coal_tonnes, waste_tonnes')
+          .in('daily_log_id', logIds)
+      : { data: null }
+
+  const prodByLogId = new Map<
+    string,
+    { coal_tonnes: number | null; waste_tonnes: number | null }[]
+  >()
+  for (const pl of prodLogs ?? []) {
+    const arr = prodByLogId.get(pl.daily_log_id) ?? []
+    arr.push({ coal_tonnes: pl.coal_tonnes, waste_tonnes: pl.waste_tonnes })
+    prodByLogId.set(pl.daily_log_id, arr)
+  }
+
+  const rows = logs.map((log) => {
+    const prods = prodByLogId.get(log.id) ?? []
     const coal = prods.reduce((s, p) => s + (p.coal_tonnes ?? 0), 0)
     const waste = prods.reduce((s, p) => s + (p.waste_tonnes ?? 0), 0)
     return {

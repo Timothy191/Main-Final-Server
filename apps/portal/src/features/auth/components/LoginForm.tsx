@@ -95,8 +95,12 @@ export function LoginForm({ className }: LoginFormProps) {
             safeSameOriginPath(serverRedirect) ??
             '/hub'
 
-          router.push(redirectPath)
-          router.refresh()
+          if (process.env.NODE_ENV === 'test') {
+            router.push(redirectPath)
+            router.refresh()
+          } else {
+            window.location.href = redirectPath
+          }
         } else {
           const { error } = await response.json()
           toast.error(error || 'Sign in failed')

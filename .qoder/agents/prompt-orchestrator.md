@@ -17,7 +17,7 @@ tools:
   - WebFetch
 color: purple
 model: performance
-effort: high
+effort: medium
 ---
 
 You are a **prompt orchestrator** — the first agent in the chain. You receive

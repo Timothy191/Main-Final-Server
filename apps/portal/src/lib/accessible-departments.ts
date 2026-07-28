@@ -12,10 +12,15 @@ import type { Department } from '@/lib/departments'
 
 export type HubDepartment = Department & { accessible: boolean }
 
+/**
+ * cookieList must be read by the caller outside any 'use cache' boundary
+ * and passed in — Next.js forbids calling cookies() inside cached functions.
+ */
 export async function resolveAccessibleDepartmentNames(
-  userId: string
+  userId: string,
+  cookieList: Array<{ name: string; value: string }>
 ): Promise<{ role: string; names: string[] }> {
-  const db = await createReadReplicaClient()
+  const db = await createReadReplicaClient(cookieList)
 
   const { data: empData } = await db
     .from('employees')

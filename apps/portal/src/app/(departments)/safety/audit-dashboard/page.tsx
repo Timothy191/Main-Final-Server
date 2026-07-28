@@ -11,6 +11,14 @@ import {
 } from 'lucide-react'
 import React from 'react'
 
+interface AuditReportData {
+  metrics?: {
+    accessControl?: { checkIns?: number; checkOuts?: number; denials?: number }
+    drilling?: { totalHoles?: number; totalMeters?: number; totalDowntimeMinutes?: number }
+    production?: { totalCoalTonnes?: number; totalWasteTonnes?: number }
+  }
+}
+
 export default async function AuditDashboardPage() {
   const supabase = await createServerSupabaseClient()
 
@@ -23,8 +31,7 @@ export default async function AuditDashboardPage() {
     .limit(15)
 
   const latestReport = reports?.[0]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const latestData = latestReport?.report_data as any
+  const latestData = latestReport?.report_data as AuditReportData | null
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto py-6 px-4">
@@ -116,8 +123,7 @@ export default async function AuditDashboardPage() {
         <div className="space-y-3">
           {reports && reports.length > 0 ? (
             reports.map((report) => {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const data = report.report_data as any
+              const data = report.report_data as AuditReportData | null
               return (
                 <GlassCard
                   key={report.id}

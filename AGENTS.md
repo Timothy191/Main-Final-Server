@@ -234,7 +234,7 @@ pnpm test -- --watch                # Watch mode
 - Cursor rules in `.cursor/rules/` enforce policies
 - Subagents in `.cursor/agents/` for specialized tasks
 - Skills in `.cursor/skills/` for reusable procedures
-- Shared knowledge base in `.agents/knowledge/`
+- Shared Knowledge Base .agents/knowledge/
 - **Concurrent-agent coordination** via `scratch_board/` — every subagent that will mutate files MUST post a check-in there before its first write and remove it (or set `status: done`) on completion. Protocol: [`scratch_board/README.md`](scratch_board/README.md). Enforced by [`.qoder/rules/scratch-board.md`](.qoder/rules/scratch-board.md). Pattern evidence: [`.agents/knowledge/patterns/scratch-board-coordination.md`](.agents/knowledge/patterns/scratch-board-coordination.md).
 - **Bash contract** for every subagent using `Bash` is fixed by [`.qoder/rules/agent-computer-interface.md`](.qoder/rules/agent-computer-interface.md) (output/runtime caps, no-TTY, forbidden-command set). Pattern: [`.agents/knowledge/patterns/agent-computer-interface.md`](.agents/knowledge/patterns/agent-computer-interface.md).
 
@@ -250,3 +250,35 @@ The `scripts/` directory contains essential development and operational tools:
 - `pre-flight.sh`: Runs pre-flight validation (type-check) and scope determination
 
 These scripts ensure consistent development experience and operational reliability.
+
+<!-- acc:begin sha=80280a056b50 — managed by `acc hosts-sync`; the sha self-hashes the machine-written content (canonical updates rewrite a matching fence; YOUR edits change the hash and are reported as drift, never rewritten); `acc hosts-sync --remove` strips it -->
+## acc — the accreted scored memory (substrate contract)
+
+- **Retrieve first.** Before any non-trivial step, call `acc_retrieve("<your task>")`
+  and let the hits shape the plan. **Cite the `[ids]` you build on** — citation IS the
+  credit edge; uncited knowledge cannot compound.
+- **Route non-trivial goals through the loop.** `acc_act(runtime="solve",
+  input="<goal>")` is memory-first: it records a commitment, answers from the scored
+  memory when it can, and checkpoints a deliberation frame when it cannot — answer a
+  returned `brain_frame` via `acc_act(runtime="continue", input={"frame_id": "…",
+  "proposal_text": "…"})`; the frame_id alone is the credential.
+- **Close what you open.** When reality answers — a passing test, a real reply, a
+  shipped artifact — `acc_act(runtime="outcome", input={"ref": "<id>", "good": true})`.
+- **Credit honesty.** An outcome defaults to `self_graded` → a weak 0.25× prior. Tag
+  `runtime`/`external` only when reality validated it; `owner` only when the owner did.
+  Never tag your own grade as reality.
+- **Two verbs are the whole interface.** `acc_retrieve` is the only READ; `acc_act`
+  is the only DO. Reasoning stays in YOUR session — the substrate perceives and
+  predicts; it is not a second mind.
+- **Work RLM-style — recursive, memory-first, for ANY job.** Technical or not, every
+  task is the same loop: retrieve, act on what memory covers, and RECURSE on what it
+  does not — `acc_act(runtime="solve")` on the sub-question. Decomposition emerges
+  from recursion; don't pre-plan a tree. Three base cases: ANSWER when retrieved
+  knowledge plus the workspace settle it (cite the `[ids]`); RECURSE when design or
+  judgment is missing from the memo; ASK the owner when the missing piece is
+  owner-held (preference, consent, identity, history) — never fabricate it. Inside
+  `acc_act(runtime="exec")` sandboxed code, `acc retrieve "<q>"` recurses over the
+  same memory mid-run. Never leave a received frame unresolved.
+- **Cross-project memory.** Export `ACC_DB=/abs/path/acc.db` to share one substrate
+  across projects; otherwise hooks and MCP resolve the project-local `acc.db`.
+<!-- acc:end -->

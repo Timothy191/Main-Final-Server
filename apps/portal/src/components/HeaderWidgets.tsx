@@ -14,11 +14,7 @@ const SystemClock = lazy(() =>
   }))
 )
 
-const ServicesDropdown = lazy(() =>
-  import('@/components/nav/ServicesDropdown').then((m) => ({
-    default: m.ServicesDropdown,
-  }))
-)
+import { ServicesDropdown } from '@/components/nav/ServicesDropdown'
 
 /**
  * HeaderWidgets

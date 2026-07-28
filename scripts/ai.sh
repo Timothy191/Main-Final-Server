@@ -373,12 +373,11 @@ run_onboard() {
   3. Read .cursor/rules/01-real-world-logic.mdc (OBSERVE→VERIFY loop)
   4. Read .cursor/agents/_shared/references/gold-standard-contract.md
   5. Know routing: .cursor/rules/04-subagent-auto-routing.mdc
-  6. Configure AI providers: pnpm provider:route --check
+  6. Run: pnpm quality (lint + type-check + test)
   7. Before done on multi-file work: sceptic → agent-alignment-score → pnpm quality
   8. Status anytime: pnpm ai status
-  9. Provider status:   pnpm provider:route
-  10. Provider check:    pnpm provider:route --check
-  11. Reset cooldowns:   pnpm provider:route --reset
+  9. Fix issues: pnpm ai fix
+  10. Build check: pnpm build
 EOF
 }
 

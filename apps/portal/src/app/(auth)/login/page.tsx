@@ -45,6 +45,8 @@ export default async function LoginPage() {
 
   return (
     <div className="login-card-viewport relative w-full flex flex-col items-center justify-center pb-16 pt-4 px-4 sm:px-8 md:px-12 lg:px-20 overflow-y-auto">
+      {/* Global ambient background is handled by RouteBackground component */}
+      <div className="absolute inset-0 -z-10 w-full h-full overflow-hidden bg-background/50" />
       {/* Login Card wrapper — centered between taskbar and dock */}
       <div className="login-card-shell relative z-10 w-full my-auto os-shell-enter-2 flex flex-col justify-center">
         {systemUnavailable ? (
@@ -97,22 +99,7 @@ export default async function LoginPage() {
               <div className="flex items-center gap-4">
                 <div className="login-brand-mark relative shrink-0" aria-hidden="true">
                   <span className="login-brand-neon" />
-                  <div className="login-brand-fold">
-                    <span className="login-brand-fold__face login-brand-fold__face--left">
-                      <Logo
-                        variant="display"
-                        stencilId="login-left"
-                        className="login-brand-logo text-text-heading"
-                      />
-                    </span>
-                    <span className="login-brand-fold__face login-brand-fold__face--right">
-                      <Logo
-                        variant="display"
-                        stencilId="login-right"
-                        className="login-brand-logo text-text-heading"
-                      />
-                    </span>
-                  </div>
+                  <Logo className="login-brand-logo" />
                 </div>
                 <div className="space-y-2">
                   <h1 className="login-wordmark font-display text-3xl font-normal tracking-[0.12em] uppercase">

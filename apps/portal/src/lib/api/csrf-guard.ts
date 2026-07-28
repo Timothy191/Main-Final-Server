@@ -30,14 +30,21 @@ export function isValidRequestOrigin(request: NextRequest): boolean {
 
   const origin = request.headers.get('origin')
   const referer = request.headers.get('referer')
+  const host = request.headers.get('host')
+
+  const allowedOrigins = new Set([appOrigin])
+  if (host) {
+    allowedOrigins.add(`http://${host}`)
+    allowedOrigins.add(`https://${host}`)
+  }
 
   if (origin) {
-    return origin === appOrigin
+    return allowedOrigins.has(origin)
   }
 
   if (referer) {
     try {
-      return new URL(referer).origin === appOrigin
+      return allowedOrigins.has(new URL(referer).origin)
     } catch {
       return false
     }

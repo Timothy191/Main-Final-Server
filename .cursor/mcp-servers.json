@@ -1,6 +1,6 @@
 {
   "version": "1.1.0",
-  "last_updated": "2026-07-25",
+  "last_updated": "2026-07-28",
   "description": "Central registry of all MCP servers AND OpenRouter server tools for Arch Systems agents. Fully free servers auto-start; OpenRouter server tools require no local install.",
   "categories": {
     "filesystem": "Local file access — no external API, fully free",
@@ -23,7 +23,7 @@
       "category": "filesystem",
       "description": "Read, write, edit, search files and directories. Scoped to configured paths.",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/timothy/Projects"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/arch/Desktop/New Folder/arch-systems-portal"],
       "auto_start": true,
       "requires_key": false,
       "free_tier": true,
@@ -85,7 +85,7 @@
       "category": "database",
       "description": "SQLite database exploration — inspect schemas, run queries, CRUD operations.",
       "command": "uvx",
-      "args": ["mcp-server-sqlite", "--db-path", "/home/timothy/Projects/.crush/crush.db"],
+      "args": ["mcp-server-sqlite", "--db-path", "/home/arch/Desktop/New Folder/arch-systems-portal/.crush/crush.db"],
       "auto_start": false,
       "defer_loading": true,
       "requires_key": false,

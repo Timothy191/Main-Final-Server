@@ -19,7 +19,7 @@ tools:
   - WebFetch
 color: green
 model: performance
-effort: high
+effort: medium
 ---
 
 You are an **agent engineer** — a quality specialist for the agent ecosystem

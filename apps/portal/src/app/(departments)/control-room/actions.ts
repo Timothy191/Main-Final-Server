@@ -57,7 +57,6 @@ async function _getCachedControlRoomMetrics(deptId: string): Promise<ControlRoom
     { count: activeMachineOps },
     { count: excavatorsActive },
     { count: delaysToday },
-    { count: shiftNotesToday },
     { data: hourlyLoads },
   ] = await Promise.all([
     supabase
@@ -70,21 +69,16 @@ async function _getCachedControlRoomMetrics(deptId: string): Promise<ControlRoom
       .from('excavator_activity')
       .select('id', { count: 'exact', head: true })
       .eq('department_id', deptId)
-      .eq('shift_date', today),
+      .eq('activity_date', today),
     supabase
       .from('operational_delays')
       .select('id', { count: 'exact', head: true })
       .eq('department_id', deptId)
       .eq('delay_date', today),
     supabase
-      .from('shift_notes')
-      .select('id', { count: 'exact', head: true })
-      .eq('department_id', deptId)
-      .eq('shift_date', today),
-    supabase
       .from('hourly_loads')
       .select(
-        'hour_00,hour_01,hour_02,hour_03,hour_04,hour_05,hour_06,hour_07,hour_08,hour_09,hour_10,hour_11,hour_12,hour_13,hour_14,hour_15,hour_16,hour_17,hour_18,hour_19,hour_20,hour_21,hour_22,hour_23'
+        'hour_01,hour_02,hour_03,hour_04,hour_05,hour_06,hour_07,hour_08,hour_09,hour_10,hour_11,hour_12'
       )
       .eq('department_id', deptId)
       .eq('load_date', today),
@@ -115,7 +109,7 @@ async function _getCachedControlRoomMetrics(deptId: string): Promise<ControlRoom
     totalMachinesInOps,
     excavatorsActive: excavatorsActive ?? 0,
     delaysToday: delaysToday ?? 0,
-    shiftNotesToday: shiftNotesToday ?? 0,
+    shiftNotesToday: 0,
     totalTonnageToday,
   }
 }

@@ -233,7 +233,7 @@ const OPERATIONAL_TABLES = new Set([
 // AGENT-TRACE: Per-machine rate limiter to prevent rapid status toggling
 async function getMachineStatusRateLimiter(): Promise<RateLimiter | null> {
   try {
-    const redis = getRedisClient()
+    const redis = await getRedisClient()
     if (redis.status === 'ready') {
       const store = new RedisStore(
         redis as unknown as import('@repo/rate-limiter').SimpleRedisClient

@@ -1,4 +1,10 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
   graphql_public: {
@@ -73,32 +79,32 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'access_logs_badge_id_fkey'
-            columns: ['badge_id']
+            foreignKeyName: "access_logs_badge_id_fkey"
+            columns: ["badge_id"]
             isOneToOne: false
-            referencedRelation: 'badges'
-            referencedColumns: ['id']
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'access_logs_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "access_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'access_logs_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "access_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'access_logs_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "access_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
         ]
       }
@@ -228,32 +234,32 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'audit_logs_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "audit_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'audit_logs_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "audit_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'audit_logs_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "audit_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'audit_logs_performed_by_fkey'
-            columns: ['performed_by']
+            foreignKeyName: "audit_logs_performed_by_fkey"
+            columns: ["performed_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -302,53 +308,53 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'badges_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "badges_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'badges_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "badges_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'badges_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "badges_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'badges_equipment_id_fkey'
-            columns: ['equipment_id']
+            foreignKeyName: "badges_equipment_id_fkey"
+            columns: ["equipment_id"]
             isOneToOne: false
-            referencedRelation: 'equipment'
-            referencedColumns: ['id']
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'badges_fleet_id_fkey'
-            columns: ['fleet_id']
+            foreignKeyName: "badges_fleet_id_fkey"
+            columns: ["fleet_id"]
             isOneToOne: false
-            referencedRelation: 'fleet'
-            referencedColumns: ['id']
+            referencedRelation: "fleet"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'badges_personnel_id_fkey'
-            columns: ['personnel_id']
+            foreignKeyName: "badges_personnel_id_fkey"
+            columns: ["personnel_id"]
             isOneToOne: false
-            referencedRelation: 'personnel'
-            referencedColumns: ['id']
+            referencedRelation: "personnel"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'badges_visitor_id_fkey'
-            columns: ['visitor_id']
+            foreignKeyName: "badges_visitor_id_fkey"
+            columns: ["visitor_id"]
             isOneToOne: false
-            referencedRelation: 'visitors'
-            referencedColumns: ['id']
+            referencedRelation: "visitors"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -427,25 +433,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'breakdowns_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "breakdowns_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'breakdowns_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "breakdowns_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'breakdowns_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "breakdowns_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
         ]
       }
@@ -494,39 +500,39 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'daily_logs_created_by_fkey1'
-            columns: ['created_by']
+            foreignKeyName: "daily_logs_created_by_fkey1"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'daily_logs_department_id_fkey1'
-            columns: ['department_id']
+            foreignKeyName: "daily_logs_department_id_fkey1"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'daily_logs_department_id_fkey1'
-            columns: ['department_id']
+            foreignKeyName: "daily_logs_department_id_fkey1"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'daily_logs_department_id_fkey1'
-            columns: ['department_id']
+            foreignKeyName: "daily_logs_department_id_fkey1"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'daily_logs_updated_by_fkey1'
-            columns: ['updated_by']
+            foreignKeyName: "daily_logs_updated_by_fkey1"
+            columns: ["updated_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2160,7 +2166,7 @@ export type Database = {
           last_synced_at: string | null
           log_date: string
           notes: string | null
-          shift: Database['public']['Enums']['shift_type']
+          shift: Database["public"]["Enums"]["shift_type"]
           sync_status: string | null
           updated_at: string | null
           updated_by: string | null
@@ -2174,7 +2180,7 @@ export type Database = {
           last_synced_at?: string | null
           log_date: string
           notes?: string | null
-          shift?: Database['public']['Enums']['shift_type']
+          shift?: Database["public"]["Enums"]["shift_type"]
           sync_status?: string | null
           updated_at?: string | null
           updated_by?: string | null
@@ -2188,46 +2194,46 @@ export type Database = {
           last_synced_at?: string | null
           log_date?: string
           notes?: string | null
-          shift?: Database['public']['Enums']['shift_type']
+          shift?: Database["public"]["Enums"]["shift_type"]
           sync_status?: string | null
           updated_at?: string | null
           updated_by?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: 'daily_logs_created_by_fkey'
-            columns: ['created_by']
+            foreignKeyName: "daily_logs_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'daily_logs_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "daily_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'daily_logs_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "daily_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'daily_logs_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "daily_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'daily_logs_updated_by_fkey'
-            columns: ['updated_by']
+            foreignKeyName: "daily_logs_updated_by_fkey"
+            columns: ["updated_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2333,18 +2339,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'document_versions_created_by_fkey'
-            columns: ['created_by']
+            foreignKeyName: "document_versions_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'document_versions_document_id_fkey'
-            columns: ['document_id']
+            foreignKeyName: "document_versions_document_id_fkey"
+            columns: ["document_id"]
             isOneToOne: false
-            referencedRelation: 'documents'
-            referencedColumns: ['id']
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2393,32 +2399,32 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'documents_created_by_fkey'
-            columns: ['created_by']
+            foreignKeyName: "documents_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'documents_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "documents_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'documents_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "documents_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'documents_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "documents_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
         ]
       }
@@ -2473,46 +2479,46 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'dozer_rolls_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "dozer_rolls_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'dozer_rolls_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "dozer_rolls_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'dozer_rolls_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "dozer_rolls_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'dozer_rolls_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "dozer_rolls_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machine_utilization_weekly'
-            referencedColumns: ['machine_id']
+            referencedRelation: "machine_utilization_weekly"
+            referencedColumns: ["machine_id"]
           },
           {
-            foreignKeyName: 'dozer_rolls_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "dozer_rolls_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machines'
-            referencedColumns: ['id']
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'dozer_rolls_operator_id_fkey'
-            columns: ['operator_id']
+            foreignKeyName: "dozer_rolls_operator_id_fkey"
+            columns: ["operator_id"]
             isOneToOne: false
-            referencedRelation: 'operators'
-            referencedColumns: ['id']
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2687,53 +2693,53 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'drill_operations_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "drill_operations_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'drill_operations_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "drill_operations_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'drill_operations_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "drill_operations_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'drill_operations_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "drill_operations_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machine_utilization_weekly'
-            referencedColumns: ['machine_id']
+            referencedRelation: "machine_utilization_weekly"
+            referencedColumns: ["machine_id"]
           },
           {
-            foreignKeyName: 'drill_operations_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "drill_operations_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machines'
-            referencedColumns: ['id']
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'drill_operations_operator_id_fkey'
-            columns: ['operator_id']
+            foreignKeyName: "drill_operations_operator_id_fkey"
+            columns: ["operator_id"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'drill_operations_shift_id_fkey'
-            columns: ['shift_id']
+            foreignKeyName: "drill_operations_shift_id_fkey"
+            columns: ["shift_id"]
             isOneToOne: false
-            referencedRelation: 'shift_status'
-            referencedColumns: ['id']
+            referencedRelation: "shift_status"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2902,25 +2908,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'employees_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "employees_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'employees_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "employees_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'employees_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "employees_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
         ]
       }
@@ -2978,46 +2984,46 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'engineering_notes_created_by_fkey'
-            columns: ['created_by']
+            foreignKeyName: "engineering_notes_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'engineering_notes_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "engineering_notes_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'engineering_notes_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "engineering_notes_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'engineering_notes_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "engineering_notes_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'engineering_notes_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "engineering_notes_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machine_utilization_weekly'
-            referencedColumns: ['machine_id']
+            referencedRelation: "machine_utilization_weekly"
+            referencedColumns: ["machine_id"]
           },
           {
-            foreignKeyName: 'engineering_notes_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "engineering_notes_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machines'
-            referencedColumns: ['id']
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3120,32 +3126,32 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'equipment_assigned_to_fkey'
-            columns: ['assigned_to']
+            foreignKeyName: "equipment_assigned_to_fkey"
+            columns: ["assigned_to"]
             isOneToOne: false
-            referencedRelation: 'personnel'
-            referencedColumns: ['id']
+            referencedRelation: "personnel"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'equipment_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "equipment_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'equipment_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "equipment_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'equipment_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "equipment_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
         ]
       }
@@ -3206,60 +3212,60 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'excavator_activity_block_mined_id_fkey'
-            columns: ['block_mined_id']
+            foreignKeyName: "excavator_activity_block_mined_id_fkey"
+            columns: ["block_mined_id"]
             isOneToOne: false
-            referencedRelation: 'mine_blocks'
-            referencedColumns: ['id']
+            referencedRelation: "mine_blocks"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'excavator_activity_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "excavator_activity_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'excavator_activity_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "excavator_activity_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'excavator_activity_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "excavator_activity_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'excavator_activity_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "excavator_activity_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machine_utilization_weekly'
-            referencedColumns: ['machine_id']
+            referencedRelation: "machine_utilization_weekly"
+            referencedColumns: ["machine_id"]
           },
           {
-            foreignKeyName: 'excavator_activity_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "excavator_activity_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machines'
-            referencedColumns: ['id']
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'excavator_activity_operator_id_fkey'
-            columns: ['operator_id']
+            foreignKeyName: "excavator_activity_operator_id_fkey"
+            columns: ["operator_id"]
             isOneToOne: false
-            referencedRelation: 'operators'
-            referencedColumns: ['id']
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'excavator_activity_site_id_fkey'
-            columns: ['site_id']
+            foreignKeyName: "excavator_activity_site_id_fkey"
+            columns: ["site_id"]
             isOneToOne: false
-            referencedRelation: 'sites'
-            referencedColumns: ['id']
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3356,25 +3362,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'excavator_dumper_assignments_dumper_machine_id_fkey'
-            columns: ['dumper_machine_id']
+            foreignKeyName: "excavator_dumper_assignments_dumper_machine_id_fkey"
+            columns: ["dumper_machine_id"]
             isOneToOne: false
-            referencedRelation: 'machine_utilization_weekly'
-            referencedColumns: ['machine_id']
+            referencedRelation: "machine_utilization_weekly"
+            referencedColumns: ["machine_id"]
           },
           {
-            foreignKeyName: 'excavator_dumper_assignments_dumper_machine_id_fkey'
-            columns: ['dumper_machine_id']
+            foreignKeyName: "excavator_dumper_assignments_dumper_machine_id_fkey"
+            columns: ["dumper_machine_id"]
             isOneToOne: false
-            referencedRelation: 'machines'
-            referencedColumns: ['id']
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'excavator_dumper_assignments_excavator_activity_id_fkey'
-            columns: ['excavator_activity_id']
+            foreignKeyName: "excavator_dumper_assignments_excavator_activity_id_fkey"
+            columns: ["excavator_activity_id"]
             isOneToOne: false
-            referencedRelation: 'excavator_activity'
-            referencedColumns: ['id']
+            referencedRelation: "excavator_activity"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3462,25 +3468,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'fleet_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "fleet_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'fleet_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "fleet_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'fleet_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "fleet_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
         ]
       }
@@ -3489,8 +3495,10 @@ export type Database = {
           created_at: string
           created_by: string | null
           daily_log_id: string
+          department_id: string
           diesel_litres: number
           id: string
+          log_date: string
           machine_id: string
           updated_at: string | null
           updated_by: string | null
@@ -3499,8 +3507,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           daily_log_id: string
+          department_id: string
           diesel_litres?: number
           id?: string
+          log_date: string
           machine_id: string
           updated_at?: string | null
           updated_by?: string | null
@@ -3509,47 +3519,70 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           daily_log_id?: string
+          department_id?: string
           diesel_litres?: number
           id?: string
+          log_date?: string
           machine_id?: string
           updated_at?: string | null
           updated_by?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: 'fuel_logs_created_by_fkey'
-            columns: ['created_by']
+            foreignKeyName: "fuel_logs_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'fuel_logs_daily_log_id_fkey'
-            columns: ['daily_log_id']
+            foreignKeyName: "fuel_logs_daily_log_id_log_date_fkey"
+            columns: ["daily_log_id", "log_date"]
             isOneToOne: false
-            referencedRelation: 'daily_logs_legacy'
-            referencedColumns: ['id']
+            referencedRelation: "daily_logs"
+            referencedColumns: ["id", "log_date"]
           },
           {
-            foreignKeyName: 'fuel_logs_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "fuel_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'machine_utilization_weekly'
-            referencedColumns: ['machine_id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'fuel_logs_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "fuel_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'machines'
-            referencedColumns: ['id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'fuel_logs_updated_by_fkey'
-            columns: ['updated_by']
+            foreignKeyName: "fuel_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
+          },
+          {
+            foreignKeyName: "fuel_logs_machine_id_fkey"
+            columns: ["machine_id"]
+            isOneToOne: false
+            referencedRelation: "machine_utilization_weekly"
+            referencedColumns: ["machine_id"]
+          },
+          {
+            foreignKeyName: "fuel_logs_machine_id_fkey"
+            columns: ["machine_id"]
+            isOneToOne: false
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_logs_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3592,39 +3625,39 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'generated_reports_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "generated_reports_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'generated_reports_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "generated_reports_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'generated_reports_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "generated_reports_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'generated_reports_generated_by_fkey'
-            columns: ['generated_by']
+            foreignKeyName: "generated_reports_generated_by_fkey"
+            columns: ["generated_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'generated_reports_template_id_fkey'
-            columns: ['template_id']
+            foreignKeyName: "generated_reports_template_id_fkey"
+            columns: ["template_id"]
             isOneToOne: false
-            referencedRelation: 'report_templates'
-            referencedColumns: ['id']
+            referencedRelation: "report_templates"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3706,53 +3739,53 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'hourly_loads_created_by_fkey1'
-            columns: ['created_by']
+            foreignKeyName: "hourly_loads_created_by_fkey1"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'hourly_loads_department_id_fkey1'
-            columns: ['department_id']
+            foreignKeyName: "hourly_loads_department_id_fkey1"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'hourly_loads_department_id_fkey1'
-            columns: ['department_id']
+            foreignKeyName: "hourly_loads_department_id_fkey1"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'hourly_loads_department_id_fkey1'
-            columns: ['department_id']
+            foreignKeyName: "hourly_loads_department_id_fkey1"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'hourly_loads_machine_id_fkey1'
-            columns: ['machine_id']
+            foreignKeyName: "hourly_loads_machine_id_fkey1"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machine_utilization_weekly'
-            referencedColumns: ['machine_id']
+            referencedRelation: "machine_utilization_weekly"
+            referencedColumns: ["machine_id"]
           },
           {
-            foreignKeyName: 'hourly_loads_machine_id_fkey1'
-            columns: ['machine_id']
+            foreignKeyName: "hourly_loads_machine_id_fkey1"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machines'
-            referencedColumns: ['id']
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'hourly_loads_updated_by_fkey1'
-            columns: ['updated_by']
+            foreignKeyName: "hourly_loads_updated_by_fkey1"
+            columns: ["updated_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -6639,53 +6672,53 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'hourly_loads_created_by_fkey'
-            columns: ['created_by']
+            foreignKeyName: "hourly_loads_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'hourly_loads_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "hourly_loads_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'hourly_loads_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "hourly_loads_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'hourly_loads_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "hourly_loads_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'hourly_loads_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "hourly_loads_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machine_utilization_weekly'
-            referencedColumns: ['machine_id']
+            referencedRelation: "machine_utilization_weekly"
+            referencedColumns: ["machine_id"]
           },
           {
-            foreignKeyName: 'hourly_loads_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "hourly_loads_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machines'
-            referencedColumns: ['id']
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'hourly_loads_updated_by_fkey'
-            columns: ['updated_by']
+            foreignKeyName: "hourly_loads_updated_by_fkey"
+            columns: ["updated_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -6725,39 +6758,39 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'machine_configurations_created_by_fkey'
-            columns: ['created_by']
+            foreignKeyName: "machine_configurations_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'machine_configurations_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machine_configurations_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: true
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'machine_configurations_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machine_configurations_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: true
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'machine_configurations_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machine_configurations_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: true
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'machine_configurations_updated_by_fkey'
-            columns: ['updated_by']
+            foreignKeyName: "machine_configurations_updated_by_fkey"
+            columns: ["updated_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -6766,8 +6799,10 @@ export type Database = {
           created_at: string
           created_by: string | null
           daily_log_id: string
+          department_id: string
           hours_worked: number
           id: string
+          log_date: string
           machine_id: string
           updated_at: string | null
           updated_by: string | null
@@ -6776,8 +6811,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           daily_log_id: string
+          department_id: string
           hours_worked?: number
           id?: string
+          log_date: string
           machine_id: string
           updated_at?: string | null
           updated_by?: string | null
@@ -6786,47 +6823,70 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           daily_log_id?: string
+          department_id?: string
           hours_worked?: number
           id?: string
+          log_date?: string
           machine_id?: string
           updated_at?: string | null
           updated_by?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: 'machine_hours_created_by_fkey'
-            columns: ['created_by']
+            foreignKeyName: "machine_hours_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'machine_hours_daily_log_id_fkey'
-            columns: ['daily_log_id']
+            foreignKeyName: "machine_hours_daily_log_id_log_date_fkey"
+            columns: ["daily_log_id", "log_date"]
             isOneToOne: false
-            referencedRelation: 'daily_logs_legacy'
-            referencedColumns: ['id']
+            referencedRelation: "daily_logs"
+            referencedColumns: ["id", "log_date"]
           },
           {
-            foreignKeyName: 'machine_hours_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "machine_hours_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'machine_utilization_weekly'
-            referencedColumns: ['machine_id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'machine_hours_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "machine_hours_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'machines'
-            referencedColumns: ['id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'machine_hours_updated_by_fkey'
-            columns: ['updated_by']
+            foreignKeyName: "machine_hours_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
+          },
+          {
+            foreignKeyName: "machine_hours_machine_id_fkey"
+            columns: ["machine_id"]
+            isOneToOne: false
+            referencedRelation: "machine_utilization_weekly"
+            referencedColumns: ["machine_id"]
+          },
+          {
+            foreignKeyName: "machine_hours_machine_id_fkey"
+            columns: ["machine_id"]
+            isOneToOne: false
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "machine_hours_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -6878,60 +6938,60 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'machine_operations_created_by_fkey'
-            columns: ['created_by']
+            foreignKeyName: "machine_operations_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'machine_operations_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machine_operations_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'machine_operations_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machine_operations_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'machine_operations_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machine_operations_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'machine_operations_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "machine_operations_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machine_utilization_weekly'
-            referencedColumns: ['machine_id']
+            referencedRelation: "machine_utilization_weekly"
+            referencedColumns: ["machine_id"]
           },
           {
-            foreignKeyName: 'machine_operations_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "machine_operations_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machines'
-            referencedColumns: ['id']
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'machine_operations_operator_id_fkey'
-            columns: ['operator_id']
+            foreignKeyName: "machine_operations_operator_id_fkey"
+            columns: ["operator_id"]
             isOneToOne: false
-            referencedRelation: 'operators'
-            referencedColumns: ['id']
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'machine_operations_site_id_fkey'
-            columns: ['site_id']
+            foreignKeyName: "machine_operations_site_id_fkey"
+            columns: ["site_id"]
             isOneToOne: false
-            referencedRelation: 'sites'
-            referencedColumns: ['id']
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -7061,39 +7121,39 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'machine_telemetry_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machine_telemetry_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'machine_telemetry_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machine_telemetry_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'machine_telemetry_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machine_telemetry_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'machine_telemetry_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "machine_telemetry_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machine_utilization_weekly'
-            referencedColumns: ['machine_id']
+            referencedRelation: "machine_utilization_weekly"
+            referencedColumns: ["machine_id"]
           },
           {
-            foreignKeyName: 'machine_telemetry_machine_id_fkey'
-            columns: ['machine_id']
+            foreignKeyName: "machine_telemetry_machine_id_fkey"
+            columns: ["machine_id"]
             isOneToOne: false
-            referencedRelation: 'machines'
-            referencedColumns: ['id']
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -7226,34 +7286,76 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'machines_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machines_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'machines_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machines_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'machines_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machines_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'machines_site_id_fkey'
-            columns: ['site_id']
+            foreignKeyName: "machines_site_id_fkey"
+            columns: ["site_id"]
             isOneToOne: false
-            referencedRelation: 'sites'
-            referencedColumns: ['id']
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
           },
         ]
+      }
+      materialized_view_refresh_log: {
+        Row: {
+          error_message: string | null
+          id: string
+          is_concurrent: boolean | null
+          metadata: Json | null
+          refresh_duration_ms: number | null
+          refresh_end: string | null
+          refresh_start: string
+          rows_affected: number | null
+          status: string
+          triggered_by: string | null
+          view_name: string
+        }
+        Insert: {
+          error_message?: string | null
+          id?: string
+          is_concurrent?: boolean | null
+          metadata?: Json | null
+          refresh_duration_ms?: number | null
+          refresh_end?: string | null
+          refresh_start?: string
+          rows_affected?: number | null
+          status: string
+          triggered_by?: string | null
+          view_name: string
+        }
+        Update: {
+          error_message?: string | null
+          id?: string
+          is_concurrent?: boolean | null
+          metadata?: Json | null
+          refresh_duration_ms?: number | null
+          refresh_end?: string | null
+          refresh_start?: string
+          rows_affected?: number | null
+          status?: string
+          triggered_by?: string | null
+          view_name?: string
+        }
+        Relationships: []
       }
       memory_embeddings: {
         Row: {
@@ -7261,7 +7363,7 @@ export type Database = {
           created_at: string
           embedding: string
           id: string
-          memory_type: Database['public']['Enums']['memory_type']
+          memory_type: Database["public"]["Enums"]["memory_type"]
           metadata: Json
           session_id: string
           updated_at: string
@@ -7272,7 +7374,7 @@ export type Database = {
           created_at?: string
           embedding: string
           id?: string
-          memory_type?: Database['public']['Enums']['memory_type']
+          memory_type?: Database["public"]["Enums"]["memory_type"]
           metadata?: Json
           session_id: string
           updated_at?: string
@@ -7283,7 +7385,7 @@ export type Database = {
           created_at?: string
           embedding?: string
           id?: string
-          memory_type?: Database['public']['Enums']['memory_type']
+          memory_type?: Database["public"]["Enums"]["memory_type"]
           metadata?: Json
           session_id?: string
           updated_at?: string
@@ -7324,11 +7426,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'mine_blocks_site_id_fkey'
-            columns: ['site_id']
+            foreignKeyName: "mine_blocks_site_id_fkey"
+            columns: ["site_id"]
             isOneToOne: false
-            referencedRelation: 'sites'
-            referencedColumns: ['id']
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -7386,53 +7488,53 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'operational_delays_affected_machine_id_fkey'
-            columns: ['affected_machine_id']
+            foreignKeyName: "operational_delays_affected_machine_id_fkey"
+            columns: ["affected_machine_id"]
             isOneToOne: false
-            referencedRelation: 'machine_utilization_weekly'
-            referencedColumns: ['machine_id']
+            referencedRelation: "machine_utilization_weekly"
+            referencedColumns: ["machine_id"]
           },
           {
-            foreignKeyName: 'operational_delays_affected_machine_id_fkey'
-            columns: ['affected_machine_id']
+            foreignKeyName: "operational_delays_affected_machine_id_fkey"
+            columns: ["affected_machine_id"]
             isOneToOne: false
-            referencedRelation: 'machines'
-            referencedColumns: ['id']
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'operational_delays_created_by_fkey'
-            columns: ['created_by']
+            foreignKeyName: "operational_delays_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'operational_delays_delay_category_id_fkey'
-            columns: ['delay_category_id']
+            foreignKeyName: "operational_delays_delay_category_id_fkey"
+            columns: ["delay_category_id"]
             isOneToOne: false
-            referencedRelation: 'delay_categories'
-            referencedColumns: ['id']
+            referencedRelation: "delay_categories"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'operational_delays_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "operational_delays_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'operational_delays_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "operational_delays_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'operational_delays_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "operational_delays_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
         ]
       }
@@ -7571,25 +7673,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'personnel_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "personnel_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'personnel_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "personnel_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'personnel_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "personnel_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
         ]
       }
@@ -7599,7 +7701,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           daily_log_id: string
+          department_id: string
           id: string
+          log_date: string
           updated_at: string | null
           updated_by: string | null
           waste_tonnes: number
@@ -7609,7 +7713,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           daily_log_id: string
+          department_id: string
           id?: string
+          log_date: string
           updated_at?: string | null
           updated_by?: string | null
           waste_tonnes?: number
@@ -7619,32 +7725,55 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           daily_log_id?: string
+          department_id?: string
           id?: string
+          log_date?: string
           updated_at?: string | null
           updated_by?: string | null
           waste_tonnes?: number
         }
         Relationships: [
           {
-            foreignKeyName: 'production_logs_created_by_fkey'
-            columns: ['created_by']
+            foreignKeyName: "production_logs_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'production_logs_daily_log_id_fkey'
-            columns: ['daily_log_id']
+            foreignKeyName: "production_logs_daily_log_id_log_date_fkey"
+            columns: ["daily_log_id", "log_date"]
             isOneToOne: false
-            referencedRelation: 'daily_logs_legacy'
-            referencedColumns: ['id']
+            referencedRelation: "daily_logs"
+            referencedColumns: ["id", "log_date"]
           },
           {
-            foreignKeyName: 'production_logs_updated_by_fkey'
-            columns: ['updated_by']
+            foreignKeyName: "production_logs_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_logs_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
+          },
+          {
+            foreignKeyName: "production_logs_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
+          },
+          {
+            foreignKeyName: "production_logs_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -7725,7 +7854,7 @@ export type Database = {
           id: string
           idempotency_key: string | null
           incident_date: string
-          incident_type: Database['public']['Enums']['incident_type']
+          incident_type: Database["public"]["Enums"]["incident_type"]
           injured_parties: number
           last_synced_at: string | null
           location: string
@@ -7748,7 +7877,7 @@ export type Database = {
           id?: string
           idempotency_key?: string | null
           incident_date: string
-          incident_type: Database['public']['Enums']['incident_type']
+          incident_type: Database["public"]["Enums"]["incident_type"]
           injured_parties?: number
           last_synced_at?: string | null
           location: string
@@ -7771,7 +7900,7 @@ export type Database = {
           id?: string
           idempotency_key?: string | null
           incident_date?: string
-          incident_type?: Database['public']['Enums']['incident_type']
+          incident_type?: Database["public"]["Enums"]["incident_type"]
           injured_parties?: number
           last_synced_at?: string | null
           location?: string
@@ -7786,53 +7915,53 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'safety_incidents_category_id_fkey'
-            columns: ['category_id']
+            foreignKeyName: "safety_incidents_category_id_fkey"
+            columns: ["category_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_categories'
-            referencedColumns: ['id']
+            referencedRelation: "safety_incident_categories"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'safety_incidents_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "safety_incidents_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'safety_incidents_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "safety_incidents_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'safety_incidents_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "safety_incidents_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'safety_incidents_reported_by_fkey'
-            columns: ['reported_by']
+            foreignKeyName: "safety_incidents_reported_by_fkey"
+            columns: ["reported_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'safety_incidents_reviewed_by_fkey'
-            columns: ['reviewed_by']
+            foreignKeyName: "safety_incidents_reviewed_by_fkey"
+            columns: ["reviewed_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'safety_incidents_severity_id_fkey'
-            columns: ['severity_id']
+            foreignKeyName: "safety_incidents_severity_id_fkey"
+            columns: ["severity_id"]
             isOneToOne: false
-            referencedRelation: 'safety_severities'
-            referencedColumns: ['id']
+            referencedRelation: "safety_severities"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -7873,8 +8002,8 @@ export type Database = {
           id: string
           notes: string | null
           shift_date: string
-          shift_type: Database['public']['Enums']['shift_type']
-          status: Database['public']['Enums']['shift_status_type']
+          shift_type: Database["public"]["Enums"]["shift_type"]
+          status: Database["public"]["Enums"]["shift_status_type"]
           updated_at: string
         }
         Insert: {
@@ -7886,8 +8015,8 @@ export type Database = {
           id?: string
           notes?: string | null
           shift_date: string
-          shift_type: Database['public']['Enums']['shift_type']
-          status?: Database['public']['Enums']['shift_status_type']
+          shift_type: Database["public"]["Enums"]["shift_type"]
+          status?: Database["public"]["Enums"]["shift_status_type"]
           updated_at?: string
         }
         Update: {
@@ -7899,45 +8028,45 @@ export type Database = {
           id?: string
           notes?: string | null
           shift_date?: string
-          shift_type?: Database['public']['Enums']['shift_type']
-          status?: Database['public']['Enums']['shift_status_type']
+          shift_type?: Database["public"]["Enums"]["shift_type"]
+          status?: Database["public"]["Enums"]["shift_status_type"]
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: 'shift_status_approved_by_fkey'
-            columns: ['approved_by']
+            foreignKeyName: "shift_status_approved_by_fkey"
+            columns: ["approved_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'shift_status_closed_by_fkey'
-            columns: ['closed_by']
+            foreignKeyName: "shift_status_closed_by_fkey"
+            columns: ["closed_by"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'shift_status_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "shift_status_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'shift_status_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "shift_status_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'shift_status_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "shift_status_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
         ]
       }
@@ -7989,6 +8118,78 @@ export type Database = {
         }
         Relationships: []
       }
+      vector_search_cache: {
+        Row: {
+          access_count: number | null
+          cache_key: string
+          created_at: string
+          last_accessed_at: string
+          memory_type: string | null
+          query_params: Json
+          result_data: Json
+          ttl_seconds: number | null
+          user_id: string
+        }
+        Insert: {
+          access_count?: number | null
+          cache_key: string
+          created_at?: string
+          last_accessed_at?: string
+          memory_type?: string | null
+          query_params: Json
+          result_data: Json
+          ttl_seconds?: number | null
+          user_id: string
+        }
+        Update: {
+          access_count?: number | null
+          cache_key?: string
+          created_at?: string
+          last_accessed_at?: string
+          memory_type?: string | null
+          query_params?: Json
+          result_data?: Json
+          ttl_seconds?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vector_search_performance: {
+        Row: {
+          cache_hit: boolean | null
+          created_at: string
+          ef_search: number
+          execution_time_ms: number
+          id: string
+          match_count: number
+          result_count: number
+          search_type: string
+          user_id: string
+        }
+        Insert: {
+          cache_hit?: boolean | null
+          created_at?: string
+          ef_search: number
+          execution_time_ms: number
+          id?: string
+          match_count: number
+          result_count: number
+          search_type: string
+          user_id: string
+        }
+        Update: {
+          cache_hit?: boolean | null
+          created_at?: string
+          ef_search?: number
+          execution_time_ms?: number
+          id?: string
+          match_count?: number
+          result_count?: number
+          search_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       visitors: {
         Row: {
           check_in_time: string | null
@@ -8037,32 +8238,32 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'visitors_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "visitors_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'visitors_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "visitors_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'visitors_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "visitors_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'visitors_host_id_fkey'
-            columns: ['host_id']
+            foreignKeyName: "visitors_host_id_fkey"
+            columns: ["host_id"]
             isOneToOne: false
-            referencedRelation: 'personnel'
-            referencedColumns: ['id']
+            referencedRelation: "personnel"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -8108,11 +8309,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'webhook_delivery_logs_webhook_endpoint_id_fkey'
-            columns: ['webhook_endpoint_id']
+            foreignKeyName: "webhook_delivery_logs_webhook_endpoint_id_fkey"
+            columns: ["webhook_endpoint_id"]
             isOneToOne: false
-            referencedRelation: 'webhook_endpoints'
-            referencedColumns: ['id']
+            referencedRelation: "webhook_endpoints"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -8158,25 +8359,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'webhook_endpoints_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "webhook_endpoints_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'webhook_endpoints_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "webhook_endpoints_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'webhook_endpoints_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "webhook_endpoints_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
         ]
       }
@@ -8210,25 +8411,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'machines_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machines_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'departments'
-            referencedColumns: ['id']
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'machines_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machines_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'dept_production_summary'
-            referencedColumns: ['department_id']
+            referencedRelation: "dept_production_summary"
+            referencedColumns: ["department_id"]
           },
           {
-            foreignKeyName: 'machines_department_id_fkey'
-            columns: ['department_id']
+            foreignKeyName: "machines_department_id_fkey"
+            columns: ["department_id"]
             isOneToOne: false
-            referencedRelation: 'safety_incident_monthly'
-            referencedColumns: ['department_id']
+            referencedRelation: "safety_incident_monthly"
+            referencedColumns: ["department_id"]
           },
         ]
       }
@@ -8238,7 +8439,7 @@ export type Database = {
           department_name: string | null
           incident_count: number | null
           incident_month: string | null
-          incident_type: Database['public']['Enums']['incident_type'] | null
+          incident_type: Database["public"]["Enums"]["incident_type"] | null
           last_refreshed_at: string | null
           status: string | null
           total_injured_parties: number | null
@@ -8258,8 +8459,13 @@ export type Database = {
       }
     }
     Functions: {
+      add_partition_check_constraints: { Args: never; Returns: undefined }
       archive_monthly_control_room_shifts: { Args: never; Returns: undefined }
       archive_monthly_drill_operations: { Args: never; Returns: undefined }
+      archive_old_partitions: {
+        Args: { months_to_keep?: number }
+        Returns: undefined
+      }
       archive_telemetry_month: {
         Args: { p_year_month?: string }
         Returns: {
@@ -8268,9 +8474,44 @@ export type Database = {
         }[]
       }
       archive_weekly_access_logs: { Args: never; Returns: undefined }
+      cache_vector_search_results: {
+        Args: {
+          p_cache_key: string
+          p_memory_type?: string
+          p_query_params: Json
+          p_result_data: Json
+          p_ttl_seconds?: number
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      check_mv_freshness: {
+        Args: { p_max_age_minutes?: number; p_view_name: string }
+        Returns: {
+          age_minutes: number
+          is_fresh: boolean
+          last_refresh: string
+          mv_name: string
+          refresh_status: string
+        }[]
+      }
+      cleanup_vector_search_cache: { Args: never; Returns: number }
       create_next_month_partitions: { Args: never; Returns: undefined }
+      generate_vector_search_cache_key: {
+        Args: {
+          p_match_count: number
+          p_memory_type: string
+          p_similarity_threshold: number
+          p_user_id: string
+        }
+        Returns: string
+      }
       get_access_control_metrics_jsonb: {
         Args: { p_department_id: string }
+        Returns: Json
+      }
+      get_cached_vector_search: {
+        Args: { p_cache_key: string; p_user_id: string }
         Returns: Json
       }
       get_conversation_history: {
@@ -8300,8 +8541,8 @@ export type Database = {
           total_waste_tonnes: number | null
         }[]
         SetofOptions: {
-          from: '*'
-          to: 'dept_production_summary'
+          from: "*"
+          to: "dept_production_summary"
           isOneToOne: false
           isSetofReturn: true
         }
@@ -8332,8 +8573,8 @@ export type Database = {
           utilization_pct: number | null
         }[]
         SetofOptions: {
-          from: '*'
-          to: 'machine_utilization_weekly'
+          from: "*"
+          to: "machine_utilization_weekly"
           isOneToOne: false
           isSetofReturn: true
         }
@@ -8342,6 +8583,20 @@ export type Database = {
         Args: { dept_id: string }
         Returns: Json
       }
+      get_mv_refresh_stats: {
+        Args: { p_days?: number; p_view_name?: string }
+        Returns: {
+          avg_duration_ms: number
+          failed_refreshes: number
+          last_refresh: string
+          last_status: string
+          max_duration_ms: number
+          mv_name: string
+          skipped_refreshes: number
+          successful_refreshes: number
+          total_refreshes: number
+        }[]
+      }
       get_safety_incident_monthly: {
         Args: never
         Returns: {
@@ -8349,14 +8604,14 @@ export type Database = {
           department_name: string | null
           incident_count: number | null
           incident_month: string | null
-          incident_type: Database['public']['Enums']['incident_type'] | null
+          incident_type: Database["public"]["Enums"]["incident_type"] | null
           last_refreshed_at: string | null
           status: string | null
           total_injured_parties: number | null
         }[]
         SetofOptions: {
-          from: '*'
-          to: 'safety_incident_monthly'
+          from: "*"
+          to: "safety_incident_monthly"
           isOneToOne: false
           isSetofReturn: true
         }
@@ -8388,8 +8643,44 @@ export type Database = {
       has_department_access: { Args: { dept_id: string }; Returns: boolean }
       is_active: { Args: { record_deleted_at: string }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      log_mv_refresh_end: {
+        Args: {
+          p_error_message?: string
+          p_log_id: string
+          p_rows_affected?: number
+          p_status: string
+        }
+        Returns: undefined
+      }
+      log_mv_refresh_start: {
+        Args: {
+          p_is_concurrent?: boolean
+          p_triggered_by?: string
+          p_view_name: string
+        }
+        Returns: string
+      }
+      record_vector_search_performance: {
+        Args: {
+          p_cache_hit?: boolean
+          p_ef_search: number
+          p_execution_time_ms: number
+          p_match_count: number
+          p_result_count: number
+          p_search_type: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      refresh_dept_production_summary_smart: { Args: never; Returns: undefined }
+      refresh_machine_utilization_weekly_smart: {
+        Args: never
+        Returns: undefined
+      }
+      refresh_safety_incident_monthly_smart: { Args: never; Returns: undefined }
       search_memories_hybrid: {
         Args: {
+          ef_search?: number
           keyword_weight?: number
           match_count?: number
           p_memory_type?: string
@@ -8415,6 +8706,7 @@ export type Database = {
       }
       search_memories_semantic: {
         Args: {
+          ef_search?: number
           match_count?: number
           p_memory_type?: string
           p_session_id?: string
@@ -8433,23 +8725,20 @@ export type Database = {
         }[]
       }
       user_department_id: { Args: never; Returns: string }
-      exec_sql: {
-        Args: { sql: string }
-        Returns: Json
-      }
-      run_db_audit: { Args: never; Returns: Json }
-      repair_table: {
-        Args: { p_table_name: string; p_issue_category: string }
-        Returns: Json
-      }
     }
     Enums: {
-      incident_type: 'near-miss' | 'incident' | 'lost-time' | 'equipment-damage'
-      memory_type: 'episodic' | 'semantic'
+      incident_type: "near-miss" | "incident" | "lost-time" | "equipment-damage"
+      memory_type: "episodic" | "semantic"
       role_type:
-        'admin' | 'supervisor' | 'operator' | 'maintenance' | 'viewer' | 'trainer' | 'relief'
-      shift_status_type: 'open' | 'closed'
-      shift_type: 'day' | 'night'
+        | "admin"
+        | "supervisor"
+        | "operator"
+        | "maintenance"
+        | "viewer"
+        | "trainer"
+        | "relief"
+      shift_status_type: "open" | "closed"
+      shift_type: "day" | "night"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -8457,31 +8746,33 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
-    : never) = never,
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
-    ? (DefaultSchema['Tables'] & DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -8490,22 +8781,23 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    keyof DefaultSchema['Tables'] | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
-    : never) = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
-    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -8514,22 +8806,23 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    keyof DefaultSchema['Tables'] | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
-    : never) = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
-    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -8538,34 +8831,36 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    keyof DefaultSchema['Enums'] | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
-    : never) = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
-    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    keyof DefaultSchema['CompositeTypes'] | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
-    : never) = never,
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
-    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {
@@ -8574,11 +8869,20 @@ export const Constants = {
   },
   public: {
     Enums: {
-      incident_type: ['near-miss', 'incident', 'lost-time', 'equipment-damage'],
-      memory_type: ['episodic', 'semantic'],
-      role_type: ['admin', 'supervisor', 'operator', 'maintenance', 'viewer', 'trainer', 'relief'],
-      shift_status_type: ['open', 'closed'],
-      shift_type: ['day', 'night'],
+      incident_type: ["near-miss", "incident", "lost-time", "equipment-damage"],
+      memory_type: ["episodic", "semantic"],
+      role_type: [
+        "admin",
+        "supervisor",
+        "operator",
+        "maintenance",
+        "viewer",
+        "trainer",
+        "relief",
+      ],
+      shift_status_type: ["open", "closed"],
+      shift_type: ["day", "night"],
     },
   },
 } as const
+

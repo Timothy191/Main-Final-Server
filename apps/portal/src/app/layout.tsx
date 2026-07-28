@@ -123,6 +123,12 @@ export default function RootLayout({
           rel="dns-prefetch"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://*.supabase.co'}
         />
+        <link
+          rel="preload"
+          href="/auth-bg-poster.jpg"
+          as="image"
+          fetchPriority="high"
+        />
         <script
           type="speculationrules"
           dangerouslySetInnerHTML={{
@@ -135,6 +141,7 @@ export default function RootLayout({
                       {
                         href_matches: [
                           '/',
+                          '/login',
                           '/drilling/*',
                           '/production/*',
                           '/access-control/*',
@@ -180,7 +187,7 @@ export default function RootLayout({
             <WebVitalsReporter />
             <PWAInstallButton />
             {/* Global Navigation Header with proper landmark */}
-            <header role="banner" className="flex items-center gap-3">
+            <header role="banner" className="relative z-navigation flex items-center gap-3">
               <ArchMacMenuBar
                 leftSlot={<PartnerBrandStrip variant="taskbar" />}
                 rightSlot={
