@@ -38,12 +38,11 @@ const nextConfig = {
       expire: 86400,
     },
   },
-  // Custom cache handler backed by Redis for distributed L2 caching (Next.js 16)
+  cacheHandlers: {
+    default: require.resolve('./src/lib/next-cache-handler.ts'),
+  },
   experimental: {
-    cacheHandlers: {
-      default: require.resolve('./src/lib/next-cache-handler.ts'),
-    },
-    optimizePackageImports: ["lucide-react", "framer-motion", "@tremor/react"],
+    optimizePackageImports: ["framer-motion"],
     inlineCss: true,
     webVitalsAttribution: ["CLS", "LCP", "FCP", "TTFB", "INP"],
     viewTransition: true,
@@ -64,15 +63,17 @@ const nextConfig = {
     "@repo/ui",
     "@repo/supabase",
     "@repo/utils",
-    "@repo/redis",
     "@repo/theme",
     "@repo/rate-limiter",
     "@repo/logger",
     "@repo/contract",
     "@repo/database",
+    "@repo/redis",
   ],
   images: {
     formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 86400,
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },
@@ -88,18 +89,6 @@ const nextConfig = {
     },
   },
   reactStrictMode: true,
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.performance = {
-        hints: "warning",
-        maxAssetSize: 512000,
-        maxEntrypointSize: 1024000,
-        assetFilter: (assetFilename) =>
-          assetFilename.endsWith(".js") || assetFilename.endsWith(".css"),
-      };
-    }
-    return config;
-  },
   async headers() {
     return [
       {
