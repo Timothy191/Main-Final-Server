@@ -2,6 +2,18 @@
 
 This file maintains a record of AI agent interventions, context hand-offs, and architectural breadcrumbs for this specific package/app.
 
+## [2026-08-03] Run /runbook + /adr — employee-auth cache eviction runbook + ADR-001 (L1/L2 gap)
+
+- **Agent**: Claude Code (glm-5.2)
+- **Purpose**: Run the `/runbook` and `/adr` project commands end-to-end. Topic chosen = the `arch:auth:employee:<userId>` 300s staleness seam in `proxy.ts` `resolveEmployee` and the `POST /api/cache/invalidate { userId }` eviction hook — a real, under-documented auth-correctness path.
+- **Changes Made**:
+  - **`docs/runbooks/evict-employee-auth-cache.md`** (new): manual ops runbook to evict a stale employee-auth cache entry after a role/department change. Documents the eviction path honestly, including the **L1-only gap** — `cacheEvictL1ByPrefix` (`packages/redis/src/cache.ts:167`) clears the in-process L1 only and does NOT `redis.del`; `cacheGet` re-populates L1 from a stale L2 hit. So the endpoint alone gives single-pod freshness; cross-pod immediacy requires also `docker exec arch-redis-prod redis-cli -A "$REDIS_PASSWORD" DEL "arch:auth:employee:<userId>"`. Wired into `docs/runbooks/README.md` (new "Manual Operations" section) + WAYFINDER caching row.
+  - **`apps/portal/src/app/api/cache/invalidate/route.ts`**: added an `AGENT-TRACE` breadcrumb at the `cacheEvictL1ByPrefix` call site documenting the L1-only/L2-persistence gap and pointing to the runbook.
+  - **`docs/architecture/adr-001-cache-auth-eviction-l1-l2.md`** (new, Proposed): first ADR in `docs/architecture/`. Decision = upgrade the invalidation route to evict **both L1 and L2** (call `cacheDelete` alongside `cacheEvictL1ByPrefix`) **and** wire the admin role-change caller to invoke the endpoint with the target user's id. Rejects manual-only (footgun stays) and TTL-lowering (shifts not eliminates the window; hot-path cost). Wired into WAYFINDER caching row + REPO-CHANGE-INDEX.
+  - **`docs/REPO-CHANGE-INDEX.md`**: appended `architecture` + `runbooks` rows.
+- **Verification**: prettier on changed docs (REPO-CHANGE-INDEX table reflow, WAYFINDER, README) + `pnpm agents:verify` (AGENTS.md link sync) before commit.
+- **Next Agent Notes**: (a) ADR-001 action items 1–2 are the **real fix** — implement them to flip the ADR to Accepted and demote the runbook's manual `redis-cli DEL` step to a fallback. (b) The code-reviewer subagent's CRITICAL finding on the branch review independently flagged this same L1-only gap — strong cross-validation; resolving ADR-001 closes that finding too. (c) The admin role-change flow (e.g. `features/admin` user management) is **not yet wired** to call `/api/cache/invalidate { userId }` — that wiring is ADR-001 action item 2 and the largest remaining auth-coherence gap.
+
 ## [2026-08-03] Port knowledge-work-plugins beneficial slice (deploy-checklist, runbook, adr commands)
 
 - **Agent**: Claude Code (glm-5.2)

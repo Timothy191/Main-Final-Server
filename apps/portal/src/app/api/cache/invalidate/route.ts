@@ -67,6 +67,11 @@ export async function POST(request: Request) {
     // Evict the edge-proxy employee-auth cache for a specific user. Called by
     // the role-change flow so the proxy re-reads `employees` on the next
     // request instead of serving the pre-change role for up to 300s.
+    // AGENT-TRACE: `cacheEvictL1ByPrefix` clears the in-process L1 ONLY — it
+    // does not delete the Redis L2 key, so on multi-pod prod the stale value
+    // resurfaces for up to 300s (cacheGet re-populates L1 from L2). For
+    // immediate cross-pod freshness also `redis-cli DEL arch:auth:employee:<id>`.
+    // See docs/runbooks/evict-employee-auth-cache.md.
     let evictedUser = false
     if (userId) {
       cacheEvictL1ByPrefix(`arch:auth:employee:${userId}`)

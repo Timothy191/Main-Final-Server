@@ -27,6 +27,14 @@ Each runbook corresponds to a Prometheus alert rule defined in
 | `CacheRetriesElevated`      | See [circuit-breaker-open.md](./circuit-breaker-open.md)   |
 | `RedisNativeFallbackActive` | See [redis-connection-down.md](./redis-connection-down.md) |
 
+## Manual Operations (not alert-driven)
+
+Procedures run on-demand by an operator, not in response to a Prometheus alert.
+
+| Task                                                                                                               | Runbook                                                        |
+| ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| Force the edge proxy to re-read a user's role after a role/department change (evict `arch:auth:employee:<userId>`) | [evict-employee-auth-cache.md](./evict-employee-auth-cache.md) |
+
 ## Quick Reference
 
 ### Health Endpoints
