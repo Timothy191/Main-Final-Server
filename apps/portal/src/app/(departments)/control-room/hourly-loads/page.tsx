@@ -2,7 +2,7 @@ import { createServerSupabaseClient } from '@repo/supabase/server'
 import { GlassCard } from '@repo/ui/GlassCard'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { HourlyLoadsTable } from './HourlyLoadsTable'
+import { HourlyLoadsTable, type HourlyLoadRow } from './HourlyLoadsTable'
 
 export const metadata: Metadata = {
   title: 'Hourly Loads | Arch OS',
@@ -88,7 +88,7 @@ export default async function Page() {
 
       <GlassCard className="overflow-hidden">
         <HourlyLoadsTable
-          initialLoads={(loads || []) as any}
+          initialLoads={(loads || []) as unknown as HourlyLoadRow[]}
           excavators={excavators || []}
           sites={sites || []}
         />

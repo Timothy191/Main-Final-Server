@@ -37,12 +37,18 @@
 - **Feature-based organization** under `src/features/` (hub, monitoring, analytics, admin, access-control, auth, departments) — good separation of concerns.
 - **Turborepo pipeline** is well-configured with proper `dependsOn` chains (`^build`, `^lint`), caching, and environment variable tracking via `globalEnv`.
 - **API middleware layer** (`lib/api/`) with clear separation: `auth.ts` (requireAuth/requireRole/requireAdmin), `rate-limit-middleware.ts`, `ssrf-guard.ts`, `csrf-guard.ts`, `body-limit.ts`, `cors.ts`, `response.ts`, `api-guard.ts`.
+- **`@repo/theme` has a proper Style Dictionary token generation pipeline** with `sd.config.mjs`, `generate-tokens.mjs`, `validate-tokens.mjs`, CSS files (glass, animations, cards, focus, palette, reset, transitions), React components (theme-provider, theme-toggle), Tailwind preset, token tests (`palette.test.ts`), and `.stylelintrc.mjs` for CSS linting. This is a professional, well-tooled design system.
+- **`@repo/eslint-config`** has sophisticated rules preventing static imports of `@repo/supabase/server` in action files (requires dynamic `await import()` instead) to prevent Turbopack "module factory not available" errors.
+- **`lint-staged.config.mjs`** includes markdownlint for `.agents/knowledge/**/*.md` files — ensures documentation quality in the shared knowledge base.
 
 ### Issues
 
 - **README is stale/inconsistent**: Claims to be a "pnpm + Nx monorepo" but uses Turborepo, not Nx. Lists `apps/cms` and `apps/overview` that don't exist in the codebase. References `@repo/redis`, `@repo/eval`, and an `orchestrator.md` that aren't present. The README has a stray `# asd` at the end.
 - **`packages/database` uses SQLite** (`better-sqlite3` + `Kysely SqliteDialect`) but the README and docker-compose reference PostgreSQL. The `database.types.ts` and `query-builder.ts` exist but the actual DB dialect doesn't match the production stack (Supabase = PostgreSQL). This is a significant architectural mismatch.
-- **`@repo/logger` package** appears in the packages listing but its source structure is unclear — it's consumed via `serverLogger()` in `error-logger.ts` but the package's internal structure needs verification.
+- **`@repo/logger` package** is a proper structured logging utility with JSON format in production and human-readable in dev. However, its `withLogging()` HOC is a no-op stub (`return handler`) — functionality is advertised but not implemented.
+- **`@repo/departments/ui`** is a STUB package — just `export type {}` with a comment saying "Stub: actual department components will be added here". A workspace package that's essentially empty.
+- **`@repo/utils`** has a no-op analytics stub (`analytics.track()` only logs in dev when `DEBUG_ANALYTICS=1`) — another advertised-but-not-implemented pattern.
+- **`packages/rust-bindings/`** is referenced in `lint-staged.config.mjs` but not visible in the file listing — may be a deleted or excluded directory that should be cleaned up.
 
 ### Recommendations & Solutions
 
@@ -99,6 +105,12 @@
 - **Strict TypeScript config** at root (`"strict": true`, `target: "ES2022"`, `moduleResolution: "Bundler"`).
 - **Zod-powered env validation** (`lib/env.ts`) with production safety constraints (rejects localhost Supabase URLs and dummy keys in production).
 - **Contract package** uses Zod schemas for API input validation (`createWebhookSchema`, `telemetryPushSchema`, `syncPlaybackSchema`, `exportQuerySchema`).
+- **`noUncheckedIndexedAccess: true`** in `@repo/typescript-config/base.json` — this is a positive finding that enforces null checks on array/object index access.
+- **ESLint config** (`@repo/eslint-config/next.js`) has sophisticated rules:
+  - `@typescript-eslint/no-explicit-any` set to 'warn' (should be 'error')
+  - `@typescript-eslint/no-unused-vars` with proper ignore patterns (`^_` prefix)
+  - Restricts static imports of `@repo/supabase/server` in action files to prevent Turbopack "module factory not available" errors
+  - Requires dynamic `await import()` instead
 
 ### Issues
 
@@ -1461,3 +1473,8 @@ With focused effort on these five areas, this codebase could easily reach **8.5+
 | P3       | Add Renovate/Dependabot                           | Low    | Low    |
 | P3       | Add distributed tracing spans                     | High   | Medium |
 | P3       | Add CONTRIBUTING.md                               | Low    | Low    |
+| P1       | Implement `@repo/logger` `withLogging()` no-op     | Low    | Medium |
+| P1       | Implement `@repo/utils` analytics no-op            | Low    | Medium |
+| P2       | Implement or remove `@repo/departments/ui` stub    | Low    | Low    |
+| P2       | Clean up `packages/rust-bindings/` reference       | Low    | Low    |
+| P1       | Set `no-explicit-any` to 'error' in ESLint         | Low    | Medium |

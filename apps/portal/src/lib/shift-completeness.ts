@@ -1,3 +1,5 @@
+import type { SupabaseClient } from '@repo/supabase'
+
 export interface ShiftCompletenessResult {
   statuses: Array<{
     machineName: string
@@ -20,7 +22,7 @@ export async function getShiftCompleteness(
   date: string,
   shiftType: 'day' | 'night'
 ): Promise<ShiftCompletenessResult> {
-  const client = supabase as any
+  const client = supabase as SupabaseClient
 
   // 1. Fetch active machines for the department
   const { data: machines, error: machinesError } = await client
@@ -63,12 +65,12 @@ export async function getShiftCompleteness(
 
   // 4. Set of machine IDs with entries
   const entryMachineIds = new Set<string>([
-    ...(loads ?? []).map((l: any) => l.machine_id),
-    ...(ops ?? []).map((o: any) => o.machine_id),
+    ...(loads ?? []).map((l) => l.machine_id),
+    ...(ops ?? []).map((o) => o.machine_id),
   ])
 
   // 5. Map to statuses
-  const statuses = machines.map((m: any) => ({
+  const statuses = machines.map((m) => ({
     machineName: m.name,
     hasEntry: entryMachineIds.has(m.id),
     exempt: m.report_exempt ?? false,

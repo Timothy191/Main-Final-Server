@@ -147,3 +147,4 @@ acc.db
 acc.db-shm
 acc.db-wal
 
+node_modules

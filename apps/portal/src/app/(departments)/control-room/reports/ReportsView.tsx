@@ -60,7 +60,7 @@ interface GeneratedReportRow {
   pdf_url: string | null
   report_date: string
   shift_type: string | null
-  report_data: any
+  report_data: Record<string, string | number | boolean | null | undefined>
   creator: { full_name: string } | { full_name: string }[] | null
   template: { name: string } | { name: string }[] | null
 }
@@ -100,10 +100,8 @@ export function ReportsView({ reports }: ReportsViewProps) {
 
   useEffect(() => {
     const now = new Date()
-    const dateStr = now.toISOString().split('T')[0]
     const hour = now.getHours()
     const isDaytime = hour >= 6 && hour < 18
-    const shiftType = isDaytime ? 'day' : 'night'
 
     const diffTime = now.getTime() - ANCHOR_DATE.getTime()
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
@@ -216,7 +214,9 @@ export function ReportsView({ reports }: ReportsViewProps) {
 
   const rosterMap = Array.from({ length: 5 }, (_, i) => getRosterDayInfo(i))
 
-  const renderReportSummary = (data: any) => {
+  const renderReportSummary = (
+    data: Record<string, string | number | boolean | null | undefined>
+  ) => {
     if (!data || typeof data !== 'object') return null
     const summaries: string[] = []
     if (data.total_tonnage) summaries.push(`Tonnage: ${data.total_tonnage}t`)

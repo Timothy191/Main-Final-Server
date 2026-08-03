@@ -42,7 +42,7 @@ const HOUR_COLUMNS = [
   'hour_12',
 ] as const
 
-type HourlyLoadRow = {
+export type HourlyLoadRow = {
   id: string
   created_at: string
   load_date: string
@@ -215,46 +215,6 @@ export function HourlyLoadsTable({ initialLoads, excavators, sites }: HourlyLoad
   const coalOptions = [...basicCoal, ...adminCoal]
   const wasteOptions = [...basicWaste, ...adminWaste]
 
-  const getExcavatorName = (row: HourlyLoadRow) => {
-    const machine = Array.isArray(row.machines) ? row.machines[0] : row.machines
-    const dId = machine?.id
-    if (!dId || !machine?.assignments) return '—'
-
-    // Sort assignments by creation date ascending
-    const assignmentsList = Array.isArray(machine.assignments)
-      ? [...machine.assignments]
-      : [machine.assignments]
-    assignmentsList.sort(
-      (a: { created_at?: string }, b: { created_at?: string }) =>
-        (a.created_at || '').localeCompare(b.created_at || '')
-    )
-
-    // Find index of this load row in the dumper's sorted loads list
-    const dumperLoads = loadsByDumper[dId] || []
-    const index = dumperLoads.findIndex((l) => l.id === row.id)
-
-    if (index !== -1 && index < assignmentsList.length) {
-      const assignment = assignmentsList[index]
-      const activity = assignment?.excavator_activity
-      const activityData = Array.isArray(activity) ? activity[0] : activity
-      const excavatorMachine = activityData?.machine
-      const excavatorMachineData = Array.isArray(excavatorMachine)
-        ? excavatorMachine[0]
-        : excavatorMachine
-      return excavatorMachineData?.name ?? '—'
-    }
-
-    // Fallback to first assignment
-    const firstAssignment = assignmentsList[0]
-    const activity = firstAssignment?.excavator_activity
-    const activityData = Array.isArray(activity) ? activity[0] : activity
-    const excavatorMachine = activityData?.machine
-    const excavatorMachineData = Array.isArray(excavatorMachine)
-      ? excavatorMachine[0]
-      : excavatorMachine
-    return excavatorMachineData?.name ?? '—'
-  }
-
   const getExcavatorId = (row: HourlyLoadRow) => {
     const machine = Array.isArray(row.machines) ? row.machines[0] : row.machines
     const dId = machine?.id
@@ -264,9 +224,8 @@ export function HourlyLoadsTable({ initialLoads, excavators, sites }: HourlyLoad
     const assignmentsList = Array.isArray(machine.assignments)
       ? [...machine.assignments]
       : [machine.assignments]
-    assignmentsList.sort(
-      (a: { created_at?: string }, b: { created_at?: string }) =>
-        (a.created_at || '').localeCompare(b.created_at || '')
+    assignmentsList.sort((a: { created_at?: string }, b: { created_at?: string }) =>
+      (a.created_at || '').localeCompare(b.created_at || '')
     )
 
     // Find index of this load row in the dumper's sorted loads list
@@ -305,9 +264,8 @@ export function HourlyLoadsTable({ initialLoads, excavators, sites }: HourlyLoad
     const assignmentsList = Array.isArray(machine.assignments)
       ? [...machine.assignments]
       : [machine.assignments]
-    assignmentsList.sort(
-      (a: { created_at?: string }, b: { created_at?: string }) =>
-        (a.created_at || '').localeCompare(b.created_at || '')
+    assignmentsList.sort((a: { created_at?: string }, b: { created_at?: string }) =>
+      (a.created_at || '').localeCompare(b.created_at || '')
     )
 
     // Find index of this load row in the dumper's sorted loads list

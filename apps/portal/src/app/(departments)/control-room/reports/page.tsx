@@ -15,7 +15,7 @@ interface GeneratedReportRow {
   pdf_url: string | null
   report_date: string
   shift_type: string | null
-  report_data: any
+  report_data: Record<string, string | number | boolean | null | undefined>
   creator: { full_name: string } | { full_name: string }[] | null
   template: { name: string } | { name: string }[] | null
 }
