@@ -52,6 +52,7 @@ Thumbs.db
 # Testing
 coverage
 .playwright
+**/test-results/
 
 # Archives / backups (do not commit)
 Archive.tar.gz
