@@ -29,13 +29,12 @@ High-frequency telemetry from drilling rigs, excavators (C66), and field sensors
        ├── L1: Fast memory write
        └── L2: Redis Stream / PubSub topic: telemetry:events
                │
-               ├──────────────────────────────┐
-               ▼                              ▼
-    [ ops-gateway Subscriber ]    [ Inngest Batching Processor ]
-      (redis-subscriber.ts)          (syncPlaybackFn)
-               │                              │
-               ▼                              ▼
-    [ Realtime Dashboard Broadcast ] [ Supabase PostgreSQL Telemetry Log ]
+               ▼
+    [ Inngest Batching Processor ]
+      (syncPlaybackFn)
+               │
+               ▼
+    [ Supabase PostgreSQL Telemetry Log ]
 ```
 
 ---
@@ -69,7 +68,7 @@ Async jobs are orchestrated via **Inngest 4** through the portal route handler a
 
 1. **`syncPlaybackFn`**: Periodically syncs buffered telemetry playback points into chronological time-series tables.
 2. **`generateReportFn`**: Asynchronously renders heavy PDF reports (`@react-pdf/renderer`) and exports CSV datasets without blocking request threads.
-3. **`generateEmbeddingFn`**: Computes text vector embeddings using LLM services (`@repo/llm-config`) and updates Supabase `pgvector` columns.
+3. **`generateEmbeddingFn`**: Computes text vector embeddings via the portal embedding provider (`@/lib/ai/embedding-provider`, routing Ollama / OpenAI / router) and writes them to the Supabase `embedding_cache` table.
 4. **`memoryPersistFn`**: Flushes agent conversation logs and operational memory into database table `ai_memory`.
 5. **`shiftCompletenessCheckFn`**: Evaluates active shifts for missing supervisor sign-offs, unassigned machines, or missing log entries.
 6. **`orphanedRecordDetectionFn`**: Identifies and re-links dangling foreign keys or unindexed records across department tables.
@@ -97,15 +96,3 @@ Inbound and outbound webhooks rely on schema validation via `@repo/contract` and
            ▼
 [ Delivery Audit Log ] ── Written to /api/webhooks/[id]/logs
 ```
-
----
-
-## 5. Control Plane Event Dispatching & Polling (`apps/ops-gateway`)
-
-`apps/ops-gateway` operates continuous background pollers and subscriber loops to monitor monorepo health and execute MCP commands:
-
-1. **`redis-subscriber.ts`**: Listens on Redis Pub/Sub channels for system alerts, operational triggers, and incident events.
-2. **`eve-dispatcher.ts`**: Routes incoming event payloads to registered MCP tools or external webhooks.
-3. **`health-poller.ts`**: Periodically pings `/api/health/live` and `/api/health/ready` to record cluster uptime.
-4. **`audit-poller.ts`**: Polls `/api/ops/db/audit/status` to maintain real-time DB integrity status for MCP tool inspection.
-5. **`metrics-poller.ts`**: Scrapes `/api/metrics` and feeds time-series telemetry into internal incident engines (`incident/engine.ts`).

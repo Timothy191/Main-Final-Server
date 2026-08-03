@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-The **Arch Systems Portal** exposes 51 API route handlers in `apps/portal/src/app/api/` built on Next.js 16 App Router Route Handlers, alongside control-plane HTTP endpoints in `apps/ops-gateway` and GraphQL Mesh endpoints in `apps/api-gateway`.
+The **Arch Systems Portal** exposes 51 API route handlers in `apps/portal/src/app/api/` built on Next.js 16 App Router Route Handlers.
 
 ---
 
@@ -38,20 +38,20 @@ The **Arch Systems Portal** exposes 51 API route handlers in `apps/portal/src/ap
 
 ### Group C: Operational Control & Maintenance (`/api/ops/*` — 12 Routes)
 
-| Endpoint                       | Methods         | File Location                                              | Description & Behavior                                                    |
-| :----------------------------- | :-------------- | :--------------------------------------------------------- | :------------------------------------------------------------------------ |
-| `/api/ops/summary`             | `GET`           | `apps/portal/src/app/api/ops/summary/route.ts`             | System-wide operational metrics and department activity overview.         |
-| `/api/ops/config`              | `GET`, `POST`   | `apps/portal/src/app/api/ops/config/route.ts`              | Dynamic operational environment and threshold configurations.             |
-| `/api/ops/cache/clear`         | `POST`          | `apps/portal/src/app/api/ops/cache/clear/route.ts`         | Purges L1 memory cache and invalidates Redis tag keys (`cacheTag`).       |
-| `/api/ops/db/audit`            | `GET`, `POST`   | `apps/portal/src/app/api/ops/db/audit/route.ts`            | Initiates database consistency and index integrity checks.                |
-| `/api/ops/db/audit/status`     | `GET`           | `apps/portal/src/app/api/ops/db/audit/status/route.ts`     | Polls current progress of active database integrity audit tasks.          |
-| `/api/ops/db/query`            | `POST`          | `apps/portal/src/app/api/ops/db/query/route.ts`            | Restricted DB query analyzer endpoint for ops diagnostics.                |
-| `/api/ops/db/repair`           | `POST`          | `apps/portal/src/app/api/ops/db/repair/route.ts`           | Automated schema repair and sequence syncing utility.                     |
-| `/api/ops/gateway/[[...path]]` | `ALL`           | `apps/portal/src/app/api/ops/gateway/[[...path]]/route.ts` | Catch-all proxy route forwarding control-plane requests to `ops-gateway`. |
-| `/api/ops/queue/action`        | `POST`          | `apps/portal/src/app/api/ops/queue/action/route.ts`        | Manually triggers retry, purge, or pause actions on job queues.           |
-| `/api/ops/queue/counts`        | `GET`           | `apps/portal/src/app/api/ops/queue/counts/route.ts`        | Returns active, pending, and failed job counts across Inngest queues.     |
-| `/api/ops/rate-limit`          | `GET`, `DELETE` | `apps/portal/src/app/api/ops/rate-limit/route.ts`          | Rate limiter metrics inspection and IP unblock administration.            |
-| `/api/ops/trigger`             | `POST`          | `apps/portal/src/app/api/ops/trigger/route.ts`             | Programmatically dispatches operational events into event pipeline.       |
+| Endpoint                       | Methods         | File Location                                              | Description & Behavior                                                                                                                  |
+| :----------------------------- | :-------------- | :--------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/ops/summary`             | `GET`           | `apps/portal/src/app/api/ops/summary/route.ts`             | System-wide operational metrics and department activity overview.                                                                       |
+| `/api/ops/config`              | `GET`, `POST`   | `apps/portal/src/app/api/ops/config/route.ts`              | Dynamic operational environment and threshold configurations.                                                                           |
+| `/api/ops/cache/clear`         | `POST`          | `apps/portal/src/app/api/ops/cache/clear/route.ts`         | Purges L1 memory cache and invalidates Redis tag keys (`cacheTag`).                                                                     |
+| `/api/ops/db/audit`            | `GET`, `POST`   | `apps/portal/src/app/api/ops/db/audit/route.ts`            | Initiates database consistency and index integrity checks.                                                                              |
+| `/api/ops/db/audit/status`     | `GET`           | `apps/portal/src/app/api/ops/db/audit/status/route.ts`     | Polls current progress of active database integrity audit tasks.                                                                        |
+| `/api/ops/db/query`            | `POST`          | `apps/portal/src/app/api/ops/db/query/route.ts`            | Restricted DB query analyzer endpoint for ops diagnostics.                                                                              |
+| `/api/ops/db/repair`           | `POST`          | `apps/portal/src/app/api/ops/db/repair/route.ts`           | Automated schema repair and sequence syncing utility.                                                                                   |
+| `/api/ops/gateway/[[...path]]` | `ALL`           | `apps/portal/src/app/api/ops/gateway/[[...path]]/route.ts` | Authenticated catch-all proxy forwarding `/api/ops/gateway/*` to the portal's own `/api/ops/*` endpoints (same-origin internal bridge). |
+| `/api/ops/queue/action`        | `POST`          | `apps/portal/src/app/api/ops/queue/action/route.ts`        | Manually triggers retry, purge, or pause actions on job queues.                                                                         |
+| `/api/ops/queue/counts`        | `GET`           | `apps/portal/src/app/api/ops/queue/counts/route.ts`        | Returns active, pending, and failed job counts across Inngest queues.                                                                   |
+| `/api/ops/rate-limit`          | `GET`, `DELETE` | `apps/portal/src/app/api/ops/rate-limit/route.ts`          | Rate limiter metrics inspection and IP unblock administration.                                                                          |
+| `/api/ops/trigger`             | `POST`          | `apps/portal/src/app/api/ops/trigger/route.ts`             | Programmatically dispatches operational events into event pipeline.                                                                     |
 
 ---
 
@@ -112,13 +112,3 @@ The **Arch Systems Portal** exposes 51 API route handlers in `apps/portal/src/ap
 | `/api/log`                             | `POST`                         | `apps/portal/src/app/api/log/route.ts`                             | Client-side error and diagnostic log collector route.           |
 | `/api/tools/status`                    | `GET`                          | `apps/portal/src/app/api/tools/status/route.ts`                    | MCP tool execution status and health inspector.                 |
 | `/api/weather`                         | `GET`                          | `apps/portal/src/app/api/weather/route.ts`                         | Site weather station telemetry and ambient condition route.     |
-
----
-
-## 3. Gateway Endpoints (`apps/ops-gateway` & `apps/api-gateway`)
-
-| Service           | Port        | Endpoint       | Protocol / Implementation                | Purpose                                                          |
-| :---------------- | :---------- | :------------- | :--------------------------------------- | :--------------------------------------------------------------- |
-| **`ops-gateway`** | 3001 / 3002 | `/health`      | HTTP GET (`http-server.ts`)              | Control plane health probe returning gateway online status.      |
-| **`ops-gateway`** | 3001        | MCP STDIO/HTTP | Model Context Protocol (`mcp/server.ts`) | MCP tool registration, execution, and AI agent dispatching.      |
-| **`api-gateway`** | 4000        | `/graphql`     | GraphQL Mesh (`.meshrc.yaml`)            | Unified GraphQL API endpoint aggregating REST & OpenAPI sources. |

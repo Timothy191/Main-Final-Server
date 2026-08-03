@@ -19,30 +19,21 @@ The **Arch Systems Portal** monorepo is managed via **pnpm workspaces** and **Tu
       +--------------------+         +--------------------+         +--------------------+
                  |                              |                              |
                  +------------------------------+------------------------------+
-                                                |
-                                                v
-                               +----------------------------------+
-                               |     Control Plane / Gateway      |
-                               |  apps/ops-gateway (MCP Bridge)   |
-                               |  apps/api-gateway (GraphQL Mesh) |
-                               +----------------------------------+
 ```
 
 ---
 
 ## 2. Workspace Applications (`apps/`)
 
-| Application       | Path                | Technology                                                 | Primary Responsibility                                                                                                                               |
-| :---------------- | :------------------ | :--------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`portal`**      | `apps/portal/`      | Next.js 16 (App Router, React 19, Turbopack, Tailwind CSS) | Deployable primary enterprise web UI, 51 REST API route handlers, Server Actions, Inngest background job handler, and SSR/SSG department dashboards. |
-| **`ops-gateway`** | `apps/ops-gateway/` | Node.js, TypeScript, MCP Protocol, HTTP                    | Control-plane bridge hosting MCP tools, telemetry subscriber/poller, audit log polling, and incident engine.                                         |
-| **`api-gateway`** | `apps/api-gateway/` | GraphQL Mesh, OpenAPI, PostGraphile                        | Unified GraphQL schema mesh synthesizing REST and OpenAPI data sources into a single schema.                                                         |
+| Application  | Path           | Technology                                                 | Primary Responsibility                                                                                                                               |
+| :----------- | :------------- | :--------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`portal`** | `apps/portal/` | Next.js 16 (App Router, React 19, Turbopack, Tailwind CSS) | Deployable primary enterprise web UI, 51 REST API route handlers, Server Actions, Inngest background job handler, and SSR/SSG department dashboards. |
 
 ---
 
-## 3. Package Topology (`packages/` — 14 `@repo/*` Packages)
+## 3. Package Topology (`packages/` — 13 `@repo/*` Packages)
 
-The monorepo contains exactly **14 `@repo/*` shared packages**. Each package is framework-agnostic or domain-isolated:
+The monorepo contains exactly **13 `@repo/*` shared packages**. Each package is framework-agnostic or domain-isolated:
 
 ```text
 packages/
@@ -51,7 +42,6 @@ packages/
 ├── departments/         --> @repo/departments (Department UI components & routes)
 ├── errors/              --> @repo/errors (AppError hierarchy & status codes)
 ├── eslint-config/       --> @repo/eslint-config (Shared ESLint rule presets)
-├── llm-config/          --> @repo/llm-config (OpenAI / Anthropic LLM configs)
 ├── logger/              --> @repo/logger (Structured JSON server/client logger)
 ├── rate-limiter/        --> @repo/rate-limiter (Token Bucket & Sliding Window)
 ├── redis/               --> @repo/redis (Hybrid L1 RAM + L2 Redis cache mesh)
@@ -71,7 +61,6 @@ packages/
 | **`departments`**       | `@repo/departments`       | Department UI components (`/ui`), route maps                                                                                                            | Modular department-specific layout wrappers and component views.                              |
 | **`errors`**            | `@repo/errors`            | `AppError`, `NotFoundError`, `UnauthorizedError`, `ForbiddenError`, `ValidationError`, `InternalError`, `ConflictError`, `RateLimitError`, `isAppError` | Standardized application error hierarchy and HTTP response serialization.                     |
 | **`eslint-config`**     | `@repo/eslint-config`     | Shared ESLint configurations                                                                                                                            | Code style enforcement and linting rules.                                                     |
-| **`llm-config`**        | `@repo/llm-config`        | Prompt templates, model identifiers                                                                                                                     | AI/LLM model parameters and routing configurations.                                           |
 | **`logger`**            | `@repo/logger`            | `serverLogger`, `clientLogger`, `Logger`                                                                                                                | High-performance structured JSON logging for server and browser contexts.                     |
 | **`rate-limiter`**      | `@repo/rate-limiter`      | `TokenBucket`, `SlidingWindow`                                                                                                                          | Rate limiting algorithm implementations for API protection.                                   |
 | **`redis`**             | `@repo/redis`             | `Cache` class, `cache` singleton, `cacheWrap`, `cacheGet`, `cacheSet`                                                                                   | Hybrid L1 (in-memory LRU) + L2 (Redis cluster) multi-tier caching library.                    |

@@ -12,11 +12,11 @@ _Visualizes how projects, workspace packages, and build tasks depend on one anot
                  [ apps/portal ] ───────┐
                         │               │
                         ▼               ▼
-  [ packages/ui ] ──► [ @repo/contract ] ◄── [ apps/ops-gateway ]
+  [ packages/ui ] ──► [ @repo/contract ]
 ```
 
 - **Workspace Dependency Graph (Project Graph):**
-  - **What it shows:** Dependencies between apps (`apps/portal`, `apps/ops-gateway`, `apps/api-gateway`) and internal workspace packages (`packages/contract`, `packages/redis`, `packages/supabase`, `packages/theme`).
+  - **What it shows:** Dependencies between apps (`apps/portal`) and internal workspace packages (`packages/contract`, `packages/redis`, `packages/supabase`, `packages/theme`).
   - **Primary Value:** Prevents circular workspace dependencies and identifies high-risk shared packages.
   - **Tools:** `turbo graph` (Turborepo), `pnpm graph`.
 

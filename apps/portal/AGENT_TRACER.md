@@ -149,6 +149,8 @@ This file maintains a record of AI agent interventions, context hand-offs, and a
   - `scripts/dev.sh`: now starts Redis if missing, generates `apps/api/.env`, starts the NestJS API before the portal, health-checks it, and tears it down on exit.
 - **Next Agent**: The backend is reachable directly at `http://localhost:3004/api` and proxied through the portal at `/api/backend/*`. The API env is generated from the portal env by `scripts/generate-api-env.mjs`; prefer changing `API_PORT` env var over editing `apps/api/.env` directly.
 
+> **Status (2026-08-03, superseded):** The standalone `apps/api` NestJS service, `scripts/generate-api-env.mjs`, and the portal `/api/backend/*` proxy route were removed in the dead-app / agentic-layer cleanup. `API_BASE_URL` remains referenced only in `apps/portal/src/lib/env.ts` as an optional env var reserved for a future external backend.
+
 ## [2026-07-06] Convert Login Form to use Next.js Server Action
 
 - **Agent**: Antigravity

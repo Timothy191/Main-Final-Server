@@ -18,8 +18,6 @@
 │   │   │   ├── features/          # Feature-based domain components (hub, auth)
 │   │   │   ├── hooks/             # React hooks (metrics, offline queue, performance)
 │   │   │   └── lib/               # Shared portal business logic & API helpers
-│   ├── ops-gateway/               # Control-plane MCP dispatcher, bridge, & event subscriber
-│   └── api-gateway/               # API Gateway services
 │
 ├── packages/                      # Framework-agnostic shared libraries
 │   ├── contract/                  # Zod validation schemas & typed API contracts
