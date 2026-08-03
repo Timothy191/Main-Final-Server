@@ -1,40 +1,46 @@
-## Local Supabase Development
+## Local Self-Hosted Supabase Stack (On-Premise Architecture)
+
+This repository strictly uses an **On-Premise / Local Self-Hosted Supabase Docker Stack** (`pnpm supabase start`). This architecture ensures 100% offline reliability for industrial mine sites without external internet dependencies.
 
 ### Prerequisites
 
-Docker installed and running.  
-pnpm package manager.  
-Supabase CLI (installed via devDependencies).  
-A Supabase account with an existing project (for linking remote DB).
+- **Docker Engine** (installed and running)
+- **Node.js** 22+ & **pnpm** 9.15.9+
+- **Supabase CLI** (managed via workspace devDependencies)
 
-### Setup and Running Locally
+---
 
-1. Install dependencies: `pnpm install`.
-2. Initialize Supabase config: `pnpm run supabase:link`. This links your local DB with remote database smoothly.
-3. Start local Supabase: `pnpm run supabase:dev`. This runs a local stack (DB, auth, storage) using Docker.
-4. Access Supabase Studio: Open <http://127.0.0.1:54323> in your browser (URL from command output).
+### Running the Local Supabase Stack
 
-### Environment Variables
+1. **Install dependencies:** `pnpm install`
+2. **Start local Supabase stack:** `pnpm dev` (or `pnpm supabase:start`)
+   - Boots PostgreSQL, GoTrue Auth, PostgREST API Gateway, Realtime WebSockets, and Storage containers inside Docker.
+3. **Access Supabase Studio Dashboard:** Open <http://localhost:54323> in your browser.
 
-After running `pnpm run supabase:dev`, the output displays database URL (e.g., postgresql://postgres:postgres@127.0.0.1:54322/postgres ) and keys (anon key, service role key). Add these to `.env` in the project root:  
-SUPABASE_URL=<http://127.0.0.1:54321>  
-SUPABASE_ANON_KEY=eyJh... (from output)
+---
 
-For production, use values from your Supabase project dashboard.
+### Local Environment Variables (`.env.local`)
 
-### Linking and Syncing with Remote DB
+When running locally, default credentials connect directly to the local Docker containers:
 
-1. Link to remote project: Update the `supabase:link` script in package.json with your project ID (from Supabase dashboard URL), then run `pnpm run supabase:link`.
-2. Pull remote schema: `pnpm run supabase:pull`. This downloads remote changes to local migrations.
-3. Push local changes: `pnpm run supabase:push`. This applies local migrations to the remote DB.
+```env
+NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJh... (from local CLI output)
+SUPABASE_SERVICE_ROLE_KEY=eyJh... (from local CLI output)
+```
 
-For migrations, create new ones with `pnpx supabase migration new <name>`, edit the SQL file in `supabase/migrations/`, then push.
+---
+
+### Migration Management & Schema Updates
+
+1. Create a new migration file: `pnpm exec supabase migration new <migration_name>`
+2. Write raw SQL inside `packages/supabase/migrations/`
+3. Apply migrations to the local DB: `pnpm exec supabase db reset`
+
+---
 
 ### Best Practices
 
-- Commit all migration files to version control for team consistency and rollback.
-- Use local Supabase for development and testing; switch to remote for staging/production via environment variables.
-- Reset the local database with `supabase db reset` before applying major schema changes to avoid conflicts.
-- Never hardcode sensitive keys; always use environment variables and add them to `.gitignore`.
-- Enable and test Row Level Security (RLS) policies in the local Studio dashboard to catch issues early.
-- Pull remote changes frequently with `supabase db pull` to stay in sync with production schema.
+- All database schema updates **must** be stored as raw SQL migration scripts under `packages/supabase/migrations/`.
+- Row Level Security (RLS) policies are audited via `pnpm audit:rls` before deployment.
+- Never depend on external cloud connections during local development or mine-site operation.

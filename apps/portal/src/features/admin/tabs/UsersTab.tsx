@@ -9,6 +9,7 @@ import { Badge } from '@repo/ui/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog'
 import { Input } from '@repo/ui/components/ui/input'
 import { logError } from '@/lib/errors/error-logger'
+import { recordAdminAuditEvent } from '@/lib/audit'
 
 interface Employee {
   id: string
@@ -61,6 +62,9 @@ export function UsersTab() {
   }) => {
     if (!editingEmployee) return
 
+    const previousRole = editingEmployee.role
+    const previousDept = editingEmployee.department_id
+
     const { error } = await supabase
       .from('employees')
       .update({
@@ -75,6 +79,38 @@ export function UsersTab() {
         context: 'users_tab_update_employee',
       })
       return
+    }
+
+    // Record admin audit trail events for security-relevant changes.
+    try {
+      if (formData.role !== previousRole) {
+        await recordAdminAuditEvent({
+          action: 'user.role_changed',
+          entityType: 'employee',
+          entityId: editingEmployee.id,
+          details: {
+            full_name: editingEmployee.full_name,
+            from: previousRole,
+            to: formData.role,
+          },
+        })
+      }
+      if (formData.department_id !== previousDept) {
+        await recordAdminAuditEvent({
+          action: 'user.department_changed',
+          entityType: 'employee',
+          entityId: editingEmployee.id,
+          details: {
+            full_name: editingEmployee.full_name,
+            from: previousDept ?? null,
+            to: formData.department_id ?? null,
+          },
+        })
+      }
+    } catch (auditError) {
+      logError(auditError instanceof Error ? auditError : new Error(String(auditError)), {
+        context: 'users_tab_record_audit',
+      })
     }
 
     // Evict the edge-proxy auth cache for the TARGET user so `proxy.ts`

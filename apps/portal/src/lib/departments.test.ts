@@ -1,6 +1,7 @@
 import {
   DEPARTMENTS,
   DEPARTMENT_TABS,
+  PRODUCTION_TABS,
   CONTROL_ROOM_TABS,
   ENGINEERING_TABS,
   SATELLITE_MONITORING_TABS,
@@ -10,13 +11,16 @@ import {
   TRAINING_TABS,
   ADMIN_TABS,
   SAFETY_TABS,
+  ENVIRONMENT_TABS,
+  LOGISTICS_FLEET_TABS,
+  GEOLOGY_TABS,
   PRODUCTIVITY_TOOLS,
   getDepartmentTabs,
 } from './departments'
 
 describe('DEPARTMENTS', () => {
-  it('contains exactly 10 departments', () => {
-    expect(DEPARTMENTS).toHaveLength(10)
+  it('contains all active departments', () => {
+    expect(DEPARTMENTS).toHaveLength(13)
   })
 
   it('every department has required fields', () => {
@@ -91,11 +95,12 @@ describe('getDepartmentTabs', () => {
     expect(getDepartmentTabs('training')).toBe(TRAINING_TABS)
   })
 
-  it('returns standard DEPARTMENT_TABS for all other departments', () => {
-    const standardDepts = ['production']
-    for (const slug of standardDepts) {
-      expect(getDepartmentTabs(slug)).toBe(DEPARTMENT_TABS)
-    }
+  it('returns PRODUCTION_TABS for production', () => {
+    expect(getDepartmentTabs('production')).toBe(PRODUCTION_TABS)
+  })
+
+  it('returns standard DEPARTMENT_TABS for unknown slugs', () => {
+    expect(getDepartmentTabs('unknown-dept')).toBe(DEPARTMENT_TABS)
   })
 
   it('returns SAFETY_TABS for safety', () => {
@@ -114,8 +119,9 @@ describe('getDepartmentTabs', () => {
     expect(getDepartmentTabs('access-card-actions')).toBe(ACCESS_CARD_ACTIONS_TABS)
   })
 
-  it('returns standard DEPARTMENT_TABS for unknown slugs', () => {
-    expect(getDepartmentTabs('nonexistent')).toBe(DEPARTMENT_TABS)
+  it('PRODUCTION_TABS includes grade-control', () => {
+    const names = PRODUCTION_TABS.map((t) => t.name)
+    expect(names).toContain('grade-control')
   })
 })
 
@@ -151,5 +157,32 @@ describe('Tab shapes', () => {
     const names = SATELLITE_MONITORING_TABS.map((t) => t.name)
     expect(names).toContain('sar')
     expect(names).toContain('hyperspectral')
+  })
+
+  it('ENVIRONMENT_TABS, LOGISTICS_FLEET_TABS, and GEOLOGY_TABS are defined and have valid structure', () => {
+    expect(ENVIRONMENT_TABS.length).toBeGreaterThan(0)
+    expect(LOGISTICS_FLEET_TABS.length).toBeGreaterThan(0)
+    expect(GEOLOGY_TABS.length).toBeGreaterThan(0)
+    for (const tab of ENVIRONMENT_TABS) {
+      expect(tab.name).toBeTruthy()
+      expect(tab.label).toBeTruthy()
+      expect(tab.icon).toBeTruthy()
+    }
+    for (const tab of LOGISTICS_FLEET_TABS) {
+      expect(tab.name).toBeTruthy()
+      expect(tab.label).toBeTruthy()
+      expect(tab.icon).toBeTruthy()
+    }
+    for (const tab of GEOLOGY_TABS) {
+      expect(tab.name).toBeTruthy()
+      expect(tab.label).toBeTruthy()
+      expect(tab.icon).toBeTruthy()
+    }
+  })
+
+  it('getDepartmentTabs returns new department tabs', () => {
+    expect(getDepartmentTabs('environment')).toBe(ENVIRONMENT_TABS)
+    expect(getDepartmentTabs('logistics-fleet')).toBe(LOGISTICS_FLEET_TABS)
+    expect(getDepartmentTabs('geology')).toBe(GEOLOGY_TABS)
   })
 })

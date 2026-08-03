@@ -49,7 +49,7 @@ export default async function LoginPage() {
       {/* Login Card wrapper — centered between taskbar and dock */}
       <div className="login-card-shell relative z-10 w-full my-auto os-shell-enter-2 flex flex-col justify-center">
         {systemUnavailable ? (
-          <div className="os-shell os-shell--login w-full overflow-hidden">
+          <div className="os-shell os-shell--login w-full overflow-hidden" role="alert">
             <div className="login-card-chrome-x flex items-center gap-3 py-3 border-b border-border-subtle login-chrome-band">
               <div className="flex items-center gap-1.5 shrink-0" aria-hidden="true">
                 <span className="w-3 h-3 rounded-full bg-mac-red border border-border-subtle opacity-40" />
@@ -62,8 +62,10 @@ export default async function LoginPage() {
             </div>
             <div className="login-card-body space-y-4 text-center">
               <AlertTriangle className="w-8 h-8 text-accent-red mx-auto" strokeWidth={1.5} />
-              <h1 className="login-text-emphasis text-lg font-medium">System Unavailable</h1>
-              <p className="login-muted-text text-sm">
+              <h1 className="login-text-emphasis text-lg font-medium text-error-500">
+                System Unavailable
+              </h1>
+              <p className="login-muted-text text-sm text-error-400">
                 Unable to reach authentication services. Please try again shortly or contact IT
                 Support.
               </p>

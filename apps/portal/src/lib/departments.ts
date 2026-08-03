@@ -166,6 +166,54 @@ export const DEPARTMENTS: Department[] = [
     ],
   },
   {
+    name: 'environment',
+    displayName: 'Environment',
+    icon: 'Leaf',
+    description: 'Environmental monitoring & compliance (dust, water, noise, emissions)',
+    color: 'emerald',
+    type: 'standard',
+    status: 'active',
+    gridSpan: 'md:col-span-1 xl:col-span-1',
+    stats: { label: 'Compliance', value: '98%' },
+    trend: [96, 97, 97, 98, 98, 98, 98, 98],
+    actions: [
+      { label: 'Readings', href: '/environment/readings' },
+      { label: 'Compliance', href: '/environment/compliance' },
+    ],
+  },
+  {
+    name: 'logistics-fleet',
+    displayName: 'Logistics & Fleet',
+    icon: 'Truck',
+    description: 'Fleet tracking, fuel consumption & site logistics',
+    color: 'indigo',
+    type: 'standard',
+    status: 'active',
+    gridSpan: 'md:col-span-1 xl:col-span-1',
+    stats: { label: 'Active', value: '118' },
+    trend: [112, 114, 115, 116, 116, 117, 118, 118],
+    actions: [
+      { label: 'Fleet', href: '/logistics-fleet/fleet' },
+      { label: 'Fuel', href: '/logistics-fleet/fuel' },
+    ],
+  },
+  {
+    name: 'geology',
+    displayName: 'Geology & Survey',
+    icon: 'Mountain',
+    description: 'Survey measurements, mine blocks & geology data',
+    color: 'violet',
+    type: 'standard',
+    status: 'active',
+    gridSpan: 'md:col-span-1 xl:col-span-1',
+    stats: { label: 'Blocks', value: '24' },
+    trend: [18, 20, 21, 22, 23, 24, 24, 25],
+    actions: [
+      { label: 'Survey', href: '/geology/survey' },
+      { label: 'Mine Blocks', href: '/geology/blocks' },
+    ],
+  },
+  {
     name: 'admin',
     displayName: 'Admin',
     icon: 'ShieldCheck',
@@ -230,6 +278,17 @@ export const DEPARTMENT_TABS = [
   { name: 'tools', label: 'Tools', icon: 'Wrench' },
 ] as const
 
+/** Production specific tabs - includes grade control and yield reconciliation. */
+export const PRODUCTION_TABS = [
+  { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
+  { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
+  { name: 'grade-control', label: 'Grade Control', icon: 'TestTube' },
+  { name: 'machines', label: 'Machines', icon: 'Cpu' },
+  { name: 'history', label: 'History', icon: 'History' },
+  { name: 'reports', label: 'Reports', icon: 'FileText' },
+  { name: 'tools', label: 'Tools', icon: 'Wrench' },
+] as const
+
 /**
  * Control Room specific tabs - optimized for mining operations monitoring
  * with automation-focused design for operators
@@ -262,6 +321,7 @@ export const SATELLITE_MONITORING_TABS = [
   { name: 'sar', label: 'SAR / InSAR', icon: 'Radio' },
   { name: 'hyperspectral', label: 'Hyperspectral', icon: 'Layers' },
   { name: 'highres', label: 'High-Res', icon: 'ScanSearch' },
+  { name: 'alerts', label: 'Alerts', icon: 'BellRing' },
 ] as const
 
 /**
@@ -269,7 +329,8 @@ export const SATELLITE_MONITORING_TABS = [
  */
 export const DRILLING_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
-  { name: 'drilling-operations', label: 'Drilling Operations', icon: 'Drill' },
+  { name: 'drilling-operations', label: 'Drill Operations', icon: 'Drill' },
+  { name: 'blast-design', label: 'Blast Design', icon: 'Crosshair' },
   { name: 'machine-telemetry', label: 'Machine Telemetry', icon: 'Activity' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
 ] as const
@@ -292,6 +353,7 @@ export const ACCESS_CARD_ACTIONS_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
   { name: 'card-actions', label: 'Card Actions', icon: 'CreditCard' },
   { name: 'print-cards', label: 'Print Cards', icon: 'Printer' },
+  { name: 'print-history', label: 'Print History', icon: 'History' },
   { name: 'qr-codes', label: 'QR Codes', icon: 'QrCode' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
 ] as const
@@ -303,14 +365,20 @@ export const TRAINING_TABS = [
   { name: 'dashboard', label: 'Overview', icon: 'BarChart2' },
   { name: 'certifications', label: 'Certifications', icon: 'ShieldCheck' },
   { name: 'courses', label: 'Courses & LMS', icon: 'GraduationCap' },
+  { name: 'trainees', label: 'Trainees', icon: 'Users' },
+  { name: 'instructors', label: 'Instructors', icon: 'UserCheck' },
   { name: 'schedules', label: 'Schedules', icon: 'Clock' },
+  { name: 'archive', label: 'Archived Docs', icon: 'Archive' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
 ] as const
 
 export const SAFETY_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
   { name: 'daily-log', label: 'Daily Log', icon: 'ClipboardList' },
+  { name: 'observations', label: 'Observations', icon: 'Eye' },
+  { name: 'jsa', label: 'JSA', icon: 'FileCheck' },
   { name: 'audit-dashboard', label: 'Audit Logs', icon: 'ShieldCheck' },
+  { name: 'archive', label: 'Archived Docs', icon: 'Archive' },
   { name: 'machines', label: 'Machines', icon: 'Cpu' },
   { name: 'history', label: 'History', icon: 'History' },
   { name: 'reports', label: 'Reports', icon: 'FileText' },
@@ -322,6 +390,34 @@ export const ADMIN_TABS = [
   { name: 'dashboard', label: 'Dashboard', icon: 'BarChart2' },
   { name: 'personnel', label: 'Personnel', icon: 'Users' },
   { name: 'shifts', label: 'Shifts', icon: 'Clock' },
+  { name: 'audit-trail', label: 'Audit Trail', icon: 'ShieldCheck' },
+] as const
+
+/** Environment specific tabs - focused on environmental monitoring & compliance. */
+export const ENVIRONMENT_TABS = [
+  { name: 'dashboard', label: 'Overview', icon: 'BarChart2' },
+  { name: 'readings', label: 'Readings', icon: 'Activity' },
+  { name: 'incidents', label: 'Incidents', icon: 'AlertTriangle' },
+  { name: 'compliance', label: 'Compliance', icon: 'ShieldCheck' },
+  { name: 'reports', label: 'Reports', icon: 'FileText' },
+] as const
+
+/** Logistics & Fleet specific tabs - focused on fleet tracking, fuel & logistics. */
+export const LOGISTICS_FLEET_TABS = [
+  { name: 'dashboard', label: 'Overview', icon: 'BarChart2' },
+  { name: 'fleet', label: 'Fleet', icon: 'Truck' },
+  { name: 'fuel', label: 'Fuel', icon: 'Fuel' },
+  { name: 'maintenance', label: 'Maintenance', icon: 'Wrench' },
+  { name: 'reports', label: 'Reports', icon: 'FileText' },
+] as const
+
+/** Geology & Survey specific tabs - focused on survey, mine blocks & geology data. */
+export const GEOLOGY_TABS = [
+  { name: 'dashboard', label: 'Overview', icon: 'BarChart2' },
+  { name: 'survey', label: 'Survey', icon: 'Ruler' },
+  { name: 'blocks', label: 'Mine Blocks', icon: 'Layers' },
+  { name: 'survey-plans', label: 'Survey Plans', icon: 'ClipboardList' },
+  { name: 'reports', label: 'Reports', icon: 'FileText' },
 ] as const
 
 /**
@@ -355,6 +451,18 @@ export function getDepartmentTabs(departmentName: string) {
   }
   if (departmentName === 'admin') {
     return ADMIN_TABS
+  }
+  if (departmentName === 'environment') {
+    return ENVIRONMENT_TABS
+  }
+  if (departmentName === 'logistics-fleet') {
+    return LOGISTICS_FLEET_TABS
+  }
+  if (departmentName === 'geology') {
+    return GEOLOGY_TABS
+  }
+  if (departmentName === 'production') {
+    return PRODUCTION_TABS
   }
   return DEPARTMENT_TABS
 }

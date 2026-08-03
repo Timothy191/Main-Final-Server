@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm build:cache-handler && next dev --turbopack --hostname 0.0.0.0",
-    "build:cache-handler": "tsc src/lib/next-cache-handler.ts --outDir dist/lib --target esnext --module esnext --moduleResolution bundler --skipLibCheck",
+    "build:cache-handler": "tsc -p tsconfig.cache-handler.json",
     "build": "pnpm build:cache-handler && node scripts/generate-openapi-spec.js && next build",
     "build:analyze": "ANALYZE=true next build",
     "start": "next start --hostname 0.0.0.0",
@@ -34,7 +34,7 @@
     "inngest": "^4.4.0",
     "js-yaml": "^4.1.0",
     "lucide-react": "^0.469.0",
-    "next": "^16.2.6",
+    "next": "16.2.10",
     "next-swagger-doc": "^0.4.1",
     "qr-code-styling": "^1.9.2",
     "react": "^19.0.0",
@@ -42,8 +42,7 @@
     "recharts": "^2.15.0",
     "sonner": "^2.0.1",
     "zod": "^3.24.0",
-    "@vercel/otel": "^1.10.1",
-    "swagger-ui-react": "^5.18.2"
+    "@vercel/otel": "^1.10.1"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.6",

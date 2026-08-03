@@ -21,6 +21,18 @@ Architectural designs, scalability references, and gap analyses.
 - [Foundational Architecture & Gap Analysis](file:///home/arch/Desktop/New%20Folder/arch-systems-portal/docs/architecture/foundational-architecture-gap-analysis.md) — Comprehensive gap analysis of the existing layers.
 - [Scalability & Architecture Reference](file:///home/arch/Desktop/New%20Folder/arch-systems-portal/docs/architecture/scalability-architecture-reference.md) — Core scalability guidelines and design principles.
 
+### 🛡️ [Compliance](./compliance/)
+
+Compliance framework mapping industrial/mining regulations to the operational
+software stack, with system criticality classification, validation strategy, and
+governance.
+
+- [Compliance Architecture](./compliance/compliance-architecture.md) — Top-level
+  framework: system inventory (SI-ARCH-2026-001), criticality classification
+  (SCC-ARCH-2026-001), GAMP 5 categories, regulatory traceability
+  (RRTM-ARCH-2026-001), validation strategy, governance, and an assumptions /
+  remediation log. Draft — assumptions in §10 must be confirmed before approval.
+
 ### 🔍 [Audits](file:///home/arch/Desktop/New%20Folder/arch-systems-portal/docs/audits/)
 
 Codebase audits, duplication analyses, and type error logs.

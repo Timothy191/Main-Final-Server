@@ -462,7 +462,7 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                         {detail.job_title ?? 'No title'}
                       </p>
                     </div>
-                    <StatusPill status={detail.status} />
+                    <StatusPill status={detail.status ?? 'active'} />
                   </div>
                   <div className="flex items-center gap-3 mt-2 text-xs text-arch-text-muted">
                     <span className="font-mono">#{detail.emp_code}</span>
@@ -547,7 +547,8 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                       <span>
                         Issued card:
                         <span className="text-arch-text-primary ml-1">
-                          {detail.issued_card.status}
+                          {detail.issued_card.status ??
+                            (detail.issued_card.is_active ? 'Active' : 'Inactive')}
                         </span>
                       </span>
                       {detail.issued_card.expires_at && (

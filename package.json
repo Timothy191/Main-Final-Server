@@ -40,19 +40,26 @@
     "production-test:url": "bash scripts/production-test-suite.sh --url",
     "production-test:strict": "bash scripts/production-test-suite.sh --strict",
     "production-test:json": "bash scripts/production-test-suite.sh --json",
-    "production-test:ci": "bash scripts/production-test-suite.sh --strict --json"
+    "production-test:ci": "bash scripts/production-test-suite.sh --strict --json",
+    "audit:knip": "knip",
+    "db:codegen": "kysely-codegen --out-file packages/supabase/src/db-types.ts",
+    "size:check": "size-limit"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",
     "@commitlint/config-conventional": "^21.0.1",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@size-limit/file": "^11.1.6",
     "eslint": "^8.57.0",
     "husky": "^9.1.7",
-    "lint-staged": "^17.0.7",
-    "prettier": "^3.4.2",
-    "tsx": "^4.0.0",
-    "turbo": "^2.10.2",
+    "knip": "^5.45.0",
+    "kysely-codegen": "^0.17.0",
+    "lint-staged": "^17.3.0",
+    "prettier": "^3.9.6",
+    "size-limit": "^11.1.6",
+    "tsx": "^4.23.5",
+    "turbo": "^2.10.8",
     "typescript": "^5.7.0",
     "zod": "^3.24.0"
   }

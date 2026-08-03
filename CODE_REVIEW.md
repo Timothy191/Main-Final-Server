@@ -359,6 +359,15 @@ export async function runApiGuards(
 - **`resolveEmployee` caches auth data for 3600s (1 hour)** — if an employee's role or department access changes, they retain elevated access for up to an hour. This is a **privilege escalation window**.
 - **Rate limiter fails open**: `catch { return { allowed: true, ... } }` — if Redis is down, all rate limits are bypassed. This is a deliberate availability-over-security tradeoff but should be documented and optionally configurable.
 - **`api-guard.ts` uses a shared rate limit identifier** (`'api-guard-id'`) — all routes using `runApiGuards` share the same rate limit bucket, which means a burst to one route consumes the quota for all others.
+- **🔴 CRITICAL: Grafana default credentials in production**: `docker-compose.production.yml` sets `GRAFANA_ADMIN_USER: admin` and `GRAFANA_ADMIN_PASSWORD: admin` as defaults — if `GRAFANA_ADMIN_PASSWORD` env var is not set, production Grafana is accessible with `admin/admin`.
+- **🔴 CRITICAL: Redis has no password in production**: `docker-compose.production.yml` runs Redis with `redis-server --appendonly yes --maxmemory 256mb` — no `requirepass` configured. Any container on the network can access Redis without authentication.
+- **🔴 CRITICAL: Monitoring stack exposed to the internet**: Prometheus (`9090`), Alertmanager (`9093`), and Grafana (`3001`) are all exposed with `ports:` mappings in production docker-compose — these should be internal-only or behind authentication.
+- **`SUPABASE_SERVICE_ROLE_KEY` passed as env var to container**: The service-role key bypasses all RLS — if the container is compromised, the attacker has full database access.
+- **`.npmrc` has `shamefully-hoist=true`**: This hoists all dependencies to the root `node_modules`, potentially bypassing dependency isolation and creating a larger attack surface for supply chain attacks.
+- **`.npmrc` has `strict-peer-dependencies=false`**: Allows mismatched peer dependencies, which could cause runtime issues or security vulnerabilities.
+- **`SKIP_TYPE_CHECK=true`** can skip TypeScript errors during build — if accidentally set in production, type errors won't block deployment.
+- **ESLint `caughtErrors: "none"`** in no-unused-vars config — caught errors are never checked for usage, which could hide bugs where errors are caught but never handled or logged.
+- **E2E tests aren't linted** — `e2e/` directory is in ESLint's `ignorePatterns`, meaning E2E test code quality isn't enforced.
 
 ### Recommendations & Solutions
 
@@ -1473,8 +1482,113 @@ With focused effort on these five areas, this codebase could easily reach **8.5+
 | P3       | Add Renovate/Dependabot                           | Low    | Low    |
 | P3       | Add distributed tracing spans                     | High   | Medium |
 | P3       | Add CONTRIBUTING.md                               | Low    | Low    |
-| P1       | Implement `@repo/logger` `withLogging()` no-op     | Low    | Medium |
-| P1       | Implement `@repo/utils` analytics no-op            | Low    | Medium |
-| P2       | Implement or remove `@repo/departments/ui` stub    | Low    | Low    |
-| P2       | Clean up `packages/rust-bindings/` reference       | Low    | Low    |
-| P1       | Set `no-explicit-any` to 'error' in ESLint         | Low    | Medium |
+| P1       | Implement `@repo/logger` `withLogging()` no-op    | Low    | Medium |
+| P1       | Implement `@repo/utils` analytics no-op           | Low    | Medium |
+| P2       | Implement or remove `@repo/departments/ui` stub   | Low    | Low    |
+| P2       | Clean up `packages/rust-bindings/` reference      | Low    | Low    |
+| P1       | Set `no-explicit-any` to 'error' in ESLint        | Low    | Medium |
+
+---
+
+## Code Critique — Additional Critical Findings
+
+> The following items were discovered during a deeper code critique that questioned every assumption and explored files not covered in the initial review (Dockerfile, docker-compose.production.yml, .env.example, .npmrc, CLAUDE.md, .eslintrc.cjs).
+
+### 🔴 P0 — Critical Security Issues in Production Deployment
+
+#### 1. Grafana default credentials in production
+
+**Problem**: `docker-compose.production.yml` sets `GRAFANA_ADMIN_USER: admin` and `GRAFANA_ADMIN_PASSWORD: admin` as defaults. If the `GRAFANA_ADMIN_PASSWORD` env var is not set, production Grafana is accessible with `admin/admin`.
+**Solution**: Remove the default value and fail if not set:
+
+```yaml
+GRAFANA_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
+GRAFANA_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
+```
+
+#### 2. Redis has no password in production
+
+**Problem**: `docker-compose.production.yml` runs Redis with `redis-server --appendonly yes --maxmemory 256mb` — no `requirepass` configured. Any container on the network can access Redis without authentication.
+**Solution**: Add Redis password:
+
+```yaml
+command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required} --loglevel warning
+```
+
+#### 3. Monitoring stack exposed to the internet
+
+**Problem**: Prometheus (`9090`), Alertmanager (`9093`), and Grafana (`3001`) are all exposed with `ports:` mappings in production docker-compose. These should be internal-only or behind authentication.
+**Solution**: Use `expose:` instead of `ports:` for Prometheus and Alertmanager (only accessible within the Docker network). For Grafana, keep `ports:` but ensure strong authentication and add IP restrictions or a reverse proxy.
+
+#### 4. FUXA uses `:latest` tag
+
+**Problem**: `image: frangoteam/fuxa:latest` — no version pinning, could break unexpectedly on a new release.
+**Solution**: Pin to a specific version: `image: frangoteam/fuxa:v2.x.x`
+
+#### 5. `.npmrc` has `shamefully-hoist=true`
+
+**Problem**: This hoists all dependencies to the root `node_modules`, potentially bypassing dependency isolation and creating a larger attack surface for supply chain attacks.
+**Solution**: Remove `shamefully-hoist=true` and fix any resolution issues that arise. Use `public-hoist-pattern` for specific packages that need it.
+
+#### 6. `SUPABASE_SERVICE_ROLE_KEY` passed as env var
+
+**Problem**: The service-role key bypasses all RLS — if the container is compromised, the attacker has full database access.
+**Solution**: Consider using a secrets manager (Docker Secrets, HashiCorp Vault) instead of environment variables for sensitive keys.
+
+### 🟡 P1 — Stale Documentation & Configuration Issues
+
+#### 7. CLAUDE.md is stale and inconsistent
+
+**Problem**: `apps/portal/CLAUDE.md` has multiple inaccuracies:
+
+- Says "It is currently detached from that workspace" — but it IS in the workspace
+- References `NestJS backend` at `API_BASE_URL` — but no NestJS backend exists in this codebase
+- References `(hub)/` route group — but actual code uses `app/hub/` not `app/(hub)/`
+- References `next-pwa` — but PWA plugins are disabled in next.config.mjs
+- References `plugins/rust-telemetry-engine/` — but this directory isn't visible
+- Says "Coverage is collected from `lib/`, `features/`, `app/`, `components/`, `hooks/`, and `proxy.ts`" — but jest.config.cjs doesn't have coverage collection configured
+- Mentions `.env.production.example` and `.env.portal.compose.example` — but these files aren't visible
+
+**Solution**: Update CLAUDE.md to accurately reflect the current state of the codebase.
+
+#### 8. `SKIP_TYPE_CHECK=true` can skip TypeScript errors in build
+
+**Problem**: If accidentally set in production, type errors won't block deployment.
+**Solution**: Remove the `SKIP_TYPE_CHECK` option or make it CI-only (already partially done in next.config.mjs, but should be documented as dangerous).
+
+#### 9. E2E tests aren't linted
+
+**Problem**: `e2e/` directory is in ESLint's `ignorePatterns`, meaning E2E test code quality isn't enforced.
+**Solution**: Create a separate ESLint config for E2E tests with relaxed rules, or remove `e2e/` from ignorePatterns.
+
+#### 10. ESLint `caughtErrors: "none"` hides unhandled errors
+
+**Problem**: Caught errors are never checked for usage, which could hide bugs where errors are caught but never handled or logged.
+**Solution**: Change to `caughtErrors: "all"` or at least `caughtErrors: "warn"`.
+
+### 🟢 P2 — Additional Findings
+
+#### 11. No nginx Dockerfile visible
+
+**Problem**: `docker-compose.production.yml` references `devops/nginx/Dockerfile` which isn't in the file listing.
+**Solution**: Verify the nginx Dockerfile exists or create it.
+
+#### 12. Dockerfile `COPY . .` copies entire repo
+
+**Problem**: The pruner stage copies the entire repo including potentially sensitive files.
+**Solution**: Verify `.dockerignore` is comprehensive and excludes `.env*`, `_appdata/`, `*.db`, `.git/`, etc.
+
+#### 13. `.env.example` missing key variables
+
+**Problem**: `NEXT_PUBLIC_APP_URL` (needed by CSRF guard) and `DATABASE_URL` (needed by env.ts validation) are not in `.env.example`.
+**Solution**: Add all required environment variables to `.env.example`.
+
+#### 14. `.env.example` has 14 AI providers
+
+**Problem**: The `.env.example` has configuration for 14 different AI providers — this is a massive configuration surface that's mostly commented out.
+**Solution**: Move AI provider configuration to a separate `.env.ai.example` or documentation file.
+
+#### 15. Redis configuration inconsistency
+
+**Problem**: Dev docker-compose uses `--save "" --appendonly no` (no persistence), production uses `--appendonly yes` (persistence enabled). This inconsistency could cause different behavior between environments.
+**Solution**: Document the intentional difference or align the configurations.

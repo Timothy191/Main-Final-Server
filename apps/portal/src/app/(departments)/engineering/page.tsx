@@ -1,8 +1,6 @@
 import { getDepartmentContext } from '@/lib/dept-context'
 import { GlassCard } from '@repo/ui/GlassCard'
-import { createReadReplicaClient } from '@repo/supabase/read-replica'
 import Link from 'next/link'
-import { cacheLife, cacheTag } from 'next/cache'
 import {
   AlertTriangle,
   CircleDot,
@@ -11,63 +9,18 @@ import {
   TrendingUp,
   ArrowRight,
 } from 'lucide-react'
-import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
-
-async function getEngineeringHubData(deptId: string) {
-  'use cache'
-  cacheLife('5 minutes')
-  cacheTag(
-    DEPARTMENT_CACHE_TAGS.ENGINEERING,
-    DEPARTMENT_CACHE_TAGS.TABLE_BREAKDOWNS,
-    `dept:engineering:${deptId}`
-  )
-
-  const db = await createReadReplicaClient()
-
-  const [
-    { count: activeBreakdowns },
-    { count: resolvedToday },
-    { data: recentBreakdowns },
-    { count: tireAlerts },
-  ] = await Promise.all([
-    db
-      .from('breakdowns')
-      .select('*', { count: 'exact', head: true })
-      .eq('department_id', deptId)
-      .eq('status', 'active')
-      .is('deleted_at', null),
-    db
-      .from('breakdowns')
-      .select('*', { count: 'exact', head: true })
-      .eq('department_id', deptId)
-      .eq('status', 'completed')
-      .gte('updated_at', new Date(Date.now() - 86400000).toISOString()),
-    db
-      .from('breakdowns')
-      .select('id, machine_name, reason, priority, created_at')
-      .eq('department_id', deptId)
-      .eq('status', 'active')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
-      .limit(5),
-    Promise.resolve({ count: 0, data: null, error: null }),
-  ])
-
-  return {
-    activeBreakdowns: activeBreakdowns ?? 0,
-    resolvedToday: resolvedToday ?? 0,
-    recentBreakdowns: recentBreakdowns || [],
-    tireAlerts: tireAlerts ?? 0,
-  }
-}
+import { getEngineeringMetrics, getRecentBreakdowns } from './actions'
 
 export default async function EngineeringDashboardPage() {
   const { deptId } = await getDepartmentContext({
     department: 'engineering',
   })
 
-  const { activeBreakdowns, resolvedToday, recentBreakdowns, tireAlerts } =
-    await getEngineeringHubData(deptId)
+  const [metrics, recentBreakdowns] = await Promise.all([
+    getEngineeringMetrics(deptId),
+    getRecentBreakdowns(deptId, 5),
+  ])
+  const { activeBreakdowns, resolvedToday, tireCritical: tireAlerts } = metrics
 
   return (
     <div className="space-y-6">
@@ -132,7 +85,7 @@ export default async function EngineeringDashboardPage() {
                     <div className="flex items-center gap-2">
                       <Wrench className="w-3.5 h-3.5 text-arch-text-muted" />
                       <span className="text-sm text-arch-text-secondary">
-                        {b.machine_name || 'Unknown Machine'}
+                        {b.machineName || 'Unknown Machine'}
                       </span>
                     </div>
                     <span

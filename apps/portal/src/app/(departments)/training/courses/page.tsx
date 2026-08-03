@@ -1,110 +1,19 @@
 import { GlassCard } from '@repo/ui/GlassCard'
-import { BookOpen, Clock, Users, PlayCircle, Plus } from 'lucide-react'
+import { BookOpen, Clock, Users, PlayCircle } from 'lucide-react'
 import { SearchForm } from '../components/SearchForm'
 import { FilterTabs } from '../components/FilterTabs'
-
-interface Course {
-  id: number
-  title: string
-  category: 'Safety' | 'Equipment' | 'Induction' | 'Compliance'
-  lessons: number
-  duration: string
-  enrolled: number
-  completionRate: number
-  description: string
-  level: 'Basic' | 'Intermediate' | 'Advanced'
-}
-
-const initialCourses: Course[] = [
-  {
-    id: 1,
-    title: 'Underground Equipment Safety V2',
-    category: 'Safety',
-    lessons: 8,
-    duration: '4h 30m',
-    enrolled: 24,
-    completionRate: 88,
-    description:
-      'Standard safety protocols for operating equipment in high-risk underground extraction areas.',
-    level: 'Intermediate',
-  },
-  {
-    id: 2,
-    title: 'HAZMAT & Chemical Handling',
-    category: 'Safety',
-    lessons: 6,
-    duration: '3h 15m',
-    enrolled: 15,
-    completionRate: 92,
-    description:
-      'Regulatory compliance and emergency drills for managing site chemicals and hazardous wastes.',
-    level: 'Advanced',
-  },
-  {
-    id: 3,
-    title: 'PC-2000 Operation & Maintenance',
-    category: 'Equipment',
-    lessons: 12,
-    duration: '8h 00m',
-    enrolled: 9,
-    completionRate: 75,
-    description:
-      'Detailed system walk-around, hydraulic telemetry, and advanced operation methods for Komatsu PC-2000.',
-    level: 'Advanced',
-  },
-  {
-    id: 4,
-    title: 'HD-785 Haul Dumper Induction',
-    category: 'Equipment',
-    lessons: 10,
-    duration: '6h 45m',
-    enrolled: 18,
-    completionRate: 83,
-    description:
-      'In-cab simulation, braking physics, loading alignment, and daily inspection checklists for HD-785 dumps.',
-    level: 'Intermediate',
-  },
-  {
-    id: 5,
-    title: 'Mine Site General Induction',
-    category: 'Induction',
-    lessons: 5,
-    duration: '2h 00m',
-    enrolled: 32,
-    completionRate: 100,
-    description:
-      'Mandatory general entry induction briefing covering core policies, safety controls, and facility layouts.',
-    level: 'Basic',
-  },
-  {
-    id: 6,
-    title: 'High-Voltage Isolation Protocols',
-    category: 'Compliance',
-    lessons: 9,
-    duration: '5h 30m',
-    enrolled: 7,
-    completionRate: 60,
-    description:
-      'LOTO procedures, electrical shock risk matrices, and multi-point panel isolation operations.',
-    level: 'Advanced',
-  },
-]
+import { getCourses, formatCourseDuration } from '../actions'
+import { getDepartmentContext } from '@/lib/dept-context'
 
 export default async function CoursesPage({
   searchParams,
 }: {
   searchParams?: Promise<{ q?: string; category?: string }>
 }) {
+  const { deptId } = await getDepartmentContext({ department: 'training' })
   const { q, category } = (await searchParams) ?? {}
 
-  const filteredCourses = initialCourses.filter((c) => {
-    const matchesSearch =
-      !q ||
-      c.title.toLowerCase().includes(q.toLowerCase()) ||
-      c.description.toLowerCase().includes(q.toLowerCase())
-    const matchesCategory = !category || category === 'All' || c.category === category
-    return matchesSearch && matchesCategory
-  })
+  const courses = await getCourses(deptId, { q, category })
 
   return (
     <div className="space-y-6">
@@ -115,10 +24,6 @@ export default async function CoursesPage({
             Create, manage, and assign technical learning plans and regulatory safety modules.
           </p>
         </div>
-        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-arch-accent-charcoal text-[var(--bg-secondary)] text-sm font-medium rounded-lg hover:opacity-90 transition-all shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/30">
-          <Plus className="w-4 h-4" />
-          <span>New Course</span>
-        </button>
       </div>
 
       {/* Filters & Search */}
@@ -138,8 +43,8 @@ export default async function CoursesPage({
 
       {/* Courses Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCourses.length > 0 ? (
-          filteredCourses.map((course) => (
+        {courses.length > 0 ? (
+          courses.map((course) => (
             <GlassCard
               key={course.id}
               className="flex flex-col justify-between hover:-translate-y-0.5 transition-transform duration-300"
@@ -181,11 +86,11 @@ export default async function CoursesPage({
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5" />
-                    <span>{course.duration}</span>
+                    <span>{formatCourseDuration(course.durationMinutes)}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Users className="w-3.5 h-3.5" />
-                    <span>{course.enrolled} Enrolled</span>
+                    <span>{course.enrolledCount} Enrolled</span>
                   </div>
                 </div>
 

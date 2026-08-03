@@ -10,13 +10,24 @@ import {
   TableCell,
 } from '@repo/ui/components/ui/table'
 import { Badge } from '@repo/ui/components/ui/badge'
-import { ClipboardList, AlertOctagon, ShieldAlert } from 'lucide-react'
+import { ClipboardList, AlertOctagon, ShieldAlert, Wrench, Clock, CheckCircle2 } from 'lucide-react'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
-  title: 'Engineering Notes | Control Room | Arch OS',
-  description: 'Engineering logs, equipment issues, and maintenance notes.',
+  title: 'Engineering Notes & Breakdowns | Control Room | Arch OS',
+  description: 'Live engineering breakdown feeds, equipment issues, and shift maintenance logs.',
+}
+
+interface BreakdownRow {
+  id: string
+  machine_name: string
+  machine_type: string
+  reason: string
+  priority: string | null
+  status: string
+  created_at: string
+  downtime_hours?: number | null
 }
 
 interface EngineeringNoteRow {
@@ -44,8 +55,17 @@ export default async function EngineeringNotesPage() {
     redirect('/login')
   }
 
-  // Fetch engineering notes
-  const { data: notes, error } = await supabase
+  // 1. Fetch live equipment breakdowns captured by Engineering
+  const { data: breakdownsData } = await supabase
+    .from('breakdowns')
+    .select('id, machine_name, machine_type, reason, priority, status, created_at')
+    .order('created_at', { ascending: false })
+    .limit(30)
+
+  const breakdowns = (breakdownsData || []) as BreakdownRow[]
+
+  // 2. Fetch engineering shift notes & handovers
+  const { data: notesData } = await supabase
     .from('engineering_notes')
     .select(
       `
@@ -62,49 +82,62 @@ export default async function EngineeringNotesPage() {
       machine:machines(name, machine_type)
     `
     )
-    .eq('department_id', deptId)
     .order('note_date', { ascending: false })
     .order('created_at', { ascending: false })
-    .limit(50)
+    .limit(30)
 
-  if (error) {
-    throw new Error(`Failed to load engineering notes: ${error.message}`)
-  }
+  const notes = (notesData || []) as unknown as EngineeringNoteRow[]
 
-  const typedNotes = (notes || []) as unknown as EngineeringNoteRow[]
-
-  // Calculate statistics
-  const totalNotes = typedNotes.length
-  const criticalHighCount = typedNotes.filter(
-    (n) => n.severity.toLowerCase() === 'critical' || n.severity.toLowerCase() === 'high'
+  // Statistics
+  const activeBreakdowns = breakdowns.filter((b) => b.status.toLowerCase() === 'active').length
+  const criticalBreakdowns = breakdowns.filter(
+    (b) =>
+      (b.priority ?? '').toLowerCase() === 'high' || (b.priority ?? '').toLowerCase() === 'critical'
   ).length
-  const unresolvedCount = typedNotes.filter((n) => n.status.toLowerCase() !== 'resolved').length
+  const totalNotes = notes.length
+  const unresolvedNotes = notes.filter((n) => n.status.toLowerCase() !== 'resolved').length
 
-  const getSeverityBadge = (severity: string) => {
-    const s = severity.toLowerCase()
-    if (s === 'critical') {
+  const getPriorityBadge = (priority: string | null) => {
+    const p = (priority || 'medium').toLowerCase()
+    if (p === 'critical' || p === 'high') {
       return (
-        <Badge className="bg-red-500/20 text-red-500 border-red-500/30 hover:bg-red-500/30">
-          Critical
+        <Badge className="bg-red-500/20 text-red-500 border-red-500/30 hover:bg-red-500/30 font-semibold">
+          High / Critical
         </Badge>
       )
     }
-    if (s === 'high') {
+    if (p === 'medium') {
       return (
-        <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30 hover:bg-orange-500/30">
-          High
-        </Badge>
-      )
-    }
-    if (s === 'medium') {
-      return (
-        <Badge className="bg-yellow-400/20 text-yellow-400 border-yellow-400/30 hover:bg-yellow-400/30">
+        <Badge className="bg-yellow-400/20 text-yellow-400 border-yellow-400/30 hover:bg-yellow-400/30 font-semibold">
           Medium
         </Badge>
       )
     }
     return (
-      <Badge className="bg-blue-400/20 text-blue-400 border-blue-400/30 hover:bg-blue-400/30">
+      <Badge className="bg-blue-400/20 text-blue-400 border-blue-400/30 hover:bg-blue-400/30 font-semibold">
+        Low
+      </Badge>
+    )
+  }
+
+  const getSeverityBadge = (severity: string) => {
+    const s = severity.toLowerCase()
+    if (s === 'critical' || s === 'high') {
+      return (
+        <Badge className="bg-red-500/20 text-red-500 border-red-500/30 hover:bg-red-500/30 font-semibold">
+          {severity}
+        </Badge>
+      )
+    }
+    if (s === 'medium') {
+      return (
+        <Badge className="bg-yellow-400/20 text-yellow-400 border-yellow-400/30 hover:bg-yellow-400/30 font-semibold">
+          Medium
+        </Badge>
+      )
+    }
+    return (
+      <Badge className="bg-blue-400/20 text-blue-400 border-blue-400/30 hover:bg-blue-400/30 font-semibold">
         Low
       </Badge>
     )
@@ -112,34 +145,68 @@ export default async function EngineeringNotesPage() {
 
   const getStatusBadge = (status: string) => {
     const s = status.toLowerCase()
-    if (s === 'resolved') {
+    if (s === 'resolved' || s === 'completed') {
       return (
-        <Badge className="bg-accent-green/20 text-accent-green border-accent-green/30 hover:bg-accent-green/30">
+        <Badge className="bg-accent-green/20 text-accent-green border-accent-green/30 hover:bg-accent-green/30 font-semibold">
           Resolved
         </Badge>
       )
     }
     return (
-      <Badge className="bg-yellow-400/20 text-yellow-400 border-yellow-400/30 hover:bg-yellow-400/30 animate-pulse">
-        Open
+      <Badge className="bg-yellow-400/20 text-yellow-400 border-yellow-400/30 hover:bg-yellow-400/30 animate-pulse font-semibold">
+        Active
       </Badge>
     )
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto py-6">
+    <div className="space-y-8 max-w-7xl mx-auto py-6">
       {/* Page Header */}
       <div>
-        <h2 className="text-2xl font-bold text-arch-text-primary">
-          Engineering Notes & Shift Logs
+        <h2 className="text-2xl font-bold text-arch-text-primary flex items-center gap-2">
+          <Wrench className="w-6 h-6 text-accent-amber" />
+          Engineering Breakdowns & Dispatch Notes
         </h2>
-        <p className="text-arch-text-muted text-sm">
-          Tracking technical challenges, mechanical issues, status reports, and handovers.
+        <p className="text-arch-text-muted text-sm mt-1">
+          Real-time preview of active equipment breakdowns captured by Engineering and shift
+          maintenance logs.
         </p>
       </div>
 
       {/* KPI Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <GlassCard>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-red-500/10 rounded-lg text-red-500">
+              <ShieldAlert className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-arch-text-muted text-xs font-medium uppercase tracking-wider">
+                Active Breakdowns
+              </p>
+              <h4 className="text-2xl font-bold text-arch-text-primary mt-0.5">
+                {activeBreakdowns}
+              </h4>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-orange-500/10 rounded-lg text-orange-500">
+              <AlertOctagon className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-arch-text-muted text-xs font-medium uppercase tracking-wider">
+                Critical Priority Faults
+              </p>
+              <h4 className="text-2xl font-bold text-arch-text-primary mt-0.5">
+                {criticalBreakdowns}
+              </h4>
+            </div>
+          </div>
+        </GlassCard>
+
         <GlassCard>
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-blue-400/10 rounded-lg text-blue-400">
@@ -147,7 +214,7 @@ export default async function EngineeringNotesPage() {
             </div>
             <div>
               <p className="text-arch-text-muted text-xs font-medium uppercase tracking-wider">
-                Total Notes
+                Total Shift Notes
               </p>
               <h4 className="text-2xl font-bold text-arch-text-primary mt-0.5">{totalNotes}</h4>
             </div>
@@ -156,71 +223,133 @@ export default async function EngineeringNotesPage() {
 
         <GlassCard>
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-red-500/10 rounded-lg text-red-500">
-              <ShieldAlert className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-arch-text-muted text-xs font-medium uppercase tracking-wider">
-                Critical / High Issues
-              </p>
-              <h4 className="text-2xl font-bold text-arch-text-primary mt-0.5">
-                {criticalHighCount}
-              </h4>
-            </div>
-          </div>
-        </GlassCard>
-
-        <GlassCard>
-          <div className="flex items-center gap-3">
             <div className="p-2.5 bg-yellow-400/10 rounded-lg text-yellow-400">
-              <AlertOctagon className="w-5 h-5" />
+              <Clock className="w-5 h-5" />
             </div>
             <div>
               <p className="text-arch-text-muted text-xs font-medium uppercase tracking-wider">
-                Unresolved Issues
+                Open Maintenance Tasks
               </p>
               <h4 className="text-2xl font-bold text-arch-text-primary mt-0.5">
-                {unresolvedCount}
+                {unresolvedNotes}
               </h4>
             </div>
           </div>
         </GlassCard>
       </div>
 
-      {/* Engineering Notes Table */}
-      <GlassCard className="overflow-hidden">
+      {/* SECTION 1: Live Captured Engineering Breakdowns Preview */}
+      <GlassCard className="overflow-hidden space-y-4">
+        <div className="flex items-center justify-between border-b border-arch-border/40 pb-3">
+          <div className="flex items-center gap-2">
+            <Wrench className="w-5 h-5 text-red-500" />
+            <h3 className="text-base font-bold text-arch-text-primary uppercase tracking-wider">
+              Engineering Breakdown Feed (Captured Equipment Faults)
+            </h3>
+          </div>
+          <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
+            {breakdowns.length} Breakdowns Logged
+          </Badge>
+        </div>
+
         <div className="overflow-x-auto">
           <Table className="w-full text-left border-collapse min-w-full">
-            <TableHeader className="bg-arch-accent-charcoal/30 border-b border-arch-border text-arch-text-secondary text-sm">
+            <TableHeader className="bg-arch-accent-charcoal/30 border-b border-arch-border text-arch-text-secondary text-xs uppercase tracking-wider">
               <TableRow>
-                <TableHead className="px-4 py-3 font-semibold">Details</TableHead>
+                <TableHead className="px-4 py-3 font-semibold">Machine / Equipment</TableHead>
+                <TableHead className="px-4 py-3 font-semibold">Breakdown Reason / Fault</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-center">Priority</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-center">Status</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-right">Logged At</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="text-sm">
+              {breakdowns.length > 0 ? (
+                breakdowns.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className="border-b border-arch-border/40 hover:bg-arch-accent-charcoal/10 transition-colors"
+                  >
+                    <TableCell className="px-4 py-3 font-medium">
+                      <div>
+                        <span className="font-bold text-arch-text-primary block">
+                          {row.machine_name}
+                        </span>
+                        <span className="text-xs text-arch-text-muted">{row.machine_type}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-4 py-3 max-w-md">
+                      <p className="text-arch-text-primary text-xs font-medium leading-relaxed">
+                        {row.reason}
+                      </p>
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-center">
+                      {getPriorityBadge(row.priority)}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-center">
+                      {getStatusBadge(row.status)}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-right text-xs font-mono text-arch-text-muted">
+                      {new Date(row.created_at).toLocaleString()}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="px-4 py-8 text-center text-arch-text-muted">
+                    No active equipment breakdowns currently logged by Engineering.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </GlassCard>
+
+      {/* SECTION 2: Shift Maintenance & Engineering Notes Log */}
+      <GlassCard className="overflow-hidden space-y-4">
+        <div className="flex items-center justify-between border-b border-arch-border/40 pb-3">
+          <div className="flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-blue-400" />
+            <h3 className="text-base font-bold text-arch-text-primary uppercase tracking-wider">
+              Shift Maintenance & Handover Logs
+            </h3>
+          </div>
+          <Badge className="bg-blue-400/10 text-blue-400 border-blue-400/20">
+            {notes.length} Notes Logged
+          </Badge>
+        </div>
+
+        <div className="overflow-x-auto">
+          <Table className="w-full text-left border-collapse min-w-full">
+            <TableHeader className="bg-arch-accent-charcoal/30 border-b border-arch-border text-arch-text-secondary text-xs uppercase tracking-wider">
+              <TableRow>
+                <TableHead className="px-4 py-3 font-semibold">Details / Issue</TableHead>
                 <TableHead className="px-4 py-3 font-semibold">Machine</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-center">Shift</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-center">Shift Date</TableHead>
                 <TableHead className="px-4 py-3 text-center">Severity</TableHead>
                 <TableHead className="px-4 py-3 text-center">Status</TableHead>
                 <TableHead className="px-4 py-3 text-right">Follow-up</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="text-sm">
-              {typedNotes.length > 0 ? (
-                typedNotes.map((row) => {
+              {notes.length > 0 ? (
+                notes.map((row) => {
                   const machineData = Array.isArray(row.machine) ? row.machine[0] : row.machine
 
                   return (
                     <TableRow
                       key={row.id}
-                      className="border-b border-arch-border/50 hover:bg-arch-accent-charcoal/10 transition-colors"
+                      className="border-b border-arch-border/40 hover:bg-arch-accent-charcoal/10 transition-colors"
                     >
                       <TableCell className="px-4 py-3 max-w-md">
                         <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-arch-text-primary">
-                              {row.issue_type}
-                            </span>
-                          </div>
+                          <span className="font-bold text-arch-text-primary block">
+                            {row.issue_type}
+                          </span>
                           <p className="text-xs text-arch-text-secondary mt-1">{row.description}</p>
                           {row.action_taken && (
-                            <div className="mt-2 text-xs bg-white/5 p-2 rounded border border-white/5">
+                            <div className="mt-2 text-xs bg-black/5 p-2 rounded border border-arch-border/30">
                               <span className="text-arch-text-muted font-semibold block uppercase text-[10px]">
                                 Action Taken:
                               </span>

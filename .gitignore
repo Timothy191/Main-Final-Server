@@ -142,9 +142,18 @@ apps/portal/src.backup/
 !**/.codewhale/constitution.json
 .deepseek/
 
+# Agent runtime state (transient session data)
+.kilo
+.kilocode
+.mimocode
+.openclaude
+.qoder
+.claude/projects
+
 # Agent memory substrate (acc)
 acc.db
 acc.db-shm
 acc.db-wal
 
 node_modules
+

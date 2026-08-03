@@ -209,6 +209,21 @@ async function main() {
       name: 'access-card-actions',
       display_name: 'Access Card Actions',
     },
+    {
+      id: '7c4a1f2e-9b3d-4c8e-a1f2-0d3e4f5a6b7c',
+      name: 'environment',
+      display_name: 'Environment',
+    },
+    {
+      id: '8d5b2f3e-ac4e-4d9f-b2f3-1e4f5a6b7c8d',
+      name: 'logistics-fleet',
+      display_name: 'Logistics & Fleet',
+    },
+    {
+      id: '9e6c3f4e-bd5f-4eaf-c3f4-2f5a6b7c8d9e',
+      name: 'geology',
+      display_name: 'Geology & Survey',
+    },
   ]
 
   const insertDept = db.prepare(

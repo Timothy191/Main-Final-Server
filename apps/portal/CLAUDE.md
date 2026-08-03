@@ -32,7 +32,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 All commands use `pnpm`. Root monorepo scripts live in `Arch-Mk2/package.json`; this package's scripts are in `package.json`.
 
-- `pnpm dev` — start the Next.js dev server with Turbopack on `0.0.0.0:3001` (open http://localhost:3001).
+- `pnpm dev` — start the Next.js dev server with Turbopack on `http://localhost:3000` (Method 1 Live Mirroring mode). Edits to components, styles, and layouts hot-reload in real-time (<100ms) to mirror design changes instantly.
 - `pnpm build` — build the portal (`next build`). Standalone output is only generated when `CI=true` or `ENABLE_HEAVY_PLUGINS=true`.
 - `pnpm start` — start the production server (serves on `PORT`, default 3000).
 - `pnpm test` — run the Jest suite (`--runInBand --forceExit`). Run a single test with `pnpm test -- proxy.test.ts` or `pnpm test -- --testPathPattern=proxy`.

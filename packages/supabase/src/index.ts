@@ -4,20 +4,19 @@
  *   import { createClient } from "@repo/supabase/client";
  *   import { createAdminClient } from "@repo/supabase/server";
  */
+import type { Database } from './database.types'
+
 export { createClient, createBrowserSupabaseClient } from './client'
 export { createAdminClient, createServerSupabaseClient, getUserSafely } from './server'
 export type { SupabaseClient } from '@supabase/supabase-js'
+export type { Database }
 
-// Legacy type exports for compatibility — prefer typed alternatives from @repo/database
-/** @deprecated Use typed row from @repo/database */
-export type PersonnelRow = any
-/** @deprecated Use typed row from @repo/database */
-export type BadgesRow = any
-/** @deprecated Use typed row from @repo/database */
-export type IssuedCardsRow = any
-/** @deprecated Use typed row from @repo/database */
-export type PersonnelDetail = any
-/** @deprecated Use typed row from @repo/database */
-export type ExpiringCard = any
-/** @deprecated Use {@link import("@repo/database").Departments} instead */
-export type Department = any
+export type PersonnelRow = Database['public']['Tables']['personnel']['Row']
+export type BadgesRow = Database['public']['Tables']['badges']['Row']
+export type IssuedCardsRow = Database['public']['Tables']['badges']['Row']
+export type PersonnelDetail = Database['public']['Tables']['personnel']['Row'] & {
+  badges?: Database['public']['Tables']['badges']['Row'][]
+  issued_cards?: Database['public']['Tables']['badges']['Row'][]
+}
+export type ExpiringCard = Database['public']['Tables']['badges']['Row']
+export type Department = Database['public']['Tables']['departments']['Row']

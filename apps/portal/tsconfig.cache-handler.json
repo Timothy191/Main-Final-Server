@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "outDir": "dist/lib",
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "isolatedModules": false,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@repo/redis/client": ["../../packages/redis/src/client.ts"],
+      "@repo/redis": ["../../packages/redis/src/index.ts"]
+    }
+  },
+  "include": ["src/lib/next-cache-handler.ts"]
+}

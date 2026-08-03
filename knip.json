@@ -1,0 +1,23 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignore": [
+    "**/database.types.ts",
+    "**/db-types.ts",
+    "**/generated.ts",
+    "**/_app_legacy_shadow/**",
+    "**/src.backup/**"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": ["@sentry/nextjs", "inngest", "@vercel/otel"],
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/**/*.sh", "tools/**/*.mjs", "tools/**/*.cjs"]
+    },
+    "apps/portal": {
+      "entry": ["src/app/**/page.tsx", "src/app/**/route.ts", "src/proxy.ts"]
+    },
+    "packages/*": {
+      "entry": ["src/index.ts"]
+    }
+  }
+}

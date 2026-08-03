@@ -23,7 +23,8 @@ export interface PersonnelSearchResult {
 
 export interface PersonnelDetail extends PersonnelRow {
   badge: Pick<BadgesRow, 'id' | 'qr_code' | 'is_active'> | null
-  issued_card: Pick<IssuedCardsRow, 'id' | 'status' | 'expires_at'> | null
+  issued_card:
+    (Pick<IssuedCardsRow, 'id' | 'is_active' | 'expires_at'> & { status?: string }) | null
   photo_signed_url: string | null
 }
 

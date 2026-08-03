@@ -6,7 +6,8 @@ import { AppError } from '@repo/errors'
 export async function runApiGuards(req: NextRequest) {
   // 1. Rate Limit
   const config = { windowMs: 60000, maxRequests: 100 } // Default config
-  const result = await checkRateLimit('api-guard-id', config, req.nextUrl.pathname)
+  const identifier = `api-guard:${req.nextUrl.pathname}`
+  const result = await checkRateLimit(identifier, config, req.nextUrl.pathname)
   if (!result.allowed) {
     throw new AppError({
       code: 'RATE_LIMITED',

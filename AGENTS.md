@@ -60,6 +60,10 @@ and can return a stale PASS.
 - **Theme package mechanics (token generation, Style Dictionary, validation):**
   [`packages/theme/README.md`](./packages/theme/README.md) and ADRs in
   [`packages/theme/DECISIONS.md`](./packages/theme/DECISIONS.md).
+- **Supabase Architecture Policy (On-Premise / Local Self-Hosted):**
+  All local development and site production deployments strictly use the **On-Premise / Local Self-Hosted Supabase Docker Stack** (`pnpm supabase:start`). Never introduce dependencies on external cloud project links or remote account configurations.
+- **Method 1 Live Mirroring Policy (Turbopack HMR Standard):**
+  All agents editing visual code, typography, or UI components in `apps/portal` or `@repo/ui` must rely on **Method 1 (Next.js Turbopack HMR on `http://localhost:3000`)** via `pnpm dev`. All UI modifications must immediately hot-reload in real-time on `http://localhost:3000` to mirror visual updates without requiring manual app restarts.
 
 ## Two-layer policy
 

@@ -10,6 +10,7 @@ import {
   type ProductionMetrics,
   type RecentProductionLog,
 } from './actions'
+import { ShiftControls } from './components/ShiftControls'
 
 export const metadata: Metadata = {
   title: 'Production | Arch OS',
@@ -178,6 +179,16 @@ export default async function ProductionPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-arch-text-primary">Production Operations</h2>
+          <p className="text-xs text-arch-text-muted mt-0.5">
+            Real-time coal yield, waste tonnage, and pit shift telemetry
+          </p>
+        </div>
+        <ShiftControls deptId={deptId} />
+      </div>
+
       {/* KPI metrics — streamed independently */}
       <Suspense
         fallback={

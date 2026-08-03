@@ -647,7 +647,7 @@ else
 fi
 
 # Routing: /hub should redirect to /login when unauthenticated
-hub_code=$(curl -sL -o /tmp/arch-hub-smoke.html -w "%{http_code}" --connect-timeout 3 \
+hub_code=$(curl -s -o /tmp/arch-hub-smoke.html -w "%{http_code}" --connect-timeout 3 \
   "http://localhost:${PORT}/hub" 2>/dev/null || echo 000)
 if echo "$hub_code" | grep -qE '^(307|308|302)$'; then
   check 'Routing: /hub → /login' "pass" "redirect (3xx)"
@@ -656,7 +656,7 @@ else
 fi
 
 # Routing: department page should redirect to /login when unauthenticated
-dept_code=$(curl -sL -o /tmp/arch-dept-smoke.html -w "%{http_code}" --connect-timeout 3 \
+dept_code=$(curl -s -o /tmp/arch-dept-smoke.html -w "%{http_code}" --connect-timeout 3 \
   "http://localhost:${PORT}/engineering" 2>/dev/null || echo 000)
 if echo "$dept_code" | grep -qE '^(307|308|302)$'; then
   check 'Routing: /engineering → /login' "pass" "redirect (3xx)"

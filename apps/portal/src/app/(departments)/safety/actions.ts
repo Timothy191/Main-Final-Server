@@ -171,3 +171,91 @@ export async function getRecentSafetyIncidents(
     injuredParties: row.injured_parties,
   }))
 }
+
+/* ------------------------------------------------------------------ */
+/*  3. Safety Mutations                                                */
+/* ------------------------------------------------------------------ */
+
+export async function reportSafetyIncident(input: {
+  departmentId: string
+  title: string
+  description: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  location?: string
+  incidentDate?: string
+  shiftType?: 'day' | 'night'
+  injuredParties?: number
+}) {
+  const { revalidateTag } = await import('next/cache')
+  const { reportSafetyIncidentSchema } = await import('@repo/contract')
+  const validated = reportSafetyIncidentSchema.parse(input)
+
+  const { supabase } = await assertSafetyRole()
+
+  const incidentDate = validated.incidentDate || new Date().toISOString().split('T')[0]
+
+  const { data, error } = await supabase
+    .from('safety_incidents')
+    .insert({
+      department_id: validated.departmentId,
+      description: `${validated.title}: ${validated.description}`,
+      incident_type: validated.severity === 'critical' ? 'lost-time' : 'near-miss',
+      status: 'open',
+      location: validated.location || null,
+      incident_date: incidentDate,
+      shift_type: validated.shiftType || 'day',
+      injured_parties: validated.injuredParties || 0,
+    })
+    .select('id')
+    .single()
+
+  if (error) {
+    throw new DatabaseError('Failed to report safety incident', {
+      operation: 'insert',
+      context: { error: error.message },
+    })
+  }
+
+  revalidateTag(DEPARTMENT_CACHE_TAGS.SAFETY, 'max')
+  revalidateTag(DEPARTMENT_CACHE_TAGS.TABLE_SAFETY_INCIDENTS, 'max')
+  revalidateTag(`dept:safety:${validated.departmentId}`, 'max')
+
+  return { success: true, incidentId: data?.id }
+}
+
+export async function updateIncidentStatus(input: {
+  incidentId: string
+  status: 'open' | 'under-investigation' | 'resolved' | 'closed'
+  comment?: string
+}) {
+  const { revalidateTag } = await import('next/cache')
+  const { updateIncidentStatusSchema } = await import('@repo/contract')
+  const validated = updateIncidentStatusSchema.parse(input)
+
+  const { supabase } = await assertSafetyRole()
+
+  const updatePayload: Record<string, unknown> = {
+    status: validated.status,
+  }
+
+  if (validated.status === 'resolved' || validated.status === 'closed') {
+    updatePayload.closed_at = new Date().toISOString()
+  }
+
+  const { error } = await supabase
+    .from('safety_incidents')
+    .update(updatePayload)
+    .eq('id', validated.incidentId)
+
+  if (error) {
+    throw new DatabaseError('Failed to update incident status', {
+      operation: 'update',
+      context: { error: error.message },
+    })
+  }
+
+  revalidateTag(DEPARTMENT_CACHE_TAGS.SAFETY, 'max')
+  revalidateTag(DEPARTMENT_CACHE_TAGS.TABLE_SAFETY_INCIDENTS, 'max')
+
+  return { success: true }
+}

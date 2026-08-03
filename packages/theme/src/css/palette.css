@@ -56,25 +56,25 @@
   --palette-surface-vibrancy: rgba(246, 246, 250, 0.82);
 
   /* ── Borders ───────────────────────────────────────────────────────── */
-  --palette-border-subtle: rgba(0, 0, 0, 0.08);
+  --palette-border-subtle: rgba(0, 0, 0, 0.18);
   --palette-chrome-border: var(--palette-border-subtle);
-  --palette-border-default: rgba(0, 0, 0, 0.12);
-  --palette-border-emphasis: rgba(0, 0, 0, 0.2);
-  --palette-border-strong: rgba(0, 0, 0, 0.3);
-  --palette-border-glass: rgba(255, 255, 255, 0.68);
-  --palette-border-glass-soft: rgba(255, 255, 255, 0.28);
+  --palette-border-default: rgba(0, 0, 0, 0.32);
+  --palette-border-emphasis: rgba(0, 0, 0, 0.5);
+  --palette-border-strong: rgba(0, 0, 0, 0.75);
+  --palette-border-glass: rgba(0, 0, 0, 0.25);
+  --palette-border-glass-soft: rgba(0, 0, 0, 0.15);
   /* Hairline catch-light on frosted glass over dark ambient backgrounds */
-  --palette-border-glass-catch: rgba(255, 255, 255, 0.2);
+  --palette-border-glass-catch: rgba(0, 0, 0, 0.2);
   --palette-border-focus: var(--palette-brand-primary);
 
   /* ── Text ──────────────────────────────────────────────────────────── */
-  --palette-text-primary: var(--palette-neutral-900);
-  --palette-text-secondary: var(--palette-neutral-600);
-  --palette-text-tertiary: var(--palette-neutral-500);
-  --palette-text-muted: var(--palette-neutral-400);
-  --palette-text-inverted: var(--palette-neutral-0);
-  --palette-text-on-glass: rgba(10, 10, 20, 1);
-  --palette-text-on-glass-muted: rgba(10, 10, 20, 0.8);
+  --palette-text-primary: #ffffff;
+  --palette-text-secondary: #f5f5f7;
+  --palette-text-tertiary: #e8e8ed;
+  --palette-text-muted: #d2d2d7;
+  --palette-text-inverted: #0a0a0c;
+  --palette-text-on-glass: #ffffff;
+  --palette-text-on-glass-muted: #f5f5f7;
 
   /* ── Interactive ───────────────────────────────────────────────────── */
   --palette-interactive-primary: var(--palette-brand-primary);

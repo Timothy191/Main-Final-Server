@@ -202,7 +202,38 @@ export async function retryPrintJob(jobId: string) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  3. Dashboard Stats                                                 */
+/*  3. Card Print History                                               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Get card print history with optional status filter.
+ */
+export async function getPrintHistory(statusFilter?: string) {
+  const { supabase } = await assertAccessCardActionsRole()
+
+  let query = supabase
+    .from('card_print_history')
+    .select('id, employee_name, card_type, printer_name, print_status, qr_code, notes, printed_at')
+    .order('printed_at', { ascending: false })
+    .limit(200)
+
+  if (statusFilter && statusFilter !== 'All') {
+    query = query.eq('print_status', statusFilter)
+  }
+
+  const { data, error } = await query
+  if (error) {
+    throw new DatabaseError('Failed to fetch print history', {
+      cause: error,
+      table: 'card_print_history',
+    })
+  }
+
+  return { prints: data ?? [] }
+}
+
+/* ------------------------------------------------------------------ */
+/*  4. Dashboard Stats                                                 */
 /* ------------------------------------------------------------------ */
 
 /**

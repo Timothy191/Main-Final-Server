@@ -193,11 +193,23 @@ function SafetyIncidentsTable({ incidents }: { incidents: RecentSafetyIncident[]
 /*  Page                                                               */
 /* ------------------------------------------------------------------ */
 
+import { ReportIncidentDialog } from './components/ReportIncidentDialog'
+
 export default async function SafetyPage() {
   const { deptId } = await getDepartmentContext({ department: 'safety' })
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-arch-text-primary">Safety Operations</h2>
+          <p className="text-xs text-arch-text-muted">
+            Real-time incident logging, site compliance, and risk management
+          </p>
+        </div>
+        <ReportIncidentDialog deptId={deptId} />
+      </div>
+
       {/* KPI cards — cached, streamed independently */}
       <Suspense
         fallback={

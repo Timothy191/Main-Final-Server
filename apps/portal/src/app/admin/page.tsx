@@ -1,8 +1,10 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server'
 import { AdminTabsClient } from '@/features/admin/components/AdminTabsClient'
 import { UsersTab } from '@/features/admin/tabs/UsersTab'
 import { DepartmentsTab } from '@/features/admin/tabs/DepartmentsTab'
+import { ScrollText } from 'lucide-react'
 
 const TABS = ['users', 'departments']
 
@@ -36,6 +38,13 @@ export default async function AdminPage({
       <header className="sticky top-0 z-50 border-b border-arch-border-default bg-arch-surface-primary/80 backdrop-blur">
         <div className="flex items-center justify-between px-6 py-3">
           <span className="text-lg font-medium text-arch-text-primary">Admin Dashboard</span>
+          <Link
+            href="/admin/audit-trail"
+            className="inline-flex items-center gap-2 text-sm text-arch-text-muted hover:text-arch-text-primary transition-colors"
+          >
+            <ScrollText className="w-4 h-4" />
+            Audit Trail
+          </Link>
         </div>
       </header>
 

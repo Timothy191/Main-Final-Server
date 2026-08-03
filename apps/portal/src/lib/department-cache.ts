@@ -4,6 +4,12 @@
  * Optimizes page switching by caching department dashboard data
  * with proper TTL and tag-based invalidation.
  *
+ * AGENT-TRACE: This module caches DATA fetches only — never the auth check.
+ * The edge-proxy auth record lives in Redis at `arch:auth:employee:<userId>`
+ * (see proxy.ts `resolveEmployee`) and is evicted via
+ * `POST /api/cache/invalidate { userId }` on role change. Cache data here
+ * keyed by dept/date; do not key auth decisions through these tags.
+ *
  * Usage:
  *   import { cachedDepartmentData, DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
  *
@@ -53,6 +59,9 @@ export const DEPARTMENT_CACHE_TAGS = {
   SAFETY: 'dept:safety',
   TRAINING: 'dept:training',
   SATELLITE_MONITORING: 'dept:satellite-monitoring',
+  ENVIRONMENT: 'dept:environment',
+  LOGISTICS_FLEET: 'dept:logistics-fleet',
+  GEOLOGY: 'dept:geology',
 
   // Table-level tags for database changes
   TABLE_BREAKDOWNS: 'table:breakdowns',
@@ -65,6 +74,30 @@ export const DEPARTMENT_CACHE_TAGS = {
 
   // Access control
   ACCESS_CONTROL_TAG: 'access:control',
+
+  // New department tables
+  TABLE_ENVIRONMENTAL_READINGS: 'table:environmental_readings',
+  TABLE_SURVEY_MEASUREMENTS: 'table:survey_measurements',
+  TABLE_TIRES: 'table:tires',
+  TABLE_FLEET: 'table:fleet',
+  TABLE_FUEL_LOGS: 'table:fuel_logs',
+  TABLE_CERTIFICATIONS: 'table:certifications',
+  TABLE_TRAINING_COURSES: 'table:training_courses',
+  TABLE_TRAINING_SCHEDULES: 'table:training_schedules',
+  TABLE_TRAINING_TRAINEES: 'table:training_trainees',
+  TABLE_TRAINING_INSTRUCTORS: 'table:training_instructors',
+  TABLE_TRAINING_DOCUMENTS: 'table:training_archived_documents',
+  TABLE_DRILL_PATTERNS: 'table:drill_patterns',
+  TABLE_BLAST_DESIGNS: 'table:blast_designs',
+  TABLE_GRADE_CONTROL: 'table:grade_control_samples',
+  TABLE_SAFETY_OBSERVATIONS: 'table:safety_observations',
+  TABLE_JSA: 'table:job_safety_analyses',
+  TABLE_ENV_INCIDENTS: 'table:environmental_incidents',
+  TABLE_FLEET_MAINT: 'table:fleet_maintenance_schedule',
+  TABLE_SURVEY_PLANS: 'table:survey_plans',
+  TABLE_ADMIN_AUDIT: 'table:admin_audit_trail',
+  TABLE_CARD_PRINTS: 'table:card_print_history',
+  TABLE_SATELLITE_ALERTS: 'table:satellite_alerts',
 } as const
 
 /**

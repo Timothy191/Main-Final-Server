@@ -151,7 +151,7 @@ export function LoginForm({ className }: LoginFormProps) {
       className={className ?? 'flex w-full flex-col space-y-4'}
     >
       <div className="w-full min-w-0 space-y-2">
-        <label htmlFor="login-email" className="login-field-label">
+        <label htmlFor="login-email" id="login-email-label" className="login-field-label">
           Employee ID or Email
         </label>
         <Input
@@ -160,6 +160,7 @@ export function LoginForm({ className }: LoginFormProps) {
           name="email"
           variant="login"
           autoComplete="username"
+          aria-labelledby="login-email-label"
           placeholder="Enter your ID or email…"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -196,6 +197,7 @@ export function LoginForm({ className }: LoginFormProps) {
           >
             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
+          <div className="text-[12px] text-muted mt-1">Password is case-sensitive</div>
           {capsLockOn && (
             <div className="absolute right-10 top-1/2 -translate-y-1/2 flex items-center gap-1 text-accent-amber text-xs">
               <AlertCircle size={12} />

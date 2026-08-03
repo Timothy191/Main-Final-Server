@@ -12,10 +12,13 @@ import {
   FileText,
   HardHat,
   GraduationCap,
+  Leaf,
   Monitor,
+  Mountain,
   Pickaxe,
   Satellite,
   ShieldCheck,
+  Truck,
   Wrench,
 } from 'lucide-react'
 import Image from 'next/image'
@@ -35,6 +38,9 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   GraduationCap,
   Satellite,
   CreditCard,
+  Leaf,
+  Truck,
+  Mountain,
 }
 
 const IMAGE_MAP: Record<string, string> = {

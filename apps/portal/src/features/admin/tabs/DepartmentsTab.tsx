@@ -9,6 +9,7 @@ import { Badge } from '@repo/ui/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog'
 import { Input } from '@repo/ui/components/ui/input'
 import { logError } from '@/lib/errors/error-logger'
+import { recordAdminAuditEvent } from '@/lib/audit'
 
 interface Department {
   id: string
@@ -68,12 +69,30 @@ export function DepartmentsTab() {
         logError(new Error(error.message), {
           context: 'departments_tab_update',
         })
+      else
+        recordAdminAuditEvent({
+          action: 'department.updated',
+          entityType: 'department',
+          entityId: editingDept.id,
+          details: { name: formData.name, display_name: formData.display_name },
+        }).catch(() => {})
     } else {
-      const { error } = await supabase.from('departments').insert(formData)
+      const { data: created, error } = await supabase
+        .from('departments')
+        .insert(formData)
+        .select('id')
+        .single()
       if (error)
         logError(new Error(error.message), {
           context: 'departments_tab_create',
         })
+      else
+        recordAdminAuditEvent({
+          action: 'department.created',
+          entityType: 'department',
+          entityId: created?.id,
+          details: { name: formData.name, display_name: formData.display_name },
+        }).catch(() => {})
     }
     setShowEditDialog(false)
     setEditingDept(null)
@@ -82,8 +101,16 @@ export function DepartmentsTab() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this department?')) return
+    const target = departments.find((d) => d.id === id)
     const { error } = await supabase.from('departments').delete().eq('id', id)
     if (error) logError(new Error(error.message), { context: 'departments_tab_delete' })
+    else
+      recordAdminAuditEvent({
+        action: 'department.deleted',
+        entityType: 'department',
+        entityId: id,
+        details: { name: target?.name ?? null, display_name: target?.display_name ?? null },
+      }).catch(() => {})
     reload()
   }
 
