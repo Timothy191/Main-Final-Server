@@ -67,34 +67,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push API
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/api/Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:${{ steps.meta.outputs.version }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:latest
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push Ops-Gateway
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/ops-gateway/Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-ops-gateway:${{ steps.meta.outputs.version }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-ops-gateway:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-ops-gateway:latest
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
       - name: Build and push Nginx
         uses: docker/build-push-action@v5
         with:
@@ -132,19 +104,19 @@ jobs:
 
             # Graceful rolling update
             echo "==> Performing rolling deployment..."
-            docker compose -f docker-compose.production.yml up -d --no-deps --wait --timeout 120 nginx portal api ops-gateway
+            docker compose -f docker-compose.production.yml up -d --no-deps --wait --timeout 120 nginx portal
 
             # Health check
             echo "==> Running health checks..."
             sleep 10
             curl -sSf -o /dev/null http://localhost:80/api/health/live || {
               echo "ERROR: API health check failed. Rolling back..."
-              docker compose -f docker-compose.production.yml up -d --no-deps nginx portal api ops-gateway
+              docker compose -f docker-compose.production.yml up -d --no-deps nginx portal
               exit 1
             }
             curl -sSf -o /dev/null http://localhost:80 || {
               echo "ERROR: Portal health check failed. Rolling back..."
-              docker compose -f docker-compose.production.yml up -d --no-deps nginx portal api ops-gateway
+              docker compose -f docker-compose.production.yml up -d --no-deps nginx portal
               exit 1
             }
 
@@ -167,7 +139,7 @@ jobs:
             set -euo pipefail
             cd /opt/arch-systems-staging
             docker compose -f docker-compose.staging.yml pull
-            docker compose -f docker-compose.staging.yml up -d --no-deps --wait --timeout 120 nginx portal api ops-gateway
+            docker compose -f docker-compose.staging.yml up -d --no-deps --wait --timeout 120 nginx portal
             sleep 10
             curl -sSf -o /dev/null http://localhost:80/api/health/live || exit 1
             curl -sSf -o /dev/null http://localhost:80 || exit 1
