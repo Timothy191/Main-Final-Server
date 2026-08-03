@@ -2,6 +2,21 @@
 
 This file maintains a record of AI agent interventions, context hand-offs, and architectural breadcrumbs for this specific package/app.
 
+## [2026-08-03] Clear failing `portal#lint` warnings on WIP control-room pages + add `agents:verify` CI script
+
+- **Agent**: Claude Code
+- **Purpose**: The `chore/remove-agentic-layer-and-wip` branch had WIP control-room department pages that failed the `portal#lint` gate (`--max-warnings 0`) with 26 `no-explicit-any` / `no-unused-vars` warnings, and the new `portal-ci.yml` "Verify AGENTS.md sync" step called `pnpm agents:verify`, which did not exist. Both blocked CI on the branch.
+- **Changes Made** (`apps/portal`):
+  - `actions.ts`: replaced `as any` casts with `Record<string, number>` / `Record<string, unknown>`; dropped unused `user` destructure from `reassignDumperExcavator`.
+  - `engineering-notes/page.tsx`, `excavator-activity/page.tsx`: removed unused `lucide-react` icon imports (`CheckCircle2`, `HelpCircle`, `User`, `FileText`).
+  - `hourly-loads/HourlyLoadsTable.tsx`: typed sort comparators and assignment callback (`{ created_at?: string }`, `{ material_type?: string }`) instead of `any`; removed dead `siteName`/`excavatorName` consts and the now-orphaned `getExcavatorName` function; `export`ed `HourlyLoadRow`.
+  - `hourly-loads/page.tsx`: import `HourlyLoadRow` and cast `initialLoads` via `as unknown as HourlyLoadRow[]` instead of `as any`.
+  - `reports/page.tsx`, `reports/ReportsView.tsx`: `report_data: any` → `Record<string, string | number | boolean | null | undefined>` (preserves template-literal interpolation); removed dead `dateStr`/`shiftType` consts in the shift-cycle `useEffect` (kept `hour`/`isDaytime`, still used by `setCurrentShiftInfo`); typed `renderReportSummary` param.
+  - `lib/shift-completeness.ts`: typed `supabase` cast as `SupabaseClient` (import from `@repo/supabase`); dropped explicit `: any` annotations on `.map` callbacks.
+- **Changes Made** (repo root): added `tools/agents-verify.mjs` + `agents:verify` script in `package.json` — verifies every relative file link in `AGENTS.md` resolves, guards the design-system trio (RULES/SPEC/DESIGN), and checks `apps/portal/CLAUDE.md` links back to `AGENTS.md`.
+- **Verification**: `turbo run type-check lint --force` (portal + @repo/theme + @repo/ui) → 4/4, 0 cached; `portal` tests → 494/494 pass; `pnpm agents:verify` → pass; `pnpm --filter=portal build` → green.
+- **Next Agent Notes**: `AGENTS.md`'s manual verification gate also cites `pnpm --filter @repo/theme lint:tokens`, which does **not** exist (`packages/theme` has no `scripts` block). Not a CI gate today, but either add a `lint:tokens` task or drop the reference from `AGENTS.md`. `tools/agents-verify.mjs` is outside the prettier glob (`{ts,tsx,md,json}`) by design, matching `tools/audit-rls.cjs`.
+
 ## [2026-08-03] Darken text + de-whiten glass panels globally (ADR #013)
 
 - **Agent**: Claude Code
