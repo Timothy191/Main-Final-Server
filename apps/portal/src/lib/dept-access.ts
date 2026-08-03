@@ -1,32 +1,33 @@
 /**
  * Shared department route / role-gate constants and auth helpers.
- * Used by hub UI filters, server actions, and kept in sync with apps/portal/proxy.ts ACL.
- * AGENT-TRACE: Single source for restricted dept roles so hub cards match proxy denials.
+ *
+ * AGENT-TRACE: The ACL data (department slugs, restricted route→role map) and
+ * the pure predicates now live in `@repo/acl`, so this node-runtime file and
+ * the edge-runtime `proxy.ts` share a single source of truth and can no longer
+ * drift (the former inline copies had diverged — proxy carried a `tools` key
+ * this file lacked). This module re-exports them for existing importers
+ * (`assertDeptRole`, `isDeptAllowedForRole`, `filterDepartmentsByRole`, the
+ * slug/role constants) and keeps `assertDeptRole` local because it needs a
+ * server Supabase client, which cannot live in the edge-safe `@repo/acl`.
+ *
+ * Used by hub UI filters, server actions, and kept in sync with
+ * apps/portal/proxy.ts via @repo/acl (no manual sync needed anymore).
  */
+
+// Canonical ACL — re-exported so existing `from '@/lib/dept-access'` importers
+// keep resolving. Source of truth is packages/acl/src/index.ts.
+export {
+  DEPARTMENT_ROUTE_SLUGS,
+  RESTRICTED_DEPT_ROLES,
+  type DepartmentRouteSlug,
+  type Role,
+  isDeptAllowedForRole,
+  filterDepartmentsByRole,
+  normalizeRole,
+} from '@repo/acl'
 
 import { AuthError, ForbiddenError } from '@/lib/errors/error-classes'
 import type { SupabaseClient } from '@supabase/supabase-js'
-
-export const DEPARTMENT_ROUTE_SLUGS = [
-  'drilling',
-  'production',
-  'access-control',
-  'access-card-actions',
-  'engineering',
-  'control-room',
-  'safety',
-  'training',
-  'satellite-monitoring',
-] as const
-
-export type DepartmentRouteSlug = (typeof DEPARTMENT_ROUTE_SLUGS)[number]
-
-/** Role allowlists matching proxy RESTRICTED_ROUTES (dept segments only). */
-export const RESTRICTED_DEPT_ROLES: Record<string, readonly string[]> = {
-  'access-control': ['access_control', 'admin'],
-  'control-room': ['control_room_operator', 'admin'],
-  admin: ['admin'],
-}
 
 /* ------------------------------------------------------------------ */
 /*  Auth helper — shared across all department server actions          */
@@ -77,17 +78,4 @@ export async function assertDeptRole(
     user: { id: user.id, email: user.email },
     employee: { role: employee.role, department_id: employee.department_id ?? '' },
   }
-}
-
-export function isDeptAllowedForRole(deptSlug: string, role: string): boolean {
-  const allowed = RESTRICTED_DEPT_ROLES[deptSlug]
-  if (!allowed) return true
-  return allowed.includes(role)
-}
-
-export function filterDepartmentsByRole<T extends { name: string }>(
-  departments: readonly T[],
-  role: string
-): T[] {
-  return departments.filter((d) => isDeptAllowedForRole(d.name, role))
 }
