@@ -30,6 +30,7 @@ This guide covers migration paths for existing users and contributors joining th
 ### @repo/redis Build Error
 
 The `@repo/redis` package has a pre-existing build error:
+
 ```
 Cannot find module '/packages/redis/src/stats' imported from packages/redis/src/cache.ts
 ```
@@ -43,6 +44,7 @@ The `openspec-*` skills are duplicated across `.cursor/skills/`, `.qoder/skills/
 ### Failing Tests
 
 As of the current version, 10 tests across 5 suites are failing. These are pre-existing failures in:
+
 - `export/fuel-logs` route tests
 - `next-cache-handler` tests (Redis-dependent)
 - `automated-audit` Inngest job tests

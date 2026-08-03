@@ -4,7 +4,6 @@
 
 <br />
 
-
 Published: July 1, 2026
 
 <br />
@@ -37,7 +36,7 @@ New to `light-dark()` is that it is no longer limited to just color values. Star
 
 The [`@function`](https://developer.mozilla.org/docs/Web/CSS/@function) at-rule lets you define custom, reusable functions directly within native CSS. It can accept locally-scoped custom properties as arguments, perform calculations, and return values using the `result` descriptor, reducing the need for preprocessors.
 
-Combined with container style queries and the CSS `if()` function, you can create a custom `--light-dark()` function that works with *any* type of value.
+Combined with container style queries and the CSS `if()` function, you can create a custom `--light-dark()` function that works with _any_ type of value.
 
 - [Learn more about `@function`](https://goo.gle/at-function)
 - [Learn more about `--light-dark()`](https://goo.gle/custom-light-dark)
@@ -49,27 +48,27 @@ Part of CSS Container Queries, style queries let developers apply styles to desc
 ```css
 @container style(--theme: primary) {
   .app-card {
-    --bg-light: #fdf2f8; 
-    --bg-dark: #ff91d3;  
+    --bg-light: #fdf2f8;
+    --bg-dark: #ff91d3;
     --neon-glow: #f472b6;
-    --btn-light: #be185d; 
-    --btn-dark: #fbcfe8;  
-    
+    --btn-light: #be185d;
+    --btn-dark: #fbcfe8;
+
     --text-on-light: #500732;
-    --text-on-dark: #fff1f2;  
+    --text-on-dark: #fff1f2;
   }
 }
 
 @container style(--theme: accent) {
   .app-card {
     --bg-light: #f3e8ff;
-    --bg-dark: #4c1d95;  
+    --bg-dark: #4c1d95;
     --neon-glow: #d8b4fe;
-    --btn-light: #7e22ce; 
-    --btn-dark: #c084fc;  
-    
-    --text-on-light: #2e1065; 
-    --text-on-dark: #faf5ff;  
+    --btn-light: #7e22ce;
+    --btn-dark: #c084fc;
+
+    --text-on-light: #2e1065;
+    --text-on-dark: #faf5ff;
   }
 }
 ```
@@ -82,10 +81,7 @@ The [`if()`](https://developer.mozilla.org/docs/Web/CSS/if) CSS function brings 
 
 ```css
 --contrast-color: contrast-color(var(--card-bg));
-color: if(
-    style(--contrast-color: white): var(--text-on-dark);
-    else: var(--text-on-light)
-);
+color: if(style(--contrast-color: white): var(--text-on-dark) ; else: var(--text-on-light));
 ```
 
 ### 6. `@supports at-rule()`
@@ -111,7 +107,7 @@ The [`text-scale`](https://developer.mozilla.org/docs/Web/HTML/Element/meta/name
 When applied, the font-size on the `html` element is now determined by the operating system, so there is no need for you to set a base `font-size`. If you then use lengths with relative units like `em` and `rem`, the computed pixel values are based off of that base font-size.
 
 ```html
-<meta name="text-scale" value="scale">
+<meta name="text-scale" value="scale" />
 ```
 
 [Learn more about `<meta name=text-scale>`](https://goo.gle/meta-text-scale)
@@ -146,7 +142,7 @@ The [`sibling-index()`](https://developer.mozilla.org/docs/Web/CSS/sibling-index
 ```css
 dialog[open] > * {
   animation: content-entry 0.6s var(--spring) forwards;
-  
+
   /* 0.2s delay for the first item, then staggering by 0.05s via sibling-index() */
   animation-delay: calc(sibling-index() * 0.05s + 0.2s);
 }
@@ -323,4 +319,4 @@ Web APIs now expose CSS pseudo-elements (like `::before` or `::after`) to JavaSc
 
 ## Conclusion
 
-That's it for our roundup of *What's New in Web UI*. We hope you take these features and build some great interfaces with them. Until next year!
+That's it for our roundup of _What's New in Web UI_. We hope you take these features and build some great interfaces with them. Until next year!

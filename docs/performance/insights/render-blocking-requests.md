@@ -4,7 +4,6 @@
 
 <br />
 
-
 Published: Oct 8, 2025
 
 <br />
@@ -44,7 +43,7 @@ or [defer less important resources](https://extensions.joomla.org/instant-search
 
 ### WordPress
 
- There are a number of WordPress plugins that can help you [inline critical assets](https://wordpress.org/plugins/search/critical+css/) or [defer less important resources](https://wordpress.org/plugins/search/defer+css+javascript/).
+There are a number of WordPress plugins that can help you [inline critical assets](https://wordpress.org/plugins/search/critical+css/) or [defer less important resources](https://wordpress.org/plugins/search/defer+css+javascript/).
 
 ## Additional references
 

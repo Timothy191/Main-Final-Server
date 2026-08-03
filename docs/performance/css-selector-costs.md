@@ -3,7 +3,7 @@
 ![Connor Clark](https://web.dev/images/authors/cjamcl.jpg)
 **Connor Clark** — [X](https://twitter.com/cjamcl) | [GitHub](https://github.com/connorjclark)
 
-*Published: Oct 8, 2025*
+_Published: Oct 8, 2025_
 
 If **recalculate style** costs remain high, selector optimization can reduce them. Optimize the selectors with both high elapsed time and high slow-path percentages. Simpler selectors, fewer selectors, a smaller DOM, and a shallower DOM will all reduce matching costs.
 

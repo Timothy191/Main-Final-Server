@@ -21,8 +21,10 @@ Add a `<meta charset>` element within the first 1024 bytes of your HTML document
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     ...
+  </head>
+</html>
 ```
 
 ### Add a `Content-Type` HTTP response header

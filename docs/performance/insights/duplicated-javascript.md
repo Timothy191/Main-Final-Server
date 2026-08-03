@@ -4,7 +4,6 @@
 
 <br />
 
-
 Published: Oct 8, 2025
 
 <br />
@@ -23,6 +22,7 @@ You can dive deeper into the JavaScript bundles on a page by clicking the `View 
 - In PageSpeed Insights and in the Lighthouse report, this button is in the Performance category below the metrics:
 
   ![Lighthouse View Treemap button](https://developer.chrome.com/static/docs/performance/insights/duplicated-javascript/image/lighthouse-view-treemap-button.png) Lighthouse "View Treemap" button.
+
 - In the DevTools **Performance** Panel, this button is in the **Duplicated JavaScript** insight:
 
   ![DevTools Performance Panel View Treemap button](https://developer.chrome.com/static/docs/performance/insights/duplicated-javascript/image/performance-panel-treemap-button.png) DevTools Performance Panel "View Treemap" button.

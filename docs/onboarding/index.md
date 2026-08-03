@@ -36,17 +36,17 @@ Complete these steps in order when joining the project:
 
 ## Project Structure
 
-| Directory | Purpose |
-|-----------|---------|
-| `apps/portal` | Next.js 16 App Router portal application |
-| `apps/api-gateway` | GraphQL Mesh API gateway |
-| `apps/ops-gateway` | MCP bridge and control-plane |
-| `packages/@repo/*` | Shared packages (errors, theme, ui, utils, supabase, redis, etc.) |
-| `.cursor/rules/` | Cursor agent rules and policies |
-| `.cursor/agents/` | Project subagents |
-| `.cursor/skills/` | Reusable AI agent skills |
-| `.agents/knowledge/` | Shared knowledge base and patterns |
-| `scratch_board/` | Live coordination surface for concurrent agents |
+| Directory            | Purpose                                                           |
+| -------------------- | ----------------------------------------------------------------- |
+| `apps/portal`        | Next.js 16 App Router portal application                          |
+| `apps/api-gateway`   | GraphQL Mesh API gateway                                          |
+| `apps/ops-gateway`   | MCP bridge and control-plane                                      |
+| `packages/@repo/*`   | Shared packages (errors, theme, ui, utils, supabase, redis, etc.) |
+| `.cursor/rules/`     | Cursor agent rules and policies                                   |
+| `.cursor/agents/`    | Project subagents                                                 |
+| `.cursor/skills/`    | Reusable AI agent skills                                          |
+| `.agents/knowledge/` | Shared knowledge base and patterns                                |
+| `scratch_board/`     | Live coordination surface for concurrent agents                   |
 
 ## Key Commands
 
@@ -79,10 +79,13 @@ git add . && git commit -m "feat: your message" && git push origin main
 ## Common Issues
 
 ### Build fails with `Cannot find module '/packages/redis/src/stats'`
+
 This is a pre-existing issue in the `@repo/redis` package. The `stats` module reference in `cache.ts` points to a file that doesn't exist. Check `packages/redis/src/` for the correct module name.
 
 ### Tests failing
+
 Run `pnpm test -- --watch` to identify which test suites are failing. Common failures are in:
+
 - `src/app/api/export/fuel-logs/route.test.ts` — export endpoint tests
 - `src/lib/__tests__/next-cache-handler.test.ts` — Redis cache handler tests
 - `src/lib/jobs/automated-audit.test.ts` — Inngest job tests
@@ -90,4 +93,5 @@ Run `pnpm test -- --watch` to identify which test suites are failing. Common fai
 - `src/components/nav/ServicesDropdown.test.tsx` — UI component tests
 
 ### Duplicate skills warning
+
 The `openspec-*` skills exist in `.cursor/skills/`, `.qoder/skills/`, and `.github/skills/`. This is a known duplication that should be resolved by merging or aliasing per `merge-rules.md`.

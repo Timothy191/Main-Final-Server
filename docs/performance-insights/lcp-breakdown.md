@@ -4,7 +4,6 @@
 
 <br />
 
-
 Published: Oct 8, 2025
 
 <br />
@@ -13,12 +12,12 @@ The Largest Contentful Paint (LCP) reports the render time of the largest image,
 
 The subparts are:
 
-| LCP subpart | Explanation |
-|---|---|
-| **[Time to First Byte (TTFB)](https://web.dev/articles/ttfb)** | The time from when the user initiates loading the page until the browser receives the first byte of the HTML document response. |
-| **Resource load delay** | The time between TTFB and when the browser starts loading the LCP resource. If the LCP element doesn't require a resource load to render (for example, if the element is a text node rendered with a system font), this time is 0. |
-| **Resource load duration** | The duration of time it takes to load the LCP resource itself. If the LCP element doesn't require a resource load to render, this time is 0. |
-| **Element render delay** | The time between when the LCP resource finishes loading and the LCP element rendering fully. |
+| LCP subpart                                                    | Explanation                                                                                                                                                                                                                        |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[Time to First Byte (TTFB)](https://web.dev/articles/ttfb)** | The time from when the user initiates loading the page until the browser receives the first byte of the HTML document response.                                                                                                    |
+| **Resource load delay**                                        | The time between TTFB and when the browser starts loading the LCP resource. If the LCP element doesn't require a resource load to render (for example, if the element is a text node rendered with a system font), this time is 0. |
+| **Resource load duration**                                     | The duration of time it takes to load the LCP resource itself. If the LCP element doesn't require a resource load to render, this time is 0.                                                                                       |
+| **Element render delay**                                       | The time between when the LCP resource finishes loading and the LCP element rendering fully.                                                                                                                                       |
 
 LCP subparts
 
