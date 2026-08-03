@@ -197,6 +197,36 @@ fi
 echo
 echo -e "  ${BOLD}━━━ Phase 4: Portal Routes ━━━${NC}"
 
+# PPR streaming check — verify Transfer-Encoding: chunked and X-Accel-Buffering: no
+# Root (/) and auth routes use chunked streaming for redirects; login is synchronous
+ppr_headers=$(curl -s -I --connect-timeout 5 --max-time 10 "${BASE}/" 2>/dev/null || echo "")
+if echo "$ppr_headers" | grep -qiE 'Transfer-Encoding:[[:space:]]*chunked'; then
+  record "PPR streaming (Transfer-Encoding: chunked)" "pass"
+else
+  record "PPR streaming (Transfer-Encoding: chunked)" "warn" "not chunked — may use Content-Length"
+fi
+if echo "$ppr_headers" | grep -qiE 'X-Accel-Buffering:[[:space:]]*no'; then
+  record "PPR streaming (X-Accel-Buffering: no)" "pass"
+else
+  record "PPR streaming (X-Accel-Buffering: no)" "warn" "missing — nginx may buffer responses"
+fi
+if echo "$ppr_headers" | grep -qiE 'Vary:[[:space:]]*.*rsc'; then
+  record "PPR streaming (Vary: rsc header)" "pass"
+else
+  record "PPR streaming (Vary: rsc header)" "warn" "missing — RSC streaming negotiation not active"
+fi
+
+# Check a PPR route (authenticated — expects 307 redirect via streaming)
+ppr_redirect_code=$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 5 --max-time 10 \
+  "${BASE}/hub" 2>/dev/null || echo "000")
+ppr_redirect_headers=$(curl -s -I --connect-timeout 5 --max-time 10 "${BASE}/hub" 2>/dev/null || echo "")
+if echo "$ppr_redirect_code" | grep -qE '^(307|308|302)$' \
+  && echo "$ppr_redirect_headers" | grep -qiE 'Transfer-Encoding:[[:space:]]*chunked'; then
+  record "PPR route /hub" "pass" "HTTP $ppr_redirect_code with chunked streaming"
+else
+  record "PPR route /hub" "warn" "HTTP $ppr_redirect_code — may not be streaming"
+fi
+
 # Portal startup time check (< 60 seconds)
 if [ -f "${REPO_ROOT:-.}/.portal.start" ] && [ -f "${REPO_ROOT:-.}/.portal.pid" ]; then
   start_ts=$(cat "${REPO_ROOT:-.}/.portal.start" 2>/dev/null || echo 0)

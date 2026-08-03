@@ -421,7 +421,10 @@ fi
 # ── Phase 4: Backend (Ops Gateway) ────────────────────────────────────────────
 phase 4 "Backend (Ops Gateway)"
 
-if [ -f "$REPO_ROOT/.gateway.pid" ] && kill -0 "$(cat "$REPO_ROOT/.gateway.pid")" 2>/dev/null; then
+if [ ! -d "$REPO_ROOT/apps/ops-gateway" ]; then
+  check "Ops Gateway" "skip" "apps/ops-gateway directory not present"
+  STARTED_GATEWAY=false
+elif [ -f "$REPO_ROOT/.gateway.pid" ] && kill -0 "$(cat "$REPO_ROOT/.gateway.pid")" 2>/dev/null; then
   check "Ops Gateway" "pass" "already running on :3100"
   STARTED_GATEWAY=false
 else
@@ -682,10 +685,11 @@ fi
 
 # ── Phase 7: Daemons ──────────────────────────────────────────────────────────
 phase 7 "Daemons"
-bash "$REPO_ROOT/scripts/lsp-router.sh" start &
-bash "$REPO_ROOT/scripts/mcp-manager.sh" start &
-bash "$REPO_ROOT/scripts/heal-daemon.sh" &
-node "$REPO_ROOT/scripts/monitor/serve-monitor.mjs" &
+[ -f "$REPO_ROOT/scripts/lsp-router.sh" ] && bash "$REPO_ROOT/scripts/lsp-router.sh" start 2>/dev/null &
+[ -f "$REPO_ROOT/scripts/mcp-manager.sh" ] && bash "$REPO_ROOT/scripts/mcp-manager.sh" start 2>/dev/null &
+[ -f "$REPO_ROOT/scripts/heal-daemon.sh" ] && bash "$REPO_ROOT/scripts/heal-daemon.sh" 2>/dev/null &
+[ -f "$REPO_ROOT/scripts/monitor/serve-monitor.mjs" ] && node "$REPO_ROOT/scripts/monitor/serve-monitor.mjs" 2>/dev/null &
+true
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 show_results

@@ -4,12 +4,16 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # Deploys the full production stack locally using Docker Compose.
 #
+# Stack includes:
+#   Main:     Nginx, Portal (Next.js), Redis, Ops-Gateway, FUXA SCADA
+#   Monitoring: Prometheus, Grafana, Alertmanager
+#
 # Features:
 #   - Prerequisite verification (Docker, env files, directories)
 #   - Image building with production optimizations
 #   - Graceful stack startup with health polling
 #   - Database backup cron setup
-#   - Health check verification
+#   - Health check verification (portal + monitoring)
 #   - Status dashboard
 #
 # Usage:
@@ -101,46 +105,73 @@ show_status() {
   fi
 
   echo ""
-  echo -e "${CYAN}Health Check URLs:${NC}"
-  echo -e "  Portal:  ${BLUE}http://localhost:${NGINX_HTTP_PORT:-80}${NC}"
-  echo -e "  API:     ${BLUE}http://localhost:${NGINX_HTTP_PORT:-80}/api/health/live${NC}"
-  echo -e "  Ops-Gateway:${BLUE}http://localhost:${NGINX_HTTP_PORT:-80}/ops/health${NC}"
-  echo -e "  Nginx:   ${BLUE}http://localhost:${NGINX_HTTP_PORT:-80}/health${NC}"
-
-  echo ""
-  echo -e "${CYAN}Service Endpoints (via nginx proxy):${NC}"
-  echo -e "  Portal:       ${BLUE}http://localhost:${NGINX_HTTP_PORT:-80}${NC}"
-  echo -e "  API:          ${BLUE}http://localhost:${NGINX_HTTP_PORT:-80}/api/health/live${NC}"
-  echo -e "  Ops-Gateway:  ${BLUE}http://localhost:${NGINX_HTTP_PORT:-80}/ops/health${NC}"
-  echo -e "  Nginx Health: ${BLUE}http://localhost:${NGINX_HTTP_PORT:-80}/health${NC}"
-
-  echo ""
-  echo -e "${CYAN}Internal Endpoints (direct, no proxy):${NC}"
-  echo -e "  API:         ${BLUE}localhost:${API_PORT:-3001}${NC}"
-  echo -e "  Portal:      ${BLUE}localhost:${PORTAL_PORT:-3000}${NC}"
-  echo -e "  Ops-Gateway: ${BLUE}localhost:${OPS_GATEWAY_PORT:-3100}${NC}"
+  echo -e "${CYAN}Endpoints:${NC}"
+  echo -e "  ${BLUE}Portal:${NC}         http://localhost:${NGINX_HTTP_PORT:-80}"
+  echo -e "  ${BLUE}Grafana:${NC}        http://localhost:${GRAFANA_PORT:-3001}"
+  echo -e "  ${BLUE}Prometheus:${NC}     http://localhost:${PROMETHEUS_PORT:-9090}"
+  echo -e "  ${BLUE}Alertmanager:${NC}   http://localhost:9093"
+  echo -e "  ${BLUE}SCADA (FUXA):${NC}   http://localhost:${NGINX_HTTP_PORT:-80}/scada/"
+  echo -e "  ${BLUE}Ops-Gateway:${NC}    http://localhost:${OPS_GATEWAY_PORT:-3100}"
 
   # Quick health probe
   echo ""
   echo -e "${CYAN}Health Probe:${NC}"
   local http_code
-  http_code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${NGINX_HTTP_PORT:-80}/api/health/live" 2>/dev/null || echo "000")
-  if [[ "$http_code" == "200" ]]; then
-    echo -e "  ${GREEN}✓${NC} API health endpoint: ${http_code}"
-  else
-    echo -e "  ${RED}✗${NC} API health endpoint: ${http_code} (expected 200)"
-  fi
+
+  # Portal
   http_code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${NGINX_HTTP_PORT:-80}" 2>/dev/null || echo "000")
   if [[ "$http_code" == "200" || "$http_code" == "302" || "$http_code" == "301" ]]; then
-    echo -e "  ${GREEN}✓${NC} Portal frontend: ${http_code}"
+    echo -e "  ${GREEN}✓${NC} Portal: ${http_code}"
   else
-    echo -e "  ${RED}✗${NC} Portal frontend: ${http_code} (expected 2xx/3xx)"
+    echo -e "  ${RED}✗${NC} Portal: ${http_code} (expected 2xx/3xx)"
   fi
+
+  # Portal health endpoint
+  http_code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${NGINX_HTTP_PORT:-80}/api/health/live" 2>/dev/null || echo "000")
+  if [[ "$http_code" == "200" ]]; then
+    echo -e "  ${GREEN}✓${NC} Portal health: ${http_code}"
+  else
+    echo -e "  ${RED}✗${NC} Portal health: ${http_code} (expected 200)"
+  fi
+
+  # Ops-Gateway
   http_code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${NGINX_HTTP_PORT:-80}/ops/health" 2>/dev/null || echo "000")
   if [[ "$http_code" == "200" ]]; then
-    echo -e "  ${GREEN}✓${NC} Ops-Gateway health: ${http_code}"
+    echo -e "  ${GREEN}✓${NC} Ops-Gateway: ${http_code}"
   else
-    echo -e "  ${YELLOW}⚠${NC} Ops-Gateway health: ${http_code} (optional service)"
+    echo -e "  ${YELLOW}⚠${NC} Ops-Gateway: ${http_code} (optional)"
+  fi
+
+  # Grafana
+  http_code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${GRAFANA_PORT:-3001}/api/health" 2>/dev/null || echo "000")
+  if [[ "$http_code" == "200" ]]; then
+    echo -e "  ${GREEN}✓${NC} Grafana: ${http_code}"
+  else
+    echo -e "  ${YELLOW}⚠${NC} Grafana: ${http_code}"
+  fi
+
+  # Prometheus
+  http_code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${PROMETHEUS_PORT:-9090}/-/ready" 2>/dev/null || echo "000")
+  if [[ "$http_code" == "200" ]]; then
+    echo -e "  ${GREEN}✓${NC} Prometheus: ${http_code}"
+  else
+    echo -e "  ${YELLOW}⚠${NC} Prometheus: ${http_code}"
+  fi
+
+  # Alertmanager
+  http_code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:9093/-/ready" 2>/dev/null || echo "000")
+  if [[ "$http_code" == "200" ]]; then
+    echo -e "  ${GREEN}✓${NC} Alertmanager: ${http_code}"
+  else
+    echo -e "  ${YELLOW}⚠${NC} Alertmanager: ${http_code}"
+  fi
+
+  # Nginx
+  http_code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${NGINX_HTTP_PORT:-80}/health" 2>/dev/null || echo "000")
+  if [[ "$http_code" == "200" ]]; then
+    echo -e "  ${GREEN}✓${NC} Nginx: ${http_code}"
+  else
+    echo -e "  ${RED}✗${NC} Nginx: ${http_code}"
   fi
 
   echo ""
@@ -243,12 +274,20 @@ if [[ "$INTERACTIVE" == "true" ]]; then
   echo -e "${YELLOW}This will deploy the Arch-Mk2 production stack:${NC}"
   echo "  - Nginx (reverse proxy, SSL termination)"
   echo "  - Portal (Next.js frontend)"
-  echo "  - API (NestJS backend)"
-  echo "  - Ops-Gateway (control plane / MCP)"
+  echo "  - Ops-Gateway (control plane / MCP bridge)"
+  echo "  - Redis (caching / rate-limiting)"
+  echo "  - FUXA SCADA (industrial HMI)"
+  echo "  - Prometheus (metrics collection)"
+  echo "  - Grafana (dashboards / visualization)"
+  echo "  - Alertmanager (alert routing / notification)"
   echo ""
   echo -e "${YELLOW}Prerequisites (managed externally):${NC}"
-  echo "  - PostgreSQL / Supabase"
-  echo "  - Redis / Upstash"
+  echo "  - Supabase (PostgreSQL + Auth)"
+  echo ""
+  echo -e "${YELLOW}Monitoring endpoints after deploy:${NC}"
+  echo "  - Grafana:      http://localhost:${GRAFANA_PORT:-3001}  (admin/admin)"
+  echo "  - Prometheus:   http://localhost:${PROMETHEUS_PORT:-9090}"
+  echo "  - Alertmanager: http://localhost:9093"
   echo ""
   read -rp "Continue? [Y/n] " confirm
   if [[ "$confirm" =~ ^[Nn] ]]; then
@@ -310,30 +349,27 @@ echo -e "${BLUE}[5/6]${NC} Verifying endpoints..."
 
 sleep 3
 
-# Wait for nginx to be ready (it depends on portal + api)
+# Wait for nginx to be ready
 NGINX_BASE="http://localhost:${NGINX_HTTP_PORT:-80}"
 
-# Check API health via nginx
-API_CHECK=$(curl -s -o /dev/null -w "%{http_code}" "${NGINX_BASE}/api/health/live" 2>/dev/null || echo "000")
-if [[ "$API_CHECK" == "200" ]]; then
-  echo -e "${GREEN}  ✓${NC} API health: ${API_CHECK}"
-else
-  echo -e "${RED}  ✗${NC} API health: ${API_CHECK} (expected 200)"
-fi
+declare -A ENDPOINTS
+ENDPOINTS["Portal frontend"]="${NGINX_BASE}"
+ENDPOINTS["Portal health"]="${NGINX_BASE}/api/health/live"
+ENDPOINTS["Nginx health"]="${NGINX_BASE}/health"
+ENDPOINTS["Ops-Gateway"]="${NGINX_BASE}/ops/health"
+ENDPOINTS["Grafana"]="http://localhost:${GRAFANA_PORT:-3001}/api/health"
+ENDPOINTS["Prometheus ready"]="http://localhost:${PROMETHEUS_PORT:-9090}/-/ready"
+ENDPOINTS["Alertmanager ready"]="http://localhost:9093/-/ready"
 
-# Check Portal via nginx
-PORTAL_CHECK=$(curl -s -o /dev/null -w "%{http_code}" "${NGINX_BASE}" 2>/dev/null || echo "000")
-if [[ "$PORTAL_CHECK" == "200" || "$PORTAL_CHECK" == "301" || "$PORTAL_CHECK" == "302" ]]; then
-  echo -e "${GREEN}  ✓${NC} Portal: ${PORTAL_CHECK}"
-else
-  echo -e "${RED}  ✗${NC} Portal: ${PORTAL_CHECK}"
-fi
-
-# Check nginx health
-NGINX_CHECK=$(curl -s -o /dev/null -w "%{http_code}" "${NGINX_BASE}/health" 2>/dev/null || echo "000")
-if [[ "$NGINX_CHECK" == "200" ]]; then
-  echo -e "${GREEN}  ✓${NC} Nginx health: ${NGINX_CHECK}"
-fi
+for name in "${!ENDPOINTS[@]}"; do
+  url="${ENDPOINTS[$name]}"
+  http_code=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+  if [[ "$http_code" == "200" || "$http_code" == "301" || "$http_code" == "302" ]]; then
+    echo -e "  ${GREEN}✓${NC} $name: ${http_code}"
+  else
+    echo -e "  ${YELLOW}⚠${NC} $name: ${http_code} (from $url)"
+  fi
+done
 
 # ── Set Up Database Backups ──────────────────────────────────────────────────
 echo -e "${BLUE}[6/6]${NC} Setting up database backups..."
@@ -365,25 +401,31 @@ echo -e "${CYAN}═════════════════════�
 echo -e "${GREEN}   Deployment Complete!${NC}"
 echo -e "${CYAN}══════════════════════════════════════════════════${NC}"
 echo ""
-echo -e "  ${BLUE}Portal:${NC}        http://localhost:${NGINX_HTTP_PORT:-80}"
-echo -e "  ${BLUE}API Health:${NC}    http://localhost:${NGINX_HTTP_PORT:-80}/api/health/live"
-echo -e "  ${BLUE}Nginx Health:${NC}  http://localhost:${NGINX_HTTP_PORT:-80}/health"
-echo -e "  ${BLUE}Ops-Gateway:${NC}   http://localhost:${NGINX_HTTP_PORT:-80}/ops/health"
+echo -e "  ${CYAN}Main Application${NC}"
+echo -e "  ${BLUE}Portal:${NC}         http://localhost:${NGINX_HTTP_PORT:-80}"
+echo -e "  ${BLUE}SCADA (FUXA):${NC}   http://localhost:${NGINX_HTTP_PORT:-80}/scada/"
+echo -e "  ${BLUE}Portal Health:${NC}  http://localhost:${NGINX_HTTP_PORT:-80}/api/health/live"
+echo -e "  ${BLUE}Ops-Gateway:${NC}    http://localhost:${NGINX_HTTP_PORT:-80}/ops/health"
+echo ""  echo -e "  ${CYAN}Monitoring Stack (direct access)${NC}"
+  echo -e "  ${BLUE}Grafana:${NC}        http://localhost:${GRAFANA_PORT:-3001}"
+  echo -e "  ${BLUE}Prometheus:${NC}     http://localhost:${PROMETHEUS_PORT:-9090}"
+  echo -e "  ${BLUE}Alertmanager:${NC}   http://localhost:9093"
 echo ""
 echo -e "  ${YELLOW}Useful commands:${NC}"
-echo -e "  ${GREEN}→${NC} ./scripts/deploy-production.sh --status    Show stack status"
-echo -e "  ${GREEN}→${NC} ./scripts/deploy-production.sh --logs     Tail logs"
-echo -e "  ${GREEN}→${NC} ./scripts/deploy-production.sh --backup   Manual backup"
+echo -e "  ${GREEN}→${NC} ./scripts/deploy-production.sh --status    Show stack status & health"
+echo -e "  ${GREEN}→${NC} ./scripts/deploy-production.sh --logs     Tail all logs"
+echo -e "  ${GREEN}→${NC} ./scripts/deploy-production.sh --backup   Manual database backup"
 echo -e "  ${GREEN}→${NC} ./scripts/deploy-production.sh --stop     Stop stack"
 echo -e "  ${GREEN}→${NC} ./scripts/deploy-production.sh --restart  Restart stack"
-echo ""
-echo -e "  ${YELLOW}Data:${NC}"
-echo -e "  ${GREEN}→${NC} Backups stored in: backups/postgres/"
-echo -e "  ${GREEN}→${NC} DB volume:         arch-postgres-data"
-echo -e "  ${GREEN}→${NC} Redis volume:      arch-redis-data"
+echo ""echo -e "  ${YELLOW}Grafana credentials (configurable in .env.production):${NC}"
+  echo -e "  ${GREEN}→${NC} User: \${GRAFANA_ADMIN_USER:-admin}"
+  echo -e "  ${GREEN}→${NC} Pass: \${GRAFANA_ADMIN_PASSWORD:-admin}"
 echo ""
 echo -e "  ${YELLOW}Logs:${NC}"
 echo -e "  ${GREEN}→${NC} docker compose -p ${COMPOSE_PROJECT} -f ${COMPOSE_FILE} logs -f"
+echo -e "  ${GREEN}→${NC} docker compose -p ${COMPOSE_PROJECT} -f ${COMPOSE_FILE} logs grafana -f"
+echo -e "  ${GREEN}→${NC} docker compose -p ${COMPOSE_PROJECT} -f ${COMPOSE_FILE} logs prometheus -f"
+echo -e "  ${GREEN}→${NC} docker compose -p ${COMPOSE_PROJECT} -f ${COMPOSE_FILE} logs alertmanager -f"
 echo ""
 echo -e "  ${YELLOW}Need to update?${NC}"
 echo -e "  ${GREEN}→${NC} Rebuild & restart: ./scripts/deploy-production.sh --build"
