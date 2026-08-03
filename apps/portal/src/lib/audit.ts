@@ -120,7 +120,7 @@ export async function recordAdminAuditEvent(input: AdminAuditEventInput) {
   }
 
   try {
-    revalidateTag(DEPARTMENT_CACHE_TAGS.TABLE_ADMIN_AUDIT, 'default')
+    revalidateTag(DEPARTMENT_CACHE_TAGS.TABLE_ADMIN_AUDIT, 'max')
   } catch {
     // Ignore if not in rendering/action context
   }
