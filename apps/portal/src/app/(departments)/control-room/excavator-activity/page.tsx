@@ -10,7 +10,7 @@ import {
   TableCell,
 } from '@repo/ui/components/ui/table'
 import { Badge } from '@repo/ui/components/ui/badge'
-import { Shovel, Weight, Zap, MapPin, User, FileText } from 'lucide-react'
+import { Shovel, Weight, Zap, MapPin } from 'lucide-react'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 

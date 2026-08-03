@@ -186,7 +186,7 @@ export function HourlyLoadsTable({ initialLoads, excavators, sites }: HourlyLoad
       const assignmentsList = Array.isArray(machine.assignments)
         ? machine.assignments
         : [machine.assignments]
-      assignmentsList.forEach((assignment: any) => {
+      assignmentsList.forEach((assignment: { material_type?: string }) => {
         if (assignment?.material_type) {
           dynamicMaterials.add(assignment.material_type)
         }
@@ -224,7 +224,10 @@ export function HourlyLoadsTable({ initialLoads, excavators, sites }: HourlyLoad
     const assignmentsList = Array.isArray(machine.assignments)
       ? [...machine.assignments]
       : [machine.assignments]
-    assignmentsList.sort((a: any, b: any) => (a.created_at || '').localeCompare(b.created_at || ''))
+    assignmentsList.sort(
+      (a: { created_at?: string }, b: { created_at?: string }) =>
+        (a.created_at || '').localeCompare(b.created_at || '')
+    )
 
     // Find index of this load row in the dumper's sorted loads list
     const dumperLoads = loadsByDumper[dId] || []
@@ -261,7 +264,10 @@ export function HourlyLoadsTable({ initialLoads, excavators, sites }: HourlyLoad
     const assignmentsList = Array.isArray(machine.assignments)
       ? [...machine.assignments]
       : [machine.assignments]
-    assignmentsList.sort((a: any, b: any) => (a.created_at || '').localeCompare(b.created_at || ''))
+    assignmentsList.sort(
+      (a: { created_at?: string }, b: { created_at?: string }) =>
+        (a.created_at || '').localeCompare(b.created_at || '')
+    )
 
     // Find index of this load row in the dumper's sorted loads list
     const dumperLoads = loadsByDumper[dId] || []
@@ -299,7 +305,10 @@ export function HourlyLoadsTable({ initialLoads, excavators, sites }: HourlyLoad
     const assignmentsList = Array.isArray(machine.assignments)
       ? [...machine.assignments]
       : [machine.assignments]
-    assignmentsList.sort((a: any, b: any) => (a.created_at || '').localeCompare(b.created_at || ''))
+    assignmentsList.sort(
+      (a: { created_at?: string }, b: { created_at?: string }) =>
+        (a.created_at || '').localeCompare(b.created_at || '')
+    )
 
     // Find index of this load row in the dumper's sorted loads list
     const dumperLoads = loadsByDumper[dId] || []
@@ -449,8 +458,6 @@ export function HourlyLoadsTable({ initialLoads, excavators, sites }: HourlyLoad
                   ? machine.site[0]
                   : machine.site
                 : null
-              const siteName = siteData?.name ?? '—'
-              const excavatorName = getExcavatorName(row)
 
               return (
                 <TableRow

@@ -10,7 +10,7 @@ import {
   TableCell,
 } from '@repo/ui/components/ui/table'
 import { Badge } from '@repo/ui/components/ui/badge'
-import { ClipboardList, AlertOctagon, ShieldAlert, CheckCircle2, HelpCircle } from 'lucide-react'
+import { ClipboardList, AlertOctagon, ShieldAlert } from 'lucide-react'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
