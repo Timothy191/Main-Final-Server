@@ -2,6 +2,29 @@
 
 This file maintains a record of AI agent interventions, context hand-offs, and architectural breadcrumbs for this specific package/app.
 
+## [2026-08-03] Darken text + de-whiten glass panels globally (ADR #013)
+
+- **Agent**: Claude Code
+- **Purpose**: User reported text blending into panels. Root cause: `--text-on-glass-muted: rgba(10,10,20,0.55)` (55% black on white glass) + body/heading dark-gray rather than black + bright `--arch-glass-surface` (white 0.40→0.20→0.30+0.25). User chose Moderate panel de-whitening + Full-darken text.
+- **Changes Made** (`packages/theme`):
+  - `src/css/variables.css`: `--arch-glass-surface` → 0.28/0.12/0.18+0.15; `-surface-hover` → 0.38/0.20/0.28+0.24; `--os-shell-taskbar-surface` scaled ~0.7×; `--login-text-muted` #848992→#4a4a52.
+  - `src/css/variables-generated.css` (effective SSOT, loads last): `--arch8-11` → #6e6e73/#3a3a3c/#1d1d1f/#0a0a0c; `--text-on-glass`→rgba(10,10,20,1), `-muted`→rgba(10,10,20,0.8).
+  - `tokens.json`: arch8-11 + text-on-glass[-muted] matched (SD source; `style-dictionary` not installed so `variables-generated.css` is manually synced).
+  - `src/css/palette.css`: `--palette-neutral-400/500/600/900` darkened to match; `-950`→#050507 (monotonicity, unused); `--palette-text-on-glass[-muted]` matched.
+  - Also darkened the live `--text-on-glass-video[-muted]` (variables.css, used by `.glass-video`) and the unused `--glass-text[-muted]` (tokens.json `glass.text` → generated) for family consistency.
+  - `src/tokens/generated.ts` was **not** regenerated — it holds `var(--token)` references only (no resolved values), so CSS changes flow through; and the committed file has `arch0–15` primitives the current `generate-tokens.mjs` doesn't emit (running it breaks GlassCard/ui-primitives tests). Restored after an accidental regen.
+  - Governance: `docs/design-system/SPEC.md` §2 + text-token note updated; ADR #013 added to `packages/theme/DECISIONS.md`.
+- **Next Agent Notes**: `--palette-brand-primary` / `--palette-semantic-info` are hardcoded #1c1c1e (not via neutral-950) → CTA/button/info colors deliberately unchanged. `--glass-text-muted` (generated, unused) was not touched. Legacy `.glass`/`.liquid-glass`/`.glass-macos` use `--palette-glass-surface` (0.63), not `--arch-glass-*` — out of scope. If contrast over light wave-video frames is insufficient, dial `--arch-glass-surface` alphas back up toward 0.34/0.16/0.22+0.18 (Modest) — text stays.
+
+## [2026-08-03] LoginBrandBanner — fix logo sizing (remove inline style override)
+
+- **Agent**: Claude Code
+- **Purpose**: The animated brand marquee in the login card footer had `<Image style={{ width: 'auto', height: 'auto' }}>` that overrode the `h-5 w-auto max-w-[5rem] object-contain` className, so logo sizing fell back to HTML attribute hints instead of the Tailwind classes. Verified `next/image` (Next 16) renders width/height as HTML attributes only and does not inject inline pixel styles, so the inline `auto/auto` was the thing defeating `h-5`.
+- **Changes Made**:
+  - `apps/portal/src/features/auth/components/LoginBrandBanner.tsx`: removed the inline `style={{ width: 'auto', height: 'auto' }}` from the logo `<Image>`, leaving `className="h-5 w-auto max-w-[5rem] object-contain"` authoritative (uniform 20px logo height, auto width capped at 80px, aspect ratio preserved). Added an `AGENT-TRACE` comment explaining why no inline width/height.
+- **Text sizing**: unchanged and consistent — caption, logo text labels, and `|` separators all use `login-muted-text text-[13px] font-medium tracking-wide`, matching the rest of the login chrome (title bar, subtitle).
+- **Next Agent Notes**: Reduced-motion finding from the same review is still open — `.animate-marquee` / `.animate-marquee-vertical` are not in the explicit `prefers-reduced-motion` block in `packages/theme/src/css/animations.css` (they rely on the global `reset.css` catch-all). Consider adding an explicit `animation: none !important` guard for clarity. No pause-on-focus for keyboard users on the scrolling `role="region"`.
+
 ## [2026-07-18] Fix all lint errors & warnings surfaced by ESLint config repair
 
 - **Agent**: Qoder
@@ -260,3 +283,23 @@ This file maintains a record of AI agent interventions, context hand-offs, and a
 - **Next Agent Notes**: Ensure any future changes to global middleware or proxies do not conflict with the suppressed logging rules.
 
 // AGENT-TRACE: Security headers and development logging filters updated to align with v16.2.10 best practices.
+
+- **Agent**: Antigravity
+- **Purpose**: Implement shift roster rotation logic, lookup widgets, filterable tables, and editable shift selections in the Reports tab.
+- **Changes Made**:
+  - `apps/portal/src/app/(departments)/control-room/actions.ts`: Added `updateReportAssignedShift` server action.
+  - `apps/portal/src/app/(departments)/control-room/reports/ReportsView.tsx`: Created client component mapping the mathematically proven 9-day shift cycle (3 days, 3 nights, 3 off), displaying live status (A/B/C), a visual 5-day cycle preview, an interactive calendar lookup form, and the reports grid.
+  - `apps/portal/src/app/(departments)/control-room/reports/page.tsx`: Updated page to query reports and delegate rendering to `ReportsView.tsx`.
+  - `apps/portal/src/lib/shift-completeness.ts`: Implemented `getShiftCompleteness` checking active machines against `hourly_loads` and `machine_operations` logs.
+  - `apps/portal/src/app/(departments)/control-room/actions.ts`: Updated `getControlRoomMetrics` to count today's shift notes using a live query on `engineering_notes`.
+  - `apps/portal/src/app/(departments)/control-room/machine-operations/page.tsx`: Implemented a custom machine operations dashboard with status indicators, logged hours, operator names, and running status badges.
+  - `apps/portal/src/app/(departments)/control-room/engineering-notes/page.tsx`: Created a severity-coded shift notes view showing unresolved vs. resolved issues and follow-up requirements.
+  - `apps/portal/src/app/(departments)/control-room/excavator-activity/page.tsx`: Added an excavator production log with cycle counts, average cycle times, material types, and estimated tonnages.
+  - `apps/portal/src/app/(departments)/control-room/reports/page.tsx`: Built a custom reports index display with creator info, PDF links, and inline summaries of compile data.
+  - `apps/portal/src/app/(departments)/control-room/actions.ts`: Added `bookMachineBreakdown` and `endHaulingSession` server mutations.
+  - `apps/portal/src/app/(departments)/control-room/hourly-loads/HourlyLoadCell.tsx`: Handled locked `-1` values to render as disabled in the hourly loads cells.
+  - `apps/portal/src/app/(departments)/control-room/hourly-loads/HourlyLoadsTable.tsx`: Created client component for the table implementing a dropdown actions trigger on `Machine_Id`, breakdown booking modals, and split hauling session logs.
+  - `apps/portal/src/app/(departments)/control-room/hourly-loads/page.tsx`: Updated columns to display `Machine_Id`, `Site`, `Excavator`, `Material`, 12 hourly columns, `Total Loads`, `Bin Factor`, and `Total Bcm Moved`. Delegated rendering to `HourlyLoadsTable`, loading active excavators, active admin-created sites, and aligning split sessions sequentially by creation date.
+  - `apps/portal/src/app/(departments)/control-room/actions.ts`: Added `updateMachineSite`, `updateHourlyLoadMaterial`, and `reassignDumperExcavator` server mutations.
+  - `apps/portal/src/app/(departments)/control-room/hourly-loads/HourlyLoadsTable.tsx`: Added site-filtered Excavator select dropdowns wired to `reassignDumperExcavator` and dual select dropdowns (Coal/Waste + sub-grades) in the Material column wired to `updateHourlyLoadMaterial`. Also replaced static Site text with a select dropdown wired to `updateMachineSite`.
+- **Next Agent Notes**: The dashboard metrics are cached for 5 minutes and tagged appropriately. Any updates to machines, hourly loads, excavator activities, or engineering notes should invalidate `DEPARTMENT_CACHE_TAGS.CONTROL_ROOM` or specific department tags as registered in the data and revalidation utilities.

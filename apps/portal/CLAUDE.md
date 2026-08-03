@@ -2,7 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **Canonical policy:** the monorepo root `AGENTS.md` is the source of truth. **Shared knowledge base:** read and update `.agents/knowledge/` (repowiki) — start at `.agents/knowledge/index.md`; see `.agents/knowledge/README.md` for the read/write protocol.
+> **Canonical policy:** the monorepo root [`AGENTS.md`](../../AGENTS.md) is the
+> source of truth. It establishes the **design-system global rule** that all
+> agents must follow, apply, and keep updated: see
+> [`docs/design-system/RULES.md`](../../docs/design-system/RULES.md) (rules),
+> [`SPEC.md`](../../docs/design-system/SPEC.md) (exact tokens & classes), and
+> [`DESIGN.md`](../../docs/design-system/DESIGN.md) (intent & surface roles).
+> Structural changes go to [`packages/theme/DECISIONS.md`](../../packages/theme/DECISIONS.md).
 
 ## Next.js agent rules
 
@@ -56,6 +62,14 @@ All commands use `pnpm`. Root monorepo scripts live in `Arch-Mk2/package.json`; 
   - `components/` — UI components grouped by domain.
   - `plugins/rust-telemetry-engine/` — Rust plugin.
 - The app expects external services at runtime: Supabase, Redis, Ollama, and the NestJS API. See `.env.example`, `.env.production.example`, and `.env.portal.compose.example`.
+
+## Design system (global rule — mandatory)
+
+Visual surfaces (glass/transparency, panels, cards, the ambient background) follow **one schema**. Before styling any panel or card:
+
+- Read [`docs/design-system/RULES.md`](../../docs/design-system/RULES.md) — no ad-hoc `backdrop-blur-*` or `bg-white/` opacity fills on panels/cards; use `.os-shell*` (chrome) or `GlassCard` / `.glass-card` (cards), both backed by the canonical `--arch-glass-*` tokens.
+- Use exact tokens from [`docs/design-system/SPEC.md`](../../docs/design-system/SPEC.md). The ambient background is the single `RouteBackground` — never add a competing page-level background.
+- If you change a token/class/visual contract, update SPEC.md (and add an ADR to [`packages/theme/DECISIONS.md`](../../packages/theme/DECISIONS.md) for structural changes) in the same change.
 
 ## Testing
 

@@ -59,7 +59,7 @@ export function KpiCardSkeleton({ className }: { className?: string }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className={cn(
-        'relative overflow-hidden rounded-xl border border-arch5/20 bg-arch1/50 p-6',
+        'glass-card glass-depth-card relative overflow-hidden rounded-[var(--radius-card)] p-6',
         className
       )}
       role="status"
@@ -111,8 +111,7 @@ export function KpiCard({
       transition={{ duration: 0.3, ease: 'easeOut' }}
       whileHover={{ y: -2 }}
       className={cn(
-        'relative overflow-hidden rounded-xl border border-arch5/20 bg-arch1/50 p-6',
-        'transition-all duration-200 hover:border-arch5/40',
+        'glass-card glass-depth-card relative overflow-hidden rounded-[var(--radius-card)] p-6',
         className
       )}
       role="region"

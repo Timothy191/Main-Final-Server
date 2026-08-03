@@ -16,6 +16,19 @@ export function HourlyLoadCell({ id, hourColumn, value, onAdjusted }: HourlyLoad
   const [count, setCount] = useState(value)
   const [isPending, startTransition] = useTransition()
 
+  if (value === -1) {
+    return (
+      <div className="flex items-center justify-center py-1">
+        <span
+          className="text-arch-text-muted/40 font-medium select-none cursor-not-allowed"
+          title="Hour is logged in another session"
+        >
+          —
+        </span>
+      </div>
+    )
+  }
+
   const handleAdjust = (delta: 1 | -1) => {
     if (count + delta < 0) return
 

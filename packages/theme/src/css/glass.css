@@ -68,8 +68,11 @@
 /* ── Glass Components ── */
 
 .glass-card {
-  --glass-surface: rgba(255, 255, 255, 0.08);
-  --glass-surface-hover: rgba(255, 255, 255, 0.15);
+  /* Canonical glass schema: derives effect from --arch-glass-* so content
+     cards share the taskbar/panel translucency, blur, border and shadow.
+     Only the radius (shape) stays card-specific. */
+  --glass-surface: var(--arch-glass-surface);
+  --glass-surface-hover: var(--arch-glass-surface-hover);
   --glass-border-top-opacity: 0.25;
   --glass-border-gradient: linear-gradient(to bottom,
       rgba(255, 255, 255, var(--glass-border-top-opacity)),
@@ -80,10 +83,10 @@
   background:
     linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
     var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(16px) saturate(120%);
-  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: var(--arch-glass-backdrop);
+  backdrop-filter: var(--arch-glass-backdrop);
   border: 1px solid transparent;
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--arch-glass-shadow);
   border-radius: var(--radius-card);
   color: var(--text-on-glass);
   transition:
@@ -93,8 +96,7 @@
 }
 
 .glass-card:hover {
-  --glass-surface: rgba(255, 255, 255, 0.85);
-  --glass-border-top-opacity: 0.35;
+  --glass-surface: var(--arch-glass-surface-hover);
 
   background:
     linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
@@ -1583,6 +1585,13 @@
   border-radius: var(--os-shell-radius-lg);
 }
 
+/* Full-height operational panel shell (department sidebar / main pane).
+   Same canonical effect as the rest of os-shell, square corners so it
+   reads as a continuous panel rather than a floating chip. */
+.os-shell--panel {
+  border-radius: 0;
+}
+
 /* Reduced-transparency / low-performance fallback: opaque surface, no blur */
 .low-perf-fallback .os-shell {
   background: rgba(246, 246, 250, 0.92);
@@ -1595,4 +1604,11 @@
   box-shadow:
     0 2px 8px rgba(4, 12, 24, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Keep content cards consistent with chrome in reduced-transparency mode */
+.low-perf-fallback .glass-card {
+  background: rgba(246, 246, 250, 0.92);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }

@@ -16,7 +16,7 @@ const SwaggerUI = dynamic(
 export default function ApiDocs() {
   return (
     <div className="min-h-screen bg-arch-surface-primary text-arch-text-primary">
-      <div className="border-b border-arch-border-subtle glass-card rounded-none backdrop-blur-xl p-4">
+      <div className="glass-card rounded-none p-4">
         <h1 className="text-2xl font-semibold text-arch-text-primary">API Documentation</h1>
         <p className="text-sm text-arch-text-muted mt-1">
           Interactive API reference for Arch-Systems Portal

@@ -2,6 +2,21 @@
 
 This package manages the design tokens, Tailwind presets, and design system governance for the Arch monorepo.
 
+> **Governance:** the design system is a global rule — see
+> [`docs/design-system/RULES.md`](../../docs/design-system/RULES.md) (rules),
+> [`SPEC.md`](../../docs/design-system/SPEC.md) (exact tokens & classes), and
+> [`DESIGN.md`](../../docs/design-system/DESIGN.md) (intent & surface roles).
+> Structural changes are recorded in [`DECISIONS.md`](./DECISIONS.md).
+
+## Canonical glass schema (`--arch-glass-*`)
+
+All frosted-glass surfaces derive from one canonical token set in
+`src/css/variables.css` — one backdrop (`blur(20px) saturate(180%)`), one
+gradient surface, one border, one shadow stack. `--os-shell-*` (chrome) and
+`.glass-card` (content cards) both resolve to it (DECISIONS #011). Radius/shape
+stays role-specific; the _effect_ is shared. Do not hand-roll glass on panels or
+cards — use `.os-shell*` or `GlassCard` / `.glass-card` (see RULES R2).
+
 ## 📦 Directory Structure
 
 ```bash

@@ -61,6 +61,8 @@ jobs:
 
       - name: Run tests (portal)
         run: pnpm --filter=portal test
+      - name: Verify AGENTS.md sync
+        run: pnpm agents:verify
 
   structured-data-validation:
     name: Rich Results / Structured Data Validation
@@ -199,3 +201,58 @@ jobs:
             echo "  $(basename "$d")"
           done
           echo "::endgroup::"
+
+  pp-streaming:
+    name: PPR Streaming Smoke Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '9'
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build portal
+        run: pnpm --filter=portal build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'test-service-key' }}
+
+      - name: Start portal server
+        run: |
+          cd apps/portal
+          npx next start --port 3000 &
+          echo "PID=$!" >> $GITHUB_ENV
+          # Wait for server to be ready
+          for i in $(seq 1 30); do
+            if curl -s -o /dev/null --max-time 2 http://localhost:3000/ 2>/dev/null; then
+              echo "Server ready after ${i}s"
+              break
+            fi
+            sleep 1
+          done
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'test-service-key' }}
+
+      - name: Run PPR streaming smoke tests
+        run: bash scripts/smoke-test.sh --port 3000 --strict
+
+      - name: Stop portal server
+        if: always()
+        run: kill $(lsof -t -i:3000) 2>/dev/null || true

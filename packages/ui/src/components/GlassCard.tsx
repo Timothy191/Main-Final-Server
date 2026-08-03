@@ -444,26 +444,18 @@ export function GlassCard({
           ? 'transition-all duration-300 ease-glass shadow-glass-depth hover:shadow-glass-depth-hover active:shadow-glass-depth-active'
           : 'shadow-glass-depth',
 
-        variant !== 'liquid' && 'glass-card glass-depth-card border border-arch-border-subtle',
+        variant !== 'liquid' && 'glass-card glass-depth-card',
 
-        // Window & Default share standard glass style
+        // Window & Default share standard glass style. The glass effect
+        // (blur/saturate/surface/border) comes from the canonical .glass-card
+        // CSS; only shape/animation/accent are variant-specific here.
         (variant === 'default' || variant === 'window') && [
-          'group/window rounded-card backdrop-saturate-[1.3] animate-window-open',
-          !intensityTokens && 'backdrop-blur-xl bg-arch-surface-secondary/80',
+          'group/window rounded-card animate-window-open',
           hover && ACCENT_COLORS[accent],
         ],
 
         // Spotlight custom layout style
-        variant === 'spotlight' && [
-          'group rounded-card backdrop-saturate-[1.3]',
-          !intensityTokens && 'backdrop-blur-xl bg-arch-surface-secondary/80',
-        ],
-
-        // GlowBorder custom layout style
-        variant === 'glowborder' && [
-          'backdrop-saturate-[1.3]',
-          !intensityTokens && 'backdrop-blur-xl',
-        ],
+        variant === 'spotlight' && ['group rounded-card'],
 
         // Liquid custom layout style
         variant === 'liquid' && [
@@ -481,8 +473,8 @@ export function GlassCard({
         {
           ...(intensityTokens
             ? {
-                backdropFilter: `blur(${intensityTokens.blur})`,
-                WebkitBackdropFilter: `blur(${intensityTokens.blur})`,
+                // Intensity presets are opacity-only layers over the canonical
+                // .glass-card backdrop (blur stays the shared 20px/180%).
                 backgroundColor: `rgba(255, 255, 255, ${intensityTokens.opacity})`,
               }
             : {}),

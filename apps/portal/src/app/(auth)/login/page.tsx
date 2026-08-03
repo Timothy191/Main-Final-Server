@@ -46,7 +46,6 @@ export default async function LoginPage() {
   return (
     <div className="login-card-viewport relative w-full flex flex-col items-center justify-center pb-16 pt-4 px-4 sm:px-8 md:px-12 lg:px-20 overflow-y-auto">
       {/* Global ambient background is handled by RouteBackground component */}
-      <div className="absolute inset-0 -z-10 w-full h-full overflow-hidden bg-background/50" />
       {/* Login Card wrapper — centered between taskbar and dock */}
       <div className="login-card-shell relative z-10 w-full my-auto os-shell-enter-2 flex flex-col justify-center">
         {systemUnavailable ? (

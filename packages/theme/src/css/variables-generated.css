@@ -11,10 +11,10 @@
   --arch5: rgba(0, 0, 0, 0.12);
   --arch6: rgba(0, 0, 0, 0.2);
   --arch7: rgba(0, 0, 0, 0.3);
-  --arch8: #a1a1a6;
-  --arch9: #6e6e73;
-  --arch10: #3a3a3c;
-  --arch11: #1d1d1f;
+  --arch8: #6e6e73;
+  --arch9: #3a3a3c;
+  --arch10: #1d1d1f;
+  --arch11: #0a0a0c;
   --arch12: #d22118;
   --arch13: #1c1c1e;
   --arch14: #34c759;
@@ -44,14 +44,14 @@
     rgba(255, 255, 255, 0.8),
     rgba(255, 255, 255, 0.3)
   );
-  --glass-text: rgba(10, 10, 20, 0.92);
-  --glass-text-muted: rgba(10, 10, 20, 0.55);
+  --glass-text: rgba(10, 10, 20, 1);
+  --glass-text-muted: rgba(10, 10, 20, 0.8);
   --glass-vibrancy: rgba(246, 246, 250, 0.82);
   --glass-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
-  --text-on-glass: rgba(10, 10, 20, 0.92);
-  --text-on-glass-muted: rgba(10, 10, 20, 0.55);
+  --text-on-glass: rgba(10, 10, 20, 1);
+  --text-on-glass-muted: rgba(10, 10, 20, 0.8);
   --vibrancy-surface: rgba(246, 246, 250, 0.82);
   --vibrancy-border: rgba(0, 0, 0, 0.06);
   --overlay-dim: rgba(0, 0, 0, 0.016);

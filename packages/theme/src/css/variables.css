@@ -204,8 +204,8 @@
   --glass-video-border-bottom: rgba(0, 0, 0, 0.06);
   --glass-video-sheen: inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
   --glass-video-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03);
-  --text-on-glass-video: rgba(10, 10, 20, 0.92);
-  --text-on-glass-video-muted: rgba(10, 10, 20, 0.55);
+  --text-on-glass-video: rgba(10, 10, 20, 1);
+  --text-on-glass-video-muted: rgba(10, 10, 20, 0.8);
   --glass-video-radius: 20px;
 
   /* Dark glass surface */
@@ -352,24 +352,45 @@
   --mac-menu-bar-height: 28px;
 
   /* ═══════════════════════════════════════════════════════════════
-       OS SHELL (taskbar / login card / dock)
+       CANONICAL GLASS SCHEMA — single source of truth for the
+       translucency/blur/border/shadow effect shared by all glass
+       surfaces (os-shell chrome AND .glass-card content cards).
+       Radius/shape stays role-specific; the *effect* is one set.
        ═══════════════════════════════════════════════════════════════ */
-  --os-shell-surface:
+  --arch-glass-backdrop: blur(20px) saturate(180%);
+  /* AGENT-TRACE: white alphas reduced ~0.7x (Moderate) so panels read as a
+     subtler frost with less glare — near-black text gains contrast (ADR #013). */
+  --arch-glass-surface:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.40) 0%,
-      rgba(255, 255, 255, 0.20) 45%,
-      rgba(246, 246, 250, 0.30) 100%
+      rgba(255, 255, 255, 0.28) 0%,
+      rgba(255, 255, 255, 0.12) 45%,
+      rgba(246, 246, 250, 0.18) 100%
     ),
-    rgba(255, 255, 255, 0.25);
-  --os-shell-border: 1px solid var(--palette-border-glass);
-  --os-shell-shadow:
+    rgba(255, 255, 255, 0.15);
+  --arch-glass-surface-hover:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.38) 0%,
+      rgba(255, 255, 255, 0.20) 45%,
+      rgba(246, 246, 250, 0.28) 100%
+    ),
+    rgba(255, 255, 255, 0.24);
+  --arch-glass-border: 1px solid var(--palette-border-glass);
+  --arch-glass-shadow:
     var(--palette-glass-shadow-ambient), var(--palette-glass-shadow-contact),
     inset 0 1px 0 var(--palette-glass-specular-top),
     inset 0 -1px 0 var(--palette-glass-contact-bottom),
     inset 1px 0 0 var(--palette-glass-specular-side),
     inset -1px 0 0 var(--palette-glass-specular-side);
-  --os-shell-backdrop: blur(20px) saturate(180%);
+
+  /* ═══════════════════════════════════════════════════════════════
+       OS SHELL (taskbar / login card / dock) — derives from canonical
+       ═══════════════════════════════════════════════════════════════ */
+  --os-shell-surface: var(--arch-glass-surface);
+  --os-shell-border: var(--arch-glass-border);
+  --os-shell-shadow: var(--arch-glass-shadow);
+  --os-shell-backdrop: var(--arch-glass-backdrop);
   --os-shell-radius-lg: 24px;
   --os-shell-radius-full: 9999px;
   --os-shell-font: var(--font-sans);
@@ -377,12 +398,12 @@
   --os-shell-taskbar-surface:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.45) 0%,
-      rgba(255, 255, 255, 0.25) 45%,
-      rgba(246, 246, 250, 0.35) 100%
+      rgba(255, 255, 255, 0.32) 0%,
+      rgba(255, 255, 255, 0.18) 45%,
+      rgba(246, 246, 250, 0.25) 100%
     ),
-    rgba(246, 246, 250, 0.30);
-  --os-shell-taskbar-backdrop: blur(20px) saturate(180%);
+    rgba(246, 246, 250, 0.21);
+  --os-shell-taskbar-backdrop: var(--arch-glass-backdrop);
   --os-shell-taskbar-shadow:
     0 4px 14px rgba(4, 12, 24, 0.14), 0 1px 3px rgba(4, 12, 24, 0.1),
     inset 0 1px 0 var(--palette-glass-specular-top),
@@ -396,7 +417,7 @@
   --os-shell-enter-delay-3: 500ms;
 
   /* Login supporting copy */
-  --login-text-muted: #848992;
+  --login-text-muted: #4a4a52;
   --login-text-emphasis: var(--text-heading);
   --login-text-placeholder: color-mix(
     in srgb,

@@ -18,11 +18,13 @@
   --palette-neutral-100: #f6f6fa;
   --palette-neutral-200: #e8e8ed;
   --palette-neutral-300: #d2d2d7;
-  --palette-neutral-400: #a1a1a6;
-  --palette-neutral-500: #6e6e73;
-  --palette-neutral-600: #3a3a3c;
-  --palette-neutral-900: #1d1d1f;
-  --palette-neutral-950: #1c1c1e;
+  /* AGENT-TRACE: darkened text end of the neutral scale (ADR #013) so text
+     reads near-black on frosted glass. Light end (0-300) unchanged. */
+  --palette-neutral-400: #6e6e73;
+  --palette-neutral-500: #3a3a3c;
+  --palette-neutral-600: #1d1d1f;
+  --palette-neutral-900: #0a0a0c;
+  --palette-neutral-950: #050507;
 
   /* ── Brand ─────────────────────────────────────────────────────────── */
   --palette-brand-primary: #1c1c1e;
@@ -71,8 +73,8 @@
   --palette-text-tertiary: var(--palette-neutral-500);
   --palette-text-muted: var(--palette-neutral-400);
   --palette-text-inverted: var(--palette-neutral-0);
-  --palette-text-on-glass: rgba(10, 10, 20, 0.92);
-  --palette-text-on-glass-muted: rgba(10, 10, 20, 0.55);
+  --palette-text-on-glass: rgba(10, 10, 20, 1);
+  --palette-text-on-glass-muted: rgba(10, 10, 20, 0.8);
 
   /* ── Interactive ───────────────────────────────────────────────────── */
   --palette-interactive-primary: var(--palette-brand-primary);

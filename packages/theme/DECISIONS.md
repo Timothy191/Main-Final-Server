@@ -158,3 +158,106 @@ output generation.
 **Why**: Keeps mock-aligned control paints as theme SSOT without inventing dark-mode UI tokens or hard-coding rgba in `LoginForm` / login page.
 
 **Reference**: `apps/portal/src/app/(auth)/login/page.tsx` + `features/auth` `LoginForm`. Spec: `.kiro/specs/login-form-redesign/`.
+
+---
+
+## 011 — Canonical glass schema (`--arch-glass-*`)
+
+**Decision**: All frosted-glass surfaces — chrome (`--os-shell-*`) **and** content
+cards (`.glass-card` / `.glass-depth-card`) — derive from a single canonical
+token set `--arch-glass-*` in `variables.css`: one backdrop
+(`blur(20px) saturate(180%)`), one gradient surface, one border, one shadow
+stack. `--os-shell-*` (and the taskbar backdrop) now resolve to
+`var(--arch-glass-*)`; `.glass-card`'s backdrop/surface/border/shadow resolve to
+the same. Radius/shape stays role-specific (taskbar pill, cards `--radius-card`,
+panels square via `.os-shell--panel`).
+
+**Why**: Before this, `.glass-card` ran a parallel glass system (blur 16px sat
+120%, `rgba(255,255,255,0.08)`) and several surfaces were ad-hoc
+(`bg-arch1/50`, `bg-white/40`, `--vibrancy-surface`). The taskbar, panels, and
+cards therefore read as different materials. "One schema, many shapes" makes
+the whole UI one material; the _effect_ is shared, only the silhouette varies.
+
+**Migration**: `GlassCard`'s Tailwind overrides (`backdrop-blur-xl`,
+`bg-arch-surface-secondary/80`, `backdrop-saturate-[1.3]`, `border-arch-border-subtle`)
+were removed so the canonical `.glass-card` CSS drives the effect;
+`glassIntensity` presets became opacity-only layers over the canonical backdrop.
+`DepartmentLayout` sidebar → `.os-shell--panel`; main pane dropped its ad-hoc
+frost (cards on top carry the glass). `ToolBanner` reverted to `.os-shell`.
+`KpiCard` → `.glass-card.glass-depth-card`. `.low-perf-fallback .glass-card`
+parity added.
+
+**Rule**: No new surface may hand-roll glass. Use `.os-shell*` or `.glass-card`;
+extend the canonical family if a new role is needed. Enforced at review and
+documented in `docs/design-system/RULES.md` (R2).
+
+---
+
+## 012 — Single ambient background (`RouteBackground`)
+
+**Decision**: The global background is exactly one component,
+`apps/portal/src/components/RouteBackground.tsx`: a muted, looping H.264 wave
+(`/assets/video/background.mp4`) at 0.65× playback rate with a keep-alive
+watchdog, over CSS fallback layers (orbs `animate-wave-canvas-a/b/c`,
+`route-bg-fallback`, `-tint`, `-grain`, `-shimmer`). It honors
+`prefers-reduced-motion: reduce`. Background theming is done via the
+`--canvas-*` and `--wave-*` tokens in `variables.css`, never via a second
+page-level `<video>` or CSS backdrop.
+
+**Why**: Concentrates the ambient motion in one asset + one component so every
+route shares the same backdrop, playback is resilient to browser interruptions,
+and reduced-motion degrades gracefully. Competing page backgrounds would
+double-render and fight the ambient layer.
+
+**Rule**: Do not add a second background/animation to a page; do not change the
+video source/playback rate outside `RouteBackground.tsx`. See `docs/design-system/RULES.md` (R5).
+
+**Reference**: `apps/portal/src/components/RouteBackground.tsx`; plan
+`docs/superpowers/plans/2026-07-17-wave-ambient-permanent-mp4.md`.
+
+---
+
+## 013 — Darker text + less-white glass for legibility
+
+**Decision**: Darken the text tokens one step and reduce the white alphas of the
+canonical glass surface ~0.7× so text reads near-black against a subtler frost
+instead of blending into the bright white-translucent panel.
+
+**Why**: Muted text on glass was `--text-on-glass-muted: rgba(10,10,20,0.55)`
+(only 55% black) on `--arch-glass-surface` (white 0.40→0.20→0.30 + 0.25 base) —
+muted labels washed to mid-gray on white and were illegible. Body/heading
+(`#3a3a3c` / `#1d1d1f`) were dark gray rather than black. User reported text and
+panels "blending in with one another."
+
+**Changes**:
+
+- `--arch-glass-surface` → `0.28 / 0.12 / 0.18 + base 0.15`; `-surface-hover` →
+  `0.38 / 0.20 / 0.28 + 0.24`; `--os-shell-taskbar-surface` scaled ~0.7×
+  (`0.32 / 0.18 / 0.25 + base rgba(246,246,250,0.21)`). Blur/saturate/border/shadow
+  unchanged.
+- `--arch8`→`#6e6e73`, `--arch9`→`#3a3a3c`, `--arch10`→`#1d1d1f`, `--arch11`→`#0a0a0c`.
+- `--text-on-glass`→`rgba(10,10,20,1)`, `--text-on-glass-muted`→`rgba(10,10,20,0.8)`.
+- `--login-text-muted`→`#4a4a52` (login card muted text + placeholder via color-mix).
+- `--palette-neutral-400/500/600/900` darkened to match; `--palette-neutral-950`
+  →`#050507` only to keep the neutral scale monotonic (it is unused —
+  `--palette-brand-primary` and `--palette-semantic-info` are hardcoded `#1c1c1e`,
+  so CTA/button/info colors are unchanged).
+
+**Source-of-truth note**: `variables-generated.css` is the _effective_ SSOT for
+`--arch8–11` and `--text-on-glass[-muted]` (it loads last in the `theme` layer and
+defines them directly). It is a Style Dictionary artifact (`sd.config.mjs`), but
+`style-dictionary` is not installed as a devDep, so it is maintained by manual sync
+with `tokens.json`. Both were updated to identical values. `src/tokens/generated.ts`
+was **not** regenerated: it holds only `var(--token)` _references_ (not resolved
+values), so CSS value changes flow through automatically; moreover the committed
+`generated.ts` includes `arch0–15` primitives that the current
+`generate-tokens.mjs` does not emit, so running it would shrink the file and break
+`GlassCard.test.tsx` / `ui-primitives.test.tsx`. That script↔file drift is a
+separate cleanup item.
+
+**Rule**: Future text/glass-surface token changes must update all three sources
+(`tokens.json`, `variables-generated.css`, `palette.css`/`variables.css`) to keep
+them in agreement until Style Dictionary regeneration is restored.
+
+**Reference**: `packages/theme/src/css/variables.css`, `variables-generated.css`,
+`palette.css`, `tokens.json`; `docs/design-system/SPEC.md` §2.

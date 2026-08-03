@@ -41,10 +41,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
 
   return (
     <div className="flex h-[calc(100vh-28px)]">
-      <aside
-        className="w-60 shrink-0 border-r border-black/[0.08] bg-[var(--vibrancy-surface)] backdrop-blur-2xl flex flex-col"
-        style={{ borderRight: '1px solid rgba(0,0,0,0.07)' }}
-      >
+      <aside className="os-shell os-shell--panel w-60 shrink-0 flex flex-col">
         <MacTitleBar title={department.displayName} />
 
         <div className="px-3 pt-3 pb-1 flex items-center justify-between">
@@ -113,7 +110,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         </div>
       </aside>
 
-      <main className="flex-1 overflow-auto bg-white/40 backdrop-blur-sm p-6">{children}</main>
+      <main className="flex-1 overflow-auto p-6">{children}</main>
     </div>
   )
 }

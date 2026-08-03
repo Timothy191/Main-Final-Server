@@ -4,6 +4,15 @@ Welcome to the documentation directory for the Arch Systems Portal. This reposit
 
 ## Directory Structure
 
+### 🎨 [Design System](./design-system/) — global rule (mandatory)
+
+The portal's visual system (glass/transparency, background animation, all tokens and visual aspects) is a **global rule** every agent must follow, apply, and keep updated. Authoritative docs:
+
+- [RULES.md](./design-system/RULES.md) — the enforceable must/must-not list (one glass schema; no ad-hoc `backdrop-blur-*` / `bg-white/` on panels or cards; token tiers; fixed background animation; how to extend).
+- [SPEC.md](./design-system/SPEC.md) — exact token values, class catalog, and visual contracts (`--arch-glass-*`, `--os-shell-*`, `.glass-card`, canvas/wave tokens, radii, shadows, typography, z-index).
+- [DESIGN.md](./design-system/DESIGN.md) — intent, principles, surface roles, and the ambient background system.
+- Structural decisions: [`packages/theme/DECISIONS.md`](../packages/theme/DECISIONS.md) (ADRs).
+
 ### 🏛️ [Architecture](file:///home/arch/Desktop/New%20Folder/arch-systems-portal/docs/architecture/)
 
 Architectural designs, scalability references, and gap analyses.

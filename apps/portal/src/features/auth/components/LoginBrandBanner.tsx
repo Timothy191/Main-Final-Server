@@ -54,8 +54,11 @@ export function LoginBrandBanner() {
                     alt=""
                     width={logo.width}
                     height={logo.height}
+                    // AGENT-TRACE: sizing governed by className (h-5 w-auto
+                    // max-w-[5rem] object-contain) — no inline width/height,
+                    // which would override the classes and break uniform logo
+                    // height. Matches next/image aspect-ratio guidance.
                     className="h-5 w-auto max-w-[5rem] object-contain"
-                    style={{ width: 'auto', height: 'auto' }}
                     unoptimized
                   />
                 ) : null}
