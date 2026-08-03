@@ -1,1 +1,0 @@
-../../cursor/rules/09-ai-surface-layout.mdc

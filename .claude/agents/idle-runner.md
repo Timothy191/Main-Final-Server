@@ -1,1 +1,0 @@
-../../cursor/agents/idle-runner.md

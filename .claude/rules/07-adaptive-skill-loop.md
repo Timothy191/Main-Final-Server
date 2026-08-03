@@ -1,1 +1,0 @@
-../../cursor/rules/07-adaptive-skill-loop.mdc

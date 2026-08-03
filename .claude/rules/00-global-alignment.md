@@ -1,1 +1,0 @@
-../../cursor/rules/00-global-alignment.mdc

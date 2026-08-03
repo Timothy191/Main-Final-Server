@@ -1,1 +1,0 @@
-../../cursor/agents/nextjs-fullstack.md

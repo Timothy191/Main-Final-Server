@@ -1,1 +1,0 @@
-../../cursor/rules/06-ai-maintenance-background.mdc

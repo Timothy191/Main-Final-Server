@@ -1,1 +1,0 @@
-../../cursor/agents/root-cause-healer.md

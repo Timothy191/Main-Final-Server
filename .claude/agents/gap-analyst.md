@@ -1,1 +1,0 @@
-../../cursor/agents/gap-analyst.md

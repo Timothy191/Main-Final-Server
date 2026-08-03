@@ -1,3 +1,0 @@
-# Skills
-
-Canonical skill repository.

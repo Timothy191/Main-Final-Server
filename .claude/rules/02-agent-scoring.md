@@ -1,1 +1,0 @@
-../../cursor/rules/02-agent-scoring.mdc

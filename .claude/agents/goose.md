@@ -1,1 +1,0 @@
-../../cursor/agents/goose.md

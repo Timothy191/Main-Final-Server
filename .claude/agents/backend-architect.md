@@ -1,1 +1,0 @@
-../../cursor/agents/backend-architect.md

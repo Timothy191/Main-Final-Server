@@ -1,1 +1,0 @@
-../../cursor/agents/reverse-engineer.md

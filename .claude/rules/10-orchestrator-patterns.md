@@ -1,1 +1,0 @@
-../../cursor/rules/10-orchestrator-patterns.mdc

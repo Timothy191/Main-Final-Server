@@ -1,1 +1,0 @@
-../../cursor/agents/ai-system-optimizer.md

@@ -1,1 +1,0 @@
-../../cursor/agents/agency-lead.md
