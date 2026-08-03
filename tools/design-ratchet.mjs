@@ -52,12 +52,22 @@ const CATEGORIES = {
   // backdrop-blur-* / backdrop-saturate-* on a panel/card re-asserts
   // backdrop-filter and overrides the canonical .glass-card / .os-shell blur.
   backdropBlur: (line) => (line.match(/backdrop-(?:blur|saturate)-[\w./-]+/g) || []).length,
-  // Raw opacity surface fills: bg-white/40, bg-arch1/50, bg-arch-surface-…/80.
-  bgOpacityFill: (line) =>
-    (
-      line.match(/bg-(?:white|black|arch\d+|arch-surface-[a-z-]+)\//g) || []
-    ).length +
-    (line.match(/bg-\[var\(--vibrancy-surface\)\]/g) || []).length,
+  // Raw white/black opacity SURFACE fills — the R2 target. R2's examples are
+  // bg-white/40, bg-white/70 (surface treatments on panels/cards). We exclude:
+  //  - low-opacity accents (<=15): bg-white/5, /10, /15 are standard
+  //    button/input/chip/hover styling, not glass surface treatments.
+  //  - semantic token fills (bg-arch-surface-…/N) and primitive fills
+  //    (bg-archN/N): those are R3 token-tier concerns, not R2 ad-hoc glass.
+  // Threshold ≥20 = surface-treatment territory; accents live at ≤15.
+  bgOpacityFill: (line) => {
+    let n = 0
+    for (const m of line.matchAll(/bg-(?:white|black)\/(\d+)/g)) {
+      if (parseInt(m[1], 10) >= 20) n++
+    }
+    // bg-[var(--vibrancy-surface)] as a surface treatment (R2 calls it out).
+    n += (line.match(/bg-\[var\(--vibrancy-surface\)\]/g) || []).length
+    return n
+  },
   // Inline style rgba glass fills.
   inlineRgbaGlass: (line) =>
     (line.match(/(?:background|backgroundColor):\s*['"`]rgba\(/g) || []).length,
