@@ -352,19 +352,17 @@ export function ServicesDropdown() {
               <span className="text-[12px] font-medium text-arch-text-primary">Sleep</span>
             </DropdownMenuItem>
 
-            
-              <DropdownMenuItem asChild className="rounded-md">
-                <button
-                  type="button"
-                  onClick={submitLogout}
-                  className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-left hover:bg-black/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/50"
-                >
-                  <LogOut className="h-3.5 w-3.5 text-arch-text-secondary shrink-0" />
-                  <span className="text-[12px] font-medium text-arch-text-primary">Log Out</span>
-                  <span className="ml-auto text-[10px] text-arch-text-muted">⇧⌘Q</span>
-                </button>
-              </DropdownMenuItem>
-            
+            <DropdownMenuItem asChild className="rounded-md">
+              <button
+                type="button"
+                onClick={submitLogout}
+                className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-left hover:bg-black/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/50"
+              >
+                <LogOut className="h-3.5 w-3.5 text-arch-text-secondary shrink-0" />
+                <span className="text-[12px] font-medium text-arch-text-primary">Log Out</span>
+                <span className="ml-auto text-[10px] text-arch-text-muted">⇧⌘Q</span>
+              </button>
+            </DropdownMenuItem>
 
             <DropdownMenuItem
               className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-left hover:bg-black/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/50"

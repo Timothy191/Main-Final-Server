@@ -74,7 +74,13 @@ export function CardActionsTab() {
               <div className="flex justify-center mb-6">
                 <div className="w-32 h-32 bg-arch-surface-tertiary rounded-xl border border-arch-border-default flex items-center justify-center overflow-hidden relative">
                   {employee.photo_url ? (
-                    <Image src={employee.photo_url} alt="Photo" fill className="object-cover" />
+                    <Image
+                      src={employee.photo_url}
+                      alt="Photo"
+                      fill
+                      className="object-cover"
+                      sizes="128px"
+                    />
                   ) : (
                     <User className="w-12 h-12 text-arch-text-muted" />
                   )}
@@ -221,7 +227,13 @@ export function CardActionsTab() {
               <div className="flex justify-between items-start">
                 <div className="w-20 h-24 bg-gray-200 rounded border border-gray-300 flex items-center justify-center overflow-hidden relative">
                   {employee?.photo_url ? (
-                    <Image src={employee.photo_url} alt="Photo" fill className="object-cover" />
+                    <Image
+                      src={employee.photo_url}
+                      alt="Photo"
+                      fill
+                      className="object-cover"
+                      sizes="80px"
+                    />
                   ) : (
                     <User className="w-8 h-8 text-gray-400" />
                   )}

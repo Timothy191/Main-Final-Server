@@ -7,11 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
-  return (
-    <DynamicTable
-      title="Tools"
-      description="Production tools."
-      tableName="equipment"
-    />
-  )
+  return <DynamicTable title="Tools" description="Production tools." tableName="equipment" />
 }

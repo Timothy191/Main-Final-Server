@@ -1,9 +1,11 @@
 'use server'
 
+import { revalidateTag } from 'next/cache'
 import { cacheTag, cacheLife } from 'next/cache'
-import { DatabaseError } from '@/lib/errors/error-classes'
+import { z } from 'zod'
+import { DatabaseError, ValidationError, ForbiddenError } from '@/lib/errors/error-classes'
 import { assertDeptRole } from '@/lib/dept-access'
-import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
+import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -27,6 +29,33 @@ export interface RecentMachineOperation {
   hoursWorked: number | null
   siteName: string | null
 }
+
+export interface AdjustHourlyLoadResult {
+  success: boolean
+  newValue: number
+  totalLoads: number
+}
+
+const HOUR_COLUMNS = [
+  'hour_01',
+  'hour_02',
+  'hour_03',
+  'hour_04',
+  'hour_05',
+  'hour_06',
+  'hour_07',
+  'hour_08',
+  'hour_09',
+  'hour_10',
+  'hour_11',
+  'hour_12',
+] as const
+
+const AdjustHourlyLoadSchema = z.object({
+  id: z.string().uuid(),
+  hourColumn: z.enum(HOUR_COLUMNS),
+  delta: z.union([z.literal(1), z.literal(-1)]),
+})
 
 /* ------------------------------------------------------------------ */
 /*  Auth helper                                                        */
@@ -122,6 +151,80 @@ export async function getControlRoomMetrics(deptId: string): Promise<ControlRoom
 /* ------------------------------------------------------------------ */
 /*  2. Recent Machine Operations (not cached — live activity)         */
 /* ------------------------------------------------------------------ */
+
+/* ------------------------------------------------------------------ */
+/*  3. Adjust an hourly load count (+/- 1)                            */
+/* ------------------------------------------------------------------ */
+
+export async function adjustHourlyLoad(formData: unknown): Promise<AdjustHourlyLoadResult> {
+  const { supabase, user } = await assertControlRoomRole()
+
+  const parseResult = AdjustHourlyLoadSchema.safeParse(formData)
+  if (!parseResult.success) {
+    throw new ValidationError('Invalid hourly load adjustment payload', {
+      issues: parseResult.error.flatten().fieldErrors,
+    })
+  }
+
+  const { id, hourColumn, delta } = parseResult.data
+
+  // Read current row and verify ownership via department membership
+  const { data: row, error: readError } = await supabase
+    .from('hourly_loads')
+    .select('department_id, total_loads, ' + hourColumn)
+    .eq('id', id)
+    .single()
+
+  if (readError || !row) {
+    throw new DatabaseError('Hourly load record not found', {
+      operation: 'select',
+      context: { id, error: readError?.message },
+    })
+  }
+
+  const typedRow = row as unknown as Record<string, number | string>
+  const currentValue = typedRow[hourColumn] as number
+  const newValue = currentValue + delta
+
+  if (newValue < 0) {
+    throw new ForbiddenError('Cannot decrement hourly load below zero', {
+      resource: 'hourly_loads',
+      action: 'adjust',
+    })
+  }
+
+  const newTotalLoads = ((typedRow.total_loads as number) ?? 0) + delta
+
+  const { data: updated, error: updateError } = await supabase
+    .from('hourly_loads')
+    .update({
+      [hourColumn]: newValue,
+      total_loads: newTotalLoads,
+      updated_at: new Date().toISOString(),
+      updated_by: user.id,
+    })
+    .eq('id', id)
+    .select('total_loads, ' + hourColumn)
+    .single()
+
+  if (updateError || !updated) {
+    throw new DatabaseError('Failed to update hourly load', {
+      operation: 'update',
+      context: { id, error: updateError?.message },
+    })
+  }
+
+  const typedUpdated = updated as unknown as Record<string, number>
+
+  revalidateTag(DEPARTMENT_CACHE_TAGS.CONTROL_ROOM, 'max')
+  revalidateTag(DEPARTMENT_CACHE_TAGS.TABLE_MACHINES, 'max')
+
+  return {
+    success: true,
+    newValue: typedUpdated[hourColumn] as number,
+    totalLoads: typedUpdated.total_loads as number,
+  }
+}
 
 export async function getRecentMachineOperations(
   deptId: string,

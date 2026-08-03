@@ -8,13 +8,17 @@ RUN turbo prune --scope=portal --docker
 
 # ── Stage 2: deps ─────────────────────────────────────────
 FROM node:24-alpine AS deps
+RUN apk add --no-cache libc6-compat python3 make g++
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+ENV NPM_CONFIG_FETCH_RETRY_MAINTIMEOUT=60000
+ENV NPM_CONFIG_FETCH_RETRIES=5
+ENV NODE_GYP_FORCE_PYTHON=/usr/bin/python3
 WORKDIR /app
 
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # ── Stage 3: builder ──────────────────────────────────────
 FROM node:24-alpine AS builder

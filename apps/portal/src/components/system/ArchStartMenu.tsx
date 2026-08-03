@@ -189,26 +189,25 @@ export function ArchStartMenu({ onClose }: ArchStartMenuProps) {
           >
             <Lock className="h-4 w-4" aria-hidden />
           </button>
-          
-            <button
-              type="button"
-              role="menuitem"
-              aria-label="Sign out"
-              title="Sign out"
-              onClick={() => {
-                onClose()
-                submitLogout()
-              }}
-              className={cn(
-                'flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[12px] font-medium',
-                'text-arch-text-secondary hover:bg-black/[0.06] hover:text-arch-text-primary',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/50'
-              )}
-            >
-              <LogOut className="h-3.5 w-3.5" aria-hidden />
-              Sign out
-            </button>
-          
+
+          <button
+            type="button"
+            role="menuitem"
+            aria-label="Sign out"
+            title="Sign out"
+            onClick={() => {
+              onClose()
+              submitLogout()
+            }}
+            className={cn(
+              'flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[12px] font-medium',
+              'text-arch-text-secondary hover:bg-black/[0.06] hover:text-arch-text-primary',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-charcoal/50'
+            )}
+          >
+            <LogOut className="h-3.5 w-3.5" aria-hidden />
+            Sign out
+          </button>
         </div>
       </div>
     </div>

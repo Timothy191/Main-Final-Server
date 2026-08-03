@@ -21,16 +21,27 @@ jest.mock('@/lib/dept-access', () => ({
 
 jest.mock('@/lib/errors/error-classes', () => ({
   AuthError: class AuthError extends Error {
-    constructor(m: string) { super(m); this.name = 'AuthError' }
+    constructor(m: string) {
+      super(m)
+      this.name = 'AuthError'
+    }
   },
   ForbiddenError: class ForbiddenError extends Error {
-    constructor(m: string, public ctx?: Record<string, unknown>) {
-      super(m); this.name = 'ForbiddenError'
+    constructor(
+      m: string,
+      public ctx?: Record<string, unknown>
+    ) {
+      super(m)
+      this.name = 'ForbiddenError'
     }
   },
   DatabaseError: class DatabaseError extends Error {
-    constructor(m: string, public ctx?: Record<string, unknown>) {
-      super(m); this.name = 'DatabaseError'
+    constructor(
+      m: string,
+      public ctx?: Record<string, unknown>
+    ) {
+      super(m)
+      this.name = 'DatabaseError'
     }
   },
 }))
@@ -85,9 +96,8 @@ beforeEach(() => {
 describe('dept auth wrappers (exported)', () => {
   describe('assertSatelliteRole', () => {
     it('calls assertDeptRole with satellite roles and resource', async () => {
-      const { assertSatelliteRole } = await import(
-        '@/app/(departments)/satellite-monitoring/actions'
-      )
+      const { assertSatelliteRole } =
+        await import('@/app/(departments)/satellite-monitoring/actions')
       await assertSatelliteRole()
       expect(assertDeptRole).toHaveBeenCalledWith(
         ['admin', 'satellite', 'supervisor'],
@@ -96,9 +106,8 @@ describe('dept auth wrappers (exported)', () => {
     })
 
     it('returns the result from assertDeptRole', async () => {
-      const { assertSatelliteRole } = await import(
-        '@/app/(departments)/satellite-monitoring/actions'
-      )
+      const { assertSatelliteRole } =
+        await import('@/app/(departments)/satellite-monitoring/actions')
       const result = await assertSatelliteRole()
       expect(result).toBe(mockResult)
     })
@@ -106,9 +115,8 @@ describe('dept auth wrappers (exported)', () => {
 
   describe('assertAccessCardActionsRole (access-card-actions)', () => {
     it('calls assertDeptRole with access-control roles and resource', async () => {
-      const { assertAccessCardActionsRole } = await import(
-        '@/app/(departments)/access-card-actions/actions'
-      )
+      const { assertAccessCardActionsRole } =
+        await import('@/app/(departments)/access-card-actions/actions')
       await assertAccessCardActionsRole()
       expect(assertDeptRole).toHaveBeenCalledWith(
         ['admin', 'access_control'],
@@ -131,10 +139,7 @@ describe('dept auth wrappers (private — tested through public API)', () => {
       } catch {
         // expected — mock supabase has no real DB
       }
-      expect(assertDeptRole).toHaveBeenCalledWith(
-        ['admin', 'safety', 'supervisor'],
-        'safety'
-      )
+      expect(assertDeptRole).toHaveBeenCalledWith(['admin', 'safety', 'supervisor'], 'safety')
     })
   })
 
@@ -176,27 +181,19 @@ describe('dept auth wrappers (private — tested through public API)', () => {
       } catch {
         // expected
       }
-      expect(assertDeptRole).toHaveBeenCalledWith(
-        ['admin', 'access_control'],
-        'access_control'
-      )
+      expect(assertDeptRole).toHaveBeenCalledWith(['admin', 'access_control'], 'access_control')
     })
   })
 
   describe('card-actions — assertAccessCardActionsRole (card-actions)', () => {
     it('calls assertDeptRole with card-actions roles', async () => {
-      const mod = await import(
-        '@/app/(departments)/access-card-actions/card-actions/actions'
-      )
+      const mod = await import('@/app/(departments)/access-card-actions/card-actions/actions')
       try {
         await mod.searchPersonnel('test')
       } catch {
         // expected
       }
-      expect(assertDeptRole).toHaveBeenCalledWith(
-        ['admin', 'access_control'],
-        'card_actions'
-      )
+      expect(assertDeptRole).toHaveBeenCalledWith(['admin', 'access_control'], 'card_actions')
     })
   })
 })

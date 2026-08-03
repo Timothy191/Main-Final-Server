@@ -3,7 +3,7 @@ import { getDepartmentContext } from '@/lib/dept-context'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Building2, Sparkles } from 'lucide-react'
 import { cacheLife, cacheTag } from 'next/cache'
-import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
+import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
 
 async function getDepartmentMetadata(deptId: string) {
   'use cache'
@@ -11,7 +11,7 @@ async function getDepartmentMetadata(deptId: string) {
   cacheTag(DEPARTMENT_CACHE_TAGS.DEPARTMENT_METADATA, `dept:metadata:${deptId}`)
 
   const supabase = await (await import('@repo/supabase/server')).createServerSupabaseClient()
-  
+
   const { data: dbDept } = await supabase
     .from('departments')
     .select('personality, display_name, description')
@@ -27,7 +27,7 @@ export default async function DepartmentDashboard({
   params: Promise<{ department: string }>
 }) {
   const { department: deptSlug } = await params
-  const { dept, deptId, supabase } = await getDepartmentContext({
+  const { dept, deptId } = await getDepartmentContext({
     department: deptSlug,
   })
 

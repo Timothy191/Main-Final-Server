@@ -61,7 +61,11 @@ let dbCache: IDBDatabase | null = null
  */
 export function _resetClientCacheDB(): void {
   if (dbCache) {
-    try { dbCache.close() } catch { /* ignore */ }
+    try {
+      dbCache.close()
+    } catch {
+      /* ignore */
+    }
   }
   dbCache = null
   dbPromise = null
@@ -86,8 +90,15 @@ function openDB(): Promise<IDBDatabase> {
 
     request.onsuccess = () => {
       dbCache = request.result
-      dbCache.onclose = () => { dbCache = null; dbPromise = null }
-      dbCache.onversionchange = () => { dbCache?.close(); dbCache = null; dbPromise = null }
+      dbCache.onclose = () => {
+        dbCache = null
+        dbPromise = null
+      }
+      dbCache.onversionchange = () => {
+        dbCache?.close()
+        dbCache = null
+        dbPromise = null
+      }
       resolve(request.result)
     }
 

@@ -1,11 +1,11 @@
 'use server'
 
 import { encodeCursor, decodeCursor } from '@repo/ui/components/ui/pagination-cursor'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { cacheTag, cacheLife } from 'next/cache'
 import { DatabaseError } from '@/lib/errors/error-classes'
 import { assertDeptRole } from '@/lib/dept-access'
-import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
+import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -65,10 +65,7 @@ async function assertAccessControlRole() {
 async function _getCachedMetrics(deptId: string): Promise<AccessControlMetrics> {
   'use cache'
   cacheLife('5 minutes')
-  cacheTag(
-    DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL,
-    `dept:access-control:${deptId}`
-  )
+  cacheTag(DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL, `dept:access-control:${deptId}`)
   const { createAdminClient } = await import('@repo/supabase/server')
   const supabase = createAdminClient()
 
@@ -193,10 +190,7 @@ export async function getRecentAccessActivity(
 async function _getCachedEntityBadgeStatus(deptId: string): Promise<EntityBadgeStatus[]> {
   'use cache'
   cacheLife('5 minutes')
-  cacheTag(
-    DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL_TAG,
-    `dept:access-control:${deptId}:badges`
-  )
+  cacheTag(DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL_TAG, `dept:access-control:${deptId}:badges`)
   const { createAdminClient } = await import('@repo/supabase/server')
   const supabase = createAdminClient()
 
@@ -304,10 +298,7 @@ async function _getCachedBadgeStatusDistribution(
 ): Promise<BadgeStatusDistribution[]> {
   'use cache'
   cacheLife('5 minutes')
-  cacheTag(
-    DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL_TAG,
-    `dept:access-control:${deptId}:distribution`
-  )
+  cacheTag(DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL_TAG, `dept:access-control:${deptId}:distribution`)
   const { createAdminClient } = await import('@repo/supabase/server')
   const supabase = createAdminClient()
 
@@ -351,24 +342,6 @@ export async function getBadgeStatusDistribution(
 /* ------------------------------------------------------------------ */
 /*  6. Badge CRUD Actions                                              */
 /* ------------------------------------------------------------------ */
-
-async function _revokeBadge(badgeId: string): Promise<{ success: boolean; error?: string }> {
-  const { cacheInvalidateTags } = await import('@repo/redis')
-  const { supabase, employee } = await assertAccessControlRole()
-
-  const { error } = await supabase
-    .from('badges')
-    .update({ is_active: false, revoked_at: new Date().toISOString() })
-    .eq('id', badgeId)
-
-  if (error) {
-    return { success: false, error: error.message }
-  }
-
-  await cacheInvalidateTags(['table:badges', `dept:${employee.department_id}`])
-  revalidatePath('/access-control/badges')
-  return { success: true }
-}
 
 export async function getBadgesForDepartment(deptId: string, page = 1, pageSize = 50) {
   const { supabase } = await assertAccessControlRole()
@@ -651,6 +624,8 @@ export async function registerVisitor(formData: FormData) {
     // In production, we should log this to a proper observability system.
   }
 
+  revalidateTag(DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL, 'max')
+  revalidateTag(DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL_TAG, 'max')
   revalidatePath('/access-control/visitors')
   return { success: true }
 }

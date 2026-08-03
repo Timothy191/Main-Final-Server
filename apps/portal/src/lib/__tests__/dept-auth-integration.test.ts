@@ -34,7 +34,10 @@ function makeMockSupabase(options: {
   user?: { id: string; email?: string } | null
   employee?: { role: string; department_id: string } | null
 }) {
-  const { user = { id: 'test-user', email: 'admin@test.com' }, employee = { role: 'admin', department_id: 'dept-1' } } = options
+  const {
+    user = { id: 'test-user', email: 'admin@test.com' },
+    employee = { role: 'admin', department_id: 'dept-1' },
+  } = options
 
   const builderMethods = {
     select: jest.fn().mockReturnThis(),
@@ -91,16 +94,16 @@ describe('assertDeptRole (integration — real auth logic)', () => {
 
       const { assertDeptRole } = await import('../dept-access')
 
-      await expect(assertDeptRole(['admin', 'supervisor'], 'safety')).rejects.toThrow(ForbiddenError)
+      await expect(assertDeptRole(['admin', 'supervisor'], 'safety')).rejects.toThrow(
+        ForbiddenError
+      )
       await expect(assertDeptRole(['admin', 'supervisor'], 'safety')).rejects.toThrow(
         'Forbidden: admin or supervisor role required'
       )
     })
 
     it('throws ForbiddenError when no employee record exists', async () => {
-      createServerSupabaseClient.mockResolvedValue(
-        makeMockSupabase({ employee: null })
-      )
+      createServerSupabaseClient.mockResolvedValue(makeMockSupabase({ employee: null }))
 
       const { assertDeptRole } = await import('../dept-access')
 
@@ -160,9 +163,7 @@ describe('department auth wrappers (integration — real auth logic)', () => {
       makeMockSupabase({ employee: { role: 'satellite', department_id: 'dept-sat' } })
     )
 
-    const { assertSatelliteRole } = await import(
-      '@/app/(departments)/satellite-monitoring/actions'
-    )
+    const { assertSatelliteRole } = await import('@/app/(departments)/satellite-monitoring/actions')
 
     const result = await assertSatelliteRole()
     expect(result.employee.role).toBe('satellite')
@@ -173,9 +174,7 @@ describe('department auth wrappers (integration — real auth logic)', () => {
       makeMockSupabase({ employee: { role: 'viewer', department_id: 'dept-sat' } })
     )
 
-    const { assertSatelliteRole } = await import(
-      '@/app/(departments)/satellite-monitoring/actions'
-    )
+    const { assertSatelliteRole } = await import('@/app/(departments)/satellite-monitoring/actions')
 
     await expect(assertSatelliteRole()).rejects.toThrow(ForbiddenError)
     await expect(assertSatelliteRole()).rejects.toThrow(
@@ -188,9 +187,8 @@ describe('department auth wrappers (integration — real auth logic)', () => {
       makeMockSupabase({ employee: { role: 'access_control', department_id: 'dept-ac' } })
     )
 
-    const { assertAccessCardActionsRole } = await import(
-      '@/app/(departments)/access-card-actions/actions'
-    )
+    const { assertAccessCardActionsRole } =
+      await import('@/app/(departments)/access-card-actions/actions')
 
     const result = await assertAccessCardActionsRole()
     expect(result.employee.role).toBe('access_control')
@@ -201,9 +199,7 @@ describe('department auth wrappers (integration — real auth logic)', () => {
       makeMockSupabase({ employee: { role: 'operator', department_id: 'dept-ac' } })
     )
 
-    const { getAccessControlMetrics } = await import(
-      '@/app/(departments)/access-control/actions'
-    )
+    const { getAccessControlMetrics } = await import('@/app/(departments)/access-control/actions')
 
     await expect(getAccessControlMetrics('dept-ac')).rejects.toThrow(ForbiddenError)
   })
@@ -214,9 +210,7 @@ describe('department auth wrappers (integration — real auth logic)', () => {
       makeMockSupabase({ employee: { role: 'admin', department_id: 'dept-ac' } })
     )
 
-    const { getRecentAccessActivity } = await import(
-      '@/app/(departments)/access-control/actions'
-    )
+    const { getRecentAccessActivity } = await import('@/app/(departments)/access-control/actions')
 
     // The function is non-cached — it uses assertAccessControlRole then queries Supabase.
     // Since supabase.from().select().eq().order().limit() returns mock chain,

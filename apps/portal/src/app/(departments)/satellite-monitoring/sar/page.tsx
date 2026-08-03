@@ -8,10 +8,6 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <DynamicTable
-      title="SAR"
-      description="Synthetic Aperture Radar data."
-      tableName="machines"
-    />
+    <DynamicTable title="SAR" description="Synthetic Aperture Radar data." tableName="machines" />
   )
 }

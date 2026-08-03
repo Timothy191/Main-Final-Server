@@ -34,19 +34,19 @@ describe('GET /api/export/fuel-logs', () => {
         log_date: '2026-06-01',
         shift: 'day',
         department_id: 'dept-1',
-        fuel_logs: [
-          {
-            id: 'fl-1',
-            diesel_litres: 120.5,
-            machine_id: 'machine-1',
-            machines: {
-              name: 'Excavator 01',
-              machine_type: 'excavator',
-            },
-          },
-        ],
       },
     ]
+
+    const mockFuelLogs = [
+      {
+        id: 'fl-1',
+        diesel_litres: 120.5,
+        machine_id: 'machine-1',
+        daily_log_id: 'log-1',
+      },
+    ]
+
+    const mockMachines = [{ id: 'machine-1', name: 'Excavator 01', machine_type: 'excavator' }]
 
     const mockQuery = {
       from: jest.fn().mockReturnThis(),
@@ -54,6 +54,11 @@ describe('GET /api/export/fuel-logs', () => {
       gte: jest.fn().mockReturnThis(),
       lte: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
+      in: jest.fn().mockImplementation((column: string) => {
+        if (column === 'daily_log_id') return Promise.resolve({ data: mockFuelLogs, error: null })
+        if (column === 'id') return Promise.resolve({ data: mockMachines, error: null })
+        return Promise.resolve({ data: [], error: null })
+      }),
       range: jest.fn().mockImplementation(() => Promise.resolve({ data: mockData, error: null })),
     }
 
@@ -83,19 +88,19 @@ describe('GET /api/export/fuel-logs', () => {
         log_date: '2026-06-01',
         shift: 'day',
         department_id: 'dept-1',
-        fuel_logs: [
-          {
-            id: 'fl-1',
-            diesel_litres: 120.5,
-            machine_id: 'machine-1',
-            machines: {
-              name: 'Excavator 01',
-              machine_type: 'excavator',
-            },
-          },
-        ],
       },
     ]
+
+    const mockFuelLogs = [
+      {
+        id: 'fl-1',
+        diesel_litres: 120.5,
+        machine_id: 'machine-1',
+        daily_log_id: 'log-1',
+      },
+    ]
+
+    const mockMachines = [{ id: 'machine-1', name: 'Excavator 01', machine_type: 'excavator' }]
 
     const mockQuery = {
       from: jest.fn().mockReturnThis(),
@@ -103,6 +108,11 @@ describe('GET /api/export/fuel-logs', () => {
       gte: jest.fn().mockReturnThis(),
       lte: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
+      in: jest.fn().mockImplementation((column: string) => {
+        if (column === 'daily_log_id') return Promise.resolve({ data: mockFuelLogs, error: null })
+        if (column === 'id') return Promise.resolve({ data: mockMachines, error: null })
+        return Promise.resolve({ data: [], error: null })
+      }),
       range: jest.fn().mockImplementation(() => Promise.resolve({ data: mockData, error: null })),
     }
 

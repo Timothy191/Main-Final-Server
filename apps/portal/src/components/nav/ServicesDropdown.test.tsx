@@ -180,7 +180,7 @@ describe('ServicesDropdown', () => {
     })
   })
 
-  it('contains logout form', async () => {
+  it('contains logout button', async () => {
     await renderDropdown()
     const trigger = screen.getByRole('button', { name: /system tray/i })
     await act(async () => {
@@ -188,7 +188,9 @@ describe('ServicesDropdown', () => {
     })
 
     const logoutButton = screen.getByText('Log Out')
-    expect(logoutButton.closest('form')).toBeInTheDocument()
+    // Log Out button uses onClick=submitLogout which creates a form programmatically
+    expect(logoutButton).toBeInTheDocument()
+    expect(logoutButton.closest('button')).toBeInTheDocument()
   })
 
   it('shows shut down overlay', async () => {

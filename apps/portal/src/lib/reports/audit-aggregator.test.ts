@@ -49,6 +49,13 @@ describe('getAggregatedAuditData', () => {
           return {
             select: jest.fn().mockReturnThis(),
             eq: jest.fn().mockResolvedValue({ data: mockProdLogs, error: null }),
+            in: jest.fn().mockResolvedValue({ data: mockProdLogs, error: null }),
+          }
+        }
+        if (table === 'daily_logs') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockResolvedValue({ data: [{ id: 'log-yesterday-1' }], error: null }),
           }
         }
         return {}

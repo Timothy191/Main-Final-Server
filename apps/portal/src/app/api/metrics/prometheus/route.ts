@@ -54,6 +54,8 @@ export async function GET(req: NextRequest) {
 
     const metrics = await getMetrics()
     const pgvectorMetrics = await getPgVectorMetrics()
+    const cacheMetrics = await getCacheHandlerMetricsProxy()
+    const redisConnInfo = await getRedisConnectionInfoProxy()
 
     const lines: string[] = [
       '# HELP arch_job_executions_total Total number of job executions',
@@ -116,6 +118,88 @@ export async function GET(req: NextRequest) {
       )
     }
 
+    // -----------------------------------------------------------------------
+    // Cache Handler Metrics
+    // -----------------------------------------------------------------------
+    lines.push(
+      '',
+      '# HELP arch_cache_handler_ops_total Total cache handler operations by type and status',
+      '# TYPE arch_cache_handler_ops_total counter'
+    )
+    lines.push(`arch_cache_handler_ops_total{operation="get",status="hit"} ${cacheMetrics.getHits}`)
+    lines.push(
+      `arch_cache_handler_ops_total{operation="get",status="miss"} ${cacheMetrics.getMisses}`
+    )
+    lines.push(
+      `arch_cache_handler_ops_total{operation="get",status="error"} ${cacheMetrics.getErrors}`
+    )
+    lines.push(
+      `arch_cache_handler_ops_total{operation="set",status="error"} ${cacheMetrics.setErrors}`
+    )
+    lines.push(
+      `arch_cache_handler_ops_total{operation="update_tags",status="error"} ${cacheMetrics.updateTagsErrors}`
+    )
+
+    lines.push(
+      '',
+      '# HELP arch_cache_handler_calls_total Total cache handler calls by operation',
+      '# TYPE arch_cache_handler_calls_total counter'
+    )
+    lines.push(`arch_cache_handler_calls_total{operation="get"} ${cacheMetrics.getCalls}`)
+    lines.push(`arch_cache_handler_calls_total{operation="set"} ${cacheMetrics.setCalls}`)
+    lines.push(
+      `arch_cache_handler_calls_total{operation="update_tags"} ${cacheMetrics.updateTagsCalls}`
+    )
+
+    lines.push(
+      '',
+      '# HELP arch_cache_handler_retries_total Total cache handler retry attempts',
+      '# TYPE arch_cache_handler_retries_total counter'
+    )
+    lines.push(`arch_cache_handler_retries_total ${cacheMetrics.retries}`)
+
+    // -----------------------------------------------------------------------
+    // Circuit Breaker Metrics
+    // -----------------------------------------------------------------------
+    lines.push(
+      '',
+      '# HELP arch_cache_circuit_breaker_events_total Circuit breaker state transitions',
+      '# TYPE arch_cache_circuit_breaker_events_total counter'
+    )
+    lines.push(
+      `arch_cache_circuit_breaker_events_total{transition="open"} ${cacheMetrics.circuitBreakerOpens}`
+    )
+    lines.push(
+      `arch_cache_circuit_breaker_events_total{transition="half_open"} ${cacheMetrics.circuitBreakerHalfOpens}`
+    )
+    lines.push(
+      `arch_cache_circuit_breaker_events_total{transition="close"} ${cacheMetrics.circuitBreakerCloses}`
+    )
+    lines.push(
+      `arch_cache_circuit_breaker_events_total{transition="reject"} ${cacheMetrics.circuitBreakerRejects}`
+    )
+
+    // -----------------------------------------------------------------------
+    // Redis Connection Metrics
+    // -----------------------------------------------------------------------
+    lines.push(
+      '',
+      '# HELP arch_redis_connection_info Redis connection state (1=connected, 0=disconnected)',
+      '# TYPE arch_redis_connection_info gauge'
+    )
+    lines.push(
+      `arch_redis_connection_info{status="${redisConnInfo.status}"} ${redisConnInfo.connected ? 1 : 0}`
+    )
+    lines.push(
+      '',
+      '# HELP arch_redis_native_fallback Whether the native in-memory fallback is active (1=yes, 0=no)',
+      '# TYPE arch_redis_native_fallback gauge'
+    )
+    lines.push(`arch_redis_native_fallback ${redisConnInfo.nativeFallback ? 1 : 0}`)
+
+    // -----------------------------------------------------------------------
+    // pgvector metrics
+    // -----------------------------------------------------------------------
     lines.push(
       '',
       '# HELP arch_pgvector_hnsw_index_info pgvector HNSW index information',
@@ -173,6 +257,80 @@ export async function GET(req: NextRequest) {
         'Content-Type': 'text/plain',
       },
     })
+  }
+}
+
+/**
+ * Proxy to import cache handler metrics — uses dynamic import to avoid
+ * ESM resolution issues at module evaluation time.
+ */
+async function getCacheHandlerMetricsProxy(): Promise<{
+  getCalls: number
+  getHits: number
+  getMisses: number
+  getErrors: number
+  setCalls: number
+  setErrors: number
+  updateTagsCalls: number
+  updateTagsErrors: number
+  retries: number
+  circuitBreakerOpens: number
+  circuitBreakerHalfOpens: number
+  circuitBreakerCloses: number
+  circuitBreakerRejects: number
+}> {
+  try {
+    const mod = await import('@/lib/next-cache-handler')
+    return mod.getCacheHandlerMetrics?.() ?? getEmptyCacheMetrics()
+  } catch {
+    return getEmptyCacheMetrics()
+  }
+}
+
+/** Proxy to import Redis connection info — graceful fallback if module unavailable. */
+async function getRedisConnectionInfoProxy(): Promise<{
+  connected: boolean
+  status: string
+  connectionAttempts: number
+  nativeFallback: boolean
+}> {
+  try {
+    const mod = (await import('@repo/redis/client')) as {
+      getRedisConnectionInfo?: () => {
+        connected: boolean
+        status: string
+        connectionAttempts: number
+        nativeFallback: boolean
+      }
+    }
+    return (
+      mod.getRedisConnectionInfo?.() ?? {
+        connected: false,
+        status: 'unavailable',
+        connectionAttempts: 0,
+        nativeFallback: true,
+      }
+    )
+  } catch {
+    return { connected: false, status: 'unavailable', connectionAttempts: 0, nativeFallback: true }
+  }
+}
+
+function getEmptyCacheMetrics() {
+  return {
+    getCalls: 0,
+    getHits: 0,
+    getMisses: 0,
+    getErrors: 0,
+    setCalls: 0,
+    setErrors: 0,
+    updateTagsCalls: 0,
+    updateTagsErrors: 0,
+    retries: 0,
+    circuitBreakerOpens: 0,
+    circuitBreakerHalfOpens: 0,
+    circuitBreakerCloses: 0,
+    circuitBreakerRejects: 0,
   }
 }
 

@@ -83,6 +83,14 @@ describe('automatedAuditFn Inngest Job', () => {
           return {
             select: jest.fn().mockReturnThis(),
             eq: jest.fn().mockResolvedValue({ data: [], error: null }),
+            in: jest.fn().mockResolvedValue({ data: [], error: null }),
+          }
+        }
+        // Daily logs — used by audit-aggregator
+        if (table === 'daily_logs') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockResolvedValue({ data: [{ id: 'log-yesterday' }], error: null }),
           }
         }
         return {}

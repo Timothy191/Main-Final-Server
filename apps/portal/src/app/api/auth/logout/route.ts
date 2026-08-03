@@ -1,7 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@repo/supabase/server'
-import { InternalError } from '@repo/errors'
 
 export async function POST(request: NextRequest) {
   try {

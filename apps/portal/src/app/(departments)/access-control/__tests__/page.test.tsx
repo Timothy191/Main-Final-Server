@@ -13,7 +13,9 @@ const mockRpc = jest.fn()
 
 const buildAuthMock = (overrides: Record<string, unknown> = {}) => ({
   auth: {
-    getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'test-user', email: 'admin@test.com' } } }),
+    getUser: jest
+      .fn()
+      .mockResolvedValue({ data: { user: { id: 'test-user', email: 'admin@test.com' } } }),
   },
   from: jest.fn().mockReturnValue({
     select: jest.fn().mockReturnThis(),

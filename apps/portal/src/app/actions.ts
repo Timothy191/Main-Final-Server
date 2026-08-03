@@ -1,6 +1,5 @@
 'use server'
 
-import { revalidateTag, updateTag } from 'next/cache'
 import { UnauthorizedError, ForbiddenError, ValidationError } from '@repo/errors'
 
 export async function speculativeEmbedShiftLog(text: string) {
@@ -31,40 +30,6 @@ export async function speculativeEmbedShiftLog(text: string) {
       context: 'speculative_embed_queue_failed',
     })
   }
-}
-
-export async function revalidateRSC(tags: string[]) {
-  const { createServerSupabaseClient } = await import('@repo/supabase/server')
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new UnauthorizedError()
-  }
-
-  for (const tag of tags) {
-    revalidateTag(tag, 'max')
-  }
-  return { success: true }
-}
-
-export async function updateCacheTags(tags: string[]) {
-  const { createServerSupabaseClient } = await import('@repo/supabase/server')
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new UnauthorizedError()
-  }
-
-  for (const tag of tags) {
-    updateTag(tag)
-  }
-  return { success: true }
 }
 
 export async function generateMonthlyReport(

@@ -50,7 +50,7 @@ describe('department-cache', () => {
   describe('getDepartmentDashboardTags', () => {
     it('should return array of tags for a department', () => {
       const tags = getDepartmentDashboardTags('engineering', 'dept-uuid-123', '2026-07-25')
-      
+
       expect(tags).toContain('dept:engineering')
       expect(tags).toContain('dept:engineering:dept-uuid-123')
       expect(tags).toContain('dept:engineering:2026-07-25')

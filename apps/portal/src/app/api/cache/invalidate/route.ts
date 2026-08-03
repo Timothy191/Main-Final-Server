@@ -1,15 +1,15 @@
 /**
  * POST /api/cache/invalidate
- * 
+ *
  * Cache invalidation endpoint for department data.
  * Allows targeted invalidation of cached data when database changes occur.
- * 
+ *
  * Usage:
  *   POST /api/cache/invalidate
  *   Body: { tags: ['dept:engineering', 'table:breakdowns'] }
- *   
+ *
  *   OR
- *   
+ *
  *   POST /api/cache/invalidate
  *   Body: { department: 'engineering' }
  */
@@ -23,13 +23,15 @@ import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
 export async function POST(request: Request) {
   try {
     const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
     if (!user) {
-      throw new AppError('Unauthorized', { 
+      throw new AppError('Unauthorized', {
         statusCode: 401,
         code: 'UNAUTHORIZED',
-        message: 'Authentication required to invalidate cache'
+        message: 'Authentication required to invalidate cache',
       })
     }
 
@@ -42,9 +44,9 @@ export async function POST(request: Request) {
 
     if (!tags && !department && !allDepartments) {
       return NextResponse.json(
-        { 
+        {
           error: 'No invalidation target specified',
-          hint: 'Provide tags, department, or allDepartments: true'
+          hint: 'Provide tags, department, or allDepartments: true',
         },
         { status: 400 }
       )
@@ -55,8 +57,8 @@ export async function POST(request: Request) {
     // Handle all departments invalidation
     if (allDepartments) {
       tagsToInvalidate.push(
-        ...Object.values(DEPARTMENT_CACHE_TAGS).filter(tag => 
-          tag.startsWith('dept:') || tag.startsWith('table:')
+        ...Object.values(DEPARTMENT_CACHE_TAGS).filter(
+          (tag) => tag.startsWith('dept:') || tag.startsWith('table:')
         )
       )
     }
@@ -80,11 +82,9 @@ export async function POST(request: Request) {
     const uniqueTags = [...new Set(tagsToInvalidate)]
 
     // Invalidate each tag
-    const results = await Promise.allSettled(
-      uniqueTags.map(tag => revalidateTag(tag, 'max'))
-    )
+    const results = await Promise.allSettled(uniqueTags.map((tag) => revalidateTag(tag, 'max')))
 
-    const successCount = results.filter(r => r.status === 'fulfilled').length
+    const successCount = results.filter((r) => r.status === 'fulfilled').length
     const failedCount = results.length - successCount
 
     return NextResponse.json({
@@ -94,15 +94,14 @@ export async function POST(request: Request) {
       failedCount,
       tags: uniqueTags,
       failedTags: results
-        .filter(r => r.status === 'rejected')
-        .map((r, i) => ({ tag: uniqueTags[i], reason: r.reason }))
+        .filter((r) => r.status === 'rejected')
+        .map((r, i) => ({ tag: uniqueTags[i], reason: r.reason })),
     })
-
   } catch (error) {
     if (error instanceof AppError) {
       return NextResponse.json({ error: error.message }, { status: error.statusCode || 500 })
     }
-    
+
     console.error('[cache/invalidate] Error:', error)
     return NextResponse.json(
       { error: 'Failed to invalidate cache', message: (error as Error).message },
@@ -116,6 +115,6 @@ export async function GET() {
   return NextResponse.json({
     status: 'ok',
     message: 'Cache invalidation endpoint is available',
-    endpoint: 'POST /api/cache/invalidate'
+    endpoint: 'POST /api/cache/invalidate',
   })
 }

@@ -38,8 +38,9 @@ const nextConfig = {
       expire: 86400,
     },
   },
+  // Redis-backed CacheHandler loaded by plain Node import()
   cacheHandlers: {
-    default: require.resolve('./src/lib/next-cache-handler.ts'),
+    default: require.resolve("./dist/lib/next-cache-handler.js"),
   },
   experimental: {
     optimizePackageImports: ["framer-motion"],
@@ -68,7 +69,6 @@ const nextConfig = {
     "@repo/logger",
     "@repo/contract",
     "@repo/database",
-    "@repo/redis",
   ],
   images: {
     formats: ["image/avif", "image/webp"],

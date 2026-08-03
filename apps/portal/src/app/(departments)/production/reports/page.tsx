@@ -8,10 +8,6 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <DynamicTable
-      title="Reports"
-      description="Production reports."
-      tableName="generated_reports"
-    />
+    <DynamicTable title="Reports" description="Production reports." tableName="generated_reports" />
   )
 }

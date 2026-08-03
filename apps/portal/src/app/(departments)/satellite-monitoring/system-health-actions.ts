@@ -4,7 +4,7 @@ import { cacheTag, cacheLife } from 'next/cache'
 import { getObservabilityMetrics } from '@/lib/observability/metrics'
 import { assertSatelliteRole } from './actions'
 import type { Alert } from '@/features/monitoring/types'
-import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
+import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */

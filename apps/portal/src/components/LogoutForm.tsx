@@ -1,7 +1,5 @@
 'use client'
 
-import { useRef } from 'react'
-
 /**
  * A hidden form that can be triggered imperatively to log out.
  * This avoids the Radix UI DropdownMenuItem `e.preventDefault()` issue
@@ -16,6 +14,6 @@ export function useLogout() {
     document.body.appendChild(form)
     form.submit()
   }
-  
+
   return submitLogout
 }

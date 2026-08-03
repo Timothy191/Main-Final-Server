@@ -168,6 +168,11 @@ self.addEventListener('fetch', (event) => {
   // Skip Supabase WebSocket connections
   if (url.protocol === 'wss:' || url.protocol === 'ws:') return
 
+  // Skip Next.js dev server HMR & dynamic chunks from SW caching
+  if (url.pathname.startsWith('/_next/')) {
+    return
+  }
+
   // ── Static assets (JS/CSS): Cache-First ────────────────────────────────
   if (/\.(js|css|map)$/i.test(url.pathname)) {
     event.respondWith(cacheFirst(request, CACHE_NAMES.STATIC))

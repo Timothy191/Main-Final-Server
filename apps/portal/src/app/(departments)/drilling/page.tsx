@@ -5,7 +5,7 @@ import { Drill, Clock, AlertTriangle } from 'lucide-react'
 import { Suspense } from 'react'
 import { Skeleton } from '@repo/ui/components/ui/skeleton'
 import { cacheLife, cacheTag } from 'next/cache'
-import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
+import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
 
 async function getDrillingDashboardData(deptId: string, today: string) {
   'use cache'

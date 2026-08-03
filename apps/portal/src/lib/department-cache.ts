@@ -1,12 +1,12 @@
 /**
  * Department Page Caching Utilities
- * 
+ *
  * Optimizes page switching by caching department dashboard data
  * with proper TTL and tag-based invalidation.
- * 
+ *
  * Usage:
  *   import { cachedDepartmentData, DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
- *   
+ *
  *   async function getEngineeringData(deptId: string) {
  *     'use cache'
  *     cacheLife('5 minutes')
@@ -15,37 +15,35 @@
  *   }
  */
 
-import { cacheLife, cacheTag } from 'next/cache'
-
 // Cache TTL constants (in seconds)
 export const CACHE_TTL = {
   // Short-lived data that changes frequently
-  REALTIME: 30,        // 30 seconds
-  SHORT: 60,          // 1 minute
-  
+  REALTIME: 30, // 30 seconds
+  SHORT: 60, // 1 minute
+
   // Default for dashboard data
-  DEFAULT: 300,       // 5 minutes
-  
+  DEFAULT: 300, // 5 minutes
+
   // Medium-lived data
-  MEDIUM: 600,        // 10 minutes
-  
+  MEDIUM: 600, // 10 minutes
+
   // Long-lived data that rarely changes
-  LONG: 3600,         // 1 hour
-  
+  LONG: 3600, // 1 hour
+
   // Department metadata (display names, descriptions)
-  METADATA: 86400,    // 24 hours
+  METADATA: 86400, // 24 hours
 } as const
 
 // Department-specific cache tags for targeted invalidation
 export const DEPARTMENT_CACHE_TAGS = {
   // Department metadata
   DEPARTMENT_METADATA: 'dept:metadata',
-  
+
   // Hub/dashboard counts
   HUB_COUNTS: 'hub:counts',
   HUB_ALERTS: 'hub:alerts',
   HUB_PRODUCTION_TREND: 'hub:production-trend',
-  
+
   // Department-specific data
   DRILLING: 'dept:drilling',
   PRODUCTION: 'dept:production',
@@ -55,7 +53,7 @@ export const DEPARTMENT_CACHE_TAGS = {
   SAFETY: 'dept:safety',
   TRAINING: 'dept:training',
   SATELLITE_MONITORING: 'dept:satellite-monitoring',
-  
+
   // Table-level tags for database changes
   TABLE_BREAKDOWNS: 'table:breakdowns',
   TABLE_MACHINES: 'table:machines',
@@ -64,7 +62,7 @@ export const DEPARTMENT_CACHE_TAGS = {
   TABLE_DRILL_OPERATIONS: 'table:drill_operations',
   TABLE_OPERATIONAL_DELAYS: 'table:operational_delays',
   TABLE_EMPLOYEES: 'table:employees',
-  
+
   // Access control
   ACCESS_CONTROL_TAG: 'access:control',
 } as const
@@ -73,9 +71,9 @@ export const DEPARTMENT_CACHE_TAGS = {
  * Generate a cache tag for a specific department and date
  */
 export function generateDepartmentTag(department: string, date?: string): string {
-  const baseTag = DEPARTMENT_CACHE_TAGS[department as keyof typeof DEPARTMENT_CACHE_TAGS] 
-    || `dept:${department}`
-  
+  const baseTag =
+    DEPARTMENT_CACHE_TAGS[department as keyof typeof DEPARTMENT_CACHE_TAGS] || `dept:${department}`
+
   if (date) {
     return `${baseTag}:${date}`
   }
@@ -85,9 +83,13 @@ export function generateDepartmentTag(department: string, date?: string): string
 /**
  * Generate cache tags for a department dashboard
  */
-export function getDepartmentDashboardTags(department: string, deptId: string, today: string): string[] {
+export function getDepartmentDashboardTags(
+  department: string,
+  deptId: string,
+  today: string
+): string[] {
   const deptTag = generateDepartmentTag(department)
-  
+
   return [
     deptTag,
     `${deptTag}:${deptId}`,
@@ -119,8 +121,8 @@ export function getCacheLife(ttlSeconds: number = 300): string {
  */
 export async function prefetchDepartmentData(
   department: string,
-  deptId: string,
-  today: string
+  _deptId: string,
+  _today: string
 ): Promise<void> {
   // This is a placeholder for prefetch implementation
   // In practice, you'd use Next.js router.prefetch() or a custom prefetch endpoint

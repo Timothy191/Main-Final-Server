@@ -11,7 +11,7 @@ import {
   TrendingUp,
   ArrowRight,
 } from 'lucide-react'
-import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
+import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
 
 async function getEngineeringHubData(deptId: string) {
   'use cache'

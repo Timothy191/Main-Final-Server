@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Wrench,
 } from 'lucide-react'
+import Image from 'next/image'
 import { cn } from '@repo/ui/lib/utils'
 import type { Department } from '@/lib/departments'
 import { semanticIconClass } from '@/lib/semantic-icon'
@@ -117,6 +118,7 @@ export function DepartmentCard({ department, index, accessible = false }: Depart
     router.push(`/${department.name}`)
   }
 
+  const deptImageSrc = IMAGE_MAP[department.name]
   const Icon = ICON_MAP[department.icon] || Factory
   const config = COLOR_MAP[department.color] || {
     bg: 'border-arch-border-subtle text-arch-text-primary',
@@ -162,7 +164,12 @@ export function DepartmentCard({ department, index, accessible = false }: Depart
           </span>
         ) : null}
         {/* Banner area */}
-        <div className={cn('uiverse-card-banner', 'bg-gradient-to-br from-arch-surface-secondary/25 via-transparent to-arch-surface-tertiary/15')}>
+        <div
+          className={cn(
+            'uiverse-card-banner',
+            'bg-gradient-to-br from-arch-surface-secondary/25 via-transparent to-arch-surface-tertiary/15'
+          )}
+        >
           {/* Save/Pin Button */}
           <button
             type="button"
@@ -179,12 +186,19 @@ export function DepartmentCard({ department, index, accessible = false }: Depart
           </button>
 
           {/* Department Icon Bubble */}
-          <div className={cn('uiverse-card-icon-bubble border-arch-border-emphasis/25 overflow-hidden', config.bg)}>
-            {IMAGE_MAP[department.name] ? (
-              <img 
-                src={IMAGE_MAP[department.name]} 
-                alt={`${department.displayName} icon`} 
-                className="w-full h-full object-cover mix-blend-multiply" 
+          <div
+            className={cn(
+              'uiverse-card-icon-bubble border-arch-border-emphasis/25 overflow-hidden',
+              config.bg
+            )}
+          >
+            {deptImageSrc ? (
+              <Image
+                src={deptImageSrc}
+                alt={`${department.displayName} icon`}
+                width={48}
+                height={48}
+                className="w-full h-full object-cover mix-blend-multiply"
               />
             ) : (
               <Icon className="w-5 h-5" />

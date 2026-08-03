@@ -3,7 +3,7 @@
 import { cacheTag, cacheLife } from 'next/cache'
 import { DatabaseError } from '@/lib/errors/error-classes'
 import { assertDeptRole } from '@/lib/dept-access'
-import { DEPARTMENT_CACHE_TAGS, CACHE_TTL } from '@/lib/department-cache'
+import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */

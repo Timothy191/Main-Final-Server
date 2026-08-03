@@ -444,6 +444,7 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                       alt={`${detail.first_name} ${detail.surname}`}
                       fill
                       className="object-cover"
+                      sizes="80px"
                     />
                   ) : (
                     <span className="text-2xl font-bold text-arch-text-muted">

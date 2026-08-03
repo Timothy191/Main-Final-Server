@@ -6,7 +6,6 @@ import { cn } from '@repo/ui/lib/utils'
 import { getServiceUrls } from '@repo/ui/lib/urls'
 
 const urls = getServiceUrls()
-import { useLogout } from './LogoutForm'
 import {
   Search,
   X,
