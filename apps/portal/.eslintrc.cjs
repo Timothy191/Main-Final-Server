@@ -11,6 +11,11 @@ module.exports = {
     "next.config.mjs",
     "storybook.d.ts",
     "e2e/",
+    // Build artifacts — regenerated, never linted (TS parser project mode
+    // can't resolve compiled .js output to the tsconfig).
+    "dist/",
+    ".next/",
+    ".turbo/",
   ],
   extends: ["@repo/eslint-config/next"],
   parser: "@typescript-eslint/parser",
