@@ -2,6 +2,23 @@
 
 This file maintains a record of AI agent interventions, context hand-offs, and architectural breadcrumbs for this specific package/app.
 
+## [2026-08-03] Implement ADR-001 (L1+L2 eviction) + fix errors contract regressions + acl tools-loop
+
+- **Agent**: Claude Code (glm-5.2)
+- **Purpose**: Act on the branch review's recommended findings and ADR-001 action items until the gates are green.
+- **Changes Made**:
+  - **`apps/portal/src/app/api/cache/invalidate/route.ts`** (ADR-001 #1): `userId` path now calls `cacheDelete` (L1 + `redis.del`) instead of `cacheEvictL1ByPrefix` (L1-only). Closes the CRITICAL review finding — the 300s stale-role window is now actually closed cross-pod. Updated the AGENT-TRACE docstrings.
+  - **`apps/portal/src/app/api/cache/invalidate/route.test.ts`** (new, ADR-001 #3): unit test asserting `cacheDelete('arch:auth:employee:<userId>')` is invoked + 401/400/tags paths.
+  - **`apps/portal/src/features/admin/tabs/UsersTab.tsx`** (ADR-001 #2): `handleUpdate` now calls `POST /api/cache/invalidate { userId: auth_id }` after a successful `employees` update (best-effort; 300s TTL backstop). Added `auth_id` to the `Employee` interface.
+  - **`apps/portal/src/proxy.ts`**: sign-out now uses `cacheDelete` (L1+L2) instead of `cacheEvictL1ByPrefix`; updated the `resolveEmployee` + sign-out AGENT-TRACE comments to reference ADR-001 and `cacheDelete`.
+  - **`packages/errors/src/index.ts`**: fixed the meta-drop regression via `resolveMeta()` (non-core option keys → `meta`); restored `AppError.code: ErrorCode` + `defaultStatus(code: ErrorCode)`; simplified `ValidationError`. Fixes the IMPORTANT `ValidationError`/`ForbiddenError` meta-drop findings + the `code`-widening suggestion.
+  - **`packages/errors/src/__tests__/errors.test.ts`**: added `ValidationError` issues + field/value-merge cases and `ForbiddenError` resource/action meta case (18 tests pass).
+  - **`packages/acl/src/index.ts`**: `isRestrictedRouteAllowed` excludes `tools` from the prefix loop (second-segment gate; avoids a future `/tools*` false positive).
+  - **Docs**: ADR-001 flipped to **Accepted** + action items checked off; runbook demoted manual `redis-cli DEL` to fallback; WAYFINDER caching row updated (L1+L2 via `cacheDelete`); `packages/acl/AGENT_TRACER.md` created; `packages/errors/AGENT_TRACER.md` backfilled (5bebdb0 + this turn).
+- **Rejected/Not done**: The review's "inaccurate change-index row lists `department-cache.ts`" — corrected via a new append-only row (the file already had the AGENT-TRACE on `main`; it just wasn't _changed_ on this branch). The pre-existing dual-Next-version `proxy.ts` `[INTERNALS]`/`[Internal]` diagnostics (16.2.10 vs 16.2.12) remain an environment/lockfile issue, not a code defect — not touched.
+- **Verification**: `pnpm --filter @repo/errors test` → 18 pass; `pnpm --filter @repo/acl type-check` clean; portal route test → 4 pass. Full `turbo run lint type-check test --force` + `pnpm gates` run next.
+- **Next Agent Notes**: (a) The cache-eviction path is now automatic end-to-end (admin edit → endpoint → L1+L2 delete); the manual runbook is fallback-only. (b) If a Supabase trigger/DB webhook ever replaces the `UsersTab` client mutation as the role-change path, re-wire the eviction caller to that trigger (the `POST /api/cache/invalidate { userId }` contract is stable). (c) `AppError.code` is typed `ErrorCode` again — keep it that way; new error codes go in the `ErrorCode` union (the `(string & {})` arm keeps it open). (d) The dual-Next-version lockfile issue still needs a `pnpm install`/dedupe to clear the `proxy.ts` type diagnostics.
+
 ## [2026-08-03] Run /runbook + /adr — employee-auth cache eviction runbook + ADR-001 (L1/L2 gap)
 
 - **Agent**: Claude Code (glm-5.2)

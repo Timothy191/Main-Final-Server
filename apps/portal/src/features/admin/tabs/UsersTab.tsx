@@ -12,6 +12,7 @@ import { logError } from '@/lib/errors/error-logger'
 
 interface Employee {
   id: string
+  auth_id: string | null
   full_name: string
   role: string
   department_id: string | null
@@ -74,6 +75,26 @@ export function UsersTab() {
         context: 'users_tab_update_employee',
       })
       return
+    }
+
+    // Evict the edge-proxy auth cache for the TARGET user so `proxy.ts`
+    // `resolveEmployee` re-reads `employees` on their next request instead of
+    // authorizing on the old role/department for up to 300s. Best-effort: the
+    // 300s L2 TTL is the backstop if this fails. Same-origin fetch carries the
+    // admin session cookie the endpoint requires. See ADR-001.
+    if (editingEmployee.auth_id) {
+      try {
+        await fetch('/api/cache/invalidate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: editingEmployee.auth_id }),
+        })
+      } catch (evictError) {
+        logError(evictError instanceof Error ? evictError : new Error(String(evictError)), {
+          context: 'users_tab_evict_auth_cache',
+          userId: editingEmployee.auth_id,
+        })
+      }
     }
 
     setShowEditDialog(false)

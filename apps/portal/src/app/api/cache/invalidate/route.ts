@@ -17,17 +17,19 @@
  *   POST /api/cache/invalidate
  *   Body: { userId: '<auth_id>' }
  *
- * AGENT-TRACE: `userId` evicts the Redis L1 employee-auth record that
+ * AGENT-TRACE: `userId` evicts the employee-auth cache record that
  * `proxy.ts` `resolveEmployee` caches at `arch:auth:employee:<userId>` for
- * 300s. The role-change admin flow MUST call this with the TARGET user's id,
- * otherwise the edge proxy keeps authorizing on the old role for up to 5 min.
- * See docs/WAYFINDER.md → "Caching".
+ * 300s (Redis L2) / 30s (in-process L1). It deletes BOTH tiers (`cacheDelete`
+ * → `memoryDelete` + `redis.del`) so the next request re-reads `employees` on
+ * every pod. The role-change admin flow MUST call this with the TARGET user's
+ * id, otherwise the edge proxy keeps authorizing on the old role for up to
+ * 5 min. See docs/WAYFINDER.md → "Caching" + ADR-001.
  */
 
 import { NextResponse } from 'next/server'
 import { revalidateTag } from 'next/cache'
 import { createServerSupabaseClient } from '@repo/supabase/server'
-import { cacheEvictL1ByPrefix } from '@repo/redis/cache'
+import { cacheDelete } from '@repo/redis/cache'
 import { AppError } from '@/lib/errors/error-classes'
 import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
 
@@ -64,17 +66,18 @@ export async function POST(request: Request) {
       )
     }
 
-    // Evict the edge-proxy employee-auth cache for a specific user. Called by
-    // the role-change flow so the proxy re-reads `employees` on the next
-    // request instead of serving the pre-change role for up to 300s.
-    // AGENT-TRACE: `cacheEvictL1ByPrefix` clears the in-process L1 ONLY — it
-    // does not delete the Redis L2 key, so on multi-pod prod the stale value
-    // resurfaces for up to 300s (cacheGet re-populates L1 from L2). For
-    // immediate cross-pod freshness also `redis-cli DEL arch:auth:employee:<id>`.
-    // See docs/runbooks/evict-employee-auth-cache.md.
+    // Evict the edge-proxy employee-auth cache for a specific user — BOTH the
+    // in-process L1 and the Redis L2 key. Called by the role-change flow so the
+    // proxy re-reads `employees` on the next request instead of serving the
+    // pre-change role for up to 300s.
+    // AGENT-TRACE: `cacheDelete` does `memoryDelete` + `redis.del` (L1 + L2).
+    // The previous `cacheEvictL1ByPrefix` was L1-only and left the Redis key
+    // for its 300s TTL — `cacheGet` would re-populate L1 from the stale L2 hit.
+    // See ADR-001 (docs/architecture/adr-001-cache-auth-eviction-l1-l2.md) and
+    // docs/runbooks/evict-employee-auth-cache.md.
     let evictedUser = false
     if (userId) {
-      cacheEvictL1ByPrefix(`arch:auth:employee:${userId}`)
+      await cacheDelete(`arch:auth:employee:${userId}`)
       evictedUser = true
     }
 

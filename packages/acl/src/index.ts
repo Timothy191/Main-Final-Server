@@ -78,6 +78,12 @@ export function isDeptAllowedForRole(deptSlug: string, role: Role): boolean {
  * Restricted-route predicate (edge + node). Mirrors the former
  * `proxy.ts` `isRestrictedRouteAllowed`: any restricted prefix whose allowlist
  * excludes `role` fails; the `tools` second-segment is checked separately.
+ *
+ * AGENT-TRACE: `tools` is a *second* segment (e.g. `/control-room/tools`), not
+ * a top-level prefix, so it is intentionally excluded from the prefix loop —
+ * the explicit `secondSegment === 'tools'` check below is the real gate. Were
+ * it in the loop, `pathname.startsWith('/tools')` would false-positive on a
+ * future top-level `/tools*` route.
  */
 export function isRestrictedRouteAllowed(
   pathname: string,
@@ -85,6 +91,7 @@ export function isRestrictedRouteAllowed(
   role: Role
 ): boolean {
   for (const [route, allowedRoles] of Object.entries(RESTRICTED_DEPT_ROLES)) {
+    if (route === 'tools') continue // second-segment gate below
     if (pathname.startsWith(`/${route}`) && !allowedRoles.includes(role)) {
       return false
     }

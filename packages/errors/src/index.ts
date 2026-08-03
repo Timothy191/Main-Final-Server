@@ -29,8 +29,49 @@ export interface AppErrorOptions {
   [key: string]: unknown
 }
 
+/**
+ * Option keys that are NOT metadata. Every other key on an `AppErrorOptions`
+ * object is treated as metadata and merged into `meta` — this preserves the
+ * pre-expansion contract where callers passed arbitrary metadata (e.g.
+ * `{ issues }`, `{ resource, action }`, `{ field, value }`) as the 2nd arg and
+ * expected it to surface on `err.meta`. The expansion to `AppErrorOptions`
+ * must not silently drop those keys.
+ *
+ * AGENT-TRACE: `field`/`value` are intentionally NOT in this set — they are
+ * caller metadata, not core error fields, so they flow into `meta` naturally.
+ */
+const CORE_OPTION_KEYS = new Set([
+  'code',
+  'message',
+  'status',
+  'statusCode',
+  'cause',
+  'meta',
+  'context',
+])
+
+/** Extract non-core option keys as a metadata record. */
+function extractExtraMeta(options: AppErrorOptions): Record<string, unknown> {
+  const extra: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(options)) {
+    if (!CORE_OPTION_KEYS.has(key) && value !== undefined) {
+      extra[key] = value
+    }
+  }
+  return extra
+}
+
+/** Resolve the final `meta`: explicit `meta`/`context` first, then any extra
+ *  non-core keys (callers' ad-hoc metadata). Explicit `meta` wins on conflict. */
+function resolveMeta(options: AppErrorOptions): Record<string, unknown> | undefined {
+  const explicit = options.meta ?? options.context
+  const extra = extractExtraMeta(options)
+  if (!explicit && Object.keys(extra).length === 0) return undefined
+  return { ...(extra ?? {}), ...(explicit ?? {}) }
+}
+
 export class AppError extends Error {
-  readonly code: string
+  readonly code: ErrorCode
   readonly status: number
   readonly meta?: Record<string, unknown>
 
@@ -64,7 +105,7 @@ export class AppError extends Error {
         code = codeOrOptions.code ?? 'INTERNAL_ERROR'
         status = codeOrOptions.status ?? codeOrOptions.statusCode ?? AppError.defaultStatus(code)
         cause = codeOrOptions.cause
-        meta = codeOrOptions.meta ?? codeOrOptions.context
+        meta = resolveMeta(codeOrOptions)
       }
     } else if (messageOrOptions && typeof messageOrOptions === 'object') {
       message = messageOrOptions.message ?? ''
@@ -72,7 +113,7 @@ export class AppError extends Error {
       status =
         messageOrOptions.status ?? messageOrOptions.statusCode ?? AppError.defaultStatus(code)
       cause = messageOrOptions.cause
-      meta = messageOrOptions.meta ?? messageOrOptions.context
+      meta = resolveMeta(messageOrOptions)
     }
 
     super(message, { cause })
@@ -88,8 +129,8 @@ export class AppError extends Error {
     }
   }
 
-  static defaultStatus(code: string): number {
-    const map: Record<string, number> = {
+  static defaultStatus(code: ErrorCode): number {
+    const map: Record<ErrorCode, number> = {
       UNAUTHORIZED: 401,
       AUTH_ERROR: 401,
       FORBIDDEN: 403,
@@ -152,14 +193,13 @@ export class ForbiddenError extends AppError {
 }
 
 export class ValidationError extends AppError {
+  // AGENT-TRACE: `field`/`value` (and any other ad-hoc keys like `issues`)
+  // flow into `meta` via AppError's `resolveMeta` — the pre-expansion contract
+  // was `ValidationError(message, meta?: Record)`, so arbitrary metadata keys
+  // must still surface on `err.meta`. The typed `field`/`value` options are
+  // kept for ergonomics; they are NOT core fields, so they become meta.
   constructor(message: string, options?: AppErrorOptions & { field?: string; value?: unknown }) {
-    const meta = {
-      ...options?.meta,
-      ...options?.context,
-      ...(options?.field ? { field: options.field } : {}),
-      ...(options?.value !== undefined ? { value: options.value } : {}),
-    }
-    super(message, { code: 'VALIDATION_ERROR', ...options, meta })
+    super(message, { ...options, code: 'VALIDATION_ERROR' })
     this.name = 'ValidationError'
   }
 }

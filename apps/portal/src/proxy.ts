@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { createMiddlewareClient } from '@repo/supabase/middleware'
-import { cacheGet, cacheSet, cacheEvictL1ByPrefix } from '@repo/redis/cache'
+import { cacheGet, cacheSet, cacheDelete } from '@repo/redis/cache'
 // AGENT-TRACE: ACL (department slugs, restricted route→role map, route
 // predicates) is sourced from @repo/acl so the edge proxy and the node server
 // actions (lib/dept-access.ts) cannot drift. The former inline copies had
@@ -195,9 +195,10 @@ async function resolveEmployee(
   // accessible_departments, the edge proxy continues to authorize on the OLD
   // record for up to 300s. The role-change flow MUST evict this cache for the
   // TARGET user by calling `POST /api/cache/invalidate { userId }` (which
-  // calls cacheEvictL1ByPrefix('arch:auth:employee:<userId>')). Do NOT cache
-  // the auth check in department-cache.ts tag layer — only cache data fetches,
-  // keyed by verified userId. See docs/WAYFINDER.md → "Caching".
+  // calls cacheDelete('arch:auth:employee:<userId>') — L1 + L2, per ADR-001).
+  // Do NOT cache the auth check in department-cache.ts tag layer — only cache
+  // data fetches, keyed by verified userId. See docs/WAYFINDER.md → "Caching"
+  // + ADR-001 (docs/architecture/adr-001-cache-auth-eviction-l1-l2.md).
   const cacheKey = `arch:auth:employee:${userId}`
   const cached = await cacheGet<EmployeeAuth | null>(cacheKey)
   if (cached) return cached
@@ -285,7 +286,11 @@ export async function proxy(request: NextRequest) {
   if (shouldSignOut) {
     await client.supabase.auth.signOut()
     if (user?.id) {
-      cacheEvictL1ByPrefix(`arch:auth:employee:${user.id}`)
+      // AGENT-TRACE: best-effort eviction of this user's edge-auth cache on
+      // sign-out (L1 + L2 via cacheDelete). Not awaited-blocked — if it fails,
+      // the 300s L2 TTL is the backstop. Consistent with ADR-001: the
+      // role-change flow evicts the TARGET user via POST /api/cache/invalidate.
+      await cacheDelete(`arch:auth:employee:${user.id}`)
     }
   }
 

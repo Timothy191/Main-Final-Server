@@ -17,15 +17,15 @@ Use it **immediately after** any change to a user's row in `employees` (role
 promotion/demotion, department access grant/revoke) when you cannot wait up to
 5 minutes for the cache to expire on its own.
 
-> **Know the gap before you run it.** The invalidation endpoint clears the
-> **in-process L1 only** — it does **not** delete the Redis L2 key, and
-> `cacheGet` re-populates L1 from a stale L2 hit (see
-> [`packages/redis/src/cache.ts`](../../packages/redis/src/cache.ts) `cacheGet`
-> and `cacheEvictL1ByPrefix`). On a **single-pod** stack the user sees the new
-> role within seconds; on a **multi-pod** production stack, pods other than the
-> one that handled the POST still serve the stale L2 value for up to 300s. For
-> **immediate, cross-pod** freshness, run **both** the endpoint (Step 2) **and**
-> the `redis-cli DEL` (Step 3).
+> **Automatic path (preferred).** Since ADR-001 landed, the admin role-change
+> flow in `features/admin/tabs/UsersTab.tsx` calls
+> `POST /api/cache/invalidate { userId }` automatically after a successful
+> `employees` update, and that endpoint now evicts **both L1 and L2** via
+> `cacheDelete` (`memoryDelete` + `redis.del`). So in normal operation **no
+> manual step is required** — the next request re-reads `employees` on every
+> pod. Use the manual steps below only when the automatic path failed or was
+> bypassed (e.g. a direct DB edit, a Supabase trigger, or the eviction fetch
+> errored).
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ promotion/demotion, department access grant/revoke) when you cannot wait up to
 - [ ] The **target user's** Supabase auth `id` (not your own — evicting your
       own cache does not help the affected user). Get it from Supabase Studio →
       Authentication → Users, or:
-- [ ] For the full-immediacy path: shell access to the production host and
+- [ ] For the fallback path only: shell access to the production host and
       `$REDIS_PASSWORD` (set in `.env.production`, consumed by
       `docker-compose.production.yml`).
 
@@ -88,11 +88,13 @@ user-auth eviction.)
 - `400 No invalidation target specified` → the body was malformed; confirm the
   JSON is `{"userId":"<uuid>"}` and the `Content-Type` header is set.
 
-### Step 3: (Multi-pod prod / immediate freshness) Delete the Redis L2 key
+### Step 3: (Fallback) Manually delete the Redis L2 key
 
-Skip this step on a single-pod dev stack where a ≤30s wait is acceptable. On
-multi-pod production, this is the step that actually guarantees the next request
-re-reads `employees`:
+> Since ADR-001, Step 2 already deletes the L2 key via `cacheDelete`, so this
+> step is normally **not needed**. Use it only as a fallback when Step 2 ran but
+> the user still sees the stale role (e.g. the `redis.del` inside `cacheDelete`
+> silently failed, or the change was made directly in the DB bypassing the
+> portal).
 
 ```bash
 docker exec arch-redis-prod redis-cli -A "$REDIS_PASSWORD" DEL "arch:auth:employee:<userId>"
@@ -124,13 +126,13 @@ had already expired (300s TTL lapsed) — the cache is already fresh, nothing to
 
 ## Troubleshooting
 
-| Symptom                                    | Likely cause                                                                                       | Fix                                                                                                                                  |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| User still sees old role after Step 2 only | L2 (Redis) still holds the stale value; L1 eviction is per-pod and `cacheGet` re-caches L1 from L2 | Run Step 3 (`redis-cli DEL`), or wait ≤300s for the L2 TTL to expire                                                                 |
-| User still sees old role after Steps 2 + 3 | A pod's L1 still holds the 30s copy and was not the pod that handled the POST                      | Wait ≤30s for that pod's L1 to expire, or restart the portal pods (`docker compose -f docker-compose.production.yml restart portal`) |
-| `evictedUserAuth` absent from the response | `userId` was missing/falsy in the request body                                                     | Re-send with `{"userId":"<uuid>"}`                                                                                                   |
-| 401 on the endpoint                        | No authenticated session on the request                                                            | Re-authenticate as admin; the endpoint enforces `auth.getUser()`                                                                     |
-| Evicted the wrong user                     | Used your own id or mistyped the UUID                                                              | Re-run Steps 2–3 with the correct `<userId>`; no harm done (the wrongly-evicted user just re-reads `employees` on next request)      |
+| Symptom                                    | Likely cause                                                                                       | Fix                                                                                                                                                                   |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| User still sees old role after Step 2      | The `redis.del` inside `cacheDelete` silently failed (Redis blip), or a pod's 30s L1 copy is stale | Run Step 3 (`redis-cli DEL`), or wait ≤30s for that pod's L1 to expire, or restart the portal pods (`docker compose -f docker-compose.production.yml restart portal`) |
+| User still sees old role after Steps 2 + 3 | A pod's L1 still holds the 30s copy and was not the pod that handled the POST                      | Wait ≤30s for that pod's L1 to expire, or restart the portal pods (`docker compose -f docker-compose.production.yml restart portal`)                                  |
+| `evictedUserAuth` absent from the response | `userId` was missing/falsy in the request body                                                     | Re-send with `{"userId":"<uuid>"}`                                                                                                                                    |
+| 401 on the endpoint                        | No authenticated session on the request                                                            | Re-authenticate as admin; the endpoint enforces `auth.getUser()`                                                                                                      |
+| Evicted the wrong user                     | Used your own id or mistyped the UUID                                                              | Re-run Steps 2–3 with the correct `<userId>`; no harm done (the wrongly-evicted user just re-reads `employees` on next request)                                       |
 
 ## Rollback
 

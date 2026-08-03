@@ -76,6 +76,17 @@ describe('Domain Error Subclasses', () => {
     expect(err.name).toBe('ForbiddenError')
   })
 
+  it('ForbiddenError preserves resource/action metadata', () => {
+    // Callers (dept-access.ts, control-room/actions.ts, ssrf-guard) pass
+    // { resource, action } expecting it on err.meta.
+    const err = new ForbiddenError('Role required', {
+      resource: 'employees',
+      action: 'assert_role',
+    })
+    expect(err.code).toBe('FORBIDDEN')
+    expect(err.meta).toEqual({ resource: 'employees', action: 'assert_role' })
+  })
+
   it('NotFoundError', () => {
     const err = new NotFoundError('User', { id: 123 })
     expect(err.code).toBe('NOT_FOUND')
@@ -92,6 +103,20 @@ describe('Domain Error Subclasses', () => {
     expect(err.message).toBe('Invalid email format')
     expect(err.meta).toEqual({ field: 'email' })
     expect(err.name).toBe('ValidationError')
+  })
+
+  it('ValidationError preserves ad-hoc meta keys (e.g. issues) — pre-expansion contract', () => {
+    // Callers like control-room/actions.ts pass { issues: fieldErrors }; the
+    // expansion to AppErrorOptions must not silently drop them.
+    const err = new ValidationError('Invalid payload', {
+      issues: { load: ['required'] },
+    })
+    expect(err.meta).toEqual({ issues: { load: ['required'] } })
+  })
+
+  it('ValidationError merges field/value with ad-hoc meta', () => {
+    const err = new ValidationError('Bad url', { field: 'url', value: 'x', extra: 1 })
+    expect(err.meta).toEqual({ field: 'url', value: 'x', extra: 1 })
   })
 
   it('TooManyRequestsError / RateLimitError', () => {

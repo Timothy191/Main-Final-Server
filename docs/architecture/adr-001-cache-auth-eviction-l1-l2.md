@@ -1,8 +1,12 @@
 # ADR-001: Evict Both L1 and L2 on a Role / Department Change
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-08-03
 **Deciders:** Platform lead, portal auth/proxy owner, on-call ops
+
+> **Implementation:** action items 1–3 landed (route `cacheDelete` + admin
+> caller wiring + unit test). The runbook's manual `redis-cli DEL` step is
+> demoted to a fallback. See the change-index row dated 2026-08-03.
 
 ## Context
 
@@ -145,16 +149,14 @@ constraint, not an architectural one.
 
 ## Action Items
 
-1. [ ] In `apps/portal/src/app/api/cache/invalidate/route.ts`, add an L2 delete
-       (`cacheDelete` / `cacheDeletePattern` on `arch:auth:employee:<userId>`)
-       alongside the existing `cacheEvictL1ByPrefix` on the `userId` path.
-2. [ ] Wire the admin role-change mutation (and department-access grant/revoke)
-       to call `POST /api/cache/invalidate { userId }` with the **target** user's
-       id, in the same change that writes the `employees` row.
-3. [ ] Add a unit test covering the L2-delete branch of the invalidation route.
-4. [ ] Update [`../runbooks/evict-employee-auth-cache.md`](../runbooks/evict-employee-auth-cache.md)
-       — once actions 1–2 land, demote the manual `redis-cli DEL` step from
-       "required for multi-pod" to "fallback / debugging" and note the route now
-       evicts L1 + L2.
-5. [ ] Append a REPO-CHANGE-INDEX row when the implementation lands; flip this
-       ADR's status to **Accepted**.
+1. [x] In `apps/portal/src/app/api/cache/invalidate/route.ts`, the `userId`
+       path now calls `cacheDelete` (L1 + `redis.del`) instead of
+       `cacheEvictL1ByPrefix`.
+2. [x] The admin role-change flow (`features/admin/tabs/UsersTab.tsx`
+       `handleUpdate`) calls `POST /api/cache/invalidate { userId }` with the
+       target user's `auth_id` after a successful `employees` update.
+       `proxy.ts` sign-out also uses `cacheDelete` (L1 + L2).
+3. [x] Unit test added: `apps/portal/src/app/api/cache/invalidate/route.test.ts`
+       asserts `cacheDelete('arch:auth:employee:<userId>')` is invoked.
+4. [x] Runbook demoted the manual `redis-cli DEL` step to a fallback.
+5. [x] REPO-CHANGE-INDEX row appended; ADR status flipped to **Accepted**.
