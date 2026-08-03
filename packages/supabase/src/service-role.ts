@@ -4,8 +4,8 @@
  */
 import 'server-only'
 import { SupabaseClient } from '@supabase/supabase-js'
-import { createMockSupabaseClient } from "./kysely-shim";
+import { createMockSupabaseClient } from './kysely-shim'
 
 export function createServiceRoleClient(): SupabaseClient<any, 'public', any> {
-  return createMockSupabaseClient() as any;
+  return createMockSupabaseClient() as any
 }

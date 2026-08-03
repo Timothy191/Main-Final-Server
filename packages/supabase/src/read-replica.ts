@@ -41,4 +41,3 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
     },
   })
 }
-

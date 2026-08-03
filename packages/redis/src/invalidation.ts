@@ -1,4 +1,5 @@
-import { getRedisClient } from "./client.ts";
+import { getRedisClient } from "./client.js";
+import { l1EvictByTags, l1DeleteByPrefix } from "./l1.js";
 
 const TAG_PREFIX = "arch:__tags__";
 
@@ -35,8 +36,10 @@ export async function indexCacheKeyByTags(key: string, tags: string[]): Promise<
  * Also clears matching keys from the in-memory L1 cache.
  */
 export async function cacheInvalidateTags(tags: string[]): Promise<number> {
+  const evicted = l1EvictByTags(tags);
+
   const redis = await getRedisClientSafe();
-  if (!redis) return 0;
+  if (!redis) return evicted;
 
   let deleted = 0;
 
@@ -75,6 +78,10 @@ export async function cacheInvalidateTags(tags: string[]): Promise<number> {
  * Also clears matching keys from the in-memory L1 cache.
  */
 export async function cacheInvalidatePrefixes(prefixes: string[]): Promise<number> {
+  for (const prefix of prefixes) {
+    l1DeleteByPrefix(prefix);
+  }
+
   const redis = await getRedisClientSafe();
   if (!redis) return 0;
 

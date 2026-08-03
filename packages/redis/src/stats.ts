@@ -6,7 +6,7 @@
  * (for cross-pod aggregation under `stats:cache` and `stats:latencies`).
  */
 
-import { getRedisClient, getClientIfOpen } from "./client.ts";
+import { getRedisClient, getClientIfOpen } from "./client.js";
 
 /** Point-in-time snapshot of cache performance counters. */
 interface CacheStatsSnapshot {

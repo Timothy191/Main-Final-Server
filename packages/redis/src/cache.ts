@@ -1,62 +1,21 @@
-import { recordCacheHit, recordCacheMiss, recordRedisError, getCacheStats } from "./stats.ts";
+import { recordCacheHit, recordCacheMiss, recordRedisError, getCacheStats } from "./stats.js";
 import {
   cacheInvalidateTags,
   cacheInvalidatePrefixes,
   indexCacheKeyByTags,
-} from "./invalidation.ts";
-
-// ------------------------------------------------------------------
-// L1 In-Memory Cache with TTL + LRU eviction
-// ------------------------------------------------------------------
-
-const L1_MAX_ENTRIES = 1000;
-
-interface MemoryEntry {
-  value: string;
-  expires: number;
-}
-
-const memoryCache = new Map<string, MemoryEntry>();
-
-function memoryGet<T>(key: string): T | null {
-  const item = memoryCache.get(key);
-  if (!item) return null;
-  if (Date.now() > item.expires) {
-    memoryCache.delete(key);
-    return null;
-  }
-  return JSON.parse(item.value) as T;
-}
-
-function memorySet<T>(key: string, value: T, ttlSeconds: number): void {
-  if (memoryCache.size >= L1_MAX_ENTRIES && !memoryCache.has(key)) {
-    const firstKey = memoryCache.keys().next().value;
-    if (firstKey !== undefined) {
-      memoryCache.delete(firstKey);
-    }
-  }
-
-  memoryCache.set(key, {
-    value: JSON.stringify(value),
-    expires: Date.now() + ttlSeconds * 1000,
-  });
-}
-
-function memoryDelete(key: string): void {
-  memoryCache.delete(key);
-}
-
-function memoryDeleteByPrefix(prefix: string): void {
-  for (const key of memoryCache.keys()) {
-    if (key.startsWith(prefix)) {
-      memoryCache.delete(key);
-    }
-  }
-}
+} from "./invalidation.js";
+import {
+  l1Get as memoryGet,
+  l1Set as memorySet,
+  l1Delete as memoryDelete,
+  l1DeleteByPrefix as memoryDeleteByPrefix,
+  l1IndexTags,
+  l1Clear,
+} from "./l1.js";
 
 async function getRedisClientSafe() {
   try {
-    const { getRedisClient } = await import("./client.ts");
+    const { getRedisClient } = await import("./client.js");
     return await getRedisClient();
   } catch {
     return null;
@@ -153,6 +112,7 @@ export async function cacheSetWithTags<T>(
 ): Promise<void> {
   await cacheSet(key, value, ttlSeconds);
   if (tags && tags.length > 0) {
+    l1IndexTags(key, tags);
     await indexCacheKeyByTags(key, tags);
   }
 }
@@ -209,7 +169,7 @@ export function cacheEvictL1ByPrefix(prefix: string): void {
 }
 
 export function clearMemoryCache(): void {
-  memoryCache.clear();
+  l1Clear();
 }
 
 export interface CacheOptions {

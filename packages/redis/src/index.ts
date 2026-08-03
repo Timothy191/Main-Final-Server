@@ -4,9 +4,9 @@
  * Provides sub-microsecond in-memory caching and Redis-compatible contracts
  * with 0 external dependency requirements.
  */
-import { getRedisClient, closeRedis } from "./client.ts";
-import { getNativeRedisClient, NativeRedisClient } from "./native-client.ts";
-import { getNativeEventBus, nativeEventBus, SystemEventPayload } from "./event-bus.ts";
+import { getRedisClient, closeRedis } from "./client.js";
+import { getNativeRedisClient, NativeRedisClient } from "./native-client.js";
+import { getNativeEventBus, nativeEventBus, SystemEventPayload } from "./event-bus.js";
 
 export function getRedis(): any {
   return getNativeRedisClient();
@@ -40,7 +40,7 @@ export const CacheCategory = {
   TRAINING: "training",
 };
 
-export { getCacheStats } from "./stats.ts";
+export { getCacheStats } from "./stats.js";
 
 export {
   cacheGet,
@@ -57,4 +57,4 @@ export {
   Cache,
   type CacheOptions,
   cache,
-} from "./cache.ts";
+} from "./cache.js";

@@ -3,7 +3,6 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "noEmit": true,
     "forceConsistentCasingInFileNames": true,
     "rootDir": "./src"

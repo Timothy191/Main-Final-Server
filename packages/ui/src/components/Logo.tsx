@@ -9,15 +9,15 @@ interface LogoProps {
   stencilId?: string
 }
 
-/** Official Arch Linux crystal icon — downloaded from the Arch Linux artwork repository. */
+/** Official BlackArch Linux logo — downloaded from the BlackArch artwork repository. */
 export function Logo({ className, variant = 'default', stencilId = 'default' }: LogoProps) {
   void variant
   void stencilId
 
   return (
     <Image
-      src="/logo.svg"
-      alt="Arch Linux logo"
+      src="/logo-blackarch.png"
+      alt="BlackArch Linux logo"
       width={128}
       height={128}
       className={cn('h-full w-auto object-contain', className)}

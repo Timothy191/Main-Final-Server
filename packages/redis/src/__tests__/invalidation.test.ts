@@ -3,18 +3,24 @@
  *
  * invalidation.ts imports from "./client.js", so we mock "../client.js".
  * The moduleNameMapper in jest.config.js strips .js → .ts for resolution.
+ *
+ * Mock methods match ioredis and NativeRedisClient API:
+ *   - multi() returns pipeline with .sadd() and .exec()
+ *   - sscanStream() returns async iterable
+ *   - scanStream() returns async iterable
+ *   - unlink() deletes keys
  */
-// Stable multi instance so sAdd/exec calls are tracked consistently
+// Stable multi instance so sadd/exec calls are tracked consistently
 const mockMulti = {
-  sAdd: jest.fn(),
+  sadd: jest.fn(),
   exec: jest.fn().mockResolvedValue([]),
 };
 
 const mockRedis = {
   isOpen: true,
   multi: jest.fn(() => mockMulti),
-  sScanIterator: jest.fn(),
-  scanIterator: jest.fn(),
+  sscanStream: jest.fn(),
+  scanStream: jest.fn(),
   unlink: jest.fn().mockResolvedValue(1),
   quit: jest.fn().mockResolvedValue("OK"),
 };
@@ -38,9 +44,9 @@ describe("indexCacheKeyByTags", () => {
 
     expect(mockRedis.multi).toHaveBeenCalled();
     const multiInstance = mockRedis.multi();
-    expect(multiInstance.sAdd).toHaveBeenCalledTimes(2);
-    expect(multiInstance.sAdd).toHaveBeenCalledWith("arch:__tags__:tag1", "cache-key-1");
-    expect(multiInstance.sAdd).toHaveBeenCalledWith("arch:__tags__:tag2", "cache-key-1");
+    expect(multiInstance.sadd).toHaveBeenCalledTimes(2);
+    expect(multiInstance.sadd).toHaveBeenCalledWith("arch:__tags__:tag1", "cache-key-1");
+    expect(multiInstance.sadd).toHaveBeenCalledWith("arch:__tags__:tag2", "cache-key-1");
     expect(multiInstance.exec).toHaveBeenCalled();
   });
 
@@ -54,7 +60,7 @@ describe("indexCacheKeyByTags", () => {
 // ---------------------------------------------------------------------------
 describe("cacheInvalidateTags", () => {
   it("should unlink all keys for the given tags", async () => {
-    const sScanMock = jest.fn().mockReturnValue({
+    const sscanStreamMock = jest.fn().mockReturnValue({
       [Symbol.asyncIterator]: () => {
         let i = 0;
         const keys = ["del-key-1", "del-key-2"];
@@ -68,41 +74,41 @@ describe("cacheInvalidateTags", () => {
         };
       },
     });
-    mockRedis.sScanIterator.mockImplementation(sScanMock);
+    mockRedis.sscanStream.mockImplementation(sscanStreamMock);
     mockRedis.unlink.mockResolvedValue(2);
 
     const deleted = await cacheInvalidateTags(["tag1"]);
 
     expect(deleted).toBe(2);
-    expect(mockRedis.sScanIterator).toHaveBeenCalledWith("arch:__tags__:tag1", {
-      COUNT: 100,
+    expect(mockRedis.sscanStream).toHaveBeenCalledWith("arch:__tags__:tag1", {
+      count: 100,
     });
     expect(mockRedis.unlink).toHaveBeenCalledWith(["del-key-1", "del-key-2"]);
     expect(mockRedis.unlink).toHaveBeenCalledWith("arch:__tags__:tag1");
   });
 
   it("should handle tags with no indexed keys", async () => {
-    const sScanMock = jest.fn().mockReturnValue({
+    const sscanStreamMock = jest.fn().mockReturnValue({
       [Symbol.asyncIterator]: () => ({
         next: () => Promise.resolve({ value: undefined, done: true }),
       }),
     });
-    mockRedis.sScanIterator.mockImplementation(sScanMock);
+    mockRedis.sscanStream.mockImplementation(sscanStreamMock);
 
     const deleted = await cacheInvalidateTags(["empty-tag"]);
     expect(deleted).toBe(0);
   });
 
   it("should handle multiple tags", async () => {
-    const sScanMock = jest.fn().mockReturnValue({
+    const sscanStreamMock = jest.fn().mockReturnValue({
       [Symbol.asyncIterator]: () => ({
         next: () => Promise.resolve({ value: undefined, done: true }),
       }),
     });
-    mockRedis.sScanIterator.mockImplementation(sScanMock);
+    mockRedis.sscanStream.mockImplementation(sscanStreamMock);
 
     const deleted = await cacheInvalidateTags(["tag-a", "tag-b"]);
-    expect(mockRedis.sScanIterator).toHaveBeenCalledTimes(2);
+    expect(mockRedis.sscanStream).toHaveBeenCalledTimes(2);
     expect(deleted).toBe(0);
   });
 });
@@ -112,7 +118,7 @@ describe("cacheInvalidateTags", () => {
 // ---------------------------------------------------------------------------
 describe("cacheInvalidatePrefixes", () => {
   it("should unlink all keys matching prefixes", async () => {
-    const scanMock = jest.fn().mockReturnValue({
+    const scanStreamMock = jest.fn().mockReturnValue({
       [Symbol.asyncIterator]: () => {
         let i = 0;
         const keys = ["arch:dept:1", "arch:dept:2"];
@@ -126,25 +132,25 @@ describe("cacheInvalidatePrefixes", () => {
         };
       },
     });
-    mockRedis.scanIterator.mockImplementation(scanMock);
+    mockRedis.scanStream.mockImplementation(scanStreamMock);
     mockRedis.unlink.mockResolvedValue(2);
 
     const deleted = await cacheInvalidatePrefixes(["arch:dept:"]);
 
     expect(deleted).toBe(2);
-    expect(mockRedis.scanIterator).toHaveBeenCalledWith({
-      MATCH: "arch:dept:*",
-      COUNT: 100,
+    expect(mockRedis.scanStream).toHaveBeenCalledWith({
+      match: "arch:dept:*",
+      count: 100,
     });
   });
 
   it("should handle prefixes with no matching keys", async () => {
-    const scanMock = jest.fn().mockReturnValue({
+    const scanStreamMock = jest.fn().mockReturnValue({
       [Symbol.asyncIterator]: () => ({
         next: () => Promise.resolve({ value: undefined, done: true }),
       }),
     });
-    mockRedis.scanIterator.mockImplementation(scanMock);
+    mockRedis.scanStream.mockImplementation(scanStreamMock);
 
     const deleted = await cacheInvalidatePrefixes(["nonexistent:*"]);
     expect(deleted).toBe(0);
@@ -153,7 +159,7 @@ describe("cacheInvalidatePrefixes", () => {
   it("should handle batched deletions for large result sets", async () => {
     let yielded = 0;
     const totalKeys = 150;
-    const scanMock = jest.fn().mockReturnValue({
+    const scanStreamMock = jest.fn().mockReturnValue({
       [Symbol.asyncIterator]: () => ({
         next: () => {
           if (yielded < totalKeys) {
@@ -166,7 +172,7 @@ describe("cacheInvalidatePrefixes", () => {
         },
       }),
     });
-    mockRedis.scanIterator.mockImplementation(scanMock);
+    mockRedis.scanStream.mockImplementation(scanStreamMock);
     mockRedis.unlink.mockResolvedValue(1);
 
     const deleted = await cacheInvalidatePrefixes(["arch:batch:"]);
