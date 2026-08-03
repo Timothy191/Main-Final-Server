@@ -1,0 +1,10 @@
+# Build artifacts (regenerated; must not be linted)
+dist
+.next
+.turbo
+
+# Dependencies
+node_modules
+
+# Generated caches / coverage
+coverage
