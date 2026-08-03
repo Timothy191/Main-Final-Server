@@ -1,0 +1,193 @@
+# =============================================================================
+# Arch Systems — Circuit Breaker & Cache Alert Rules
+# =============================================================================
+# Scrapes: /api/metrics/prometheus (arch_cache_*, arch_redis_* metrics)
+# Prometheus version: >= 2.45
+# =============================================================================
+
+groups:
+  - name: arch-circuit-breaker
+    interval: 30s
+    rules:
+      # -----------------------------------------------------------------------
+      # Circuit Breaker Open — Critical
+      # -----------------------------------------------------------------------
+      # Fires when the circuit breaker has been in OPEN state for 5+ consecutive
+      # minutes. Indicates persistent Redis/cache layer failure. Requests are
+      # being fast-rejected without hitting the backend.
+      - alert: CircuitBreakerOpen
+        expr: |
+          (arch_cache_circuit_breaker_events_total{transition="open"}
+            - ignoring(transition) arch_cache_circuit_breaker_events_total{transition="close"})
+          > 0
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Circuit breaker OPEN for {{ $value | humanizeDuration }}"
+          description: >
+            The cache layer circuit breaker has been OPEN for more than 5 minutes.
+            All cache requests are being fast-rejected. Redis or the backing store
+            may be down. Check the cache health endpoint
+            (/api/health/cache) and Redis logs immediately.
+          runbook_url: "/docs/runbooks/circuit-breaker-open.md"
+
+      # -----------------------------------------------------------------------
+      # Circuit Breaker Frequently Transitioning — Warning
+      # -----------------------------------------------------------------------
+      # Fires when the breaker transitions more than 6 times in 5 minutes
+      # (i.e., rate > 0.02 events/sec per transition). Indicates flapping.
+      - alert: CircuitBreakerFlapping
+        expr: |
+          rate(arch_cache_circuit_breaker_events_total[5m]) > 0.02
+        for: 2m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Circuit breaker flapping ({{ $value | humanize }} transitions/sec)"
+          description: >
+            The circuit breaker is transitioning between states more than
+            6 times per 5 minutes. The system may be experiencing intermittent
+            failures. Check Redis connectivity and cache handler logs.
+
+      # -----------------------------------------------------------------------
+      # Circuit Breaker Rejecting Requests — Warning
+      # -----------------------------------------------------------------------
+      # Fires immediately when the breaker starts rejecting requests.
+      # The for: 1m prevents alerting on a single transient reject.
+      - alert: CircuitBreakerRejectingRequests
+        expr: |
+          rate(arch_cache_circuit_breaker_events_total{transition="reject"}[1m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Circuit breaker rejecting requests ({{ $value | humanize }} req/s)"
+          description: >
+            The circuit breaker is actively rejecting cache requests at
+            {{ $value | humanize }} requests per second. This is expected
+            when the breaker is OPEN, but sustained rejection indicates
+            the underlying issue has not resolved.
+
+  - name: arch-cache-layer
+    interval: 30s
+    rules:
+      # -----------------------------------------------------------------------
+      # High Cache Failure Rate — Warning
+      # -----------------------------------------------------------------------
+      # Fires when more than 50% of cache operations result in errors
+      # over a 5-minute rolling window. Indicates degraded cache behavior.
+      - alert: HighCacheFailureRate
+        expr: |
+          (
+            rate(arch_cache_handler_ops_total{status="error"}[5m])
+            /
+            rate(arch_cache_handler_ops_total[5m])
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Cache failure rate {{ $value | humanizePercentage }}"
+          description: >
+            {{ $value | humanizePercentage }} of cache operations are failing.
+            This may indicate Redis connection issues, serialization errors,
+            or resource exhaustion. Investigate the cache health endpoint
+            (/api/health/cache) and Redis logs.
+
+      # -----------------------------------------------------------------------
+      # Cache Hit Rate Dropped — Warning
+      # -----------------------------------------------------------------------
+      # Fires when cache hit rate drops below 50% for 10+ minutes.
+      # Could indicate cache eviction, tag invalidation storms, or
+      # a change in traffic patterns.
+      - alert: CacheHitRateDropped
+        expr: |
+          (
+            rate(arch_cache_handler_ops_total{operation="get",status="hit"}[10m])
+            /
+            (
+              rate(arch_cache_handler_ops_total{operation="get",status="hit"}[10m])
+              +
+              rate(arch_cache_handler_ops_total{operation="get",status="miss"}[10m])
+            )
+          ) < 0.5
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Cache hit rate dropped to {{ $value | humanizePercentage }}"
+          description: >
+            Cache hit rate has fallen below 50% for over 10 minutes.
+            This may indicate excessive tag invalidation, cache eviction
+            due to memory pressure, or a shift in access patterns.
+            Check cache statistics via /api/health/cache.
+
+      # -----------------------------------------------------------------------
+      # Cache Handler Retries Elevated — Info
+      # -----------------------------------------------------------------------
+      # Fires when the retry rate exceeds 0.1 retries/sec over 5 minutes.
+      # Indicates transient failures that the retry mechanism is handling.
+      - alert: CacheRetriesElevated
+        expr: |
+          rate(arch_cache_handler_retries_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: info
+          team: platform
+        annotations:
+          summary: "Cache retry rate {{ $value | humanize }} req/s"
+          description: >
+            The cache handler is retrying operations at a rate of
+            {{ $value | humanize }} requests per second. This indicates
+            transient failures that the exponential-backoff mechanism
+            is handling, but may warrant investigation if sustained.
+
+  - name: arch-redis-connection
+    interval: 30s
+    rules:
+      # -----------------------------------------------------------------------
+      # Redis Connection Down — Critical
+      # -----------------------------------------------------------------------
+      # Fires when the Redis connection gauge is 0 (disconnected) for
+      # more than 1 minute. The native in-memory fallback should be
+      # serving requests, but with degraded consistency.
+      - alert: RedisConnectionDown
+        expr: arch_redis_connection_info == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Redis connection is DOWN (native fallback active)"
+          description: >
+            Redis connection has been down for more than 1 minute.
+            The native in-memory fallback is serving cache requests,
+            but cross-pod cache consistency is degraded and tags
+            are not shared. Check the cache health endpoint and
+            Redis server logs immediately.
+          runbook_url: "/docs/runbooks/redis-connection-down.md"
+
+      # -----------------------------------------------------------------------
+      # Redis on Native Fallback — Info
+      # -----------------------------------------------------------------------
+      # Fires when the native in-memory fallback is active. Useful
+      # for awareness during maintenance or development.
+      - alert: RedisNativeFallbackActive
+        expr: arch_redis_native_fallback == 1
+        for: 5m
+        labels:
+          severity: info
+          team: platform
+        annotations:
+          summary: "Redis native fallback active"
+          description: >
+            The Redis native in-memory fallback has been active for
+            more than 5 minutes. Cache data is not shared across
+            pods. This may be expected in development or staging
+            environments. Check REDIS_URL configuration.

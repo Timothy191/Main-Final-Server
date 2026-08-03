@@ -1,0 +1,37 @@
+# =============================================================================
+# Arch Systems — Grafana Notification Channel: Alertmanager
+# =============================================================================
+# Provisioning file for Grafana to connect to the internal Alertmanager
+# instance. This enables Grafana to send alert notifications through
+# Alertmanager, which handles routing, grouping, and silencing.
+#
+# Path: /etc/grafana/provisioning/notifiers/alertmanager.yaml
+# Grafana version: >= 10.0
+# =============================================================================
+
+apiVersion: 1
+
+notifiers:
+  - name: "Alertmanager (Internal)"
+    type: "prometheus-alertmanager"
+    uid: "arch-alertmanager"
+    orgId: 1
+    isDefault: true
+    sendReminder: true
+    frequency: "5m"
+    disableResolveMessage: false
+    # See settings below for Alertmanager access
+    settings:
+      # URL of the Alertmanager instance (Docker service name)
+      url: "http://alertmanager:9093"
+      # Timeout for HTTP requests to Alertmanager
+      httpMethod: "POST"
+      # Severity filter — all severities are forwarded
+      severity: "critical, warning, info"
+      # Do not send resolved alerts twice
+      uploadImage: false
+      # Disable TLS verification for internal service
+      tlsSkipVerify: true
+    secureSettings:
+      # No auth between Grafana and Alertmanager on internal network
+      basicAuthPassword: ""

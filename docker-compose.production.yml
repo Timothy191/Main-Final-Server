@@ -2,14 +2,12 @@
 # Arch Systems — Production Docker Compose Configuration
 #
 # Full-stack single-host production deployment:
-#   nginx reverse proxy, Next.js portal, ops-gateway, Redis, FUXA SCADA.
+#   nginx reverse proxy, Next.js portal, Redis, FUXA SCADA, observability stack.
 #
 # Usage:
 #   docker compose -f docker-compose.production.yml --env-file apps/portal/.env.production up -d
 #
-# Note: the legacy `api` service is intentionally omitted. The monorepo only
-# has portal + ops-gateway applications; the API surface lives inside the
-# Next.js App Router.
+# Note: the API surface lives inside the Next.js App Router (apps/portal).
 #
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -87,7 +85,7 @@ services:
           memory: 512M
     healthcheck:
       test:
-        ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3000/api/health']
+        ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://127.0.0.1:3000/api/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -100,52 +98,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-    networks:
-      - arch-net-prod
-
-  # ── Control Plane (Ops-Gateway / MCP) ────────────────────────────────────────
-  ops-gateway:
-    build:
-      context: .
-      dockerfile: apps/ops-gateway/Dockerfile
-      target: production
-    container_name: arch-ops-gateway-prod
-    restart: always
-    expose:
-      - '3100'
-    environment:
-      OPS_API_URL: http://portal:3000/api/ops
-      OPS_SECRET: ${INTERNAL_API_SECRET}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-      MCP_PORT: 3100
-      MCP_HOST: 0.0.0.0
-      NODE_ENV: production
-      OPENCODE_API_KEY: ${OPENCODE_API_KEY:-}
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 256M
-        reservations:
-          cpus: '0.1'
-          memory: 128M
-    healthcheck:
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3100/health']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    depends_on:
-      portal:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: '10m'
-        max-file: '3'
     networks:
       - arch-net-prod
 
@@ -170,6 +122,115 @@ services:
       options:
         max-size: '10m'
         max-file: '3'
+    networks:
+      - arch-net-prod
+
+  # ── Alertmanager ──────────────────────────────────────────────────────────────
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: arch-alertmanager-prod
+    restart: always
+    ports:
+      - "9093:9093"
+    environment:
+      SLACK_API_URL: ${SLACK_API_URL:-}
+      PAGERDUTY_ROUTING_KEY: ${PAGERDUTY_ROUTING_KEY:-}
+      SMTP_HOST: ${SMTP_HOST:-localhost:25}
+      SMTP_FROM: ${SMTP_FROM:-alertmanager@archsystems.local}
+      ALERTMANAGER_LOG_LEVEL: ${ALERTMANAGER_LOG_LEVEL:-info}
+    volumes:
+      # Mount the config template (with ${VAR} placeholders) and entrypoint script
+      - ./ops/alertmanager/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml.tmpl:ro
+      - ./ops/alertmanager/entrypoint.sh:/entrypoint.sh:ro
+      - alertmanager_data:/alertmanager
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yaml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:9093/-/ready']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    networks:
+      - arch-net-prod
+
+  # ── Prometheus ───────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: arch-prometheus-prod
+    restart: always
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./ops/prometheus:/etc/prometheus:ro
+      - prometheus_data:/prometheus
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:9090/-/ready']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    networks:
+      - arch-net-prod
+
+  # ── Grafana ─────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: arch-grafana-prod
+    restart: always
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: ""
+      GF_UNIFIED_ALERTING_ENABLED: "true"
+      GF_ALERTING_ENABLE: "false"
+      GF_FEATURE_TOGGLES_ENABLE: "alertingSimplifiedRouting flappingDetection"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      # Dashboard provider config
+      - ./ops/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      # Datasource provisioning
+      - ./ops/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      # Alert notification channel provisioning
+      - ./ops/grafana/provisioning/notifiers:/etc/grafana/provisioning/notifiers:ro
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3000/api/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    depends_on:
+      prometheus:
+        condition: service_started
+      alertmanager:
+        condition: service_healthy
     networks:
       - arch-net-prod
 
@@ -211,3 +272,6 @@ networks:
 volumes:
   redis_data:
   fuxa_data:
+  alertmanager_data:
+  prometheus_data:
+  grafana_data:

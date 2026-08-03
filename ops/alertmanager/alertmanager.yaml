@@ -1,0 +1,160 @@
+# =============================================================================
+# Arch Systems — Alertmanager Configuration
+# =============================================================================
+# Alertmanager version: >= 0.27
+# Integrates with: Prometheus (arch-* alert rules at ops/prometheus/alert-rules.yaml)
+#
+# ENVIRONMENT VARIABLE SUBSTITUTION:
+#   This config uses ${VAR} patterns that are replaced at startup by
+#   ops/alertmanager/entrypoint.sh using envsubst.
+#
+#   Required:
+#     SLACK_API_URL          — https://hooks.slack.com/services/T.../B.../xxx
+#     PAGERDUTY_ROUTING_KEY  — PagerDuty service integration key
+#
+#   Optional:
+#     SMTP_HOST              — SMTP server (default: localhost:25)
+#     SMTP_FROM              — Sender address (default: alertmanager@archsystems.local)
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Global settings
+# ---------------------------------------------------------------------------
+global:
+  # Slack webhook — set via SLACK_API_URL env var
+  slack_api_url: "${SLACK_API_URL}"
+
+  # Email notifications — set via SMTP_HOST / SMTP_FROM env vars
+  smtp_smarthost: "${SMTP_SMARTHOST}"
+  smtp_from: "${SMTP_FROM}"
+  smtp_require_tls: false
+
+  # Resolve timeout — how long before a firing alert auto-resolves
+  resolve_timeout: 5m
+
+# ---------------------------------------------------------------------------
+# Root route — all alerts enter here
+# ---------------------------------------------------------------------------
+route:
+  receiver: "default"
+  group_by:
+    - alertname
+    - severity
+  # How long to wait before sending initial notification for a new group
+  group_wait: 30s
+  # Minimum time between sending notifications for the same group
+  group_interval: 5m
+  # How long to wait before re-sending a resolved alert
+  repeat_interval: 4h
+
+  # Sub-routes based on severity
+  routes:
+    # Critical alerts — escalate immediately, re-notify every hour
+    - match:
+        severity: "critical"
+      receiver: "critical"
+      repeat_interval: 1h
+      continue: false
+
+    # Warning alerts — standard grouping, re-notify every 4 hours
+    - match:
+        severity: "warning"
+      receiver: "warning"
+      repeat_interval: 4h
+      continue: false
+
+    # Info alerts — daily digest, no urgent action
+    - match:
+        severity: "info"
+      receiver: "info"
+      repeat_interval: 24h
+      group_interval: 1h
+      continue: false
+
+# ---------------------------------------------------------------------------
+# Inhibit rules — suppress lower-severity alerts when a higher-severity
+# alert for the same component is firing
+# ---------------------------------------------------------------------------
+inhibit_rules:
+  # Suppress warning/info cache alerts when circuit breaker is OPEN (critical)
+  - source_match:
+      alertname: "CircuitBreakerOpen"
+      severity: "critical"
+    target_match:
+      severity: "(warning|info)"
+    equal:
+      - "alertname"
+
+  # Suppress warning cache alerts when Redis connection is DOWN (critical)
+  - source_match:
+      alertname: "RedisConnectionDown"
+      severity: "critical"
+    target_match:
+      severity: "(warning|info)"
+    equal:
+      - "team"
+
+# ---------------------------------------------------------------------------
+# Receivers — where notifications go
+# ---------------------------------------------------------------------------
+receivers:
+  # ---- Default (fallback) — webhook only ----
+  - name: "default"
+    webhook_configs:
+      - url: "http://localhost:9093/webhook/notify"
+        send_resolved: true
+
+  # ---- Critical — Slack + PagerDuty + webhook ----
+  - name: "critical"
+    webhook_configs:
+      - url: "http://localhost:9093/webhook/critical"
+        send_resolved: true
+    slack_configs:
+      - channel: "#alerts-critical"
+        title: '[CRITICAL] {{ .GroupLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+            *Alert:* {{ .Annotations.summary }}
+            *Description:* {{ .Annotations.description }}
+            *Severity:* {{ .Labels.severity }}
+            *Instance:* {{ .Labels.instance }}
+            *Started:* {{ .StartsAt }}
+          {{ end }}
+        send_resolved: true
+    pagerduty_configs:
+      - routing_key: "${PAGERDUTY_ROUTING_KEY}"
+        severity: "critical"
+        description: "{{ .GroupLabels.alertname }} — {{ .CommonAnnotations.summary }}"
+        client: "Arch Systems Monitoring"
+
+  # ---- Warning — Slack + webhook ----
+  - name: "warning"
+    webhook_configs:
+      - url: "http://localhost:9093/webhook/warning"
+        send_resolved: true
+    slack_configs:
+      - channel: "#alerts-warning"
+        title: '[WARNING] {{ .GroupLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+            *Alert:* {{ .Annotations.summary }}
+            *Description:* {{ .Annotations.description }}
+            *Severity:* {{ .Labels.severity }}
+            *Started:* {{ .StartsAt }}
+          {{ end }}
+        send_resolved: true
+
+  # ---- Info — Slack + webhook (no resolve) ----
+  - name: "info"
+    webhook_configs:
+      - url: "http://localhost:9093/webhook/info"
+        send_resolved: false
+    slack_configs:
+      - channel: "#alerts-info"
+        title: '[INFO] {{ .GroupLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+            *Alert:* {{ .Annotations.summary }}
+            *Description:* {{ .Annotations.description }}
+          {{ end }}
+        send_resolved: false

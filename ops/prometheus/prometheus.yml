@@ -1,0 +1,52 @@
+# =============================================================================
+# Arch Systems — Prometheus Configuration
+# =============================================================================
+# Scrapes the Next.js portal's /api/metrics/prometheus endpoint for cache
+# handler and circuit breaker metrics. Fires alerting rules from
+# alert-rules.yaml via the built-in Alertmanager integration.
+#
+# Path: /etc/prometheus/prometheus.yml (mounted from ops/prometheus/)
+# Prometheus version: >= 2.45
+# =============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 30s
+  scrape_timeout: 10s
+  external_labels:
+    cluster: "arch-systems"
+    environment: "production"
+
+# ── Alertmanager configuration ───────────────────────────────────────────────
+alerting:
+  alertmanagers:
+    - scheme: http
+      static_configs:
+        - targets:
+            - "alertmanager:9093"
+
+# ── Rule files ───────────────────────────────────────────────────────────────
+rule_files:
+  - "/etc/prometheus/alert-rules.yaml"
+
+# ── Scrape targets ───────────────────────────────────────────────────────────
+scrape_configs:
+  # Portal metrics endpoint — cache handler, circuit breaker, Redis
+  - job_name: "arch-portal"
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: "/api/metrics/prometheus"
+    scheme: http
+    static_configs:
+      - targets:
+          - "portal:3000"
+        labels:
+          app: "portal"
+          team: "platform"
+
+  # Prometheus self-monitoring
+  - job_name: "prometheus"
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+          - "localhost:9090"
