@@ -1,0 +1,19 @@
+packages:
+  - "apps/*"
+  - "!apps/api"
+  - "packages/*"
+  - "packages/departments/*"
+
+# Security & stability settings (aligned with Next.js monorepo conventions)
+updateNotifier: false
+blockExoticSubdeps: true
+minimumReleaseAge: 2880 # 48 hrs — avoid untested dependency drift
+minimumReleaseAgeExclude:
+  - '@repo/*'
+  - next
+  - react
+  - react-dom
+ignoredBuiltDependencies:
+  - '@swc/core'
+  - esbuild
+  - sharp

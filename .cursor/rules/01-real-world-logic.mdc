@@ -1,0 +1,52 @@
+---
+description: Force evidence-based real-world reasoning — no speculation-as-fact
+alwaysApply: true
+---
+
+# Real-World Logic & Proven Methods
+
+Agents must reason like operators shipping production software, not like autocomplete. Apply real-world proven engineering methods.
+
+## Mandatory Loop (every decision)
+
+```
+OBSERVE → HYPOTHESIZE → VERIFY → ACT → SCORE
+```
+
+1. **Observe** — Read code, configs, errors, logs, or runtime output. Cite paths/lines.
+2. **Hypothesize** — State what you believe and why (one sentence).
+3. **Verify** — Prove or falsify with a tool call (read, test, grep, run). No "should work".
+4. **Act** — Change only what evidence supports. Minimal diff.
+5. **Score** — Before claiming done, run the alignment score (see `02-agent-scoring.mdc`).
+
+## Real-World Engineering Principles
+
+### Practical Thinking
+- **Start simple** - Implement the minimum viable solution first
+- **Progressive enhancement** - Make it work → make it right → make it fast
+- **Production mindset** - Consider monitoring, debugging, maintenance
+- **Learn from incidents** - Real user problems > theoretical edge cases
+
+### Engineering Heuristics
+- **YAGNI (You Ain't Gonna Need It)** - Don't build features before they're needed
+- **KISS (Keep It Simple, Stupid)** - Complexity is the enemy of reliability
+- **DRY (Don't Repeat Yourself)** - But know when duplication beats wrong abstraction
+- **Fail Fast** - Detect problems early, don't silently swallow errors
+
+### Evidence-Based Approach
+- **Data over opinions** - "I think" → "The logs show"
+- **Benchmark before optimizing** - Don't guess what's slow
+- **Measure impact** - Monitor before/after changes
+- **Learn from others** - Don't reinvent proven patterns
+
+## Hard Stops (speculation)
+
+- Never claim a bug is fixed without a failing→passing signal or equivalent evidence.
+- Never claim env/stack facts without reading the file or running the command.
+- Never invent APIs, package versions, or routes — look them up in-repo first.
+- Never skip verification because "it looks correct".
+- If blocked (missing secret, login, infra) → stop and report the blocker with evidence.
+
+## Subagents
+
+Use explore/shell/review subagents when parallel facts are needed (layout + tests + history). Synthesize their evidence; do not rubber-stamp.

@@ -1,0 +1,16 @@
+# Agent Tracer Log
+
+This file maintains a record of AI agent interventions, context hand-offs, and architectural breadcrumbs for this specific package/app.
+
+## 2026-07-03 Remove deprecated @novu/node
+
+- **Purpose**: Remove deprecated `@novu/node` dependency (dead code, functions never imported).
+- **Changes**:
+  - `package.json`: Removed `@novu/node` dependency and `./novu` export.
+  - `src/novu.ts`: Deleted (dead code).
+- **Next Agent**: Notification triggers are gone. If notifications are needed, use `@novu/api` instead.
+
+## [2026-06-05] AMCA Foundation / Initialization
+
+- **Agent**: Antigravity
+- **Changes**: Initialized tracing protocols globally as per user instruction.

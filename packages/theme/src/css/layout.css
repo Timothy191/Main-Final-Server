@@ -1,0 +1,126 @@
+/**
+ * Arch System — Global Layout & Spacing Utilities
+ * =====================================================
+ * Establishes consistent, universally shared layout primitives
+ * instead of scattering Tailwind classes individually.
+ */
+
+/* ── Standard Page Wrappers ── */
+
+.page-container {
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (width >= 640px) {
+  .page-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (width >= 1024px) {
+  .page-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* ── Section Spacing ── */
+
+.page-section {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (width >= 640px) {
+  .page-section {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+  }
+}
+
+/* ── Hero / Feature Areas ── */
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-card); /* approx 24px */
+  padding: 1.5rem;
+}
+
+@media (width >= 640px) {
+  .hero-section {
+    padding: 2rem 2.5rem;
+  }
+}
+
+@media (width >= 768px) {
+  .hero-section {
+    padding: 2.5rem 3.5rem;
+  }
+}
+
+/* ── Standard Content Grids ── */
+
+.content-grid-2 {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+@media (width >= 768px) {
+  .content-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.content-grid-3 {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+@media (width >= 768px) {
+  .content-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (width >= 1024px) {
+  .content-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ── Card Inner Padding ── */
+.card-body {
+  padding: 1.25rem;
+}
+
+@media (width >= 640px) {
+  .card-body {
+    padding: 1.5rem;
+  }
+}
+
+/* ── Skeletons ── */
+/* Replaces arbitrary loading skeletons */
+.skeleton-block {
+  background-color: var(--bg-tertiary);
+  border-radius: var(--radius-card);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.spinner-primary {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid transparent;
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}

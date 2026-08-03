@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Exec(pnpm ai)",
+      "Exec(mkdir)",
+      "Exec(chmod)",
+      "Exec(sed)",
+      "Exec(ls)",
+      "Exec(find)",
+      "Exec(stat)",
+      "Exec(jq)"
+    ]
+  }
+}

@@ -1,0 +1,352 @@
+{
+  "version": "1.1.0",
+  "last_updated": "2026-07-20",
+  "description": "Central registry of all MCP servers AND OpenRouter server tools for Arch Systems agents. Fully free servers auto-start; OpenRouter server tools require no local install.",
+  "categories": {
+    "filesystem": "Local file access — no external API, fully free",
+    "browser": "Browser automation via Playwright — no external API, fully free",
+    "docker": "Container management — uses local Docker daemon, fully free",
+    "memory": "Persistent knowledge graph — local storage, fully free",
+    "reasoning": "Structured step-by-step reasoning — pure logic, fully free",
+    "database": "Database querying — connects to local/self-hosted databases, fully free",
+    "codebase": "Codebase intelligence — local analysis tools, fully free",
+    "search": "Web search — requires free-tier API key",
+    "github": "GitHub API — requires free GitHub token",
+    "productivity": "Tool/software discovery, project management — requires free-tier keys",
+    "design": "Figma integration — requires Figma account",
+    "sandbox": "Cloud sandboxed code execution — 100 hrs/month free",
+    "or-server-tools": "OpenRouter server-side tools — zero local install, requires OR API key"
+  },
+  "servers": {
+    "filesystem": {
+      "category": "filesystem",
+      "description": "Read, write, edit, search files and directories. Scoped to configured paths.",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/timothy/Projects"],
+      "auto_start": true,
+      "requires_key": false,
+      "free_tier": true,
+      "notes": "Anthropic-maintained. Scoped to Projects directory."
+    },
+    "playwright": {
+      "category": "browser",
+      "description": "Browser automation for web testing, scraping, and interaction via Playwright.",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp"],
+      "auto_start": false,
+      "requires_key": false,
+      "free_tier": true,
+      "notes": "Browser automation. Headless by default."
+    },
+    "docker": {
+      "category": "docker",
+      "description": "Container management — list, inspect, pull, run containers, manage images and compose stacks.",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--init",
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+        "ghcr.io/docker/labs-mcp-server:latest"
+      ],
+      "auto_start": false,
+      "requires_key": false,
+      "free_tier": true,
+      "notes": "Requires Docker daemon. Maps host socket."
+    },
+    "memory": {
+      "category": "memory",
+      "description": "Persistent knowledge graph memory using JSON file storage. Entities, relations, observations.",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "auto_start": true,
+      "requires_key": false,
+      "free_tier": true,
+      "notes": "Stores to local JSON file."
+    },
+    "sequential-thinking": {
+      "category": "reasoning",
+      "description": "Structured step-by-step reasoning and problem-solving through sequential thoughts.",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "auto_start": true,
+      "requires_key": false,
+      "free_tier": true,
+      "notes": "Pure reasoning — no external calls."
+    },
+// "postgres" disabled due to missing local Supabase instance
+// "postgres": { ... }
+    "sqlite": {
+      "category": "database",
+      "description": "SQLite database exploration — inspect schemas, run queries, CRUD operations.",
+      "command": "uvx",
+      "args": ["mcp-server-sqlite", "--db-path", "/home/timothy/Projects/.crush/crush.db"],
+      "auto_start": false,
+      "requires_key": false,
+      "free_tier": true,
+      "notes": "Scoped to crush.db for session/message inspection."
+    },
+    "redis": {
+      "category": "database",
+      "description": "Redis in-memory data store access — key-value operations, cache inspection, pub/sub.",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-redis", "redis://localhost:6379"],
+      "auto_start": false,
+      "requires_key": false,
+      "free_tier": true,
+      "notes": "Connects to local Redis."
+    },
+    "context7": {
+      "category": "codebase",
+      "description": "Codebase summarization with automatic PII masking. Distills large codebases for context injection.",
+      "command": "npx",
+      "args": ["-y", "context7"],
+      "auto_start": true,
+      "requires_key": true,
+      "free_tier": true,
+      "notes": "Free tier available. Set CONTEXT7_API_KEY."
+    },
+    "brave-search": {
+      "category": "search",
+      "description": "Web search via Brave Search API. Requires free Brave API key.",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": true,
+      "notes": "Free Brave API key required."
+    },
+// "brave-search" disabled due to missing API key
+// "brave-search": { ... }
+    "github": {
+      "category": "github",
+      "description": "GitHub API integration — manage repos, PRs, issues, commits, search code.",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": true,
+      "notes": "Free GitHub token with repo scope."
+    },
+    "figma": {
+      "category": "design",
+      "description": "Figma design file access — read components, styles, and metadata from Figma files.",
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp"],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": false,
+      "notes": "Requires Figma personal access token."
+    },
+    "notion": {
+      "category": "productivity",
+      "description": "Notion API integration — read, write, update Notion pages and databases.",
+      "command": "npx",
+      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": true,
+      "notes": "Notion integration token required."
+    },
+    "e2b": {
+      "category": "sandbox",
+      "description": "Cloud sandboxed code execution. Run arbitrary code in isolated environments.",
+      "command": "npx",
+      "args": ["-y", "@e2b/mcp-server"],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": true,
+      "notes": "100 hrs/month free tier."
+    },
+    "composio": {
+      "category": "productivity",
+      "description": "150+ tool integrations — file I/O, shell commands, web browsing, code execution.",
+      "command": "npx",
+      "args": ["-y", "composio-mcp"],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": true,
+      "notes": "Free tier available with Composio API key."
+    },
+// "supabase" disabled due to missing local instance/keys
+// "supabase": { ... }
+    "opencode-mcp": {
+      "category": "codebase",
+      "description": "OpenCode MCP server.",
+      "command": "",
+      "args": [],
+      "auto_start": false,
+      "requires_key": false,
+      "free_tier": true,
+      "notes": "Placeholder — configured in opencode config."
+    },
+    "serena": {
+      "category": "codebase",
+      "description": "Oraios Serena — universal codebase intelligence, file operations, and MCP tool execution. No API key needed, fully free.",
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/oraios/serena", "serena-mcp-server"],
+      "auto_start": true,
+      "requires_key": false,
+      "free_tier": true,
+      "notes": "Zero-cost codebase intelligence. Installed via UVX."
+    },
+    "openrouter-subagent": {
+      "category": "or-server-tools",
+      "description": "Server-side subagent delegation — orchestrator delegates subtasks to a cheaper worker model. No local install. type: openrouter:subagent",
+      "command": "",
+      "args": [],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": true,
+      "notes": "OpenRouter server tool. Works with any model that supports tool calling. Parameters: model, task_name, task_description."
+    },
+    "openrouter-advisor": {
+      "category": "or-server-tools",
+      "description": "Consult a stronger model mid-generation as a server tool. No local install. type: openrouter:advisor",
+      "command": "",
+      "args": [],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": false,
+      "notes": "OpenRouter server tool. Best for review/verification of the primary model's output."
+    },
+    "openrouter-web-search": {
+      "category": "or-server-tools",
+      "description": "Real-time web search — model-agnostic grounding. No local install. type: openrouter:web_search",
+      "command": "",
+      "args": [],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": true,
+      "notes": "OpenRouter server tool. Returns web search results the model can cite."
+    },
+    "openrouter-web-fetch": {
+      "category": "or-server-tools",
+      "description": "Fetch and extract content from URLs. No local install. type: openrouter:web_fetch",
+      "command": "",
+      "args": [],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": true,
+      "notes": "OpenRouter server tool. Returns extracted page text."
+    },
+    "openrouter-datetime": {
+      "category": "or-server-tools",
+      "description": "Access current date and time. No local install. type: openrouter:datetime",
+      "command": "",
+      "args": [],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": true,
+      "notes": "OpenRouter server tool. Zero-cost, no external calls."
+    },
+    "openrouter-files": {
+      "category": "or-server-tools",
+      "description": "Read, write, and list workspace files via OpenRouter. No local install. type: openrouter:files",
+      "command": "",
+      "args": [],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": true,
+      "notes": "OpenRouter server tool. Scoped to permitted paths."
+    },
+    "openrouter-bash": {
+      "category": "or-server-tools",
+      "description": "Sandboxed shell execution via OpenRouter. No local install. type: openrouter:bash",
+      "command": "",
+      "args": [],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": false,
+      "notes": "OpenRouter server tool. Sandboxed environment."
+    },
+    "openrouter-image-generation": {
+      "category": "or-server-tools",
+      "description": "Generate images from text prompts. No local install. type: openrouter:image_generation",
+      "command": "",
+      "args": [],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": false,
+      "notes": "OpenRouter server tool. Uses configured image model."
+    },
+    "openrouter-search-models": {
+      "category": "or-server-tools",
+      "description": "Search the OpenRouter model catalog. No local install. type: openrouter:search_models",
+      "command": "",
+      "args": [],
+      "auto_start": false,
+      "requires_key": true,
+      "free_tier": true,
+      "notes": "OpenRouter server tool. Returns matching models with capabilities."
+    }
+  },
+  "profiles": {
+    "minimal": {
+      "description": "Zero-cost starter — auto-start servers with no keys needed + free OR server tools",
+      "servers": [
+        "filesystem",
+        "memory",
+        "sequential-thinking",
+        "context7",
+        "openrouter-datetime",
+        "openrouter-web-search",
+        "openrouter-web-fetch"
+      ]
+    },
+    "development": {
+      "description": "Full local dev — adds browser, Docker, databases, GitHub, OR subagent",
+      "servers": [
+        "filesystem",
+        "memory",
+        "sequential-thinking",
+        "context7",
+        "playwright",
+        "docker",
+        "sqlite",
+        "redis",
+        "github",
+        "serena",
+        "openrouter-datetime",
+        "openrouter-web-search",
+        "openrouter-web-fetch",
+        "openrouter-subagent",
+        "openrouter-files"
+      ]
+    },
+    "full": {
+      "description": "All servers including key-dependent + all OR server tools",
+      "servers": [
+        "filesystem",
+        "memory",
+        "sequential-thinking",
+        "context7",
+        "playwright",
+        "docker",
+        "sqlite",
+        "redis",
+        "github",
+        "brave-search",
+        "toolradar",
+        "supabase",
+        "e2b",
+        "notion",
+        "composio",
+        "postgres",
+        "figma",
+        "serena",
+        "openrouter-datetime",
+        "openrouter-web-search",
+        "openrouter-web-fetch",
+        "openrouter-subagent",
+        "openrouter-advisor",
+        "openrouter-files",
+        "openrouter-bash",
+        "openrouter-image-generation",
+        "openrouter-search-models"
+      ]
+    }
+  }
+}

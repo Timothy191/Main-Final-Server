@@ -1,0 +1,188 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Arch-Systems — Staging Docker Compose Configuration
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: arch-systems-staging
+
+services:
+
+  # ── Frontend (Next.js Portal) ────────────────────────────────────────────────
+  portal:
+    build:
+      context: .
+      dockerfile: apps/portal/Dockerfile
+      target: runner
+      args:
+        NODE_ENV: production
+    container_name: arch-portal-staging
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # Supabase configuration
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      # Database and cache
+      REDIS_URL: ${REDIS_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      # Staging settings
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+      # Monitoring
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - arch-net-staging
+
+  # ── API Backend (NestJS Fastify) ─────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: production
+    container_name: arch-api-staging
+    restart: always
+    ports:
+      - "${API_PORT:-3001}:3001"
+    environment:
+      # Supabase configuration
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      # Database and cache
+      REDIS_URL: ${REDIS_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      PORT: 3001
+      NODE_ENV: production
+      # API Config
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:80,http://192.168.0.52:3000}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+      DISABLE_RATE_LIMIT: ${DISABLE_RATE_LIMIT:-false}
+      INTERNAL_API_SECRET: ${INTERNAL_API_SECRET}
+      # AI / Ollama
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:5243}
+      SURREALDB_URL: ${SURREALDB_URL:-}
+      SURREALDB_NS: ${SURREALDB_NS:-}
+      SURREALDB_DB: ${SURREALDB_DB:-}
+      SURREALDB_USER: ${SURREALDB_USER:-}
+      SURREALDB_PASS: ${SURREALDB_PASS:-}
+      # External tools
+      NEXT_PUBLIC_FUXA_URL: ${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}
+      # Monitoring
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - arch-net-staging
+
+  # ── Control Plane (Ops-Gateway) ──────────────────────────────────────────────
+  ops-gateway:
+    build:
+      context: .
+      dockerfile: apps/ops-gateway/Dockerfile
+      target: production
+    container_name: arch-ops-gateway-staging
+    restart: always
+    ports:
+      - "${OPS_GATEWAY_PORT:-3100}:3100"
+    environment:
+      OPS_API_URL: http://api:3001/api/ops
+      OPS_SECRET: ${INTERNAL_API_SECRET}
+      REDIS_URL: ${REDIS_URL}
+      MCP_PORT: 3100
+      MCP_HOST: 0.0.0.0
+      NODE_ENV: production
+      OPENCODE_API_KEY: ${OPENCODE_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - arch-net-staging
+
+  # ── Reverse Proxy (Nginx) ───────────────────────────────────────────────────
+  nginx:
+    build:
+      context: .
+      dockerfile: devops/nginx/Dockerfile
+    container_name: arch-nginx-staging
+    restart: always
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - ./certs:/etc/nginx/ssl:ro
+      - ./.certbot-webroot:/var/www/certbot:ro
+    depends_on:
+      portal:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    networks:
+      - arch-net-staging
+
+# ── Networks ────────────────────────────────────────────────────────────────
+networks:
+  arch-net-staging:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-arch-stage

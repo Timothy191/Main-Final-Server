@@ -1,0 +1,52 @@
+/**
+ * Arch System — Focus & Accessibility
+ */
+
+/* Custom Glass Focus Indicators (WCAG 2.2 AA compliant) */
+.interactive-element:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.8),
+    0 0 0 4px var(--accent-electric-blue-subtle),
+    0 12px 24px rgba(0, 0, 0, 0.05) !important;
+  border-color: var(--accent-electric-blue-border) !important;
+}
+
+/* Apply premium focus glow globally to keyboard focusable elements for comprehensive compliance */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: none !important;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.8),
+    0 0 0 4px var(--accent-electric-blue-subtle),
+    0 12px 24px rgba(0, 0, 0, 0.05) !important;
+  border-color: var(--accent-electric-blue-border) !important;
+}
+
+/* Remove default focus for non-keyboard navigation */
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: var(--shadow-none, none) !important;
+}
+
+/* ── Screen Reader Contrast Reinforcement ── */
+/* Add white text-shadow backing to text components inside focused container cards to ensure a 4.5:1 contrast against background shifts */
+.interactive-element:focus-visible h1,
+.interactive-element:focus-visible h2,
+.interactive-element:focus-visible h3,
+.interactive-element:focus-visible h4,
+.interactive-element:focus-visible h5,
+.interactive-element:focus-visible h6,
+.interactive-element:focus-visible p,
+.interactive-element:focus-visible span,
+.interactive-element:focus-visible a,
+.interactive-element:focus-visible li {
+  text-shadow:
+    0 0 4px rgba(255, 255, 255, 0.9),
+    0 1px 1px rgba(255, 255, 255, 0.8) !important;
+}

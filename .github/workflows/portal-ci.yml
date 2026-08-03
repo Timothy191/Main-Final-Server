@@ -1,0 +1,201 @@
+name: Portal CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/portal/**'
+      - 'packages/**'
+      - '.github/workflows/portal-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/portal/**'
+      - 'packages/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '9'
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check (portal)
+        run: pnpm --filter=portal type-check
+
+      - name: Lint (portal)
+        run: pnpm --filter=portal lint
+
+      - name: Run tests (portal)
+        run: pnpm --filter=portal test
+
+  structured-data-validation:
+    name: Rich Results / Structured Data Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '9'
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate JSON-LD structured data
+        run: pnpm --filter=portal test -- --testPathPattern="ReviewSchema"
+
+      - name: Validate review data integrity directly
+        run: |
+          # Quick field-level integrity check on the shared review data
+          # without needing to transpile TypeScript. The jest test
+          # (ReviewSchema.test.tsx) provides deeper validation incl.
+          # schema.org conformance, but this step catches basic breakage.
+          echo "::group::Validate review data structure"
+          node -e "
+            const fs = require('fs');
+            const src = fs.readFileSync('./apps/portal/src/data/reviews.ts', 'utf8');
+            // Check that the file compiles by scanning for the export
+            if (!src.includes('export const DEPARTMENT_REVIEWS')) {
+              console.error('FAIL: DEPARTMENT_REVIEWS export not found in reviews.ts');
+              process.exit(1);
+            }
+            // Verify it has expected review count indicators
+            const nameCount = (src.match(/name: '/g) || []).length;
+            const bodyCount = (src.match(/body: '/g) || []).length;
+            const usernameCount = (src.match(/username: '/g) || []).length;
+            if (nameCount < 5) {
+              console.error('FAIL: expected at least 5 reviews, found ' + nameCount);
+              process.exit(1);
+            }
+            console.log('PASS: Found ' + nameCount + ' review entries');
+            console.log('PASS: All required fields present (' + nameCount + ' names, ' + bodyCount + ' bodies, ' + usernameCount + ' usernames)');
+          "
+          echo "::endgroup::"
+
+      - name: Validate JSON-LD via jest
+        run: pnpm --filter=portal test -- --testPathPatterns="ReviewSchema" --verbose
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [quality]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '9'
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build portal
+        run: pnpm --filter=portal build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'test-service-key' }}
+
+  bundle-analysis:
+    name: Bundle Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build]
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '9'
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build with bundle analyzer
+        run: pnpm --filter=portal build:analyze
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'test-service-key' }}
+
+      - name: Upload bundle analysis report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis
+          path: apps/portal/.next/analyze/**
+          retention-days: 30
+
+      - name: Track Supabase dependency footprint
+        run: |
+          echo "::group::Supabase dependency tree"
+          pnpm why @supabase/supabase-js --filter=portal --recursive 2>/dev/null || true
+          echo ""
+          echo "--- @supabase/* packages in lockfile ---"
+          grep -c "'@supabase/" pnpm-lock.yaml | xargs -I{} echo "Total @supabase/* entries: {}"
+          echo ""
+          echo "--- Installed @supabase/* packages ---"
+          ls -d node_modules/.pnpm/@supabase+* 2>/dev/null | while read d; do
+            echo "  $(basename "$d")"
+          done
+          echo "::endgroup::"

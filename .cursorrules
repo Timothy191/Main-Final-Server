@@ -1,0 +1,14 @@
+# Cursor project rules pointer
+
+**Canonical agent policy:** `AGENTS.md` (source of truth). Cursor always-on mirrors live in `.cursor/rules/`.
+
+**Shared knowledge base:** `.agents/knowledge/` (repowiki, symlinked at `.cursor/knowledge`). Read before non-trivial work; write durable learnings. See `AGENTS.md` -> Shared Knowledge Base.
+
+Do **not** replace or overwrite `AGENTS.md` with harness boilerplate.
+
+Optional harness collateral (sidecar only, not policy):
+
+- `agent-harnesses/data-intensive/` — batch/data-processing templates when explicitly relevant
+- `.cursor/rules/harness.mdc` — short pointer (`alwaysApply: false`)
+
+Stack: **pnpm 9** only. Never use npm or yarn.

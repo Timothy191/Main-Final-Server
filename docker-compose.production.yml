@@ -1,0 +1,212 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Arch-Systems — Production Docker Compose Configuration
+#
+# Full-stack production deployment with resource limits, health monitoring,
+# SSL termination via nginx, and managed services.
+#
+# Usage:
+#   docker compose -f docker-compose.production.yml --env-file .env.production up -d
+#   ./scripts/deploy-production.sh --yes
+#
+# ══════════════════════════════════════════════════════════════════════════════
+
+name: arch-systems-production
+
+services:
+  # ── Reverse Proxy (Nginx) ───────────────────────────────────────────────────
+  nginx:
+    build:
+      context: .
+      dockerfile: devops/nginx/Dockerfile
+    container_name: arch-nginx-prod
+    restart: always
+    ports:
+      - '${NGINX_HTTP_PORT:-80}:80'
+      - '${NGINX_HTTPS_PORT:-443}:443'
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      INTERNAL_API_SECRET: ${INTERNAL_API_SECRET}
+    volumes:
+      - ./certs:/etc/nginx/ssl:ro
+      - ./.certbot-webroot:/var/www/certbot:ro
+    depends_on:
+      portal:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:80/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    networks:
+      - arch-net-prod
+
+  # ── Frontend (Next.js Portal) ────────────────────────────────────────────────
+  portal:
+    build:
+      context: .
+      dockerfile: apps/portal/Dockerfile
+      target: runner
+      args:
+        NODE_ENV: production
+    container_name: arch-portal-prod
+    restart: always
+    expose:
+      - '3000'
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      REDIS_URL: ${REDIS_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+      PORT: 3000
+      HOSTNAME: '0.0.0.0'
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3000/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    networks:
+      - arch-net-prod
+
+  # ── API Backend (NestJS) ─────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: production
+    container_name: arch-api-prod
+    restart: always
+    expose:
+      - '3001'
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      REDIS_URL: ${REDIS_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      PORT: 3001
+      NODE_ENV: production
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:80}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+      DISABLE_RATE_LIMIT: ${DISABLE_RATE_LIMIT:-false}
+      INTERNAL_API_SECRET: ${INTERNAL_API_SECRET}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:3001/api/health/live',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    networks:
+      - arch-net-prod
+
+  # ── Control Plane (Ops-Gateway / MCP) ────────────────────────────────────────
+  ops-gateway:
+    build:
+      context: .
+      dockerfile: apps/ops-gateway/Dockerfile
+      target: production
+    container_name: arch-ops-gateway-prod
+    restart: always
+    expose:
+      - '3100'
+    environment:
+      OPS_API_URL: http://api:3001/api/ops
+      OPS_SECRET: ${INTERNAL_API_SECRET}
+      REDIS_URL: ${REDIS_URL}
+      MCP_PORT: 3100
+      MCP_HOST: 0.0.0.0
+      NODE_ENV: production
+      OPENCODE_API_KEY: ${OPENCODE_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3100/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      api:
+        condition: service_healthy
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    networks:
+      - arch-net-prod
+
+# ── Networks ────────────────────────────────────────────────────────────────
+networks:
+  arch-net-prod:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-arch-prod

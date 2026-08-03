@@ -1,0 +1,54 @@
+# Redis facil.io Module CI/CD Pipeline
+
+## Build & Test Workflow
+
+On push/pull to redis branch:
+- Build C module with Makefile
+- Run build tests via pytest
+- Execute functional tests with run_e2e.sh
+- Perform security audit with npm audit
+
+## Coverage Analysis
+- Run coverage reports for Redis module code
+- Generate XML report
+- Store in artifacts directory
+
+## Docker Deployment
+- Build Docker image with Redis facil.io
+- Tag with git hash
+- Push to registry (only on main branch)
+
+```yaml
+name: Redis Module CI
+
+on:
+  push:
+    paths:
+      - 'redis/**'
+  pull_request:
+    paths:
+      - 'redis/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |\n        cd redis\n        npm install\n        cd modules/redis-facil\n        make clean all\n        pytest test_*.py\n        cd ../tests\n        ./run_e2e.sh\n      - run: |\n        cd ../..\n        npm audit\n
+  audit-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |\n        pip install pytest-cov coverage\n        cd redis/modules/redis-facil\n        CC=${{ matrix.compiler }} make -j4\n        cp redis-facil.so ../..\n        cd ..\n        pytest --cov=redis_facil test/facil_*_test.py --cov-report=xml\n      - uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report\n          path: redisfacil/test-*coverage.xml
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Redis Docker Image
+        run: |\n          docker build -t redis-facil \n            -f redis/Dockerfile \
+            --build-arg MODULE_PATH=/usr/lib/redis-facil.so \
+            .\n      - name: Push to Container Registry
+        if: github.ref == 'refs/heads/main'\n        run: |\n          echo ${{ secrets.CNL_REDIS }} | docker login -u ${{ secrets.CNL_USERNAME }} --password-stdin\n          docker tag redis-facil:latest cnlai/redis-facil:${GITHUB_SHA::7}\n          docker push cnlai/redis-facil:${GITHUB_SHA::7}

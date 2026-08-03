@@ -1,0 +1,35 @@
+{
+  "standard": "https://agentskills.io/home",
+  "indexedFrom": "https://deepwiki.com/libukai/awesome-agent-skills",
+  "tools": [
+    { "tool": "Cursor", "project": ".cursor/skills/", "global": "~/.cursor/skills/" },
+    { "tool": "Claude Code", "project": ".claude/skills/", "global": "~/.claude/skills/" },
+    { "tool": "Codex", "project": ".codex/skills/", "global": "~/.codex/skills/" },
+    { "tool": "GitHub Copilot", "project": ".github/skills/", "global": "~/.copilot/skills/" },
+    { "tool": "VS Code", "project": ".github/skills/", "global": "~/.copilot/skills/" },
+    { "tool": "Amp", "project": ".agents/skills/", "global": "~/.config/agents/skills/" },
+    {
+      "tool": "Antigravity",
+      "project": ".agent/skills/",
+      "global": "~/.gemini/antigravity/skills/"
+    },
+    { "tool": "CodeBuddy", "project": ".codebuddy/skills/", "global": "~/.codebuddy/skills/" },
+    { "tool": "Droid/Factory", "project": ".factory/skills/", "global": "~/.factory/skills/" },
+    { "tool": "Gemini CLI", "project": ".gemini/skills/", "global": "~/.gemini/skills/" },
+    { "tool": "Goose", "project": ".goose/skills/", "global": "~/.config/goose/skills/" },
+    { "tool": "Kilo Code", "project": ".kilocode/skills/", "global": "~/.kilocode/skills/" },
+    { "tool": "Kimi CLI", "project": ".kimi/skills/", "global": "~/.kimi/skills" },
+    { "tool": "OpenCode", "project": ".opencode/skills/", "global": "~/.config/opencode/skills/" },
+    { "tool": "Qwen Code", "project": ".qwen/skills/", "global": "~/.qwen/skills/" },
+    { "tool": "Roo Code", "project": ".roo/skills/", "global": "~/.roo/skills/" },
+    { "tool": "Trae", "project": ".trae/skills/", "global": null },
+    { "tool": "Windsurf", "project": ".windsurf/skills/", "global": "~/.codeium/windsurf/skills/" }
+  ],
+  "thisRepo": {
+    "cursor": ".cursor/skills/",
+    "qoder": ".qoder/skills/",
+    "github": ".github/skills/",
+    "agents": ".cursor/agents/",
+    "standard": ".cursor/standards/agent-skills/STANDARD.md"
+  }
+}

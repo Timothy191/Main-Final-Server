@@ -1,0 +1,111 @@
+/**
+ * FUXA SCADA Light Theme Overrides
+ * Maps Arch-Systems macOS Sonoma design tokens to FUXA HMI layouts.
+ */
+
+:root {
+  --fuxa-bg-primary: #f5f5f7;
+  --fuxa-bg-secondary: #ffffff;
+  --fuxa-border: rgba(0, 0, 0, 0.12);
+  --fuxa-text-primary: #1d1d1f;
+  --fuxa-text-secondary: #6e6e73;
+  --fuxa-accent: #1c1c1e;
+  --fuxa-success: #10b981;
+  --fuxa-warning: #f59e0b;
+  --fuxa-danger: #ff3b30;
+}
+
+/* Base Body Styles */
+body,
+.main-container,
+#app,
+.fuxa-app,
+.main-content {
+  background-color: var(--fuxa-bg-primary) !important;
+  color: var(--fuxa-text-primary) !important;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Outfit", "Segoe UI", sans-serif !important;
+}
+
+/* Sidebars and headers - Frosted Glass effect */
+.sidebar,
+.left-sidebar,
+.right-sidebar,
+.toolbar,
+header,
+.header,
+.navbar,
+.nav-container {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-color: var(--fuxa-border) !important;
+  color: var(--fuxa-text-primary) !important;
+}
+
+/* Cards & Panel Widgets - Glass aesthetic */
+.card,
+.panel,
+.widget-container,
+.fuxa-panel {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--fuxa-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Inputs & Forms */
+input,
+select,
+textarea,
+.fuxa-input {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid var(--fuxa-border) !important;
+  border-radius: var(--radius-button) !important;
+  color: var(--fuxa-text-primary) !important;
+  padding: 6px 12px !important;
+}
+
+input:focus,
+select:focus,
+.fuxa-input:focus {
+  border-color: var(--fuxa-accent) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(28, 28, 30, 0.2) !important;
+}
+
+/* Buttons */
+button,
+.btn-primary {
+  background-color: var(--fuxa-accent) !important;
+  color: #ffffff !important;
+  border-radius: var(--radius-button) !important;
+  font-weight: 500 !important;
+  border: none !important;
+  transition: background-color 0.2s ease-in-out !important;
+}
+
+button:hover,
+.btn-primary:hover {
+  background-color: #2c2c2e !important;
+}
+
+/* Status Indicators */
+.status-active,
+.status-ok,
+.tag-ok {
+  color: var(--fuxa-success) !important;
+}
+
+.status-warning,
+.tag-warn {
+  color: var(--fuxa-warning) !important;
+}
+
+.status-error,
+.status-danger,
+.tag-error {
+  color: var(--fuxa-danger) !important;
+}

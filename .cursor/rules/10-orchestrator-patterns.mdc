@@ -1,0 +1,19 @@
+---
+description: Orchestrator-worker delegation, token-cache discipline, multi-model routing (lean always-on)
+alwaysApply: true
+---
+
+# Orchestrator-Worker (Lean)
+
+Detail (tables, mermaid, cache recipes): [`references/orchestrator-patterns-detail.md`](references/orchestrator-patterns-detail.md).
+
+## Rules
+
+1. **Orchestrator plans; workers execute.** Parent / `agency-lead` holds the goal, decomposes, validates. Do not burn flagship inference on mechanical grunt work.
+2. **Pin cheap roles.** Recon / format / idle / gap analysis → cheaper models + `effort: low` when available.
+3. **Context budget.** Workers return summaries only; keep long file dumps out of the orchestrator context.
+4. **Route by policy.** Use `.cursor/rules/04-subagent-auto-routing.mdc` — do not re-implement specialists in the parent thread.
+5. **Stable prefix first.** Never put timestamps/request IDs before system instructions or reorder the stable tool/skill prefix (breaks prompt cache).
+6. **After non-trivial work:** `sceptic` → `agent-alignment-score` → optional `skill-self-improve` / `ai-system-optimizer`.
+
+Live provider routing: `pnpm provider:route --check` · skill `provider-router`.

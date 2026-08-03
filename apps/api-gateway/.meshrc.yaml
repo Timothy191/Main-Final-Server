@@ -1,0 +1,13 @@
+sources:
+  - name: SupabaseDB
+    handler:
+      postgraphile:
+        connectionString: postgres://postgres:postgres@localhost:5432/postgres
+  - name: OpsGateway
+    handler:
+      openapi:
+        source: http://localhost:3000/openapi.json
+  - name: AgenticAPI
+    handler:
+      openapi:
+        source: http://localhost:8000/openapi.json

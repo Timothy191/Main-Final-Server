@@ -1,0 +1,3 @@
+{"event":"task_completed","teammate":"","task_id":"4","subject":"Remove 7 orphaned agent directories","description":"Remove empty directories: agy, codeep, hermes, kilo, mimo, omp-clone, qwen","timestamp":"2026-07-21T06:54:19Z"}
+{"event":"task_completed","teammate":"","task_id":"5","subject":"Remove dead kilo/agy code from ops-gateway","description":"Clean up config.ts, types.ts, eve-dispatcher.ts, mcp/tools.ts","timestamp":"2026-07-21T06:58:27Z"}
+{"event":"task_completed","teammate":"","task_id":"6","subject":"Fix stale agent references in standards docs","description":"Update .cursor/standards/lsp/STANDARD.md to remove deleted agents","timestamp":"2026-07-21T07:01:15Z"}

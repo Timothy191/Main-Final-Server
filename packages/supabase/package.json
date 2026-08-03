@@ -1,0 +1,30 @@
+{
+  "name": "@repo/supabase",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./client": "./src/client.ts",
+    "./middleware": "./src/middleware.ts",
+    "./read-replica": "./src/read-replica.ts",
+    "./service-role": "./src/service-role.ts"
+  },
+  "scripts": {
+    "supabase:start": "pnpm dlx supabase@^2.26.0 start --workdir ..",
+    "supabase:stop": "pnpm dlx supabase@^2.26.0 stop --workdir ..",
+    "supabase:status": "pnpm dlx supabase@^2.26.0 status --workdir .."
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.49.0",
+    "next": "^16.0.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22",
+    "typescript": "^5.7.0"
+  }
+}

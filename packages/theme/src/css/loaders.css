@@ -1,0 +1,217 @@
+/* From Uiverse.io by Nawsome */
+
+.loader-pl {
+  display: block;
+}
+
+.loader-pl-ring {
+  animation: loader-pl-ring-a 2s linear infinite;
+  transform-origin: center;
+}
+
+.loader-pl-ring-a {
+  stroke: var(--loader-ring-a);
+}
+
+.loader-pl-ring-b {
+  animation-name: loader-pl-ring-b;
+  stroke: var(--loader-ring-b);
+}
+
+.loader-pl-ring-c {
+  animation-name: loader-pl-ring-c;
+  stroke: var(--loader-ring-c);
+}
+
+.loader-pl-ring-d {
+  animation-name: loader-pl-ring-d;
+  stroke: var(--loader-ring-d);
+}
+
+/* Animations */
+@keyframes loader-pl-ring-a {
+  0%,
+  4% {
+    stroke-dashoffset: -330;
+    stroke-dasharray: 0 660;
+    stroke-width: 20;
+  }
+
+  12% {
+    stroke-dashoffset: -335;
+    stroke-dasharray: 60 600;
+    stroke-width: 30;
+  }
+
+  32% {
+    stroke-dashoffset: -595;
+    stroke-dasharray: 60 600;
+    stroke-width: 30;
+  }
+
+  40%,
+  54% {
+    stroke-dashoffset: -660;
+    stroke-dasharray: 0 660;
+    stroke-width: 20;
+  }
+
+  62% {
+    stroke-dashoffset: -665;
+    stroke-dasharray: 60 600;
+    stroke-width: 30;
+  }
+
+  82% {
+    stroke-dashoffset: -925;
+    stroke-dasharray: 60 600;
+    stroke-width: 30;
+  }
+
+  90%,
+  100% {
+    stroke-dashoffset: -990;
+    stroke-dasharray: 0 660;
+    stroke-width: 20;
+  }
+}
+
+@keyframes loader-pl-ring-b {
+  0%,
+  12% {
+    stroke-dashoffset: -110;
+    stroke-dasharray: 0 220;
+    stroke-width: 20;
+  }
+
+  20% {
+    stroke-dashoffset: -115;
+    stroke-dasharray: 20 200;
+    stroke-width: 30;
+  }
+
+  40% {
+    stroke-dashoffset: -195;
+    stroke-dasharray: 20 200;
+    stroke-width: 30;
+  }
+
+  48%,
+  62% {
+    stroke-dashoffset: -220;
+    stroke-dasharray: 0 220;
+    stroke-width: 20;
+  }
+
+  70% {
+    stroke-dashoffset: -225;
+    stroke-dasharray: 20 200;
+    stroke-width: 30;
+  }
+
+  90% {
+    stroke-dashoffset: -305;
+    stroke-dasharray: 20 200;
+    stroke-width: 30;
+  }
+
+  98%,
+  100% {
+    stroke-dashoffset: -330;
+    stroke-dasharray: 0 220;
+    stroke-width: 20;
+  }
+}
+
+@keyframes loader-pl-ring-c {
+  0% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 0 440;
+    stroke-width: 20;
+  }
+
+  8% {
+    stroke-dashoffset: -5;
+    stroke-dasharray: 40 400;
+    stroke-width: 30;
+  }
+
+  28% {
+    stroke-dashoffset: -175;
+    stroke-dasharray: 40 400;
+    stroke-width: 30;
+  }
+
+  36%,
+  58% {
+    stroke-dashoffset: -220;
+    stroke-dasharray: 0 440;
+    stroke-width: 20;
+  }
+
+  66% {
+    stroke-dashoffset: -225;
+    stroke-dasharray: 40 400;
+    stroke-width: 30;
+  }
+
+  86% {
+    stroke-dashoffset: -395;
+    stroke-dasharray: 40 400;
+    stroke-width: 30;
+  }
+
+  94%,
+  100% {
+    stroke-dashoffset: -440;
+    stroke-dasharray: 0 440;
+    stroke-width: 20;
+  }
+}
+
+@keyframes loader-pl-ring-d {
+  0%,
+  8% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 0 440;
+    stroke-width: 20;
+  }
+
+  16% {
+    stroke-dashoffset: -5;
+    stroke-dasharray: 40 400;
+    stroke-width: 30;
+  }
+
+  36% {
+    stroke-dashoffset: -175;
+    stroke-dasharray: 40 400;
+    stroke-width: 30;
+  }
+
+  44%,
+  50% {
+    stroke-dashoffset: -220;
+    stroke-dasharray: 0 440;
+    stroke-width: 20;
+  }
+
+  58% {
+    stroke-dashoffset: -225;
+    stroke-dasharray: 40 400;
+    stroke-width: 30;
+  }
+
+  78% {
+    stroke-dashoffset: -395;
+    stroke-dasharray: 40 400;
+    stroke-width: 30;
+  }
+
+  86%,
+  100% {
+    stroke-dashoffset: -440;
+    stroke-dasharray: 0 440;
+    stroke-width: 20;
+  }
+}

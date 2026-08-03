@@ -1,0 +1,297 @@
+@import "@repo/theme/css";
+
+/* AGENT-TRACE: Explicit layer order ensures predictable cascade — reset < base < theme < components < utilities */
+@layer reset, base, theme, components, utilities;
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme inline {
+  --animate-shine: shine var(--duration) infinite linear;
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  @keyframes shine {
+    0% {
+      background-position: 0% 0%;
+    }
+    50% {
+      background-position: 100% 100%;
+    }
+    to {
+      background-position: 0% 0%;
+    }
+  }
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes wave-drift {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes wave-drift-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-50%);
+    }
+  }
+  @keyframes solar-flare {
+    0% {
+      opacity: 0.4;
+      transform: scale(1) translate3d(0, 0, 0);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.15) translate3d(3%, 4%, 0);
+    }
+    100% {
+      opacity: 0.4;
+      transform: scale(1.05) translate3d(-3%, -2%, 0);
+    }
+  }
+
+  @keyframes aurora-shadow {
+    0%,
+    100% {
+      box-shadow:
+        0 10px 30px -10px rgba(15, 25, 45, 0.08),
+        0 0 15px rgba(210, 210, 215, 0.15);
+    }
+    50% {
+      box-shadow:
+        0 10px 33px -10px rgba(15, 25, 45, 0.15),
+        0 0 18px rgba(210, 210, 215, 0.25);
+    }
+  }
+
+  @keyframes glass-shimmer {
+    0% {
+      transform: translateX(-150%) skewX(-45deg);
+    }
+    15% {
+      transform: translateX(350%) skewX(-45deg);
+    }
+    100% {
+      transform: translateX(350%) skewX(-45deg);
+    }
+  }
+
+  @keyframes glass-shimmer-ambient {
+    0% {
+      transform: translateX(-100%) skewX(-12deg);
+    }
+    8%,
+    100% {
+      transform: translateX(200%) skewX(-12deg);
+    }
+  }
+
+  @keyframes caustic-wave {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes caustic-shadow-optimal {
+    0%,
+    100% {
+      box-shadow: 0 4px 20px -2px rgba(52, 199, 89, 0.05);
+    }
+    50% {
+      box-shadow: 0 6px 30px -2px rgba(52, 199, 89, 0.2);
+    }
+  }
+  @keyframes caustic-shadow-warning {
+    0%,
+    100% {
+      box-shadow: 0 4px 20px -2px rgba(245, 158, 11, 0.05);
+    }
+    50% {
+      box-shadow: 0 6px 30px -2px rgba(245, 158, 11, 0.2);
+    }
+  }
+  @keyframes caustic-shadow-critical {
+    0%,
+    100% {
+      box-shadow: 0 4px 20px -2px rgba(255, 59, 48, 0.05);
+    }
+    50% {
+      box-shadow: 0 6px 30px -2px rgba(255, 59, 48, 0.25);
+    }
+  }
+}
+
+@layer utilities {
+  /* ── Z-Index Matrix Utilities ── */
+  .z-background {
+    z-index: var(--z-background);
+  }
+  .z-telemetry {
+    z-index: var(--z-telemetry);
+  }
+  .z-primary-card {
+    z-index: var(--z-primary-card);
+  }
+  .z-navigation {
+    z-index: var(--z-navigation);
+  }
+  .z-overlay {
+    z-index: var(--z-overlay);
+  }
+
+  .aurora-shadow {
+    position: relative;
+  }
+  .aurora-shadow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: -1;
+    animation: aurora-shadow 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .glass-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .glass-shimmer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -100%;
+    width: 50%;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.03) 40%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.03) 60%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    animation: glass-shimmer 12s infinite;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .caustic-glow-optimal {
+    background: linear-gradient(
+      120deg,
+      rgba(52, 199, 89, 0.02) 0%,
+      rgba(52, 199, 89, 0.08) 50%,
+      rgba(52, 199, 89, 0.02) 100%
+    );
+    background-size: 200% 200%;
+    animation:
+      caustic-wave 6s ease-in-out infinite,
+      caustic-shadow-optimal 6s ease-in-out infinite;
+  }
+  .caustic-glow-warning {
+    background: linear-gradient(
+      120deg,
+      rgba(245, 158, 11, 0.03) 0%,
+      rgba(245, 158, 11, 0.12) 50%,
+      rgba(245, 158, 11, 0.03) 100%
+    );
+    background-size: 200% 200%;
+    animation:
+      caustic-wave 6s ease-in-out infinite,
+      caustic-shadow-warning 6s ease-in-out infinite;
+  }
+  .caustic-glow-critical {
+    background: linear-gradient(
+      120deg,
+      rgba(255, 59, 48, 0.04) 0%,
+      rgba(255, 59, 48, 0.18) 50%,
+      rgba(255, 59, 48, 0.04) 100%
+    );
+    background-size: 200% 200%;
+    animation:
+      caustic-wave 6s ease-in-out infinite,
+      caustic-shadow-critical 6s ease-in-out infinite;
+  }
+
+  .text-arch-blue {
+    color: var(--arch-brand-blue);
+  }
+  .bg-arch-blue {
+    background-color: var(--arch-brand-blue);
+  }
+  .border-arch-blue {
+    border-color: var(--arch-brand-blue);
+  }
+  .focus-ring-arch-blue {
+    outline: none;
+    border-color: var(--arch-brand-blue) !important;
+    box-shadow: 0 0 0 4px rgba(28, 28, 30, 0.2) !important;
+  }
+}
+
+@layer base {
+  :root {
+    --arch-brand-blue: #007aff;
+    --arch-brand-blue-hover: #0066eb;
+  }
+
+  .hide-cursor,
+  .hide-cursor * {
+    cursor: none !important;
+  }
+}
+
+@layer components {
+  /* Skip link – hidden but becomes visible on focus */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    z-index: 1000;
+    transition: top 0.3s ease;
+  }
+  .skip-link:focus,
+  .skip-link:active {
+    top: 0;
+  }
+
+  /* RevoGrid visible table grid lines overrides */
+  revo-grid .rgCell {
+    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+
+  revo-grid .rgHeaderCell {
+    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+}

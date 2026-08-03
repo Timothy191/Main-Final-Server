@@ -1,0 +1,135 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+.next
+dist
+out
+build
+*.tsbuildinfo
+
+# Turbo
+.turbo
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+.env.tools
+
+# TLS certs / private keys (never commit)
+certs/
+*.pem
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+portal.log
+api.log
+
+# Process / PID files
+*.pid
+.portal.pid
+.api.pid
+.portal.start
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea
+
+# Testing
+coverage
+.playwright
+
+# Archives / backups (do not commit)
+Archive.tar.gz
+*.tar.gz
+
+# Misc
+.vercel
+.remember
+.venv
+__pycache__
+*.pyc
+deployment-logs
+skills-lock.json
+AGENTS.local.md
+CLAUDE.local.md
+
+# Third-party agent runtime (Claude Code, claude-flow, swarm, etc.)
+.claude-flow/
+.claude/
+.claude-plugin/
+.swarm/
+.crush/
+.openclaude/
+.poolside/
+.devin/
+.junie/
+.certbot-webroot/
+.harness-worktrees/
+.codeep/
+.commandcode/
+.freebuff/
+.roo/
+.qoder/
+.windsurf/
+.codex/
+.claude-code-harness*
+.kiro/specs/
+.env.production.example
+.agents/knowledge/
+.agents/types/
+.agents/skills/
+.agents/teamwork_preview_*/
+.agents/victory_auditor/
+.agents/BRIEFING.md
+.agents/ORIGINAL_REQUEST.md
+ORIGINAL_REQUEST.md
+
+# Embedded git repos / independent projects
+agentic-system/
+python-web-scraper/
+redis/
+system-tools/
+SillyTavern-Launcher/
+
+# Orphaned/rogue files
+knowledge.md
+package-lock.json
+23810654.fxsnapshot
+Plans.md
+remove-dynamic.cjs
+.agents/.agents
+
+# Harness / agent runtime generated files
+harness.toml
+hosts.toml
+agent-harnesses/claude-code-harness/.skill-backups/
+agent-harnesses/claude-code-harness/scripts/
+agent-harnesses/claude-code-harness/skills-templates/
+hooks/
+bin/
+devops/
+.syncpackrc.json
+
+# Local-only legacy archives (do not shadow live src/app or @/features)
+apps/portal/_app_legacy_shadow/
+apps/portal/_features_legacy_shadow/
+apps/portal/src.backup/
+.aider*
+**/.codewhale/*
+!**/.codewhale/constitution.json
+.deepseek/

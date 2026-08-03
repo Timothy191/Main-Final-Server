@@ -1,0 +1,115 @@
+/**
+ * Arch Systems — Official Color Palette (v1)
+ * ==========================================
+ * Single source of truth for all brand, semantic, surface, glass, and chrome
+ * colors. Components MUST reference Tier 2 semantic tokens in variables.css
+ * or Tailwind `arch.*` / `palette.*` namespaces — never hard-code hex here.
+ *
+ * Tiers:
+ *   --palette-*     primitives (this file)
+ *   --arch* / --text-* / --bg-*   semantic aliases (variables.css)
+ *   Tailwind arch.* / palette.*   utility classes (preset.ts)
+ */
+
+:root {
+  /* ── Neutral scale (macOS Ventura light) ───────────────────────────── */
+  --palette-neutral-0: #ffffff;
+  --palette-neutral-50: #f5f5f7;
+  --palette-neutral-100: #f6f6fa;
+  --palette-neutral-200: #e8e8ed;
+  --palette-neutral-300: #d2d2d7;
+  --palette-neutral-400: #a1a1a6;
+  --palette-neutral-500: #6e6e73;
+  --palette-neutral-600: #3a3a3c;
+  --palette-neutral-900: #1d1d1f;
+  --palette-neutral-950: #1c1c1e;
+
+  /* ── Brand ─────────────────────────────────────────────────────────── */
+  --palette-brand-primary: #1c1c1e;
+  --palette-brand-primary-hover: #2c2c2e;
+  --palette-brand-on-primary: #ffffff;
+
+  /* ── Semantic status ───────────────────────────────────────────────── */
+  --palette-semantic-success: #34c759;
+  --palette-semantic-success-hover: #2db84d;
+  --palette-semantic-success-subtle: rgba(52, 199, 89, 0.1);
+  --palette-semantic-warning: #f59e0b;
+  --palette-semantic-warning-hover: #d97706;
+  --palette-semantic-warning-subtle: rgba(245, 158, 11, 0.1);
+  --palette-semantic-danger: #d22118;
+  --palette-semantic-danger-hover: #b81c15;
+  --palette-semantic-danger-subtle: rgba(210, 33, 24, 0.1);
+  --palette-semantic-info: #1c1c1e;
+  --palette-semantic-info-hover: #2c2c2e;
+  --palette-semantic-info-subtle: rgba(28, 28, 30, 0.08);
+
+  /* ── Surfaces ──────────────────────────────────────────────────────── */
+  --palette-surface-canvas: var(--palette-neutral-50);
+  --palette-surface-elevated: var(--palette-neutral-0);
+  --palette-surface-sunken: var(--palette-neutral-200);
+  --palette-surface-pressed: var(--palette-neutral-300);
+  --palette-surface-chrome: rgba(0, 0, 0, 0.016);
+  --palette-surface-chrome-medium: rgba(0, 0, 0, 0.032);
+  --palette-surface-chrome-strong: rgba(0, 0, 0, 0.049);
+  --palette-surface-vibrancy: rgba(246, 246, 250, 0.82);
+
+  /* ── Borders ───────────────────────────────────────────────────────── */
+  --palette-border-subtle: rgba(0, 0, 0, 0.08);
+  --palette-chrome-border: var(--palette-border-subtle);
+  --palette-border-default: rgba(0, 0, 0, 0.12);
+  --palette-border-emphasis: rgba(0, 0, 0, 0.2);
+  --palette-border-strong: rgba(0, 0, 0, 0.3);
+  --palette-border-glass: rgba(255, 255, 255, 0.68);
+  --palette-border-glass-soft: rgba(255, 255, 255, 0.28);
+  /* Hairline catch-light on frosted glass over dark ambient backgrounds */
+  --palette-border-glass-catch: rgba(255, 255, 255, 0.2);
+  --palette-border-focus: var(--palette-brand-primary);
+
+  /* ── Text ──────────────────────────────────────────────────────────── */
+  --palette-text-primary: var(--palette-neutral-900);
+  --palette-text-secondary: var(--palette-neutral-600);
+  --palette-text-tertiary: var(--palette-neutral-500);
+  --palette-text-muted: var(--palette-neutral-400);
+  --palette-text-inverted: var(--palette-neutral-0);
+  --palette-text-on-glass: rgba(10, 10, 20, 0.92);
+  --palette-text-on-glass-muted: rgba(10, 10, 20, 0.55);
+
+  /* ── Interactive ───────────────────────────────────────────────────── */
+  --palette-interactive-primary: var(--palette-brand-primary);
+  --palette-interactive-primary-hover: var(--palette-brand-primary-hover);
+  --palette-interactive-on-primary: var(--palette-brand-on-primary);
+  --palette-interactive-focus-ring: var(--palette-brand-primary);
+
+  /* ── Liquid Glass material ─────────────────────────────────────────── */
+  /* Tuned for the dark ambient wave video: milkier fills keep the surface
+     light-based and text readable, while stronger shadows and a brighter
+     hairline separate glass edges from the deep background.
+     Alphas stepped ~10% more transparent (second pass) so the wave reads through. */
+  --palette-glass-fill-top: rgba(255, 255, 255, 0.6);
+  --palette-glass-fill-mid: rgba(255, 255, 255, 0.4);
+  --palette-glass-fill-bottom: rgba(255, 255, 255, 0.49);
+  --palette-glass-tint: rgba(246, 246, 250, 0.55);
+  --palette-glass-surface: rgba(255, 255, 255, 0.63);
+  --palette-glass-surface-hover: rgba(255, 255, 255, 0.71);
+  --palette-glass-surface-strong: rgba(255, 255, 255, 0.77);
+  --palette-glass-backdrop: blur(28px) saturate(170%);
+  --palette-glass-specular-top: rgba(255, 255, 255, 0.9);
+  --palette-glass-specular-side: rgba(255, 255, 255, 0.45);
+  --palette-glass-contact-bottom: rgba(0, 0, 0, 0.08);
+  --palette-glass-shadow-ambient: 0 24px 60px rgba(4, 12, 24, 0.35);
+  --palette-glass-shadow-contact: 0 2px 10px rgba(4, 12, 24, 0.22);
+
+  /* ── Window chrome (traffic lights) ────────────────────────────────── */
+  --palette-chrome-red: #ff5f56;
+  --palette-chrome-yellow: #ffbd2e;
+  --palette-chrome-green: #27c93f;
+
+  /* ── Canvas / ambient background ─────────────────────────────────── */
+  --palette-canvas-from: #f4f4f7;
+  --palette-canvas-to: #e4e4e7;
+
+  /* ── Legacy overlay aliases (title bar / chrome strips) ────────────── */
+  --overlay-dim: var(--palette-surface-chrome);
+  --overlay-subtle: var(--palette-surface-chrome-medium);
+  --overlay-medium: var(--palette-surface-chrome-strong);
+}

@@ -1,0 +1,44 @@
+---
+description: Keep portal Next.js on :3000 alive after task batches; restart if down; fix-and-retry on boot errors
+alwaysApply: true
+---
+
+# Portal Dev Keepalive
+
+After every non-trivial task batch that touches `apps/portal/`, `packages/theme/`, `packages/ui/`, or other code that affects the running portal UI, **verify the portal is serving** before saying done or moving on.
+
+## Check (required)
+
+```bash
+export PATH="/home/timothy/.npm-global/bin:$PATH"
+ss -tlnp | rg ':3000' || true
+curl -s -o /dev/null -w '%{http_code}' --connect-timeout 2 http://127.0.0.1:3000/login
+```
+
+Pass = port `:3000` listening **and** HTTP status not connection-failure (`000` / empty). Prefer `2xx`/`3xx` for `/login`; `4xx` still proves the server is up.
+
+## If down → restart
+
+```bash
+export PATH="/home/timothy/.npm-global/bin:$PATH"
+cd /home/timothy/Projects/apps/portal
+PORT=3000 pnpm exec next dev --turbopack --hostname 0.0.0.0
+```
+
+- Prefer portal-only (above) for UI work; use repo-root `pnpm dev --quick` only when Docker/full stack is needed.
+- Wait for `✓ Ready` / `Local: http://localhost:3000`, then re-run the check.
+- Do **not** assume `pnpm` is on PATH — prepend `~/.npm-global/bin` when missing.
+
+## If start/runtime error → stop, fix, retry
+
+1. **Stop** — kill the failed Next process (do not leave a half-dead listener on `:3000`).
+2. **Fix** — read the terminal error; apply the minimal code/config fix (compile error, missing dep, bad import, env).
+3. **Retry** — restart with the same command; re-check `/login`.
+4. Cap at **2 fix/retry loops** per batch. If still failing, report the blocker with the exact error + last command; do not claim the portal is running.
+
+## Out of scope
+
+- Do not restart for pure docs/rules/spec-only edits with no portal runtime impact.
+- Do not force-push, skip hooks, or change git config as part of keepalive.
+- `ERR_CONNECTION_REFUSED` on `:3000` means the server is not running — fix by restart, not by changing app routes.
+- Never recreate `apps/portal/app/` beside `apps/portal/src/app/` — root `app/` shadows `src/app` and Next ignores the redesigned login. Legacy copy lives at `apps/portal/_app_legacy_shadow` if present.

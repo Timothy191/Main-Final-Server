@@ -1,0 +1,10 @@
+node_modules
+.git
+.next
+dist
+*.log
+.turbo
+coverage
+Dockerfile*
+docker-compose*
+.env*

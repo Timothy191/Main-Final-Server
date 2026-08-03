@@ -1,0 +1,626 @@
+/**
+ * Arch System — Keyframe Animations & Utility Classes
+ */
+
+/* ── Premium Background Animations ── */
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(10%, 10%) scale(1.1);
+  }
+  66% {
+    transform: translate(-5%, 15%) scale(0.9);
+  }
+}
+
+@keyframes float-delayed {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1.1);
+  }
+  33% {
+    transform: translate(-10%, -10%) scale(0.9);
+  }
+  66% {
+    transform: translate(5%, -15%) scale(1);
+  }
+}
+
+@keyframes grid-drift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px;
+  }
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+/* ── Perpetual Motion Animations ── */
+
+@keyframes perpetual-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.98);
+    opacity: 0.85;
+  }
+}
+
+@keyframes perpetual-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes glow-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(0, 212, 170, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(0, 212, 170, 0.6);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Login Background Animations ── */
+
+@keyframes ken-burns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.08) translate(-1%, -1%);
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translateX(-5%);
+  }
+  50% {
+    opacity: 0.4;
+    transform: translateX(5%);
+  }
+}
+
+@keyframes pulse-glow-bg {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.25;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ── Modern Micro-Interactions ── */
+
+@keyframes soft-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes gentle-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes liquid-bg-shift {
+  0% {
+    filter: saturate(1.05) hue-rotate(0deg);
+  }
+  50% {
+    filter: saturate(1.15) hue-rotate(4deg);
+  }
+  100% {
+    filter: saturate(1.05) hue-rotate(0deg);
+  }
+}
+
+.animate-liquid-bg {
+  animation: liquid-bg-shift 12s ease-in-out infinite;
+}
+
+/* ── Animation Utility Classes ── */
+
+.animate-float {
+  animation: float-slow 20s infinite ease-in-out;
+}
+.animate-float-slow {
+  animation: float-slow 20s infinite ease-in-out;
+}
+.animate-float-delayed {
+  animation: float-delayed 25s infinite ease-in-out;
+}
+.animate-grid-drift {
+  animation: grid-drift 10s linear infinite;
+}
+.animate-pulse-slow {
+  animation: pulse-slow 15s infinite ease-in-out;
+}
+.animate-perpetual-pulse {
+  animation: perpetual-pulse 2s ease-in-out infinite;
+}
+.animate-perpetual-float {
+  animation: perpetual-float 3s ease-in-out infinite;
+}
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+.animate-gradient-flow {
+  background-size: 200% 200%;
+  animation: gradient-flow 3s ease infinite;
+}
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out 0.5s both;
+}
+.animate-spin {
+  animation: spin 0.8s linear infinite;
+}
+
+/* Modern micro-interaction utilities */
+.animate-soft-bounce {
+  animation: soft-bounce 2s ease-in-out infinite;
+}
+.animate-gentle-pulse {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+.animate-fade-up {
+  animation: fade-up 0.4s ease-out;
+}
+
+/* Login background animations */
+.animate-ken-burns {
+  animation: ken-burns 20s ease-in-out infinite;
+}
+.animate-gradient-shift {
+  animation: gradient-shift 8s ease-in-out infinite;
+}
+.animate-pulse-glow-bg {
+  animation: pulse-glow-bg 6s ease-in-out infinite;
+}
+
+/* Subtle float for decorative elements */
+@keyframes subtle-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-subtle-float {
+  animation: subtle-float 6s ease-in-out infinite;
+}
+
+/* ── Hero Blob Entrance ──
+   Soft scale + fade for ambient background blobs.
+   Respects reduced motion via class companion.
+   ─────────────────────────────────────────────── */
+
+@keyframes blob-in {
+  from {
+    opacity: 0;
+    transform: translateZ(0) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(0) scale(1);
+  }
+}
+
+.animate-blob-in {
+  animation: blob-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-blob-in {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ── Wave Canvas Animations ──
+   Hardware-accelerated backdrop orb drift for RouteBackground.
+   All keyframes touch ONLY opacity and transform — no layout props.
+   ─────────────────────────────────────────────────────────────── */
+
+@keyframes wave-canvas-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.55;
+  }
+  35% {
+    transform: translate3d(8%, 6%, 0) scale(1.1);
+    opacity: 0.75;
+  }
+  70% {
+    transform: translate3d(-4%, 10%, 0) scale(0.92);
+    opacity: 0.5;
+  }
+}
+
+@keyframes wave-canvas-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.05);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translate3d(-6%, -8%, 0) scale(0.95);
+    opacity: 0.6;
+  }
+  80% {
+    transform: translate3d(5%, -5%, 0) scale(1.08);
+    opacity: 0.35;
+  }
+}
+
+@keyframes wave-canvas-drift-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate3d(10%, -12%, 0) scale(1.15);
+    opacity: 0.5;
+  }
+}
+
+.animate-wave-canvas-a {
+  animation: wave-canvas-drift-a 22s ease-in-out infinite;
+}
+
+.animate-wave-canvas-b {
+  animation: wave-canvas-drift-b 28s ease-in-out infinite alternate;
+}
+
+.animate-wave-canvas-c {
+  animation: wave-canvas-drift-c 18s ease-in-out infinite alternate-reverse;
+}
+
+/* ── Liquid Glass (Fluid Morphism) Keyframes ── */
+
+@keyframes liquid-swell {
+  0% {
+    border-radius: 20px;
+  }
+  50% {
+    border-radius: 24px 18px 26px 16px;
+  }
+  100% {
+    border-radius: 20px;
+  }
+}
+
+@keyframes liquid-sheen {
+  0% {
+    transform: translate3d(-100%, -100%, 0) rotate(25deg);
+  }
+  100% {
+    transform: translate3d(100%, 100%, 0) rotate(25deg);
+  }
+}
+
+@keyframes mercury-flow {
+  0%,
+  100% {
+    transform: scale(1) translate3d(0, 0, 0);
+    filter: saturate(100%);
+  }
+  50% {
+    transform: scale(1.02) translate3d(1px, -2px, 0);
+    filter: saturate(115%);
+  }
+}
+
+@keyframes status-glow-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 8px rgba(28, 28, 30, 0.2),
+      inset 0 0 4px rgba(28, 28, 30, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(28, 28, 30, 0.6),
+      inset 0 0 10px rgba(28, 28, 30, 0.3);
+  }
+}
+
+.animate-liquid-swell {
+  animation: liquid-swell 8s ease-in-out infinite;
+}
+
+.animate-liquid-sheen {
+  animation: liquid-sheen 6s cubic-bezier(0.2, 0, 0, 1) infinite;
+}
+
+.animate-mercury-flow {
+  animation: mercury-flow 12s ease-in-out infinite;
+}
+
+.animate-status-glow {
+  animation: status-glow-pulse 3s ease-in-out infinite;
+}
+
+/* ── GPU Layer Promotion & Acceleration Utilities ── */
+
+.gpu-accelerated {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}
+
+.will-change-glass {
+  will-change: transform, opacity;
+}
+
+/* ── Initial Sheen Sweep ── */
+
+@keyframes initial-sheen-sweep {
+  0% {
+    transform: translateX(-150%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+.animate-initial-sheen-sweep {
+  animation: initial-sheen-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ── Active Beacon & Sheen Sweep Keyframes (moved from glass.css) ── */
+
+@keyframes active-beacon-pulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 8px rgba(16, 185, 129, 0.3),
+      0 0 12px rgba(16, 185, 129, 0.2);
+    background-color: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.35);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 16px rgba(16, 185, 129, 0.5),
+      0 0 20px rgba(16, 185, 129, 0.35);
+    background-color: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.6);
+  }
+}
+
+@keyframes liquid-sheen-sweep-mount {
+  0% {
+    transform: translateX(-150%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(150%) skewX(-15deg);
+  }
+}
+
+@keyframes liquid-sheen-sweep-hover {
+  0% {
+    transform: translateX(-150%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(150%) skewX(-15deg);
+  }
+}
+
+/* ── OS Shell motion (keyframes + staggered entrance) ── */
+
+@keyframes os-shell-enter-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes os-shell-enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.os-shell-enter-1 {
+  animation: os-shell-enter-down var(--os-shell-enter-duration) var(--os-shell-enter-ease)
+    var(--os-shell-enter-delay-1) both;
+}
+
+.os-shell-enter-2 {
+  animation: os-shell-enter-up var(--os-shell-enter-duration) var(--os-shell-enter-ease)
+    var(--os-shell-enter-delay-2) both;
+}
+
+.os-shell-enter-3 {
+  animation: os-shell-enter-up var(--os-shell-enter-duration) var(--os-shell-enter-ease)
+    var(--os-shell-enter-delay-3) both;
+}
+
+/* ── Scroll-Driven Animations & Anchor Positioning Utilities ── */
+
+.animate-scroll-progress {
+  animation-name: grow-progress;
+  animation-duration: auto;
+  animation-timing-function: linear;
+  animation-timeline: scroll();
+}
+
+.animate-scroll-view {
+  animation-name: os-shell-enter-up;
+  animation-duration: auto;
+  animation-timing-function: ease-out;
+  animation-timeline: view();
+  animation-range: entry 10% cover 30%;
+  animation-fill-mode: both;
+}
+
+/* Anchor positioning utility helpers */
+.anchor-target {
+  anchor-name: var(--anchor-target-name, --default-anchor);
+}
+
+.anchor-popover {
+  position: absolute;
+  position-anchor: var(--anchor-target-name, --default-anchor);
+}
+
+/* ── Prefers Reduced Motion Audited Overrides ── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll-progress,
+  .animate-scroll-view,
+  .animate-window-open,
+  .animate-fade-up,
+  .animate-initial-sheen-sweep,
+  .animate-soft-bounce,
+  .animate-gentle-pulse,
+  .animate-slide-in-right,
+  .animate-ken-burns,
+  .animate-gradient-shift,
+  .animate-marquee,
+  .animate-marquee-vertical,
+  .animate-wave-canvas-a,
+  .animate-wave-canvas-b,
+  .animate-wave-canvas-c {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .os-shell-enter-1,
+  .os-shell-enter-2,
+  .os-shell-enter-3 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

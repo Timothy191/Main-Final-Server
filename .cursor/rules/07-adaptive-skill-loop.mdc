@@ -1,0 +1,29 @@
+---
+description: Permanent adaptive skill loop — progressive disclosure + Hermes distill/patch
+alwaysApply: true
+---
+
+# Adaptive Skill Loop (Permanent)
+
+Clone of Hermes observe→distill→reuse→refine for Arch Systems. Canonical skill: `.cursor/skills/skill-self-improve/`.
+
+## Always
+
+1. **Progressive disclosure** — treat skill catalogs as Tier-1 (name+description); load full `SKILL.md` only when the task matches; load scripts/refs only when needed.
+2. **Patch-first** — when improving a procedure, patch an existing skill before creating a new one.
+3. **No policy fork** — never invent or soften `AGENTS.md`.
+
+## After non-trivial work
+
+1. Emit extended Alignment block (`02-agent-scoring.mdc`).
+2. If Adaptive next is `distill` or `patch`, or criteria match (3+ similar successes, 5+ tool calls, error recovery, user correction, repeatable Alignment FAIL) → run **`skill-self-improve`**.
+3. Validate with `pnpm ai check` when skills change.
+
+## Token honesty
+
+Report Tokens saved using the progressive-disclosure heuristic in `.cursor/skills/agent-alignment-score/references/extended-metrics.md`.
+
+## Out of scope
+
+- Vendoring Hermes runtime or DSPy+GEPA into this monorepo
+- Auto-committing secrets into skills

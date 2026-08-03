@@ -1,0 +1,38 @@
+/**
+ * Arch System — Theme Transitions
+ */
+
+/* Smooth theme transitions when toggling */
+.theme-transitioning {
+  --theme-transition-duration: 300ms;
+}
+
+.theme-transitioning,
+.theme-transitioning * {
+  transition:
+    background-color var(--theme-transition-duration) ease,
+    border-color var(--theme-transition-duration) ease,
+    color var(--theme-transition-duration) ease,
+    fill var(--theme-transition-duration) ease,
+    stroke var(--theme-transition-duration) ease,
+    opacity var(--theme-transition-duration) ease !important;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .theme-transitioning,
+  .theme-transitioning * {
+    --theme-transition-duration: 0ms !important;
+  }
+
+  .animate-float-slow,
+  .animate-float-delayed,
+  .animate-grid-drift,
+  .animate-pulse-slow,
+  .animate-perpetual-pulse,
+  .animate-perpetual-float,
+  .animate-shimmer,
+  .animate-gradient-flow {
+    animation: none !important;
+  }
+}

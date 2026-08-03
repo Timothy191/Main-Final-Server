@@ -1,0 +1,16 @@
+.agentic-tools-mcp/checksums.json
+.agentic-tools-mcp/claude/CLAUDE.md
+.agentic-tools-mcp/repowise-workspace.yaml
+.agentic-tools-mcp/repowise-workspace/system_graph.json
+.agentic-tools-mcp/repowise/state.json
+apps/ops-gateway/.claude/hooks/state/acc-session.json
+apps/ops-gateway/.claude/hooks/state/acc-turn-ses_0c36c8624ffeFgBW5RUfyRFAOw.json
+apps/ops-gateway/.claude/hooks/state/acc-turn-ses_0c3905173ffe3aLnribs7GIKXn.json
+apps/ops-gateway/.claude/hooks/state/acc-turn-ses_0c3925543ffe3bLkgufUB6c1lA.json
+apps/ops-gateway/.claude/hooks/state/acc-turn-ses_0c394a942ffejZZnzQA8vHZzO1.json
+apps/ops-gateway/.claude/hooks/state/acc-turn-ses_0c394a948ffe2SeiVqkJ0alc0J.json
+apps/ops-gateway/.claude/hooks/state/acc-turn-ses_0c394a953ffeLplImYyvpd9FtX.json
+apps/ops-gateway/.claude/hooks/state/hosts-sync.fingerprint
+apps/ops-gateway/.claude/hooks/state/turn-baseline-ses_0c3905173ffe3aLnribs7GIKXn.txt
+apps/ops-gateway/.claude/hooks/state/turn-baseline-ses_0c3925543ffe3bLkgufUB6c1lA.txt
+apps/ops-gateway/acc.db

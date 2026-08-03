@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Arch Systems - Live Architecture Monitor</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #0b0c10;
+        color: #c5c6c7;
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100vw;
+      }
+      #info {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 15px 25px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+      }
+      h1 {
+        margin: 0 0 10px 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: #ffffff;
+      }
+      .legend {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 0.9rem;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        box-shadow: 0 0 8px currentColor;
+      }
+      #canvas-container {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="info">
+      <h1>System Architecture Live Monitor</h1>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="dot" style="color: #ffeb3b; background-color: #ffeb3b"></div>
+          Frontend (Portal UI)
+        </div>
+        <div class="legend-item">
+          <div class="dot" style="color: #2196f3; background-color: #2196f3"></div>
+          Backend (Ops Gateway)
+        </div>
+        <div class="legend-item">
+          <div class="dot" style="color: #4caf50; background-color: #4caf50"></div>
+          Cache Mesh (Redis)
+        </div>
+        <div class="legend-item">
+          <div class="dot" style="color: #f44336; background-color: #f44336"></div>
+          Database (Supabase)
+        </div>
+      </div>
+    </div>
+    <div id="canvas-container"></div>
+
+    <script type="module">
+      import * as THREE from 'https://unpkg.com/three@0.128.0/build/three.module.js'
+      import { OrbitControls } from 'https://unpkg.com/three@0.128.0/examples/jsm/controls/OrbitControls.js'
+
+      // Setup scene, camera, and renderer
+      const scene = new THREE.Scene()
+      scene.fog = new THREE.FogExp2(0x0b0c10, 0.002)
+
+      const camera = new THREE.PerspectiveCamera(
+        60,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      )
+      camera.position.z = 200
+      camera.position.y = 50
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+      renderer.setSize(window.innerWidth, window.innerHeight)
+      renderer.setPixelRatio(window.devicePixelRatio)
+      document.getElementById('canvas-container').appendChild(renderer.domElement)
+
+      const controls = new OrbitControls(camera, renderer.domElement)
+      controls.enableDamping = true
+      controls.dampingFactor = 0.05
+      controls.autoRotate = true
+      controls.autoRotateSpeed = 1.0
+
+      // Groups for different layers
+      const frontendGroup = new THREE.Group()
+      const backendGroup = new THREE.Group()
+      const cacheGroup = new THREE.Group()
+      const dbGroup = new THREE.Group()
+
+      scene.add(frontendGroup)
+      scene.add(backendGroup)
+      scene.add(cacheGroup)
+      scene.add(dbGroup)
+
+      const nodes = []
+
+      // Create nodes helper
+      function createNodes(group, count, radius, yOffset, colorHex) {
+        const geometry = new THREE.SphereGeometry(2.5, 16, 16)
+        const material = new THREE.MeshBasicMaterial({
+          color: colorHex,
+          transparent: true,
+          opacity: 0.9,
+        })
+
+        const layerNodes = []
+
+        for (let i = 0; i < count; i++) {
+          const mesh = new THREE.Mesh(geometry, material)
+
+          // Distribute in a spherical/cylindrical shell
+          const theta = Math.random() * Math.PI * 2
+          const r = radius * (0.8 + Math.random() * 0.4)
+
+          mesh.position.x = Math.cos(theta) * r
+          mesh.position.y = yOffset + (Math.random() - 0.5) * 30
+          mesh.position.z = Math.sin(theta) * r
+
+          group.add(mesh)
+          layerNodes.push(mesh)
+          nodes.push({ mesh, group: group.uuid })
+
+          // Add glow
+          const glowGeo = new THREE.SphereGeometry(4, 16, 16)
+          const glowMat = new THREE.MeshBasicMaterial({
+            color: colorHex,
+            transparent: true,
+            opacity: 0.2,
+            blending: THREE.AdditiveBlending,
+          })
+          const glowMesh = new THREE.Mesh(glowGeo, glowMat)
+          mesh.add(glowMesh)
+        }
+
+        return layerNodes
+      }
+
+      // Colors
+      const COLOR_FRONTEND = 0xffeb3b // Yellow
+      const COLOR_BACKEND = 0x2196f3 // Blue
+      const COLOR_CACHE = 0x4caf50 // Green
+      const COLOR_DB = 0xf44336 // Red
+
+      // Generate layers
+      const frontendNodes = createNodes(frontendGroup, 40, 80, 60, COLOR_FRONTEND)
+      const backendNodes = createNodes(backendGroup, 60, 50, 20, COLOR_BACKEND)
+      const cacheNodes = createNodes(cacheGroup, 30, 40, -20, COLOR_CACHE)
+      const dbNodes = createNodes(dbGroup, 20, 20, -60, COLOR_DB)
+
+      // Create connections (lines) between layers
+      const lineMaterial = new THREE.LineBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.1,
+        blending: THREE.AdditiveBlending,
+      })
+
+      function connectLayers(layerA, layerB, connectionProbability = 0.3) {
+        const geometry = new THREE.BufferGeometry()
+        const positions = []
+
+        layerA.forEach((nodeA) => {
+          layerB.forEach((nodeB) => {
+            if (Math.random() < connectionProbability) {
+              positions.push(
+                nodeA.position.x,
+                nodeA.position.y,
+                nodeA.position.z,
+                nodeB.position.x,
+                nodeB.position.y,
+                nodeB.position.z
+              )
+            }
+          })
+        })
+
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+        const lines = new THREE.LineSegments(geometry, lineMaterial)
+        scene.add(lines)
+        return lines
+      }
+
+      // Connect them representing data flow
+      const lines1 = connectLayers(frontendNodes, backendNodes, 0.08)
+      const lines2 = connectLayers(backendNodes, cacheNodes, 0.15)
+      const lines3 = connectLayers(backendNodes, dbNodes, 0.2)
+      const lines4 = connectLayers(cacheNodes, dbNodes, 0.1)
+
+      // Data packets (particles traveling along lines)
+      const particleGeometry = new THREE.BufferGeometry()
+      const particleCount = 150
+      const particlePositions = new Float32Array(particleCount * 3)
+
+      // Store source and target for each particle
+      const particlesData = []
+
+      for (let i = 0; i < particleCount; i++) {
+        // Pick random nodes to travel between (e.g., Frontend <-> Backend)
+        const allNodes = [...frontendNodes, ...backendNodes, ...cacheNodes, ...dbNodes]
+        const sourceNode = allNodes[Math.floor(Math.random() * allNodes.length)]
+        const targetNode = allNodes[Math.floor(Math.random() * allNodes.length)]
+
+        particlePositions[i * 3] = sourceNode.position.x
+        particlePositions[i * 3 + 1] = sourceNode.position.y
+        particlePositions[i * 3 + 2] = sourceNode.position.z
+
+        particlesData.push({
+          source: sourceNode.position,
+          target: targetNode.position,
+          progress: Math.random(),
+          speed: 0.005 + Math.random() * 0.01,
+        })
+      }
+
+      particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3))
+      const particleMaterial = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 3,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending,
+      })
+      const particleSystem = new THREE.Points(particleGeometry, particleMaterial)
+      scene.add(particleSystem)
+
+      // Animation Loop
+      function animate() {
+        requestAnimationFrame(animate)
+
+        // Rotate groups slightly
+        frontendGroup.rotation.y += 0.001
+        backendGroup.rotation.y -= 0.0015
+        cacheGroup.rotation.y += 0.002
+        dbGroup.rotation.y -= 0.001
+
+        // Move data particles
+        const positions = particleSystem.geometry.attributes.position.array
+        for (let i = 0; i < particleCount; i++) {
+          const data = particlesData[i]
+          data.progress += data.speed
+
+          if (data.progress >= 1) {
+            data.progress = 0
+            // Pick new target
+            const allNodes = [...frontendNodes, ...backendNodes, ...cacheNodes, ...dbNodes]
+            data.source = data.target
+            data.target = allNodes[Math.floor(Math.random() * allNodes.length)].position
+          }
+
+          positions[i * 3] = data.source.x + (data.target.x - data.source.x) * data.progress
+          positions[i * 3 + 1] = data.source.y + (data.target.y - data.source.y) * data.progress
+          positions[i * 3 + 2] = data.source.z + (data.target.z - data.source.z) * data.progress
+        }
+        particleSystem.geometry.attributes.position.needsUpdate = true
+
+        controls.update()
+        renderer.render(scene, camera)
+      }
+
+      animate()
+
+      // Handle Resize
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight
+        camera.updateProjectionMatrix()
+        renderer.setSize(window.innerWidth, window.innerHeight)
+      })
+    </script>
+  </body>
+</html>

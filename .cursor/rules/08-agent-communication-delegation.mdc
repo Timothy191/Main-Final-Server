@@ -1,0 +1,33 @@
+---
+description: Rules for communication and delegation between agents and subagents, including context, attachments, and images
+alwaysApply: true
+---
+
+# Agent Communication & Delegation Protocol
+
+When agents or subagents communicate, delegate tasks, or route queries, they MUST adhere to this strict context sharing and asset handling contract.
+
+## Rules
+
+### 1. Context & Prompts Sharing
+* **Rule:** Every delegation call MUST explicitly pass the target agent's system prompt parameters and active reference files.
+* **Why:** Subagents start with blank memories. Passing references ensures they execute with full context.
+
+### 2. Prior Agent Calls
+* **Rule:** Document and chain previous agent call outcomes, JSON payloads, or state transitions in the communication payload.
+
+### 3. Attachment & Image Handling
+* **Rule:** If a communication or delegation requires an image (e.g. layout screenshots, rendering diffs):
+  1. Download the image into a temp directory (e.g. `/tmp/attachments/` or `apps/portal/public/temp/`).
+  2. Provide the absolute file path as an attachment or parameter.
+  3. NEVER send raw base64 or inline image URLs in plain text communication blocks.
+
+## Example
+
+```bash
+# Bad: Delegating to aider without references
+pnpm agent:delegate aider "fix imports in route.ts"
+
+# Good: Delegating with system context and attachment details
+pnpm agent:delegate aider "System Prompt: Refactor rule. Reference: .cursor/standards/lsp/STANDARD.md. Attachment: /tmp/attachments/screen_diff.png"
+```

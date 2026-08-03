@@ -1,0 +1,39 @@
+{
+  "runId": "wf_fa4a7cb4-80e",
+  "workflowName": "deep-research",
+  "scriptPath": "/home/timothy/Projects/packages/.qoder/sessions/a4e46158-01d1-404c-9515-cc5b43d8fb70/workflows/scripts/deep-research-wf_fa4a7cb4-80e.js",
+  "source": "built-in",
+  "args": "Compare this monorepo system against real-world production-grade web applications. The system is a Next.js 16 + TypeScript 5.7 strict monorepo (pnpm + Turborepo) with Supabase (auth, DB, storage), Redis caching, Inngest background jobs, and a light-only macOS-inspired UI. Key differentiators: (1) Multi-agent AI orchestration across Cursor, Claude Code, Qoder CLI, and GitHub Copilot — with shared AGENTS.md policy, alignment scoring (0-100), spec-driven workflow (requirements → design → tasks), and background AI maintenance. (2) Strict monorepo boundaries: pure framework-agnostic packages (@repo/*), single deployable Next.js app, enforced server/client boundaries. (3) Quality gates: ESLint --max-warnings 0, strict TypeScript, Jest with coverage thresholds, Prettier, Husky + commitlint. (4) Security-first: Zod validation everywhere, parameterized queries, CSP headers, rate limiting, no service-role key exposure. (5) AI surfaces synced across 4 agent tools with deduplication and drift detection. Research: What are real-world production systems (Vercel, Linear, Supabase's own apps, Stripe Dashboard, etc.) doing in terms of monorepo structure, AI-assisted development workflows, quality gates, and developer experience? What is this system doing better than most? What is it missing that production systems typically have (e.g., E2E testing, observability, feature flags, CI/CD pipeline sophistication, performance budgets, error tracking, A/B testing infrastructure, deployment strategies, monitoring/alerting, documentation systems)? Provide a detailed comparison with specific gaps and strengths.",
+  "meta": {
+    "name": "deep-research",
+    "description": "Deep research harness - fan-out web searches, fetch sources, adversarially verify claims, synthesize a cited report.",
+    "whenToUse": "When the user wants a deep, multi-source, fact-checked research report on any topic. Before invoking, check whether the question is specific enough to research directly; if underspecified, ask 2-3 clarifying questions, then pass the refined question as args.",
+    "phases": [
+      {
+        "title": "Scope",
+        "detail": "Decompose question from args into 5 search angles"
+      },
+      {
+        "title": "Search",
+        "detail": "Run 5 parallel WebSearch agents, one per angle"
+      },
+      {
+        "title": "Fetch",
+        "detail": "Deduplicate URLs, fetch the top 15 sources, and extract falsifiable claims"
+      },
+      {
+        "title": "Verify",
+        "detail": "Use 3-vote adversarial verification per claim; 2 refutations reject a claim"
+      },
+      {
+        "title": "Synthesize",
+        "detail": "Merge findings, rank confidence, cite sources"
+      }
+    ]
+  },
+  "createdAt": "2026-07-19T04:42:35.111Z",
+  "updatedAt": "2026-07-19T05:10:05.280Z",
+  "status": "killed",
+  "outputPath": "/home/timothy/Projects/packages/.qoder/sessions/a4e46158-01d1-404c-9515-cc5b43d8fb70/workflows/runs/wf_fa4a7cb4-80e/output.json",
+  "agents": []
+}

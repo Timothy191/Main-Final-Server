@@ -1,0 +1,21 @@
+{
+  "runId": "wf_1d72358d-77d",
+  "taskId": "wf-1d72358d-77d",
+  "workflowName": "deep-research",
+  "status": "completed",
+  "result": {
+    "error": "No research question provided. Pass it as args: Workflow({ name: \"deep-research\", args: \"<question>\" })."
+  },
+  "logs": [],
+  "failures": [],
+  "agentCount": 0,
+  "totalToolCalls": 0,
+  "durationMs": 3,
+  "usage": {
+    "agents": 0,
+    "toolCalls": 0,
+    "durationMs": 3
+  },
+  "transcriptDir": "/home/timothy/Projects/packages/.qoder/sessions/a4e46158-01d1-404c-9515-cc5b43d8fb70/workflows/runs/wf_1d72358d-77d",
+  "scriptPath": "/home/timothy/Projects/packages/.qoder/sessions/a4e46158-01d1-404c-9515-cc5b43d8fb70/workflows/scripts/deep-research-wf_1d72358d-77d.js"
+}

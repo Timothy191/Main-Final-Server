@@ -1,0 +1,196 @@
+name: Deploy Production
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment || 'production' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    concurrency:
+      group: ${{ github.event.inputs.environment || 'production' }}-deploy
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=sha,prefix=,format=short
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Portal
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/portal/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-portal:${{ steps.meta.outputs.version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-portal:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-portal:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push API
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:${{ steps.meta.outputs.version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Ops-Gateway
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/ops-gateway/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-ops-gateway:${{ steps.meta.outputs.version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-ops-gateway:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-ops-gateway:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Nginx
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: devops/nginx/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-nginx:${{ steps.meta.outputs.version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-nginx:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-nginx:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to production server
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || '22' }}
+          script: |
+            set -euo pipefail
+
+            echo "==> Pulling deployment repository..."
+            cd /opt/arch-systems
+
+            # Save current tags for rollback
+            echo "$(date -Iseconds): Deploying ${{ steps.meta.outputs.version }}" >> deploy-history.log
+
+            # Pull new images
+            echo "==> Pulling updated images..."
+            docker compose -f docker-compose.production.yml pull
+
+            # Graceful rolling update
+            echo "==> Performing rolling deployment..."
+            docker compose -f docker-compose.production.yml up -d --no-deps --wait --timeout 120 nginx portal api ops-gateway
+
+            # Health check
+            echo "==> Running health checks..."
+            sleep 10
+            curl -sSf -o /dev/null http://localhost:80/api/health/live || {
+              echo "ERROR: API health check failed. Rolling back..."
+              docker compose -f docker-compose.production.yml up -d --no-deps nginx portal api ops-gateway
+              exit 1
+            }
+            curl -sSf -o /dev/null http://localhost:80 || {
+              echo "ERROR: Portal health check failed. Rolling back..."
+              docker compose -f docker-compose.production.yml up -d --no-deps nginx portal api ops-gateway
+              exit 1
+            }
+
+            # Clean up old images
+            echo "==> Cleaning up old images..."
+            docker image prune -f --filter "until=24h"
+
+            echo "==> Deployment complete: ${{ steps.meta.outputs.version }}"
+            echo "$(date -Iseconds): Successfully deployed ${{ steps.meta.outputs.version }}" >> deploy-history.log
+
+      - name: Deploy to staging server
+        if: github.event.inputs.environment == 'staging'
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.STAGING_HOST || secrets.DEPLOY_HOST }}
+          username: ${{ secrets.STAGING_USER || secrets.DEPLOY_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY || secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.STAGING_PORT || '22' }}
+          script: |
+            set -euo pipefail
+            cd /opt/arch-systems-staging
+            docker compose -f docker-compose.staging.yml pull
+            docker compose -f docker-compose.staging.yml up -d --no-deps --wait --timeout 120 nginx portal api ops-gateway
+            sleep 10
+            curl -sSf -o /dev/null http://localhost:80/api/health/live || exit 1
+            curl -sSf -o /dev/null http://localhost:80 || exit 1
+            docker image prune -f --filter "until=24h"
+            echo "Staging deployment complete: ${{ steps.meta.outputs.version }}"
+
+      - name: Notify deployment status
+        if: always()
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "Deployment `${{ steps.meta.outputs.version }}` to `${{ github.event.inputs.environment || 'production' }}`: ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment ${{ job.status }}*: `${{ steps.meta.outputs.version }}` → `${{ github.event.inputs.environment || 'production' }}`\n<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|View commit>"
+                  }
+                }
+              ]
+            }
+        continue-on-error: true

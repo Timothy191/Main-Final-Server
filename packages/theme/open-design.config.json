@@ -1,0 +1,14 @@
+{
+  "project": "arch-systems-theme",
+  "tokens": {
+    "source": "figma",
+    "output": "src/css/variables.css",
+    "format": "css-variables",
+    "colorSpace": "oklch"
+  },
+  "sync": {
+    "autoPrefix": "theme-",
+    "includeTypography": true,
+    "includeSpacing": true
+  }
+}

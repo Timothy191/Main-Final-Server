@@ -1,0 +1,12 @@
+{
+  "extends": "@repo/typescript-config/react-library.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@repo/theme/*": ["./src/*"]
+    },
+    "types": ["react"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "src/tokens/generated-sd.ts"]
+}

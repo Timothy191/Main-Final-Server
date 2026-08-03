@@ -1,0 +1,164 @@
+/**
+ * Do not edit directly, this file was auto-generated.
+ */
+
+:root {
+  --arch0: #ffffff;
+  --arch1: #ffffff;
+  --arch2: #e8e8ed;
+  --arch3: #d2d2d7;
+  --arch4: rgba(0, 0, 0, 0.06);
+  --arch5: rgba(0, 0, 0, 0.12);
+  --arch6: rgba(0, 0, 0, 0.2);
+  --arch7: rgba(0, 0, 0, 0.3);
+  --arch8: #a1a1a6;
+  --arch9: #6e6e73;
+  --arch10: #3a3a3c;
+  --arch11: #1d1d1f;
+  --arch12: #d22118;
+  --arch13: #1c1c1e;
+  --arch14: #34c759;
+  --arch15: #1c1c1e;
+  --mac-red: #ff5f56;
+  --mac-yellow: #ffbd2e;
+  --mac-green: #27c93f;
+  --mac-menu-bar-height: 28px;
+  --border: 240 6% 87%;
+  --accent-red: #d22118;
+  --accent-alert: #d22118;
+  --success: #34c759;
+  --success-foreground: 0 0% 100%;
+  --warning: #1c1c1e;
+  --warning-foreground: 0 0% 100%;
+  --danger: #d22118;
+  --danger-foreground: 0 0% 100%;
+  --info: #1c1c1e;
+  --info-foreground: 0 0% 100%;
+  --glass-surface: rgba(255, 255, 255, 0.7);
+  --glass-surface-hover: rgba(255, 255, 255, 0.85);
+  --glass-surface-strong: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-border-top: rgba(255, 255, 255, 0.25);
+  --glass-border-gradient: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.3)
+  );
+  --glass-text: rgba(10, 10, 20, 0.92);
+  --glass-text-muted: rgba(10, 10, 20, 0.55);
+  --glass-vibrancy: rgba(246, 246, 250, 0.82);
+  --glass-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+  --text-on-glass: rgba(10, 10, 20, 0.92);
+  --text-on-glass-muted: rgba(10, 10, 20, 0.55);
+  --vibrancy-surface: rgba(246, 246, 250, 0.82);
+  --vibrancy-border: rgba(0, 0, 0, 0.06);
+  --overlay-dim: rgba(0, 0, 0, 0.016);
+  --overlay-subtle: rgba(0, 0, 0, 0.04);
+  --overlay-medium: rgba(0, 0, 0, 0.06);
+  --background: 240 5% 96%;
+  --foreground: 240 6% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 6% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 6% 10%;
+  --primary: 240 6% 10%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 5% 91%;
+  --secondary-foreground: 240 6% 10%;
+  --muted: 240 5% 91%;
+  --muted-foreground: 240 3% 44%;
+  --accent: 240 5% 91%;
+  --accent-foreground: 240 6% 10%;
+  --destructive: 3 78% 46%;
+  --destructive-foreground: 0 0% 100%;
+  --input: 240 5% 91%;
+  --ring: 240 6% 10%;
+  --radius: 0.75rem;
+  --chart-1: 240 6% 10%;
+  --chart-2: 142 71% 45%;
+  --chart-3: 240 5% 45%;
+  --chart-4: 3 78% 46%;
+  --chart-5: 270 60% 55%;
+  --tremor-brand-faint: 240 5% 96%;
+  --tremor-brand-muted: 240 5% 90%;
+  --tremor-brand-subtle: 240 5% 65%;
+  --tremor-brand-default: 240 6% 10%;
+  --tremor-brand-emphasis: 0 0% 0%;
+  --tremor-brand-inverted: 0 0% 100%;
+  --tremor-background-muted: 240 5% 96%;
+  --tremor-background-subtle: 240 5% 92%;
+  --tremor-background-default: 0 0% 100%;
+  --tremor-background-emphasis: 240 6% 10%;
+  --tremor-border-default: 240 6% 87%;
+  --tremor-ring-default: 240 6% 10%;
+  --tremor-content-subtle: 240 3% 63%;
+  --tremor-content-default: 240 3% 44%;
+  --tremor-content-emphasis: 240 6% 23%;
+  --tremor-content-strong: 240 6% 10%;
+  --tremor-content-inverted: 0 0% 100%;
+  --shadow-card:
+    0 1px 2px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.03), 0 12px 32px rgba(0, 0, 0, 0.03),
+    0 20px 48px rgba(0, 0, 0, 0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
+  --shadow-card-hover:
+    0 2px 4px rgba(0, 0, 0, 0.02), 0 6px 16px rgba(0, 0, 0, 0.04), 0 16px 40px rgba(0, 0, 0, 0.04),
+    0 28px 64px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
+  --shadow-elevated:
+    0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 20px rgba(0, 0, 0, 0.03), 0 20px 48px rgba(0, 0, 0, 0.03),
+    0 32px 72px rgba(0, 0, 0, 0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
+  --shadow-glow-blue: 0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
+  --shadow-glow-primary: 0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
+  --shadow-glow-electric: 0 0 24px rgba(28, 28, 30, 0.28), 0 0 80px rgba(28, 28, 30, 0.1);
+  --shadow-window:
+    0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.03), 0 24px 56px rgba(0, 0, 0, 0.04),
+    0 40px 96px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
+  --shadow-diffusion-sm: 0 2px 4px -1px rgba(0, 0, 0, 0.04), 0 8px 12px -4px rgba(0, 0, 0, 0.03);
+  --shadow-diffusion-md: 0 3px 5px -1px rgba(0, 0, 0, 0.04), 0 14px 18px -5px rgba(0, 0, 0, 0.03);
+  --shadow-diffusion-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03);
+  --shadow-diffusion-xl: 0 4px 8px -2px rgba(0, 0, 0, 0.05), 0 28px 40px -8px rgba(0, 0, 0, 0.04);
+  --refraction-inner-border: inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  --refraction-inner-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.02);
+  --refraction-edge-light: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  --wave-intensity: 0.2;
+  --wave-speed-mult: 0.5;
+  --wave-ampl-scale: 0.4;
+  --wave-opacity: 0.25;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-card: 20px;
+  --radius-button: 9999px;
+  --radius-full: 9999px;
+  --motion-duration-instant: 0ms;
+  --motion-duration-fast: 150ms;
+  --motion-duration-normal: 250ms;
+  --motion-duration-slow: 400ms;
+  --motion-duration-emphasis: 600ms;
+  --motion-easing-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --motion-easing-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --motion-easing-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --motion-easing-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --theme-transition-duration: 0ms;
+  --bg-primary: var(--arch0);
+  --bg-secondary: var(--arch1);
+  --bg-tertiary: var(--arch2);
+  --border-subtle: var(--arch4);
+  --border-default: var(--arch5);
+  --border-emphasis: var(--arch6);
+  --text-muted: var(--arch8);
+  --text-secondary: var(--arch9);
+  --text-body: var(--arch10);
+  --text-primary: var(--arch10);
+  --text-heading: var(--arch11);
+  --accent-charcoal: var(--arch13);
+  --accent-blue: var(--arch13);
+  --accent-green: var(--arch14);
+  --accent-cyan: var(--arch15);
+  --accent-emerald: var(--arch14);
+  --accent-indigo: var(--arch15);
+  --accent-violet: var(--arch15);
+}

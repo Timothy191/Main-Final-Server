@@ -1,0 +1,88 @@
+---
+description: Enforce Anthropic/agentskills.io layout for skills, agents, hooks, and Claude Code surfaces
+alwaysApply: true
+---
+
+# AI Surface Layout (Mandatory)
+
+All skills, agents, hooks, and Claude Code mirrors **must** follow project layout standards. `AGENTS.md` wins on policy; this rule wins on **structure**.
+
+## Canonical standards
+
+| Surface | Standard | Max entry size |
+| ------- | -------- | -------------- |
+| **Skills** | `.cursor/standards/agent-skills/STANDARD.md` + [agentskills.io](https://agentskills.io/home) | `SKILL.md` ≤ **80 lines** |
+| **Agents** | `.cursor/standards/agent-layout/STANDARD.md` | entry `.md` ≤ **65 lines** |
+| **Claude Code** | `.cursor/standards/claude-code/STANDARD.md` | lean `CLAUDE.md`; detail in `rules/` |
+| **Hooks** | `.cursor/hooks.json` + `.cursor/hooks/` | one concern per hook script |
+| **Knowledge base** | `.agents/knowledge/` (repowiki) + root `AGENTS.md` | entries lean; detail in subfolders |
+
+## Required folder layout
+
+### Skills (`.cursor/skills/<name>/`, `.qoder/skills/`, `.github/skills/`)
+
+```
+<skill-name>/
+  SKILL.md          # YAML frontmatter: name, description (trigger terms)
+  scripts/          # optional — subprocess helpers
+  references/       # detailed docs — load on demand
+  assets/           # templates, static outputs
+```
+
+### Agents (`.cursor/agents/`)
+
+```
+<agent-name>.md              # ENTRY — frontmatter + lean body (Cursor discovery)
+<agent-name>/
+  references/                # workflow, checklists, domain detail
+  scripts/                   # optional
+  assets/                    # REPORT-TEMPLATE.md etc.
+```
+
+**Never** nest entry files in subfolders — Cursor loads flat `.cursor/agents/<name>.md` only.
+
+### Shared knowledge base (`.agents/knowledge/`)
+
+```
+.agents/knowledge/
+  README.md          # read/write protocol (frontmatter, evidence, supersede-never-delete)
+  index.md           # table of contents — update on every add
+  architecture/  decisions/  patterns/   glossary.md
+```
+
+Single source of truth for cross-agent knowledge; tool paths `.claude/knowledge`,
+`.cursor/knowledge`, `.qoder/repowiki` are symlinks to it (via `.claude/scripts/sync-surfaces.sh`).
+Enforced by `pnpm ai check`.
+
+## Authoring rules (every create/update)
+
+1. **Progressive disclosure** — entry = mandate + workflow links; move tables, code samples, and long checklists to `references/`.
+2. **Description is the router** — YAML `description` must include trigger terms and `Anti-trigger:` line.
+3. **Gold contract** — every agent entry links `_shared/references/gold-standard-contract.md`.
+4. **No policy fork** — never soften `AGENTS.md`; mirror only.
+5. **Validate before done** — run `pnpm ai check` when touching AI surfaces.
+6. **Import/path changes** — after agent edits that move files, run `import-auditor` or `pnpm type-check`.
+
+## Subagent creation checklist
+
+When using `/create-subagent` or adding `.cursor/agents/<name>.md`:
+
+- [ ] `name` (kebab-case) + specific `description` with anti-triggers
+- [ ] Entry ≤65 lines; detail in `<name>/references/`
+- [ ] `assets/REPORT-TEMPLATE.md` if agent produces reports
+- [ ] Update `.cursor/rules/04-subagent-auto-routing.mdc` inventory
+- [ ] Update `.cursor/agents/README.md`
+- [ ] Run `pnpm ai check`
+
+## Skill creation checklist
+
+- [ ] `SKILL.md` ≤80 lines; tables/long config → `references/`
+- [ ] `description` names when to activate (include "MUST" / "use proactively" where appropriate)
+- [ ] Scripts in `scripts/`; no inline bash blocks >10 lines in entry
+- [ ] Run `pnpm ai check`
+
+## Enforcement
+
+`pnpm ai check` warns on oversized entries. Fix by moving content to `references/` — do not raise line limits.
+
+Meta-skills: `agent-layout`, `skill-layout`, `claude-code-layout`.

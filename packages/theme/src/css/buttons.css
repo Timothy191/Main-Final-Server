@@ -1,0 +1,142 @@
+/* From Uiverse.io by Spacious74 */
+
+.button {
+  cursor: pointer;
+  border-radius: 16px;
+  border: none;
+  padding: 2px;
+  background: var(--bg-button-uiverse);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-decoration: none;
+  transition: transform var(--theme-transition-duration, 150ms) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.button::after {
+  content: "";
+  position: absolute;
+  width: 65%;
+  height: 60%;
+  border-radius: 120px;
+  top: 0;
+  right: 0;
+  box-shadow: var(--shadow-button-uiverse-after);
+  z-index: -1;
+}
+
+.blob1 {
+  position: absolute;
+  width: 70px;
+  height: 100%;
+  border-radius: 16px;
+  bottom: 0;
+  left: 0;
+  background: var(--bg-button-uiverse-blob);
+  box-shadow: var(--shadow-button-uiverse-blob);
+  z-index: 2;
+}
+
+.inner {
+  border-radius: 14px;
+  color: var(--white);
+  z-index: 3;
+  position: relative;
+  background: var(--bg-button-uiverse-inner);
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--theme-transition-duration, 150ms) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inner::before {
+  content: "";
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  border-radius: 14px;
+  background: var(--bg-button-uiverse-inner-before);
+  position: absolute;
+  z-index: -1;
+}
+
+/* Button sizing controls padding on the inner element */
+.button-sm .inner {
+  padding: 6px 12px;
+  font-size: 0.75rem; /* 12px */
+  border-radius: 10px;
+}
+
+.button-sm {
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+.button-sm .blob1 {
+  border-radius: 12px;
+}
+
+.button-md .inner {
+  padding: 10px 20px;
+  font-size: 0.875rem; /* 14px */
+  border-radius: 14px;
+}
+
+.button-md {
+  border-radius: 16px;
+  font-size: 0.875rem;
+}
+
+.button-md .blob1 {
+  border-radius: 16px;
+}
+
+.button-lg .inner {
+  padding: 14px 25px;
+  font-size: 1.125rem; /* 18px */
+  border-radius: 14px;
+}
+
+.button-lg {
+  border-radius: 16px;
+  font-size: 1.125rem;
+}
+
+.button-lg .blob1 {
+  border-radius: 16px;
+}
+
+/* Original massive size from Uiverse */
+.button-uiverse-xl .inner {
+  padding: 14px 25px;
+  font-size: 1.4rem;
+  border-radius: 14px;
+}
+
+.button-uiverse-xl {
+  border-radius: 16px;
+  font-size: 1.4rem;
+}
+
+.button-uiverse-xl .blob1 {
+  border-radius: 16px;
+}
+
+/* Hover & Active States */
+.button:hover {
+  transform: scale(1.02);
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+.button:disabled {
+  pointer-events: none;
+  opacity: var(--opacity-disabled);
+}

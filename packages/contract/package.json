@@ -1,0 +1,22 @@
+{
+  "name": "@repo/contract",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./validation": "./validation/index.ts"
+  },
+  "scripts": {
+    "test": "pnpm exec jest --passWithNoTests"
+  },
+  "devDependencies": {
+    "jest": "^30.0.0",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0"
+  },
+  "dependencies": {
+    "zod": "^3.24.0"
+  }
+}

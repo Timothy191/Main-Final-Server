@@ -1,0 +1,37 @@
+---
+description: Rules for monitoring, prompting, and reporting on self-learning skill evolution (creation, polishing, or merging) to the user.
+globs: ".cursor/skills/**/*"
+---
+# Skill Evolution & Self-Learning Coordination Protocol
+
+This rule governs the communication interface between the autonomous self-learning daemon and the user. It ensures that any automated modifications to the system's capabilities (skills catalog) are transparently reported, and the user is prompted to guide the evolution.
+
+---
+
+## 1. Trigger Conditions
+This protocol is activated whenever:
+1.  **Skill Creation:** A new skill directory is initialized under `.cursor/skills/`.
+2.  **Skill Refinement (Polishing):** An existing `SKILL.md` file is edited (e.g. usage statistics added, gotchas injected, or workflow items updated).
+3.  **Skill Merging:** Multi-step scripts or command sequences are consolidated into a shared skill abstraction.
+
+---
+
+## 2. Mandatory User Prompts & Notifications
+
+Whenever a skill modification occurs, the agent MUST prepend a **System Evolution Alert** to the chat output. This alert must contain the following structured sections:
+
+### 🚀 System Evolution Alert
+*   **Action Type:** `[CREATED / REFINED / MERGED]`
+*   **Skill Target:** `.cursor/skills/<skill-name>/`
+*   **Trigger Cause:** Specify the exact compilation errors or prompt patterns (with frequency counters) that triggered the update.
+*   **Modification Details:** Summarize the changes (e.g., "Injected 2 new gotchas," "Created default cacheWrap workflow").
+*   **Evolving System Statistics:**
+    *   Total Mined Skills: `N`
+    *   LSP Availability: `L/2`
+    *   System Health Check Status: `PASS/FAIL`
+
+---
+
+## 3. Human-in-the-loop Acknowledgement
+The agent must end the prompt alert by requesting the user to confirm, edit, or decline the automated skill modification:
+- *"Would you like to review the updated SKILL.md file or customize the default workflow steps? (Reply with 'approve', 'edit', or 'revert')"*

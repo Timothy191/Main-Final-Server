@@ -1,0 +1,49 @@
+{
+  "runId": "wf_fa4a7cb4-80e",
+  "taskId": "wf-fa4a7cb4-80e",
+  "workflowName": "deep-research",
+  "status": "killed",
+  "result": null,
+  "logs": [
+    "Question: Compare this monorepo system against real-world production-grade web application…",
+    "Decomposed into 5 angles: Production monorepo architecture, AI-assisted development workflows, Quality gates and developer experience, Security practices in production, Missing production infrastructure",
+    "Quality gates and developer experience: 6 search results",
+    "AI-assisted development workflows: 6 search results",
+    "Security practices in production: 6 search results",
+    "Security practices in production: 3 novel (3 filtered)",
+    "Production monorepo architecture: 6 search results",
+    "Production monorepo architecture: 3 novel (3 filtered)",
+    "Missing production infrastructure: 6 search results",
+    "Missing production infrastructure: 2 novel (4 filtered)",
+    "Fetched 20 sources -> 99 claims -> verifying top 25",
+    "confirmed: Packages should avoid crossing boundaries with relative paths like '..",
+    "confirmed: Internal packages should use scoped prefixes (like @acme/ or @repo/) t",
+    "confirmed: Stripe's monorepo contains approximately 50 million lines of Ruby with",
+    "confirmed: Stripe built a custom C++ shared library called file_access_intercepto",
+    "confirmed: Stripe's Selective Test Execution (STE) system runs only about 5% of t",
+    "refuted: Production-grade systems use built-in feature flag providers as standa",
+    "refuted: Production systems require a formal incident response plan with escala",
+    "confirmed: Real-world production systems integrate A/B testing and experimentatio",
+    "confirmed: Vercel's recommended E2E testing pattern uses Playwright as the primar",
+    "confirmed: Production monorepo CI/CD pipelines should leverage remote caching and",
+    "refuted: Production-grade E2E testing on Vercel uses a GitHub Actions repositor",
+    "refuted: Playwright is the officially endorsed E2E testing framework for Next.j",
+    "refuted: Scaling monorepo architectures must support independent deploys for ea",
+    "refuted: Vercel Monitoring provides visualization of bandwidth, errors, perform",
+    "confirmed: Next.js officially recommends running E2E tests against production bui"
+  ],
+  "failures": [
+    "agent[37] v1:Production monorepos should divide works failed: agent({schema}): subagent completed without calling StructuredOutput"
+  ],
+  "agentCount": 101,
+  "totalToolCalls": 1026,
+  "durationMs": 1650131,
+  "usage": {
+    "agents": 101,
+    "toolCalls": 1026,
+    "durationMs": 1650131
+  },
+  "transcriptDir": "/home/timothy/Projects/packages/.qoder/sessions/a4e46158-01d1-404c-9515-cc5b43d8fb70/workflows/runs/wf_fa4a7cb4-80e",
+  "scriptPath": "/home/timothy/Projects/packages/.qoder/sessions/a4e46158-01d1-404c-9515-cc5b43d8fb70/workflows/scripts/deep-research-wf_fa4a7cb4-80e.js",
+  "error": "Workflow aborted"
+}

@@ -1,0 +1,123 @@
+name: arch-systems-dev
+
+# ── Local development infrastructure ─────────────────────────────────────────
+# Default path (pnpm dev): Redis only via --profile infra
+#   docker compose --profile infra up -d redis
+# Opt-in Compose Postgres (when not using Supabase CLI):
+#   docker compose --profile postgres up -d
+# Opt-in containerized portal (not used by scripts/dev.sh):
+#   docker compose --profile infra --profile postgres --profile portal up -d
+# Stop: docker compose --profile infra down
+# Wipe: docker compose --profile infra down -v
+#
+# Performance notes (current local Docker setup):
+# - 14 containers from Supabase stack (~6GB virtual, ~150MB active)
+# - arch-redis: 42MB virtual, <1% CPU
+# - arch-postgres: 303MB virtual (separate from Supabase PG)
+# - Stop Harness delegate containers when not needed: ~3.5GB each!
+
+services:
+
+  # ── Frontend (Next.js Portal) — opt-in; host Turbopack is canonical for local ─
+  portal:
+    profiles: ["portal"]
+    build:
+      context: .
+      dockerfile: apps/portal/Dockerfile
+      target: runner
+    container_name: arch-portal
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/arch_dev
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: 1
+    volumes:
+      - ./apps/portal/src:/app/apps/portal/src
+      - ./apps/portal/public:/app/apps/portal/public
+      - ./packages:/app/packages
+    depends_on:
+      redis:
+        condition: service_healthy
+    # Note: deploy.resources.limits ignored by `docker compose up`;
+    # they apply only with `docker stack deploy` (Swarm mode).
+    # For actual per-container limits, use Docker run flags or cgroups.
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - arch-net
+
+  # ── Redis (default infra for pnpm dev) ───────────────────────────────────────
+  redis:
+    profiles: ["infra"]
+    image: redis:7-alpine
+    container_name: arch-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --save "" --appendonly no --maxmemory 128mb --maxmemory-policy allkeys-lru --loglevel warning
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - arch-net
+
+  # ── LiteLLM Proxy (LLM Gateway) ──────────────────────────────────────────────
+  litellm:
+    profiles: ["infra"]
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: arch-litellm
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - LITELLM_MASTER_KEY=sk-arch-dev-key
+    volumes:
+      - ./packages/llm-config/litellm_config.yaml:/app/config.yaml
+    command: --config /app/config.yaml --port 4000
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - arch-net
+
+  # ── Postgres — opt-in when Supabase CLI is not used ──────────────────────────
+  postgres:
+    profiles: ["postgres"]
+    image: postgres:16-alpine
+    container_name: arch-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: arch_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - arch-net
+
+volumes:
+  redis_data:
+  postgres_data:
+
+networks:
+  arch-net:
+    driver: bridge

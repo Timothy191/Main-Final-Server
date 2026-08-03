@@ -1,0 +1,41 @@
+---
+description: Background ai-maintenance-checker — launch at prompt start, await before done on AI work
+alwaysApply: true
+---
+
+# AI Maintenance (Background)
+
+## Lifecycle
+
+1. **Start** — at the beginning of every user prompt, launch `ai-maintenance-checker` in background (`is_background: true`)
+2. **Parallel** — parent continues the primary task
+3. **Default action** — `pnpm ai check` (read-only). Use `pnpm ai fix` only when repairing or on `init`.
+4. **Await** — before final reply when the task touched AI surfaces (skills, rules, agents, hooks, `.claude/`, `AGENTS.md` mirrors, `scripts/ai.sh`)
+5. **Skip await** — pure portal UI with zero AI-surface file changes
+
+## Unified command (canonical)
+
+```bash
+pnpm ai          # status (default)
+pnpm ai init     # cold start / first clone
+pnpm ai onboard  # human + agent checklist
+pnpm ai check    # validate only (CI)
+pnpm ai fix      # safe repair + validate
+```
+
+Do **not** run scattered validate/sync scripts directly — they are merged into `pnpm ai`.
+
+## Agent
+
+- Entry: `.cursor/agents/ai-maintenance-checker.md`
+- Script: `.cursor/agents/ai-maintenance-checker/scripts/run-maintenance.sh`
+- Standard: `.cursor/standards/ai-system/STANDARD.md`
+
+## Gold enforcement
+
+Maintenance preserves:
+
+- SOUL.md evidence contract
+- `01-real-world-logic.mdc` OBSERVE→VERIFY loop
+- `02-agent-scoring.mdc` Alignment Score
+- No watered-down duplicate skills (merge or alias)

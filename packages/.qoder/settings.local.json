@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /home/timothy/Projects/.qoder/agents/ 2>/dev/null || echo \"Directory does not exist\")",
+      "Read(//home/timothy/Projects/.qoder/**)",
+      "Bash(ls -la /home/timothy/Projects/.qoder/agents/ 2>/dev/null; echo \"---\"; ls -la /home/timothy/Projects/.cursor/agents/ 2>/dev/null; echo \"---\"; ls -la /home/timothy/Projects/.claude/agents/ 2>/dev/null)",
+      "Read(//home/timothy/Projects/.cursor/agents/**)",
+      "Bash(ls /home/timothy/Projects/.claude/SOUL.md 2>/dev/null && echo \"EXISTS\" || echo \"NOT FOUND\"; ls /home/timothy/Projects/SOUL.md 2>/dev/null && echo \"EXISTS\" || echo \"NOT FOUND\")",
+      "Read(//home/timothy/Projects/.claude/**)",
+      "Bash(ls /home/timothy/Projects/.github/workflows/ 2>/dev/null || echo \"No workflows directory\")",
+      "Read(//home/timothy/Projects/.github/**)",
+      "Bash(ls -la /home/timothy/Projects/apps/portal/src/lib/observability/ 2>/dev/null || echo \"No observability directory found\")",
+      "Read(//home/timothy/Projects/apps/portal/src/lib/observability/**)",
+      "Bash(ls -la /home/timothy/Projects/e2e/ 2>/dev/null || echo \"No e2e directory\")",
+      "Read(//home/timothy/Projects/**)",
+      "Bash(ls -la /home/timothy/Projects/apps/ 2>/dev/null || echo \"No apps directory\")",
+      "Read(//home/timothy/Projects/apps/**)",
+      "Bash(cat /home/timothy/Projects/package.json | grep -A5 -B5 \"test:e2e\\\\|playwright\")",
+      "Bash(cat /home/timothy/Projects/package.json | grep -A2 -B2 \"test\" || echo \"No test scripts in root package.json\")"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+[
+  {
+    "path": "apps/portal/.next/static/chunks/app/**/page-*.js",
+    "limit": "350 KB"
+  },
+  {
+    "path": "apps/portal/.next/static/chunks/main-*.js",
+    "limit": "250 KB"
+  }
+]

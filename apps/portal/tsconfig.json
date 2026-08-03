@@ -1,0 +1,45 @@
+{
+  "extends": "@repo/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/assets/*": ["./src/assets/*"],
+      "@repo/auth/ui": ["../../packages/auth/ui/index.tsx"],
+      "@repo/auth/data-access": ["../../packages/auth/data-access/index.ts"],
+      "@repo/auth/utils": ["../../packages/auth/utils/index.ts"],
+      "@repo/shared/data-access": ["../../packages/shared/data-access/index.ts"],
+      "@repo/shared/utils": ["../../packages/shared/utils/index.ts"],
+      "@repo/shared/hooks": ["../../packages/shared/hooks/index.ts"],
+      "@repo/ui/lib/*": ["../../packages/ui/lib/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "next.config.mjs",
+    "postcss.config.mjs",
+    "jest.config.js",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "src.backup",
+    "components",
+    "hooks",
+    "lib",
+    "plugins",
+    "assets",
+    "e2e"
+  ]
+}

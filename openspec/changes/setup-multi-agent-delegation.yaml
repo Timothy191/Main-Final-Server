@@ -1,0 +1,69 @@
+schema: change-proposal
+version: 1
+id: setup-multi-agent-delegation
+title: "Setup Multi-Agent Delegation Infrastructure"
+status: implemented
+author: system
+created: 2026-07-20
+
+context: |
+  ## Background
+  Arch Systems has 7+ agent CLIs installed (omp, kilo, opencode, agy, devin, hermes, qwen)
+  plus OpenSpec for spec-driven development and Cursor SWE agents for specialized tasks.
+  Currently each agent operates independently without shared specs or orchestration.
+
+  ## Current State
+  - 7 agent CLIs on PATH, most with partial auth
+  - OpenSpec installed at v1.6.0 with config at openspec/
+  - .cursor/agents/ has 12+ Cursor SWE subagents
+  - All agents use different auth methods and config patterns
+  - No unified delegation command
+
+  ## Desired State
+  - `pnpm agent:delegate <name> "prompt"` runs any agent with OpenSpec shared context
+  - `pnpm agent:list` shows all available agents and their auth status
+  - Each agent can read OpenSpec specs and SWE agent context
+  - Auth/keys centralized in .env where possible
+
+requirements:
+  - MUST create delegation wrapper that accepts agent name + prompt
+  - MUST inject OpenSpec context (config.yaml + latest spec) into agent prompt
+  - MUST support all 7 agents: omp, kilo, opencode, agy, devin, hermes, qwen
+  - MUST add `pnpm agent:delegate` and `pnpm agent:list` scripts
+  - MUST report auth status per agent
+
+design:
+  ## Delegation Flow
+  1. User: `pnpm agent:delegate <name> "task description"`
+  2. Wrapper loads openspec/ context + any available SWE agent context
+  3. Injects context as system prompt / initial input
+  4. Runs agent with shared auth (reads .env for API keys)
+  5. Captures output, reports results
+
+  ## Auth Strategy
+  - Most agents use env vars (already set in .env)
+  - devin: already logged in via OAuth
+  - kilo: OAuth + Vercel AI Gateway
+  - hermes: needs OpenRouter/OpenAI keys added
+  - qwen: uses --model flag, reads env
+
+  ## Agent Selection Logic
+  Each agent has strengths:
+  - omp: cmd: `omp -p "prompt"` — best for deep multi-file refactors
+  - kilo: cmd: `kilo run "prompt"` — best for ACP server mode
+  - opencode: cmd: `opencode run "prompt"` — VSCode-based agent
+  - agy: cmd: `agy -p "prompt"` — Go-based lightweight agent
+  - devin: cmd: `devin -- "prompt"` — cloud agent with sandbox
+  - hermes: cmd: `hermes -z "prompt"` — Python-based agent with plugins
+  - qwen: cmd: `qwen -p "prompt"` — Qwen Code CLI
+
+tasks:
+  - [x] Create delegation wrapper script at scripts/delegate-agent.sh
+  - [x] Create OpenSpec context injector
+  - [x] Add pnpm agent:delegate and agent:list scripts to package.json
+  - [x] Wire auth check into delegation
+
+risks:
+  - hermes may need interactive auth for OpenRouter
+  - agy and qwen may have different API key expectations
+  - Some agents may not support non-interactive mode

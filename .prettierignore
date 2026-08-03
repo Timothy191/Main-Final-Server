@@ -1,0 +1,32 @@
+node_modules
+.next
+dist
+out
+build
+*.tsbuildinfo
+pnpm-lock.yaml
+
+# Agentic AI layer (CLI agents / skills / specs) — not part of product quality
+.cursor/
+.claude/
+.claude-flow/
+.crush/
+.grok/
+.qoder/
+.roo/
+.serena/
+.swarm/
+.windsurf/
+.agents/
+agent-harnesses/
+openspec/
+.kiro/agents/
+.kiro/specs/
+.github/skills/
+AGENTS.md
+CLAUDE.md
+SOUL.md
+.cursorrules
+
+# Generated files
+packages/contract/openapi.generated.json

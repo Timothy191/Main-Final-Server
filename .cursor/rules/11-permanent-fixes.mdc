@@ -1,0 +1,69 @@
+---
+description: Permanent Fixes — only implement complete fixes verified on real-world data
+alwaysApply: true
+---
+
+# Permanent & Complete Fixes Rule
+
+## Core Principle
+
+*Only implement permanent and complete fixes verified on real-world proven data.*
+
+## Requirements
+
+Every fix must satisfy ALL of the following before being considered complete:
+
+### 1. Root Cause Analysis
+- Identify the actual root cause, not just the symptom
+- Document the root cause in the fix description
+- Ensure the fix addresses the root cause, not just a workaround
+
+### 2. Complete Coverage
+- Fix ALL instances of the same pattern, not just the one reported
+- Search the codebase for similar occurrences before fixing
+- If the pattern exists in 3+ places, create a shared abstraction
+
+### 3. Real-World Verification
+- Run the actual code path against real infrastructure, not just unit tests
+- For database changes: apply migration and verify against running Supabase
+- For API changes: verify with actual HTTP requests
+- For portal changes: verify via real browser or curl against running portal
+- Fixes to test files alone (without fixing the source) are incomplete
+
+### 4. Type-Safe
+- Fixes must pass `type-check` with 0 errors
+- If the fix requires type assertions, document why
+- Never use `any` as a fix — use proper type narrowing or Zod schemas
+
+### 5. Lint-Clean
+- Fixes must pass `lint` with 0 errors and 0 warnings
+- If the fix touches a file with pre-existing lint warnings, fix those too
+
+### 6. Backward Compatible
+- Fixes must not break existing functionality
+- Existing tests must still pass (or be updated if the fix changes behavior)
+- Rollback plan must exist if the fix involves database schema changes
+
+## Enforcement
+
+- Before marking a fix as "done", verify ALL 6 requirements above
+- If a requirement cannot be met, document why and get explicit approval
+- Never leave a fix "partially done" — either complete it or revert it
+
+## Examples
+
+### ✅ Complete Fix
+1. Root cause identified: Import uses .js extension that Turbopack can't resolve
+2. Complete: Fixed all similar .js extension imports in the same package
+3. Verified: Portal compiles and serves /login, /hub, /api/health successfully
+4. Type-safe: Changed extensionless imports, type-check passes
+5. Lint-clean: 0 warnings
+6. Backward compatible: Same exports, same behavior
+
+### ❌ Incomplete Fix
+1. Symptom only: Silenced unused variable warning without checking if variable is needed
+2. Incomplete: Fixed one file but not the other 5 with the same pattern
+3. Not verified: Changed code but never ran it against real infra
+4. Unsafe: Used `as any` instead of proper typing
+5. Lint warnings remain: Only fixed the portal but not the API lint warnings
+6. Broke tests: Changed import style but didn't update test mocks

@@ -1,0 +1,12 @@
+schema: spec-driven
+
+# Shown to AI when creating OpenSpec artifacts.
+context: |
+  Arch Systems (Plantcor) — industrial mining-operations portal monorepo.
+  Package manager: pnpm 9 only (Never use npm / yarn).
+  App code: apps/portal/ only. Never modify apps(legacy)/.
+  Packages: @repo/* — no app logic; never import from apps/.
+  Specs: .kiro/specs/ remains AGENTS.md multi-file gate; OpenSpec is parallel change lifecycle.
+  Errors: @repo/errors AppError subclasses. Validation: Zod on external input.
+  Icons: lucide-react. Toasts: sonner. Light-only UI.
+  Canonical policy: AGENTS.md.

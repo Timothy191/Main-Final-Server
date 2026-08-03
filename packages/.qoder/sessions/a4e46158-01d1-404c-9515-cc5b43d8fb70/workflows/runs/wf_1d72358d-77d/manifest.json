@@ -1,0 +1,38 @@
+{
+  "runId": "wf_1d72358d-77d",
+  "workflowName": "deep-research",
+  "scriptPath": "/home/timothy/Projects/packages/.qoder/sessions/a4e46158-01d1-404c-9515-cc5b43d8fb70/workflows/scripts/deep-research-wf_1d72358d-77d.js",
+  "source": "built-in",
+  "meta": {
+    "name": "deep-research",
+    "description": "Deep research harness - fan-out web searches, fetch sources, adversarially verify claims, synthesize a cited report.",
+    "whenToUse": "When the user wants a deep, multi-source, fact-checked research report on any topic. Before invoking, check whether the question is specific enough to research directly; if underspecified, ask 2-3 clarifying questions, then pass the refined question as args.",
+    "phases": [
+      {
+        "title": "Scope",
+        "detail": "Decompose question from args into 5 search angles"
+      },
+      {
+        "title": "Search",
+        "detail": "Run 5 parallel WebSearch agents, one per angle"
+      },
+      {
+        "title": "Fetch",
+        "detail": "Deduplicate URLs, fetch the top 15 sources, and extract falsifiable claims"
+      },
+      {
+        "title": "Verify",
+        "detail": "Use 3-vote adversarial verification per claim; 2 refutations reject a claim"
+      },
+      {
+        "title": "Synthesize",
+        "detail": "Merge findings, rank confidence, cite sources"
+      }
+    ]
+  },
+  "createdAt": "2026-07-19T04:41:20.090Z",
+  "updatedAt": "2026-07-19T04:41:20.124Z",
+  "status": "completed",
+  "outputPath": "/home/timothy/Projects/packages/.qoder/sessions/a4e46158-01d1-404c-9515-cc5b43d8fb70/workflows/runs/wf_1d72358d-77d/output.json",
+  "agents": []
+}
