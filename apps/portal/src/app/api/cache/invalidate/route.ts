@@ -12,11 +12,22 @@
  *
  *   POST /api/cache/invalidate
  *   Body: { department: 'engineering' }
+ *
+ *   OR — evict a user's edge-auth cache after a role / department change:
+ *   POST /api/cache/invalidate
+ *   Body: { userId: '<auth_id>' }
+ *
+ * AGENT-TRACE: `userId` evicts the Redis L1 employee-auth record that
+ * `proxy.ts` `resolveEmployee` caches at `arch:auth:employee:<userId>` for
+ * 300s. The role-change admin flow MUST call this with the TARGET user's id,
+ * otherwise the edge proxy keeps authorizing on the old role for up to 5 min.
+ * See docs/WAYFINDER.md → "Caching".
  */
 
 import { NextResponse } from 'next/server'
 import { revalidateTag } from 'next/cache'
 import { createServerSupabaseClient } from '@repo/supabase/server'
+import { cacheEvictL1ByPrefix } from '@repo/redis/cache'
 import { AppError } from '@/lib/errors/error-classes'
 import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
 
@@ -36,20 +47,30 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { tags, department, allDepartments } = body as {
+    const { tags, department, allDepartments, userId } = body as {
       tags?: string[]
       department?: string
       allDepartments?: boolean
+      userId?: string
     }
 
-    if (!tags && !department && !allDepartments) {
+    if (!tags && !department && !allDepartments && !userId) {
       return NextResponse.json(
         {
           error: 'No invalidation target specified',
-          hint: 'Provide tags, department, or allDepartments: true',
+          hint: 'Provide tags, department, allDepartments: true, or userId',
         },
         { status: 400 }
       )
+    }
+
+    // Evict the edge-proxy employee-auth cache for a specific user. Called by
+    // the role-change flow so the proxy re-reads `employees` on the next
+    // request instead of serving the pre-change role for up to 300s.
+    let evictedUser = false
+    if (userId) {
+      cacheEvictL1ByPrefix(`arch:auth:employee:${userId}`)
+      evictedUser = true
     }
 
     const tagsToInvalidate: string[] = []
@@ -93,6 +114,7 @@ export async function POST(request: Request) {
       successCount,
       failedCount,
       tags: uniqueTags,
+      evictedUserAuth: evictedUser ? userId : undefined,
       failedTags: results
         .filter((r) => r.status === 'rejected')
         .map((r, i) => ({ tag: uniqueTags[i], reason: r.reason })),

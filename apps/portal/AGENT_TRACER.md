@@ -2,6 +2,22 @@
 
 This file maintains a record of AI agent interventions, context hand-offs, and architectural breadcrumbs for this specific package/app.
 
+## [2026-08-03] Promote ACL to @repo/acl + cache/auth coherence + design-system ratchet/shape gates
+
+- **Agent**: Claude Code (glm-5.2) — synoptic-cycle recommendations
+- **Purpose**: Resolve three live cross-domain tensions surfaced by a multi-domain synthesis: (1) the edge `proxy.ts` and node `dept-access.ts` had **already drifted** inline ACL copies (proxy carried a `tools: ['admin','supervisor']` key dept-access lacked); (2) the design-system R2 rule was doc-enforced only, with no honest CI gate; (3) the edge-proxy employee-auth cache (`arch:auth:employee:<userId>`, 300s TTL) had no eviction hook on role change, leaving a stale-permission window. Plus a cross-cutting maturity step: make traces machine-navigable via a wayfinder.
+- **Changes Made**:
+  - **`@repo/acl` (new package)**: `packages/acl/src/index.ts` — canonical `DEPARTMENT_ROUTE_SLUGS`, `RESTRICTED_DEPT_ROLES` (incl. `tools`), `Role` type, `normalizeRole`, `isDeptAllowedForRole`, `isRestrictedRouteAllowed`, `filterDepartmentsByRole`. Pure data + pure functions, edge-safe (zero deps, no `server-only`).
+  - **`apps/portal/src/proxy.ts`**: imports ACL from `@repo/acl`; removed inline `DEPARTMENT_ROUTES`/`RESTRICTED_ROUTES`/`normalizeRole`/`isRestrictedRouteAllowed`; re-exports `normalizeRole` so `proxy.test.ts` still resolves. Added AGENT-TRACE on `resolveEmployee` documenting the 300s staleness window + the eviction contract.
+  - **`apps/portal/src/lib/dept-access.ts`**: re-exports the ACL data/predicates from `@repo/acl` (preserving its public API for the ~14 importers); keeps `assertDeptRole` local (needs a server Supabase client).
+  - **`apps/portal/src/app/api/cache/invalidate/route.ts`**: added `userId` target → `cacheEvictL1ByPrefix('arch:auth:employee:<userId>')`, giving the role-change flow a ready eviction hook.
+  - **`apps/portal/src/lib/department-cache.ts`**: AGENT-TRACE — caches data only, never the auth check.
+  - **`tools/design-ratchet.mjs`** + **`tools/design-ratchet.baseline.json`**: standalone R2 ratchet gate (counts `backdropBlur`/`bgOpacityFill`/`inlineRgbaGlass`; grandfathered baseline; fails on regression; R4 transient-surface filenames exempt). Not turbo-cached → no stale PASS.
+  - **`tools/theme-shape-guard.mjs`** + **`tools/theme-shape-guard.baseline.json`**: presence guard for `generated.ts` (archCount ≥ 16, top-level groups, `as const`) — catches the documented `generate-tokens.mjs` shrink.
+  - **Docs**: root `CLAUDE.md` (new), `docs/WAYFINDER.md` (structural index), `docs/REPO-CHANGE-INDEX.md` (temporal change log), `AGENTS.md` (Documentation + Repo change index global rules), `docs/design-system/RULES.md` R7 (references the new gates).
+- **Verification**: `pnpm exec turbo run lint type-check test --force` → 10/10, **0 cached**, 495 tests pass; `pnpm gates` (agents:verify + design:ratchet + theme:shape) → pass; `pnpm format:check` → pass. ACL tests (proxy/dept-access/dept-auth-wrappers/accessible-departments) → 60/60.
+- **Next Agent Notes**: (a) The admin role-change UI flow (`features/admin/tabs/UsersTab.tsx`) should call `POST /api/cache/invalidate { userId: <target> }` after a successful role/department update — the eviction hook now exists but the caller still needs wiring. (b) The ratchet baseline (`bgOpacityFill: 159`) is high; it grandfathered existing ad-hoc opacity fills. Migrate-on-touch per R2/R4; lower the baseline with `--update` after each fix. (c) `@repo/acl` has no `lint:tokens`-style task; its `lint` script is a no-op echo (no lintable files), matching `@repo/database`.
+
 ## [2026-08-03] Clear failing `portal#lint` warnings on WIP control-room pages + add `agents:verify` CI script
 
 - **Agent**: Claude Code

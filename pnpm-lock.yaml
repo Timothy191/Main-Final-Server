@@ -53,6 +53,9 @@ importers:
       '@react-pdf/renderer':
         specifier: ^4.5.1
         version: 4.5.1(react@19.2.7)
+      '@repo/acl':
+        specifier: workspace:*
+        version: link:../../packages/acl
       '@repo/contract':
         specifier: workspace:*
         version: link:../../packages/contract
@@ -198,6 +201,15 @@ importers:
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.19(tsx@4.23.1)(yaml@2.9.0)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+
+  packages/acl:
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       typescript:
         specifier: ^5.7.0
         version: 5.9.3

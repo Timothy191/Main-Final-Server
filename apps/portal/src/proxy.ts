@@ -2,6 +2,20 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { createMiddlewareClient } from '@repo/supabase/middleware'
 import { cacheGet, cacheSet, cacheEvictL1ByPrefix } from '@repo/redis/cache'
+// AGENT-TRACE: ACL (department slugs, restricted route→role map, route
+// predicates) is sourced from @repo/acl so the edge proxy and the node server
+// actions (lib/dept-access.ts) cannot drift. The former inline copies had
+// already diverged (proxy carried a `tools` key dept-access lacked).
+import {
+  DEPARTMENT_ROUTE_SLUGS,
+  normalizeRole,
+  isRestrictedRouteAllowed,
+  type DepartmentRouteSlug,
+} from '@repo/acl'
+
+// Re-export so existing `proxy.test.ts` imports (`normalizeRole` from './proxy')
+// keep resolving without touching the test.
+export { normalizeRole }
 
 export function isValidRedirect(path: string): boolean {
   if (!path) return false
@@ -38,37 +52,15 @@ export function isValidRedirect(path: string): boolean {
     /^\/safety(?:\/.*)?$/,
     /^\/training(?:\/.*)?$/,
     /^\/satellite-monitoring(?:\/.*)?$/,
+    /^\/environment(?:\/.*)?$/,
+    /^\/logistics-fleet(?:\/.*)?$/,
+    /^\/geology(?:\/.*)?$/,
     /^\/hub(?:\/.*)?$/,
     /^\/executive(?:\/.*)?$/,
     /^\/admin(?:\/.*)?$/,
   ]
 
   return allowedPatterns.some((pattern) => pattern.test(path))
-}
-
-// AGENT-TRACE: Keep in sync with src/lib/dept-access.ts DEPARTMENT_ROUTE_SLUGS
-const DEPARTMENT_ROUTES = [
-  'drilling',
-  'production',
-  'access-control',
-  'access-card-actions',
-  'engineering',
-  'control-room',
-  'safety',
-  'training',
-  'satellite-monitoring',
-]
-
-// AGENT-TRACE: Keep in sync with src/lib/dept-access.ts RESTRICTED_DEPT_ROLES (+ tools)
-const RESTRICTED_ROUTES: Record<string, string[]> = {
-  'access-control': ['access_control', 'admin'],
-  'control-room': ['control_room_operator', 'admin'],
-  tools: ['admin', 'supervisor'],
-  admin: ['admin'],
-}
-
-export function normalizeRole(role: unknown): string {
-  return typeof role === 'string' && role.length > 0 ? role : 'operator'
 }
 
 export function isTokenExpiredError(error: unknown): boolean {
@@ -193,6 +185,19 @@ async function resolveEmployee(
   supabase: MiddlewareClient['supabase'],
   userId: string
 ): Promise<EmployeeAuth | null> {
+  // AGENT-TRACE: Cache/auth coherence seam. This employee auth record (role,
+  // department_id, accessible_departments) is cached in Redis for CACHE_TTL
+  // (300s) keyed by userId — already user-scoped, so it can never bleed across
+  // users (cf. Supabase studio bug e88f389 where generic keys leaked one
+  // user's permissions into another's session).
+  //
+  // STALENESS WINDOW: after an admin changes this user's role / department /
+  // accessible_departments, the edge proxy continues to authorize on the OLD
+  // record for up to 300s. The role-change flow MUST evict this cache for the
+  // TARGET user by calling `POST /api/cache/invalidate { userId }` (which
+  // calls cacheEvictL1ByPrefix('arch:auth:employee:<userId>')). Do NOT cache
+  // the auth check in department-cache.ts tag layer — only cache data fetches,
+  // keyed by verified userId. See docs/WAYFINDER.md → "Caching".
   const cacheKey = `arch:auth:employee:${userId}`
   const cached = await cacheGet<EmployeeAuth | null>(cacheKey)
   if (cached) return cached
@@ -203,39 +208,19 @@ async function resolveEmployee(
     .eq('auth_id', userId)
     .single()
   if (data) {
-    await cacheSet(cacheKey, data as EmployeeAuth, 3600)
+    await cacheSet(cacheKey, data as EmployeeAuth, 300)
   }
   return (data as EmployeeAuth) ?? null
 }
 
-function isRestrictedRouteAllowed(
-  pathname: string,
-  secondSegment: string | undefined,
-  role: string
-): boolean {
-  for (const [route, allowedRoles] of Object.entries(RESTRICTED_ROUTES)) {
-    if (pathname.startsWith(`/${route}`) && !allowedRoles.includes(role)) {
-      return false
-    }
-  }
-
-  if (
-    secondSegment === 'tools' &&
-    RESTRICTED_ROUTES.tools &&
-    !RESTRICTED_ROUTES.tools.includes(role)
-  ) {
-    return false
-  }
-
-  return true
-}
+// isRestrictedRouteAllowed is imported from @repo/acl (canonical ACL).
 
 async function isDepartmentAllowed(
   supabase: MiddlewareClient['supabase'],
   topSegment: string,
   employee: EmployeeAuth
 ): Promise<'ok' | 'unknown' | 'unauthorized'> {
-  if (!DEPARTMENT_ROUTES.includes(topSegment)) return 'ok'
+  if (!DEPARTMENT_ROUTE_SLUGS.includes(topSegment as DepartmentRouteSlug)) return 'ok'
 
   const isAdmin = employee.role === 'admin'
   const deptUuid = await resolveDeptUuid(supabase, topSegment)

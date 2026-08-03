@@ -1,0 +1,19 @@
+{
+  "name": "@repo/acl",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo dist",
+    "lint": "echo 'No lintable files in @repo/acl'",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "typescript": "^5.7.0"
+  }
+}

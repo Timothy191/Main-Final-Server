@@ -68,3 +68,63 @@ and can return a stale PASS.
 - **Agentic layer** (`.cursor/`, `.agents/`, `.claude/`, etc.): agent
   infrastructure only. Do not let product code depend on it; do not commit agent
   runtime state.
+
+---
+
+## Documentation — a global rule
+
+Every agent **must use and update the docs** that govern the area it touches.
+This is the same severity as the design-system rule: leaving docs stale after a
+change is a rule violation, equivalent to leaving tests failing.
+
+- **Before** changing a domain, read its authoritative docs (the
+  [wayfinder](./docs/WAYFINDER.md) maps each concept → entry point → ADR/trace
+  → how-to-extend).
+- **In the same change** that introduces, removes, or redefines behavior,
+  update every doc that describes the old behavior:
+  - API/contract surface → `@repo/contract` + `@repo/errors` + the relevant
+    `docs/codebase-maps/` map.
+  - Visual token/class/contract → `docs/design-system/SPEC.md` (+ ADR in
+    `packages/theme/DECISIONS.md` for structural changes), per the design-system
+    rule above.
+  - Architecture/structure decision → add an ADR in
+    [`packages/theme/DECISIONS.md`](./packages/theme/DECISIONS.md) (visual) or a
+    note in [`docs/architecture/`](./docs/architecture/) (non-visual).
+  - Anything an agent would need to know next → an `AGENT-TRACE:` breadcrumb in
+    the code and an entry in the app's `AGENT_TRACER.md`.
+- **Update the [repo change index](./docs/REPO-CHANGE-INDEX.md)** for every
+  change (see below).
+
+If a doc contradicts the code, fix one or the other in the same change — never
+leave the contradiction for the next agent.
+
+## Repo change index — a global rule
+
+[`docs/REPO-CHANGE-INDEX.md`](./docs/REPO-CHANGE-INDEX.md) is the **canonical,
+append-only log of every change** to the repo. Every agent must append one entry
+per change (one per commit is fine) before declaring the work done. An entry is
+not optional prose — it is the record that the change happened and where to find
+it next time.
+
+Entry format (append to the table, newest at top):
+
+| Date | Agent | Area | Summary | Files | Docs updated |
+| --- | --- | --- | --- | --- | --- |
+
+- **Area** matches a wayfinder concept where possible (e.g. `acl`, `errors`,
+  `design-system`, `cache`, `portal/auth`).
+- **Docs updated** lists every doc changed in the same commit (SPEC.md, ADR,
+  codebase map, AGENT_TRACER.md, etc.) — `none` is a red flag, not an answer.
+- This index is the temporal companion to the structural
+  [wayfinder](./docs/WAYFINDER.md): the wayfinder says *what is here*, the
+  change index says *how it got here*.
+
+---
+
+## Documentation Hygiene — Removal & Maintenance Rule
+
+All notes, citations, scratch files, and markdown documentation (`*.md`) across the repository must follow strict hygiene:
+
+1. **Remove Unimportant & Stale Files**: Any temporary notes, obsolete citations, duplicate plan documents, or scratch markdown files that are no longer relevant, active, or authoritative **must be removed immediately**.
+2. **Keep Important Documentation Updated**: Any markdown document that is retained as part of the architecture, runbooks, codebase maps, or design system **must be updated** in the same change whenever code, signatures, or system behaviors change.
+3. **No Unmaintained Artifacts**: Never leave abandoned, out-of-date, or speculative documentation behind.

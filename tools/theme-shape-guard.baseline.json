@@ -1,0 +1,11 @@
+{
+  "archCount": 16,
+  "hasTokensExport": true,
+  "hasAsConst": true,
+  "groups": {
+    "color": true,
+    "shadow": true,
+    "radius": true,
+    "wave": true
+  }
+}

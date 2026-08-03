@@ -102,6 +102,16 @@ When a genuinely new surface role is needed (e.g. a new chrome variant):
 # Token integrity (CI gate)
 pnpm --filter @repo/theme lint:tokens
 
+# Design-system ad-hoc-glass ratchet (standalone — not turbo-cached, so no
+# stale PASS). Fails when a banned-pattern category count regresses over the
+# baseline in tools/design-ratchet.baseline.json. See R2.
+pnpm design:ratchet
+
+# generated.ts shape guard — fails if the committed token map loses its
+# baseline shape (e.g. someone ran generate-tokens.mjs, which drops --arch*
+# primitives). See memory: theme-generated-ts-drift.
+pnpm theme:shape
+
 # Quality gate — MUST be forced + 0 cached (turbo caches stale lint PASS)
 pnpm exec turbo run lint type-check test --force   # confirm "0 cached"
 pnpm format:check
@@ -109,7 +119,8 @@ pnpm format:check
 
 Do not claim a green quality gate from a non-forced `pnpm quality` run — the
 `lint` task is turbo-cached and can return a stale PASS. (See the
-`turbo-eslint-cache-masking` memory.)
+`turbo-eslint-cache-masking` memory.) The ratchet and shape guard are
+standalone scripts precisely so they sidestep that cache.
 
 ## R8 — Update these docs when you change the system
 
