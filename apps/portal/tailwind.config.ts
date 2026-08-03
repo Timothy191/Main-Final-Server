@@ -1,1 +1,1 @@
-export { default } from '@repo/theme/tailwind'
+../../packages/ui/tailwind.config.ts
