@@ -56,6 +56,7 @@ export default async function Page() {
     )
     .eq('load_date', new Date().toISOString().split('T')[0])
     .order('shift_type')
+    .order('session_index')
     .limit(50)
 
   if (error) {

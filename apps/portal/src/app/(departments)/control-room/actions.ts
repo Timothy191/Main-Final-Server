@@ -413,130 +413,19 @@ export async function endHaulingSession(
     newExcavatorId,
   })
 
-  // 1. Fetch current hourly load row
-  const { data: currentLoad, error: readError } = await supabase
-    .from('hourly_loads')
-    .select('*')
-    .eq('id', input.loadRowId)
-    .single()
+  const { data, error } = await supabase.rpc('control_room_end_hauling_session', {
+    p_load_row_id: input.loadRowId,
+    p_stop_hour: input.stopHour,
+    p_new_material: input.newMaterial,
+    p_new_excavator_id: input.newExcavatorId || null,
+    p_user_id: user.id,
+  })
 
-  if (readError || !currentLoad) {
-    throw new DatabaseError('Hourly load record not found', {
-      operation: 'select',
-      context: { loadRowId, error: readError?.message },
-    })
-  }
-
-  // 2. Lock remaining hours by setting them to -1 on the current row
-  const updatedHours: Record<string, number> = {}
-  let totalLoads = 0
-  for (let i = 1; i <= 12; i++) {
-    const col = `hour_${String(i).padStart(2, '0')}`
-    if (i > stopHour) {
-      updatedHours[col] = -1
-    } else {
-      const val = (currentLoad as Record<string, number>)[col] as number
-      updatedHours[col] = val >= 0 ? val : 0
-      totalLoads += updatedHours[col]
-    }
-  }
-
-  const { error: updateError } = await supabase
-    .from('hourly_loads')
-    .update({
-      ...updatedHours,
-      total_loads: totalLoads,
-      updated_at: new Date().toISOString(),
-      updated_by: user.id,
-    })
-    .eq('id', input.loadRowId)
-
-  if (updateError) {
+  if (error || (data && !data.success)) {
     throw new DatabaseError('Failed to end hauling session', {
-      operation: 'update',
-      context: { loadRowId: input.loadRowId, error: updateError.message },
+      operation: 'rpc:control_room_end_hauling_session',
+      context: { loadRowId: input.loadRowId, error: error?.message || data?.error },
     })
-  }
-
-  // 3. Create a new hourly load row, locking hours up to stopHour
-  const newHours: Record<string, number> = {}
-  for (let i = 1; i <= 12; i++) {
-    const col = `hour_${String(i).padStart(2, '0')}`
-    if (i <= input.stopHour) {
-      newHours[col] = -1
-    } else {
-      newHours[col] = 0
-    }
-  }
-
-  const { data: newLoad, error: insertError } = await supabase
-    .from('hourly_loads')
-    .insert({
-      department_id: currentLoad.department_id,
-      load_date: currentLoad.load_date,
-      shift_type: currentLoad.shift_type,
-      machine_id: currentLoad.machine_id,
-      material_type: input.newMaterial,
-      total_loads: 0,
-      ...newHours,
-      created_by: user.id,
-      updated_at: new Date().toISOString(),
-    })
-    .select('id')
-    .single()
-
-  if (insertError || !newLoad) {
-    throw new DatabaseError('Failed to create new hauling session row', {
-      operation: 'insert',
-      context: { error: insertError?.message },
-    })
-  }
-
-  // 4. Create a new assignment if a new excavator is selected
-  if (input.newExcavatorId) {
-    // Check if there is an active excavator_activity for this excavator today/shift
-    let activityId: string | null = null
-    const { data: activeActivity } = await supabase
-      .from('excavator_activity')
-      .select('id')
-      .eq('machine_id', input.newExcavatorId)
-      .eq('activity_date', currentLoad.load_date)
-      .eq('shift_type', currentLoad.shift_type)
-      .limit(1)
-
-    if (activeActivity && activeActivity.length > 0 && activeActivity[0]) {
-      activityId = activeActivity[0].id
-    } else {
-      // Create new excavator activity
-      const { data: newActivity, error: activityError } = await supabase
-        .from('excavator_activity')
-        .insert({
-          department_id: currentLoad.department_id,
-          activity_date: currentLoad.load_date,
-          shift_type: currentLoad.shift_type,
-          machine_id: input.newExcavatorId,
-          loads: 0,
-          passes: 0,
-          updated_at: new Date().toISOString(),
-        })
-        .select('id')
-        .single()
-
-      if (!activityError && newActivity) {
-        activityId = newActivity.id
-      }
-    }
-
-    if (activityId) {
-      // Insert new assignment
-      await supabase.from('excavator_dumper_assignments').insert({
-        dumper_machine_id: currentLoad.machine_id,
-        excavator_activity_id: activityId,
-        material_type: input.newMaterial,
-        total_loads: 0,
-        updated_at: new Date().toISOString(),
-      })
-    }
   }
 
   revalidateTag(DEPARTMENT_CACHE_TAGS.CONTROL_ROOM, 'max')
@@ -587,64 +476,18 @@ export async function updateHourlyLoadMaterial(
     subMaterial,
   })
 
-  // 1. Update hourly loads material_type (restricted to 'Coal' | 'Waste')
-  const { error: loadError } = await supabase
-    .from('hourly_loads')
-    .update({
-      material_type: input.primaryMaterial,
-      updated_at: new Date().toISOString(),
-      updated_by: user.id,
+  const { data, error } = await supabase.rpc('control_room_update_material', {
+    p_load_row_id: input.loadRowId,
+    p_primary_material: input.primaryMaterial,
+    p_sub_material: input.subMaterial,
+    p_user_id: user.id,
+  })
+
+  if (error || (data && !data.success)) {
+    throw new DatabaseError('Failed to update hourly load material', {
+      operation: 'rpc:control_room_update_material',
+      context: { loadRowId: input.loadRowId, error: error?.message || data?.error },
     })
-    .eq('id', input.loadRowId)
-
-  if (loadError) {
-    throw new DatabaseError('Failed to update hourly load material type', {
-      operation: 'update',
-      context: {
-        loadRowId: input.loadRowId,
-        primaryMaterial: input.primaryMaterial,
-        error: loadError.message,
-      },
-    })
-  }
-
-  // 2. Fetch the corresponding excavator dumper assignment to update its specific material type
-  const { data: loadRow } = await supabase
-    .from('hourly_loads')
-    .select('machine_id, load_date, shift_type')
-    .eq('id', input.loadRowId)
-    .single()
-
-  if (loadRow) {
-    // Find sibling loads
-    const { data: siblingLoads } = await supabase
-      .from('hourly_loads')
-      .select('id')
-      .eq('machine_id', loadRow.machine_id)
-      .eq('load_date', loadRow.load_date)
-      .eq('shift_type', loadRow.shift_type)
-      .order('created_at')
-
-    // Find assignments
-    const { data: assignments } = await supabase
-      .from('excavator_dumper_assignments')
-      .select('id, created_at')
-      .eq('dumper_machine_id', loadRow.machine_id)
-      .order('created_at')
-
-    if (siblingLoads && assignments) {
-      const index = siblingLoads.findIndex((l) => l.id === input.loadRowId)
-      if (index !== -1 && index < assignments.length && assignments[index]) {
-        const assignmentId = assignments[index].id
-        await supabase
-          .from('excavator_dumper_assignments')
-          .update({
-            material_type: input.subMaterial,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', assignmentId)
-      }
-    }
   }
 
   revalidateTag(DEPARTMENT_CACHE_TAGS.CONTROL_ROOM, 'max')
@@ -657,102 +500,21 @@ export async function reassignDumperExcavator(
   loadRowId: string,
   newExcavatorId: string
 ): Promise<{ success: boolean }> {
-  const { supabase } = await assertControlRoomRole()
+  const { supabase, user } = await assertControlRoomRole()
 
   const input = parseSchema(ReassignDumperExcavatorSchema, { loadRowId, newExcavatorId })
 
-  // 1. Fetch the hourly loads row
-  const { data: loadRow, error: readError } = await supabase
-    .from('hourly_loads')
-    .select('machine_id, load_date, shift_type, material_type, department_id')
-    .eq('id', input.loadRowId)
-    .single()
+  const { data, error } = await supabase.rpc('control_room_reassign_excavator', {
+    p_load_row_id: input.loadRowId,
+    p_new_excavator_id: input.newExcavatorId || null,
+    p_user_id: user.id,
+  })
 
-  if (readError || !loadRow) {
-    throw new DatabaseError('Hourly load record not found', {
-      operation: 'select',
-      context: { loadRowId: input.loadRowId, error: readError?.message },
+  if (error || (data && !data.success)) {
+    throw new DatabaseError('Failed to reassign excavator', {
+      operation: 'rpc:control_room_reassign_excavator',
+      context: { loadRowId: input.loadRowId, error: error?.message || data?.error },
     })
-  }
-
-  // 2. Find the corresponding assignment for this session row (using creation order matching)
-  const { data: siblingLoads } = await supabase
-    .from('hourly_loads')
-    .select('id')
-    .eq('machine_id', loadRow.machine_id)
-    .eq('load_date', loadRow.load_date)
-    .eq('shift_type', loadRow.shift_type)
-    .order('created_at')
-
-  const { data: assignments } = await supabase
-    .from('excavator_dumper_assignments')
-    .select('id, created_at')
-    .eq('dumper_machine_id', loadRow.machine_id)
-    .order('created_at')
-
-  if (siblingLoads && assignments) {
-    const index = siblingLoads.findIndex((l) => l.id === input.loadRowId)
-
-    // Find or create active excavator activity for the new excavator
-    let activityId: string | null = null
-    if (input.newExcavatorId) {
-      const { data: activeActivity } = await supabase
-        .from('excavator_activity')
-        .select('id')
-        .eq('machine_id', input.newExcavatorId)
-        .eq('activity_date', loadRow.load_date)
-        .eq('shift_type', loadRow.shift_type)
-        .limit(1)
-
-      if (activeActivity && activeActivity.length > 0 && activeActivity[0]) {
-        activityId = activeActivity[0].id
-      } else {
-        // Create new excavator activity
-        const { data: newActivity, error: activityError } = await supabase
-          .from('excavator_activity')
-          .insert({
-            department_id: loadRow.department_id,
-            activity_date: loadRow.load_date,
-            shift_type: loadRow.shift_type,
-            machine_id: input.newExcavatorId,
-            loads: 0,
-            passes: 0,
-            updated_at: new Date().toISOString(),
-          })
-          .select('id')
-          .single()
-
-        if (!activityError && newActivity) {
-          activityId = newActivity.id
-        }
-      }
-    }
-
-    if (index !== -1 && index < assignments.length && assignments[index]) {
-      const assignmentId = assignments[index].id
-      // Update existing assignment
-      if (activityId) {
-        await supabase
-          .from('excavator_dumper_assignments')
-          .update({
-            excavator_activity_id: activityId,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', assignmentId)
-      } else {
-        // If unassigned (empty select)
-        await supabase.from('excavator_dumper_assignments').delete().eq('id', assignmentId)
-      }
-    } else if (activityId) {
-      // If no assignment existed for this index, insert one!
-      await supabase.from('excavator_dumper_assignments').insert({
-        dumper_machine_id: loadRow.machine_id,
-        excavator_activity_id: activityId,
-        material_type: loadRow.material_type,
-        total_loads: 0,
-        updated_at: new Date().toISOString(),
-      })
-    }
   }
 
   revalidateTag(DEPARTMENT_CACHE_TAGS.CONTROL_ROOM, 'max')
