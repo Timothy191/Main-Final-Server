@@ -149,6 +149,7 @@ pnpm --filter portal test -- path/to/file.test.tsx   # single test file
 pnpm audit:rls                                       # RLS policy audit
 pnpm audit:knip                                      # dead code / unused deps
 pnpm db:codegen                                      # regenerate db-types.ts
+pnpm analyze                                         # run @next/bundle-analyzer on client/server bundles
 pnpm build                                           # turbo build all
 pnpm format                                          # prettier --write
 ```
@@ -220,6 +221,81 @@ Do **not** run `generate-tokens.mjs` for CSS edits — edit `packages/theme/src/
 ### Agent tracing
 
 Leave `// AGENT-TRACE:` breadcrumbs in code at non-obvious integration points. Update `.agents/AGENT_TRACER.md` for significant tasks.
+
+### Working Across Package Boundaries
+
+When work spans multiple packages, follow this incremental approach:
+
+1. **Start with foundation packages** (no dependencies):
+   - `packages/acl` - Department slugs and roles
+   - `packages/contract` - Zod schemas
+   - `packages/typescript-config` - Shared TS config
+
+2. **Move to data layer packages**:
+   - `packages/supabase` - Database clients and migrations
+   - `packages/database` - Kysely types
+   - `packages/redis` - Caching layer
+
+3. **Update shared utilities**:
+   - `packages/ui` - Shared components
+   - `packages/utils` - Utility functions
+   - `packages/errors` - Error classes
+
+4. **Finally update consuming app**:
+   - `apps/portal` - Portal application
+
+**After each package change:**
+```bash
+# Test the specific package
+pnpm --filter <package> type-check
+pnpm --filter <package> test
+
+# Check dependent packages
+pnpm exec turbo run type-check --filter ...^<package>
+```
+
+### Build Dependency Order
+
+Packages must be built in dependency order. The correct sequence:
+
+1. Foundation: `@repo/typescript-config`, `@repo/eslint-config`
+2. Types & Contracts: `@repo/acl`, `@repo/contract`, `@repo/errors`
+3. Data Layer: `@repo/supabase`, `@repo/database`, `@repo/redis`
+4. Utilities: `@repo/utils`, `@repo/logger`, `@repo/rate-limiter`
+5. UI Foundation: `@repo/theme`, `@repo/ui`
+6. App: `apps/portal`
+
+**Before testing a package, ensure its dependencies are built:**
+```bash
+# Example: Before testing portal
+pnpm build --filter @repo/theme --filter @repo/ui --filter @repo/supabase
+pnpm --filter portal test
+```
+
+### Monorepo Build & Deployment
+- **Remote Caching:** Connect Turborepo to Vercel's remote cache (or S3) via `npx turbo link`. In CI, ensure `TURBO_TOKEN` and `TURBO_TEAM` are set to reuse build artifacts.
+- **Turbo Prune:** For optimized Docker builds or slim deployments, use `turbo prune`:
+  ```bash
+  npx turbo prune --scope=portal --docker
+  ```
+  This generates a `out/` directory with a pruned workspace containing only the necessary packages.
+- **Global Dependencies:** `turbo.json` tracks `.env*` and `AGENTS.md` as global dependencies. Any change to these files will invalidate the cache for all tasks.
+- **Quality Pipeline:** Use `pnpm quality` (or `turbo run quality --filter=<pkg>`) for a comprehensive check before completion.
+
+### Package-Level Guidelines
+
+Critical shared packages have their own AGENTS.md files:
+- [`packages/acl/AGENTS.md`](./packages/acl/AGENTS.md) - Department slugs and roles (SSOT)
+- [`packages/contract/AGENTS.md`](./packages/contract/AGENTS.md) - Zod schemas and validation
+- [`packages/ui/AGENTS.md`](./packages/ui/AGENTS.md) - Shared React components
+- [`packages/supabase/AGENTS.md`](./packages/supabase/AGENTS.md) - Database clients and migrations
+- [`packages/redis/AGENTS.md`](./packages/redis/AGENTS.md) - Caching layer
+
+**Before changing a shared package:**
+1. Read its package-level AGENTS.md
+2. Identify all consuming packages
+3. Plan incremental updates across the dependency chain
+4. Update consumers after breaking changes
 
 ---
 

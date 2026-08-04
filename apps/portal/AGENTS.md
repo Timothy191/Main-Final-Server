@@ -36,3 +36,17 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - React 19 + Testing Library for component tests. Mock Supabase/Redis at the boundary, not the component.
 - Run a single test: `pnpm --filter portal test -- path/to/file.test.tsx`.
 - Verify before done: `pnpm exec turbo run lint type-check test --force` (must show **0 cached**), then `pnpm gates` and `pnpm format:check`.
+
+## Performance Rules
+- Always use `next/image` and `next/font`.
+- Keep components server-side unless they need `useState`, `useEffect`, or event handlers.
+- Wrap database queries with `cache()` from React when used in multiple components.
+- After any mutation, call `revalidatePath` or `revalidateTag` to keep ISR fresh.
+- Favor deep imports from `@repo/ui` (e.g., `@repo/ui/GlassButton`) over barrel imports.
+
+## Caching Synergy (L1/L2 Redis vs Next.js Data Cache)
+- **Shared Data (Redis):** Use `@repo/redis` for data that needs to be shared across multiple apps, worker processes, or remains valid across deployments.
+- **Request-Scoped Data (`cache()`):** Use React `cache()` to deduplicate database or API calls within a single render cycle.
+- **Next.js Data Cache:** For portal-specific data, prefer Next.js's built-in fetch cache and `unstable_cache` to leverage ISR and easy revalidation.
+- **Double-Caching Avoidance:** If using Redis as the primary data store, bypass Next.js's data cache by setting `cache: 'no-store'` or using `connection()`.
+- **Revalidation Mapping:** When using `@repo/redis`, ensure any `revalidateTag` call is paired with a corresponding `cache.invalidateTags` call to `@repo/redis`.
