@@ -718,7 +718,7 @@ export function SystemTrayPill() {
             align="end"
             sideOffset={6}
             className={cn(
-              'w-64 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl p-3 z-[120]',
+              'w-64 os-shell os-shell--popover shadow-window rounded-xl p-3 z-[120]',
               'flex flex-col gap-2 select-none focus:outline-none'
             )}
           >

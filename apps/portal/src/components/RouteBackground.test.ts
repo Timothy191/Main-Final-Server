@@ -22,7 +22,7 @@ describe('ensureAmbientVideoPlaying', () => {
     expect(video.muted).toBe(true)
     expect(video.defaultMuted).toBe(true)
     expect(video.playsInline).toBe(true)
-    expect(video.playbackRate).toBe(0.65)
+    expect(video.playbackRate).toBe(1.0)
     expect(video.play).toHaveBeenCalledTimes(1)
   })
 

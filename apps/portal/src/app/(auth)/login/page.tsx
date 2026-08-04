@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import * as Sentry from '@sentry/nextjs'
 import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { LoginBrandBanner } from '@/features/auth/components/LoginBrandBanner'
@@ -36,7 +37,9 @@ export default async function LoginPage() {
       ) {
         // Transient — don't show unavailable, just serve the form
 
-        console.warn('Transient auth check failure, serving login form:', e.message)
+        Sentry.logger.warn('Transient auth check failure, serving login form', {
+          error_message: e.message,
+        })
       } else {
         systemUnavailable = true
       }
@@ -103,7 +106,7 @@ export default async function LoginPage() {
                   <Logo className="login-brand-logo" />
                 </div>
                 <div className="space-y-2">
-                  <h1 className="login-wordmark font-display text-3xl font-normal tracking-[0.12em] uppercase">
+                  <h1 className="login-wordmark font-display text-3xl font-normal tracking-[0.12em] uppercase text-slate-900">
                     ARCH-SYSTEM
                   </h1>
                   <p className="login-muted-text text-[13px] font-medium tracking-wide">

@@ -20,7 +20,7 @@ export function PrimitivesShowcase() {
 
       <div className="grid gap-6 md:grid-cols-3">
         {/* Avatar Showcase */}
-        <Card className="border-white/20 bg-white/70 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">
               Avatar Primitive
@@ -44,7 +44,7 @@ export function PrimitivesShowcase() {
         </Card>
 
         {/* Kbd Showcase */}
-        <Card className="border-white/20 bg-white/70 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">
               Kbd Primitive
@@ -75,7 +75,7 @@ export function PrimitivesShowcase() {
         </Card>
 
         {/* Spinner Showcase */}
-        <Card className="border-white/20 bg-white/70 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">
               Spinner Primitive

@@ -92,7 +92,7 @@ export function FeedbackWidget() {
           className={cn(
             'absolute right-0 top-full z-[60] mt-1.5 w-80 p-4',
             'flex flex-col gap-4 rounded-xl border border-border-subtle',
-            'bg-white/95 shadow-window backdrop-blur-xl'
+            'os-shell os-shell--popover shadow-window'
           )}
         >
           <div className="flex items-center justify-between">

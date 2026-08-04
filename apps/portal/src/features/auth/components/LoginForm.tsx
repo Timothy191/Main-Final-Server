@@ -193,11 +193,11 @@ export function LoginForm({ className }: LoginFormProps) {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
-            className="absolute right-3 top-1/2 -translate-y-1/2 login-muted-text hover:text-arch-text-primary focus-visible:outline-none rounded p-0.5"
+            className="absolute right-3 top-1/2 -translate-y-1/2 login-muted-text hover:text-slate-900 focus-visible:outline-none rounded p-0.5"
           >
             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
-          <div className="text-[12px] text-muted mt-1">Password is case-sensitive</div>
+          <div className="login-text-help text-[12px] mt-1">Password is case-sensitive</div>
           {capsLockOn && (
             <div className="absolute right-10 top-1/2 -translate-y-1/2 flex items-center gap-1 text-accent-amber text-xs">
               <AlertCircle size={12} />
@@ -210,7 +210,7 @@ export function LoginForm({ className }: LoginFormProps) {
       <div className="flex w-full min-w-0 items-center justify-between gap-3 pt-0.5">
         <label
           htmlFor="remember-me"
-          className={`flex items-center gap-2 ${LOGIN_MUTED_TEXT} cursor-pointer select-none`}
+          className="flex items-center gap-2 login-text-help cursor-pointer select-none"
         >
           <input
             id="remember-me"
@@ -224,7 +224,7 @@ export function LoginForm({ className }: LoginFormProps) {
         </label>
         <Link
           href="/reset-password"
-          className={`${LOGIN_MUTED_TEXT} hover:text-arch-text-primary hover:underline focus-visible:outline-none rounded px-0.5`}
+          className="login-text-help hover:text-slate-900 hover:underline focus-visible:outline-none rounded px-0.5"
         >
           Forgot password?
         </Link>

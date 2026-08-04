@@ -180,8 +180,8 @@
   --tremor-content-inverted: 0 0% 100%;
 
   /* ═══════════════════════════════════════════════════════════════
-       GLASS TOKENS — macOS Frosted Glass (always active)
-       ═══════════════════════════════════════════════════════════════ */
+   * GLASS TOKENS — System Liquid Glass (always active)
+   * ═══════════════════════════════════════════════════════════════ */
   --glass-surface: var(--palette-glass-surface);
   --glass-surface-hover: var(--palette-glass-surface-hover);
   --glass-surface-strong: var(--palette-glass-surface-strong);
@@ -417,14 +417,10 @@
   --os-shell-enter-delay-3: 500ms;
 
   /* Login supporting copy */
-  --login-text-muted: #4a4a52;
-  --login-text-emphasis: var(--text-heading);
-  --login-text-placeholder: color-mix(
-    in srgb,
-    var(--login-text-muted) 78%,
-    var(--text-heading) 22%
-  );
-  --login-chrome-band: rgba(0, 0, 0, 0.04);
+  --login-text-muted: #475569; /* text-slate-600 */
+  --login-text-emphasis: #0F172A; /* text-slate-900 */
+  --login-text-placeholder: #94A3B8; /* text-slate-400 */
+  --login-chrome-band: rgba(255, 255, 255, 0.15); /* light glass band */
   --login-card-max-width: 26.25rem;
   --login-card-min-height: 40rem;
   --login-viewport-taskbar-offset: 28px;
@@ -435,9 +431,11 @@
   --login-card-body-pb: 2rem;
 
   /* Login card shell */
-  --login-shell-edge: var(--palette-border-glass-catch);
-  --login-shell-specular-inset: inset 0 1px 2px rgba(255, 255, 255, 0.28);
-  --login-shell-shadow: var(--os-shell-shadow), var(--login-shell-specular-inset);
+  --login-shell-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.4) 100%); /* bg-white/50 or bg-white/40 */
+  --login-shell-backdrop: blur(24px) saturate(150%); /* backdrop-blur-xl / backdrop-saturate-150 */
+  --login-shell-edge: rgba(255, 255, 255, 0.6); /* border border-white/60 */
+  --login-shell-specular-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --login-shell-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), var(--login-shell-specular-inset); /* shadow-2xl shadow-black/10 */
 
   /* Login focus — golden chrome ring */
   --login-focus-gold: var(--palette-chrome-yellow);
@@ -453,32 +451,29 @@
 
   /* Login controls — light glass interior (white translucent, dark borders) */
   --login-control-radius: var(--radius-lg);
-  --login-field-bg: rgba(255, 255, 255, 0.75);
+  --login-field-bg: rgba(255, 255, 255, 0.75); /* bg-white/80 or bg-white/70 */
   --login-field-bg-focus: rgba(255, 255, 255, 0.92);
-  --login-field-border: rgba(15, 23, 42, 0.12);
-  --login-field-shadow: var(--login-focus-inset-highlight), inset 0 1px 2px rgba(15, 23, 42, 0.04);
-  --login-field-backdrop: blur(4px) saturate(120%);
-  --login-cta-bg: var(--palette-neutral-950);
-  --login-cta-bg-hover: var(--palette-brand-primary-hover);
-  --login-cta-fg: var(--palette-brand-on-primary);
-  --login-cta-border: color-mix(in srgb, var(--palette-neutral-950) 82%, black);
-  --login-cta-border-hover: color-mix(in srgb, var(--palette-brand-primary-hover) 88%, black);
-  --login-cta-shadow: 0 2px 12px rgba(0, 0, 0, 0.24), 0 1px 3px rgba(0, 0, 0, 0.14);
-  --login-oauth-bg: rgba(255, 255, 255, 0.75);
-  --login-oauth-bg-hover: rgba(255, 255, 255, 0.88);
-  --login-oauth-border: rgba(15, 23, 42, 0.1);
-  --login-oauth-backdrop: blur(4px) saturate(120%);
-  --login-notice-bg: var(--overlay-dim);
-  --login-notice-border: var(--border-subtle);
-  --login-notice-radius: var(--login-control-radius);
-  --login-brand-neon-core: color-mix(in srgb, var(--palette-semantic-danger) 55%, transparent);
-  --login-brand-neon-mid: color-mix(in srgb, var(--palette-semantic-danger) 22%, transparent);
-  --login-wordmark-color: var(--text-heading);
-  --login-wordmark-shadow: 0 1px 0 rgba(255, 255, 255, 0.75), 0 2px 4px rgba(15, 23, 42, 0.1);
-  --login-wordmark-drop: none;
-  --login-footer-opacity: 0.52;
-  --login-footer-opacity-hover: 0.62;
-  --login-footer-divider-opacity: 0.4;
+  --login-field-border: rgba(255, 255, 255, 0.8); /* border border-white/80 */
+  --login-field-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --login-field-backdrop: blur(12px) saturate(130%); /* backdrop-blur-md */
+  --login-cta-bg: #0f172a; /* solid dark slate bg-slate-900 */
+  --login-cta-fg: #ffffff;
+  --login-cta-border: #0f172a;
+  --login-cta-border-hover: #1e293b;
+  --login-cta-bg-hover: #1e293b; /* bg-slate-800 */
+  --login-cta-shadow: 0 4px 12px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  --login-oauth-bg: rgba(255, 255, 255, 0.8); /* bg-white/80 */
+  --login-oauth-bg-hover: #ffffff; /* hover:bg-white */
+  --login-oauth-border: rgba(255, 255, 255, 0.9); /* border-white/90 */
+  --login-oauth-fg: #1e293b; /* text-slate-800 */
+  --login-oauth-backdrop: blur(8px) saturate(120%);
+  --login-oauth-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --login-notice-bg: rgba(255, 255, 255, 0.4);
+  --login-notice-border: rgba(255, 255, 255, 0.5);
+  --login-wordmark-color: #0f172a; /* text-slate-900 */
+  --login-footer-opacity: 0.62;
+  --login-footer-opacity-hover: 0.82;
+  --login-footer-divider-opacity: 0.15;
 
   /* ═══════════════════════════════════════════════════════════════
        THEME TRANSITION
@@ -495,3 +490,10 @@
 
   color-scheme: light;
 }
+
+/* INP Optimization: Skip layout calculation for off-screen containers until scrolled into view */
+.lazy-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 500px;
+}
+

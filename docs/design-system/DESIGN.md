@@ -13,7 +13,7 @@ summarizes their consequences; consult DECISIONS for rationale.
 
 ## 1. Intent
 
-The portal is a **light-only, macOS-frosted-glass** operational control surface
+The portal is a **light-only, Sonoma-palette, Liquid Glass** operational control surface
 for a mining control room (DECISIONS #003). The visual language is white
 translucency, liquid glass, and high-contrast ambient shadow over a single
 animated ambient backdrop. There is intentionally **no dark mode** — components
@@ -91,7 +91,7 @@ them; only the silhouette changes.
 A single client component, `apps/portal/src/components/RouteBackground.tsx`,
 renders the permanent backdrop on every route:
 
-- **One muted, looping H.264 wave** (`/assets/video/background.mp4`) at **0.65×**
+- **One muted, looping H.264 wave** (`/assets/video/background.mp4`) at **1.0×**
   playback rate, `autoPlay/loop/playsInline`, with a **keep-alive watchdog**
   (re-asserts play on pause/visibility/decoder stalls).
 - **CSS fallback layers** behind/over the video: animated orbs

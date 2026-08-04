@@ -104,7 +104,7 @@ export function ArchStartMenu({ onClose }: ArchStartMenuProps) {
   return (
     <div
       data-testid="arch-start-menu"
-      className="flex max-h-[min(80vh,34rem)] w-full flex-col overflow-hidden rounded-2xl border border-black/[0.08] bg-white/90 shadow-window backdrop-blur-2xl"
+      className="os-shell rounded-[var(--os-shell-radius-lg)] flex max-h-[min(80vh,34rem)] w-full flex-col overflow-hidden"
     >
       <div className="border-b border-black/[0.06] p-3">
         <label className="relative flex items-center">

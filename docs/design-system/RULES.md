@@ -189,58 +189,58 @@ The CI pipeline enforces these checks:
 
 ---
 
-## R10 — Platform-Specific Details (macOS)
+## R10 — Platform-Specific Details
 
-The design system is optimized for macOS, with the following platform-specific
+The design system is optimized for the System environment, with the following platform-specific
 tokens and classes:
 
-### macOS Chrome Tokens
+### Chrome Tokens
 
-- `--mac-red`: `#ff5f56` — Traffic light red (matches macOS system)
+- `--mac-red`: `#ff5f56` — Traffic light red (matches system)
 - `--mac-yellow`: `#ffbd2e` — Traffic light yellow
 - `--mac-green`: `#27c93f` — Traffic light green
-- `--mac-menu-bar-height`: `28px` — System menu bar height
+- `--menu-bar-height`: `28px` — System menu bar height
 
-### macOS UI Patterns
+### UI Patterns
 
-**Login Card (macOS-style):**
+**Login Card (System-style):**
 
 - Uses `.os-shell--login` with 24px rounded corners
-- Dark ambient wallpaper behind frosted glass card
+- Dark ambient wallpaper behind Liquid Glass card
 - Gold focus ring (`--login-focus-gold-*`) for interactive elements
 - Centered, fixed-width card (max-width: 26.25rem)
 
 **Dock Implementation:**
 
 - Bottom-aligned panel using `.os-shell--dock`
-- Square corners for full-height shell
+- Rounded corners for full-height shell
 - Centered icon arrangement
 
 **Menu Bar Integration:**
 
 - Taskbars use pill shape with `.os-shell--taskbar`
-- Respects `--mac-menu-bar-height` for positioning
+- Respects `--menu-bar-height` for positioning
 - Ultra-translucent fill (`--os-shell-taskbar-surface`)
 
-### Platform-Specific Styles
+### System-Specific Styles
 
 ```css
-/* macOS-specific overrides in glass.css */
+/* System-specific overrides in glass.css */
 .os-shell--login {
   /* Login-specific styling */
 }
 
 .login-focus-gold-ring {
-  /* Gold focus ring for macOS-like UI */
+  /* Gold focus ring for System-like UI */
 }
 ```
 
-### macOS Lockup UI
+### Lockup UI
 
-The login interface follows macOS conventions:
+The login interface follows System conventions:
 
-- Frosted glass card over dark ambient
+- Liquid Glass card over dark ambient
 - Centered branding with wordmark
-- Apple-style traffic light red/yellow/green indicators
+- Traffic light red/yellow/green indicators
 - Focus ring uses gold (`--login-focus-gold-*`) rather than blue
 - Password field shows reveal/hide toggle with proper spacing

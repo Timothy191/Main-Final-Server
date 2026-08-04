@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import { Download, X } from 'lucide-react'
 
 type BeforeInstallPromptEvent = Event & {
@@ -57,9 +58,9 @@ export function PWAInstallButton() {
     const { outcome } = await deferredPrompt.userChoice
 
     if (outcome === 'accepted') {
-      console.warn('[pwa] User accepted the install prompt')
+      Sentry.logger.info('PWA install prompt accepted')
     } else {
-      console.warn('[pwa] User dismissed the install prompt')
+      Sentry.logger.info('PWA install prompt dismissed')
     }
 
     // Clear the deferred prompt
@@ -79,7 +80,7 @@ export function PWAInstallButton() {
   return (
     <div
       role="alert"
-      className="fixed bottom-4 right-4 z-[9998] flex items-center gap-3 bg-white/90 backdrop-blur-xl border border-black/[0.08] shadow-card rounded-lg p-4 animate-in slide-in-from-bottom-4 fade-in duration-300"
+      className="fixed bottom-4 right-4 z-[9998] flex items-center gap-3 os-shell os-shell--toast shadow-card rounded-lg p-4 animate-in slide-in-from-bottom-4 fade-in duration-300"
     >
       <div className="flex-1">
         <p className="text-sm font-medium text-arch-text-primary">Install Arch Portal</p>

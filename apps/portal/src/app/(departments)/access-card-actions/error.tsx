@@ -1,16 +1,26 @@
 'use client'
 
+import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import { GlassCard } from '@repo/ui/GlassCard'
 import { Button } from '@repo/ui/components/ui/button'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 
 export default function AccessCardActionsError({
-  error: _error,
+  error,
   reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    Sentry.captureException(error)
+    Sentry.logger.error('Access card actions error', {
+      error_message: error.message,
+      digest: error.digest,
+    })
+  }, [error])
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col items-center justify-center py-16">

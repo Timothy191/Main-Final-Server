@@ -7,7 +7,7 @@ const BACKGROUND_VIDEO_SRC = '/assets/video/background.mp4'
 /** Poster shown before the first decoded frame (matches the wave clip). */
 const BACKGROUND_POSTER_SRC = '/auth-bg-poster.jpg'
 /** Approved ambient speed (65% of source). */
-const PLAYBACK_RATE = 0.65
+const PLAYBACK_RATE = 1.0
 /** Re-assert play() if the browser pauses the ambient layer unexpectedly. */
 const KEEP_ALIVE_MS = 2000
 

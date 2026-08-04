@@ -45,7 +45,7 @@ Per ADR #007, enforced by `packages/theme/scripts/validate-tokens.mjs`:
 
 `--dept-drilling:#2563eb`, `--dept-production:#34c759`, `--dept-access-control:#0284c7`, `--dept-access-card-actions:#3b82f6`, `--dept-engineering:#7c3aed`, `--dept-control-room:#dc2626`, `--dept-safety:#d97706`, `--dept-training:#0891b2`, `--dept-satellite:#4f46e5`, `--dept-admin:#7c3aed`. Applied via safelisted Tailwind classes (ADR #004), not CSS vars.
 
-### 1.4 macOS chrome (`variables.css:125–128`)
+### 1.4 System chrome (`variables.css:125–128`)
 
 `--mac-red/--mac-yellow/--mac-green` ← `--palette-chrome-{red,yellow,green}`.
 
@@ -93,14 +93,14 @@ Per ADR #007, enforced by `packages/theme/scripts/validate-tokens.mjs`:
 
 ### 3.2 Classes
 
-| Class                                   | Radius                          | Purpose                                                                                                      |
-| --------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `.os-shell`                             | inherits                        | Base chrome: `position:relative; isolation:isolate; overflow:hidden;` + surface/border/shadow/backdrop/font. |
-| `.os-shell--taskbar`                    | pill (`--os-shell-radius-full`) | Top taskbar — taskbar surface/shadow.                                                                        |
-| `.os-shell--login`, `.os-shell--dock`   | `24px`                          | Login card, bottom dock.                                                                                     |
-| `.os-shell--panel`                      | `0` (square)                    | Full-height operational panel shell (department sidebar).                                                    |
-| `.low-perf-fallback .os-shell`          | —                               | Opaque `rgba(246,246,250,0.92)`, no blur.                                                                    |
-| `.low-perf-fallback .os-shell--taskbar` | —                               | Opaque `rgba(246,246,250,0.96)` + flat shadow.                                                               |
+| Class                                 | Radius                          | Purpose                                                                                                      |
+| ------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `.os-shell`                           | inherits                        | Base chrome: `position:relative; isolation:isolate; overflow:hidden;` + surface/border/shadow/backdrop/font. |
+| `.os-shell--taskbar`                  | pill (`--os-shell-radius-full`) | Top taskbar — taskbar surface/shadow.                                                                        |
+| `.os-shell--login`, `.os-shell--dock` | `24px`                          | Login card, bottom dock.                                                                                     |
+| `.os-shell--panel`                    | `0` (square)                    | Full-height operational panel shell (department sidebar).                                                    |
+| `.low-perf-fallback .os-shell`        | —                               | Opaque `rgba(246,246,250,0.92)`, no blur.                                                                    |
+| `.glass-macos`                        | `blur(20px) saturate(180%)`     | `--glass-surface`                                                                                            | inherits | System translucency |
 
 Entrance animations: `.os-shell-enter-1` (down, 0ms), `.os-shell-enter-2` (up, 250ms), `.os-shell-enter-3` (up, 500ms) — `animations.css:203–216`.
 
@@ -355,7 +355,7 @@ Exposed as utilities (selected): colors `arch0–15`, `arch.surface.*`, `arch.te
 
 ## 15. Login control tokens (`--login-*`)
 
-The login reference surface (`apps/portal/src/app/(auth)/login/page.tsx`) uses `--os-shell--login` for the card shell and dedicated `--login-*` tokens (ADR #010) for control paints — **do not hard-code these in components**. Groups: `--login-control-radius` (16px), `--login-card-max-width/-min-height/-viewport-taskbar-offset/-page-offset-top/-padding-x/-sm`, `--login-field-bg/-bg-focus/-border/-shadow/-backdrop`, `--login-cta-bg/-bg-hover/-fg/-border/-shadow`, `--login-oauth-bg/-bg-hover/-border/-backdrop`, `--login-notice-bg/-border/-radius`, `--login-wordmark-color/-shadow`, `--login-chrome-band`, `--login-brand-neon-core/-mid`, `--login-focus-gold-*` (incl. `-inset-highlight`, `-glow-peak`). Classes: `.login-field`, `.login-cta`, `.login-oauth`, `.login-notice`, `.login-checkbox`, `.login-card-*`, `.login-chrome-band`, `.login-brand-neon`, `.login-brand-fold`, `.login-wordmark`, `.hub-hero-title`.
+The login reference surface (`apps/portal/src/app/(auth)/login/page.tsx`) uses `--os-shell--login` for the card shell and dedicated `--login-*` tokens (ADR #010) for control paints — **do not hard-code these in components**. Groups: `--login-control-radius` (16px), `--login-card-max-width/-min-height/-viewport-taskbar-offset/-page-offset-top/-padding-x/-sm`, `--login-field-bg/-bg-focus/-border/-shadow/-backdrop`, `--login-cta-bg/-bg-hover/-fg/-border/-shadow`, `--login-oauth-bg/-bg-hover/-border/-backdrop`, `--login-notice-bg/-border/-radius`, `--login-wordmark-color/-shadow`, `--login-chrome-band`, `--login-brand-neon-core/-mid`, `--login-focus-gold-*` (incl. `-inset-highlight`, `-glow-peak`), `--login-shell-bg`, `--login-shell-backdrop`, `--login-shell-edge`, `--login-shell-shadow`, `--login-oauth-fg`, `--login-oauth-shadow`. Classes: `.login-field`, `.login-cta`, `.login-oauth`, `.login-notice`, `.login-checkbox`, `.login-card-*`, `.login-chrome-band`, `.login-brand-neon`, `.login-brand-fold`, `.login-wordmark`, `.hub-hero-title`, `.login-eve-status`.
 
 ## 16. Migration history (glass unification)
 

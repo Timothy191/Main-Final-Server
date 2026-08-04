@@ -36,7 +36,7 @@ export function LoginEveNotice() {
           <span className="login-text-emphasis text-[12px] font-semibold tracking-wide lowercase">
             {EVE_BRAND.name}
           </span>
-          <span className="login-eve-status text-[11px] font-medium tracking-wide">
+          <span className="login-eve-status px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide">
             Integrated · Active
           </span>
         </div>
