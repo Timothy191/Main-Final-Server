@@ -1,0 +1,23 @@
+{
+  "name": "@repo/scraper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "latest",
+    "@repo/supabase": "workspace:*",
+    "@repo/errors": "workspace:*",
+    "crawlee": "^3.11.0",
+    "playwright": "^1.45.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20.12.7",
+    "tsx": "^4.19.1",
+    "typescript": "^5.4.5"
+  }
+}
