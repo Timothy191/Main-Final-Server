@@ -63,6 +63,14 @@ All commands use `pnpm`. Root monorepo scripts live in `Arch-Mk2/package.json`; 
   - `plugins/rust-telemetry-engine/` — Rust plugin.
 - The app expects external services at runtime: Supabase, Redis, Ollama, and the NestJS API. See `.env.example`, `.env.production.example`, and `.env.portal.compose.example`.
 
+## Performance & Optimization Rules
+
+- **RSC by Default**: Keep components server-renderable; place `'use client'` only on leaf interactive nodes.
+- **Images & Fonts**: Always use `next/image` (with AVIF/WebP formats) and `next/font` (with `display: 'swap'`).
+- **Tree-Shaking**: Import shared UI components directly from specific paths (e.g. `@repo/ui/components/ui/button`), avoiding barrel file index imports.
+- **Data Caching**: Use React `cache()` for non-fetch async operations, and `cacheTag`/`cacheLife` alongside `@repo/redis` for data revalidation.
+- **Bundle Optimization**: Use `next/dynamic` for heavy client-side libraries and ensure `experimental.optimizePackageImports` covers large icon/utility libraries.
+
 ## Design system (global rule — mandatory)
 
 Visual surfaces (glass/transparency, panels, cards, the ambient background) follow **one schema**. Before styling any panel or card:

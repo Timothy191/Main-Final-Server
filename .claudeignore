@@ -1,0 +1,180 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+.next
+dist
+out
+build
+*.tsbuildinfo
+
+# Turbo
+.turbo
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+.env.tools
+
+# TLS certs / private keys
+certs/
+*.pem
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+portal.log
+api.log
+
+# Process / PID files
+*.pid
+.portal.pid
+.api.pid
+.portal.start
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea
+
+# Testing
+coverage
+.playwright
+**/test-results/
+
+# Archives / backups
+Archive.tar.gz
+*.tar.gz
+
+# Misc
+.vercel
+.remember
+.venv
+__pycache__
+*.pyc
+deployment-logs
+skills-lock.json
+AGENTS.local.md
+CLAUDE.local.md
+
+# Third-party agent runtime
+.claude-flow/
+.claude/hooks/state/
+.claude/settings.local.json
+.claude-plugin/
+.swarm/
+.crush/
+.openclaude/
+.poolside/
+.devin/
+.junie/
+.certbot-webroot/
+.harness-worktrees/
+.codeep/
+.commandcode/
+.freebuff/
+.roo/
+.qoder/
+.windsurf/
+.codex/
+.claude-code-harness*
+.kiro/specs/
+.env.production.example
+.agents/types/
+.agents/skills/
+.agents/teamwork_preview_*/
+.agents/victory_auditor/
+.agents/BRIEFING.md
+.agents/ORIGINAL_REQUEST.md
+ORIGINAL_REQUEST.md
+
+# Scratch board
+scratch_board/*
+!scratch_board/README.md
+!scratch_board/ACTIVE_TEMPLATE.md
+
+# Embedded git repos
+/agentic-system/
+/python-web-scraper/
+/redis/
+/system-tools/
+/SillyTavern-Launcher/
+
+# Orphaned/rogue files
+knowledge.md
+package-lock.json
+23810654.fxsnapshot
+Plans.md
+remove-dynamic.cjs
+.agents/.agents
+
+# Harness / agent runtime
+harness.toml
+hosts.toml
+agent-harnesses/
+hooks/
+bin/
+devops/
+.syncpackrc.json
+
+# Local-only legacy archives
+apps/portal/_app_legacy_shadow/
+apps/portal/_features_legacy_shadow/
+apps/portal/src.backup/
+.aider*
+**/.codewhale/*
+!**/.codewhale/constitution.json
+.deepseek/
+
+# Agent runtime state
+.kilo
+.kilocode
+.mimocode
+.openclaude
+.qoder
+.claude/projects
+
+# Agent memory substrate
+acc.db
+acc.db-shm
+acc.db-wal
+
+# App data directories
+_appdata/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Large media files
+public/assets/video/
+public/**/*.mp4
+public/**/*.mov
+public/**/*.avi
+
+# Font files (large binaries)
+public/fonts/*.otf
+public/fonts/*.ttf
+public/fonts/*.woff
+public/fonts/*.woff2
+
+# Generated icon sets
+public/icons/icon-*.png
+
+# Documentation build artifacts
+docs/.quarto/
+docs/_site/
+docs/_book/

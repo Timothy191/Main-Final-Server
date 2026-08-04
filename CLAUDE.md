@@ -20,8 +20,11 @@ Tools: `pnpm dev` (full stack), `pnpm quality` (lint+test+format), `pnpm supabas
 Quality gates: `pnpm gates` (enforced in CI)
 
 ## Critical Rules (WHY)
-- Run `pnpm exec turbo run lint type-check test --force` before "done"
-- Never edit `generated.ts` for CSS changes
+- Run `pnpm exec turbo run lint type-check test --force` and `pnpm format:check` before "done"
+- Keep components server-renderable by default; use `'use client'` only on interactive leaf components
+- Always use `next/image` and `next/font` for images and font optimization
+- Import shared components directly from specific files (e.g., `@repo/ui/components/ui/button`), avoiding root barrel exports
+- Never edit `generated.ts` for CSS changes directly (edit `variables.css`)
 - Use `@repo/errors` for typed errors
 - Supabase RLS enforced
 
