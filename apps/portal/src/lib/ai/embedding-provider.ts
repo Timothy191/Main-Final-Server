@@ -3,7 +3,7 @@ import crypto from 'crypto'
 
 export interface EmbeddingResult {
   embedding: number[]
-  provider: 'router' | 'ollama' | 'openai' | 'local'
+  provider: 'router' | 'ollama' | 'openai' | 'gemini' | 'local'
 }
 
 /**
@@ -55,10 +55,21 @@ function resolveEndpointConfig(): { url: string; apiKey?: string; isOllama: bool
 }
 
 /**
- * Generates an embedding for a single string using standard OpenAI-compatible API endpoint
- * (Ollama Cloud, OpenRouter, OpenCode, Kilo, Antigravity) with automatic fallback to local generation.
+ * Generates an embedding for a single string.
+ * Provider priority: Gemini (native) → OpenAI-compatible (Ollama/Router/OpenAI) → local fallback.
  */
 export async function getEmbedding(text: string): Promise<EmbeddingResult> {
+  // ── 1. Gemini native embedding (uses text-embedding-004 via Google API) ──
+  if (env.AI_EMBEDDING_PROVIDER === 'gemini' && env.GEMINI_API_KEY) {
+    try {
+      const { geminiEmbedSingle } = await import('./gemini-client')
+      return await geminiEmbedSingle(text)
+    } catch {
+      // Fall through to other providers
+    }
+  }
+
+  // ── 2. OpenAI-compatible endpoints (Ollama, Router, OpenAI, Mimo) ──
   const config = resolveEndpointConfig()
 
   if (config) {
@@ -90,6 +101,7 @@ export async function getEmbedding(text: string): Promise<EmbeddingResult> {
     }
   }
 
+  // ── 3. Local deterministic fallback ──
   return {
     embedding: generateLocalFallbackEmbedding(text),
     provider: 'local',
@@ -97,12 +109,23 @@ export async function getEmbedding(text: string): Promise<EmbeddingResult> {
 }
 
 /**
- * Generates embeddings for a batch of strings using standard OpenAI-compatible API endpoint
- * (Ollama Cloud, OpenRouter, OpenCode, Kilo, Antigravity) with automatic fallback to local generation.
+ * Generates embeddings for a batch of strings.
+ * Provider priority: Gemini (native) → OpenAI-compatible (Ollama/Router/OpenAI) → local fallback.
  */
 export async function getBatchEmbeddings(texts: string[]): Promise<EmbeddingResult[]> {
   if (texts.length === 0) return []
 
+  // ── 1. Gemini native embedding ──
+  if (env.AI_EMBEDDING_PROVIDER === 'gemini' && env.GEMINI_API_KEY) {
+    try {
+      const { geminiEmbedBatch } = await import('./gemini-client')
+      return await geminiEmbedBatch(texts)
+    } catch {
+      // Fall through
+    }
+  }
+
+  // ── 2. OpenAI-compatible endpoints ──
   const config = resolveEndpointConfig()
 
   if (config) {
@@ -137,6 +160,7 @@ export async function getBatchEmbeddings(texts: string[]): Promise<EmbeddingResu
     }
   }
 
+  // ── 3. Local deterministic fallback ──
   return texts.map((t) => ({
     embedding: generateLocalFallbackEmbedding(t),
     provider: 'local',

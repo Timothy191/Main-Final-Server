@@ -387,7 +387,7 @@ ON CONFLICT DO NOTHING;
 
 -- Tires (Engineering)
 INSERT INTO tires (department_id, fleet_id, machine_name, position, size, tread_depth_mm, pressure_psi, status, installed_at, notes)
-SELECT d.id, f.id, f.fleet_code, v.position, v.size, v.tread_depth_mm, v.pressure_psi, v.status, v.installed_at, v.notes
+SELECT d.id, f.id, f.fleet_code, v.position, v.size, v.tread_depth_mm, v.pressure_psi, v.status, v.installed_at::date, v.notes
 FROM departments d
 CROSS JOIN (VALUES
   ('DT12', 'FL', '29.5R25', 38.2, 105, 'active',       '2026-02-10', 'Front-left, good condition'),
@@ -403,7 +403,7 @@ ON CONFLICT DO NOTHING;
 
 -- Certifications (Training)
 INSERT INTO certifications (department_id, employee_name, role, certification, issue_date, expiry_date, notes)
-SELECT d.id, v.employee_name, v.role, v.certification, v.issue_date, v.expiry_date, v.notes
+SELECT d.id, v.employee_name, v.role, v.certification, v.issue_date::date, v.expiry_date::date, v.notes
 FROM departments d
 CROSS JOIN (VALUES
   ('Jared Leto',    'Drill Operator',        'Class A Rig Telemetry',            '2025-05-28', '2027-05-28', 'Renewal reminder set'),
@@ -436,7 +436,7 @@ ON CONFLICT DO NOTHING;
 
 -- Training schedules (Training) - courses reference by title
 INSERT INTO training_schedules (department_id, course_id, course_name, location, session_date, start_time, end_time, instructor, capacity, filled, session_type, status)
-SELECT d.id, c.id, c.title, v.location, v.session_date, v.start_time, v.end_time, v.instructor, v.capacity, v.filled, v.session_type, v.status
+SELECT d.id, c.id, c.title, v.location, v.session_date, v.start_time::time, v.end_time::time, v.instructor, v.capacity, v.filled, v.session_type, v.status
 FROM departments d
 CROSS JOIN (VALUES
   ('Underground Equipment Safety V2', 'South Pit Simulator & Training Suite B', CURRENT_DATE + 2, '08:00', '12:00', 'Sarah Jenkins', 15, 14, 'Mandatory', 'Confirmed'),

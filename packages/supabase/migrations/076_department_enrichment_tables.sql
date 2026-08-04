@@ -294,7 +294,7 @@ CREATE TABLE IF NOT EXISTS survey_plans (
   department_id UUID NOT NULL REFERENCES departments(id) ON DELETE CASCADE,
   plan_name TEXT NOT NULL,
   block_id UUID REFERENCES mine_blocks(id) ON DELETE SET NULL,
-  survey_type TEXT NOT NULL CHECK (survey_type IN ('topographic', 'control', 'cadastral', 'as-built', 'monitoring')),
+  survey_type TEXT NOT NULL CHECK (survey_type IN ('topographic', 'control', 'cadastral', 'as-built', 'monitoring', 'volume')),
   planned_date DATE,
   completed_date DATE,
   area_size_ha NUMERIC,
@@ -306,6 +306,12 @@ CREATE TABLE IF NOT EXISTS survey_plans (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- The seed data uses 'volume' as a survey_type; relax the constraint if the
+-- table was created earlier without it (idempotent).
+ALTER TABLE survey_plans DROP CONSTRAINT IF EXISTS survey_plans_survey_type_check;
+ALTER TABLE survey_plans ADD CONSTRAINT survey_plans_survey_type_check
+  CHECK (survey_type IN ('topographic', 'control', 'cadastral', 'as-built', 'monitoring', 'volume'));
 
 ALTER TABLE survey_plans ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "survey_plans_select_department" ON survey_plans FOR SELECT TO authenticated USING (has_department_access(survey_plans.department_id));
@@ -441,7 +447,7 @@ ON CONFLICT DO NOTHING;
 
 -- Job safety analyses (Safety)
 INSERT INTO job_safety_analyses (department_id, jsa_number, job_description, location, hazards_identified, risk_level, status, valid_from, valid_to)
-SELECT d.id, v.jsa_number, v.job_description, v.location, v.hazards_identified, v.risk_level, v.status, v.valid_from, v.valid_to
+SELECT d.id, v.jsa_number, v.job_description, v.location, v.hazards_identified, v.risk_level, v.status, v.valid_from::date, v.valid_to::date
 FROM departments d
 CROSS JOIN (VALUES
   ('JSA-2026-001', 'Crusher Maintenance - Lockout/Tagout', 'Crusher Station', 8, 'critical', 'approved', '2026-01-15', '2026-07-15'),
@@ -454,7 +460,7 @@ ON CONFLICT DO NOTHING;
 
 -- Training trainees (Training)
 INSERT INTO training_trainees (department_id, employee_name, role, enrolled_date, courses_completed, courses_in_progress, total_hours_logged, avg_score, status)
-SELECT d.id, v.employee_name, v.role, v.enrolled_date, v.courses_completed, v.courses_in_progress, v.total_hours_logged, v.avg_score, v.status
+SELECT d.id, v.employee_name, v.role, v.enrolled_date::date, v.courses_completed, v.courses_in_progress, v.total_hours_logged, v.avg_score, v.status
 FROM departments d
 CROSS JOIN (VALUES
   ('Jared Leto', 'Drill Operator', '2025-06-01', 4, 2, 48, 87, 'active'),
