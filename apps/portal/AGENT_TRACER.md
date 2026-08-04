@@ -2,6 +2,50 @@
 
 This file maintains a record of AI agent interventions, context hand-offs, and architectural breadcrumbs for this specific package/app.
 
+## [2026-08-04] Implement React `cache()`, Suspense, and PPR optimizations
+
+- **Agent**: Junie (AI)
+- **Purpose**: Satisfy Next.js 16+ rendering & performance rules by maximizing server components, implementing streaming/suspense, and documenting caching synergy.
+- **Changes Made**:
+  - React `cache()`: Wrapped `getMachineOperationsForShift` and `getMachineOperationOptions` in `control-room/actions.ts` with React's `cache()` to deduplicate identical Supabase/Postgres queries.
+  - Suspense & Streaming: Decoupled the `MachineOperationsPage` data-fetching into a new `MachineOpsTable` Server Component. Wrapped it in `<Suspense>` with a new `MachineOpsSkeleton` glass skeleton fallback.
+  - Caching Synergy: Documented the boundary between `@repo/redis` (L1/L2) and Next.js Data Cache in `apps/portal/AGENTS.md`.
+  - Deployment Guidance: Updated root `AGENTS.md` with Remote Caching and `turbo prune` documentation.
+  - Quality gates: `pnpm quality` passed (0 cached), all 535 tests pass.
+- **Files**: `apps/portal/src/app/(departments)/control-room/actions.ts`, `apps/portal/src/app/(departments)/control-room/machine-operations/page.tsx`, `apps/portal/AGENTS.md`, `AGENTS.md`, `turbo.json`
+- **Docs updated**: `docs/REPO-CHANGE-INDEX.md`, `apps/portal/AGENT_TRACER.md`, `apps/portal/AGENTS.md` (Performance Rules & Caching Synergy), `AGENTS.md` (Monorepo Build & Deployment).
+- **Next Agent Notes**: Use deep imports for `@repo/ui`. When adding new department views, follow this "Server Component + Suspense + Skeleton" pattern. Pair `revalidateTag` with `cache.invalidateTags` for Redis consistency.
+
+## [2026-08-04] Implement SMR-based Machine Operations shift sheet
+
+- **Agent**: Claude Code
+- **Purpose**: Replace the read-only Machine Operations dashboard with an editable SMR (Service Meter Reading) shift sheet per the user's spec: Machine, Site, Start SMR, Close SMR, Total, Operator, Natural/Non-Production/Production/Engineering delays, Utilization, Availability.
+- **Changes Made**:
+  - Database: migration 077 adds `start_smr`, `close_smr`, `smr_total` (generated), four delay-minute buckets to `machine_operations` and its archive, `current_smr` to `machines`, and `category_bucket` to `operational_delays` and its archive. Added `get_machine_previous_close_smr(UUID)` helper and RLS policies. Fixed archive-table parity so `SELECT *` archival keeps working.
+  - Types: updated `packages/supabase/src/database.types.ts` for the new columns/function and `packages/supabase/src/kysely.ts` for `machines.current_smr`.
+  - Server actions: added `calculateSmrMetrics`, `getMachineOperationsForShift`, `getMachineOperationOptions`, `upsertMachineOperation`, and `closeMachineOperation` to `apps/portal/src/app/(departments)/control-room/actions.ts`, all validated with Zod.
+  - UI: rebuilt `machine-operations/page.tsx` as a server page with shift selector and editable table. Added `MachineOpsClient.tsx` for per-row interactivity (site/operator selects, delay inputs, close SMR input, save/close buttons).
+  - Tests: extended `control-room/actions.test.ts` with 8 SMR tests covering metric calculation, upsert success/closing, and close SMR validation.
+- **Files**: `packages/supabase/migrations/077_machine_operations_smr_and_delays.sql`, `packages/supabase/src/database.types.ts`, `packages/supabase/src/kysely.ts`, `apps/portal/src/app/(departments)/control-room/actions.ts`, `apps/portal/src/app/(departments)/control-room/actions.test.ts`, `apps/portal/src/app/(departments)/control-room/machine-operations/page.tsx`, `apps/portal/src/app/(departments)/control-room/machine-operations/MachineOpsClient.tsx`
+- **Docs updated**: `docs/REPO-CHANGE-INDEX.md`, `.agents/AGENT_TRACER.md`, `apps/portal/AGENT_TRACER.md`
+- **Verification**: `pnpm exec turbo run lint type-check test --force` → 12/12 tasks, 0 cached, 535 tests pass; `pnpm format:check` green.
+- **Next Agent Notes**: The UI computes utilization as `smr_total / 12 * 100` and availability as `(smr_total - engineering_delay_hours) / smr_total * 100`. If the shift baseline changes from 12 h, update `calculateSmrMetrics` and the page header text. The `close_smr` input is disabled after a row is closed; to reopen/edit a closed shift, add an explicit "reopen" action or allow supervisors to override.
+
+## [2026-08-04] Rebuild Excavator Activity page as an interactive section-based builder
+
+- **Agent**: Cline (AI)
+- **Purpose**: Redesign the Control Room Excavator Activity page per requirements — sectioned tables, empty initial state, site-first flow, and per-excavator metrics pulled from previous data.
+- **Changes Made**:
+  - Created `ExcavatorActivityBuilder.tsx` (client component). It manages a list of independent "sections": each section is a Site → Excavator → data table flow. Starts empty with an `+ Add Excavator` button; each `+` appends a new section (new Site selection).
+  - Site selected → an Excavator selector appears, filtered to machines `site_id` matching the selected site and typed as excavator/shovel/backhoe/digger.
+  - Excavator selected → a table renders pulled from prior data: Machine ID, Operator (newest activity), Hours Worked (sum of `machine_hours`), Total Loads (sum), Material (newest), Bin Factor (`machines.bin_factor`), Total Material Moved (loads × bin factor).
+  - Reworked `page.tsx` to fetch sites, active excavator machines, prior `excavator_activity` (joined operator), and `machine_hours`, then render the builder. Kept page header + KPI summary cards (history loads / tonnes / machine count).
+  - Added `ExcavatorActivityBuilder.test.tsx` (5 tests: empty state, add section, site-filtered excavator options, computed metrics table, multiple sections).
+- **Files**: `apps/portal/src/app/(departments)/control-room/excavator-activity/page.tsx`, `.../ExcavatorActivityBuilder.tsx`, `.../ExcavatorActivityBuilder.test.tsx`
+- **Docs updated**: `docs/REPO-CHANGE-INDEX.md`, `apps/portal/AGENT_TRACER.md`
+- **Verification**: `pnpm --filter portal type-check` clean; eslint clean; `turbo run lint type-check test --force` all 12 tasks green (0 cached), 526 tests pass; `pnpm gates` + `pnpm format:check` green. Dev server compiled the page without errors.
+- **Next Agent Notes**: "Hours Worked" is aggregated from `machine_hours` (per machine total). If a per-record/per-day hours figure is desired on each row, source it from `machine_operations.hours_worked` or add daily `machine_hours` joins by activity date.
+
 ## [2026-08-04] Harden control-room server actions with Zod validation + tests
 
 - **Agent**: Cline (AI)

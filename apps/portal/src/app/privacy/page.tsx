@@ -20,7 +20,7 @@ export default function PrivacyPage(): React.JSX.Element {
       <div className="prose prose-neutral max-w-none text-arch-text-muted space-y-6">
         <p className="text-lg">Last updated: July 2026</p>
 
-        <section className="bg-white/70 backdrop-blur-xl border border-black/[0.08] p-8 rounded-2xl shadow-card">
+        <section className="glass-card p-8 shadow-card">
           <h2 className="text-xl font-medium text-arch-text-primary mb-4">
             1. Data Collection and Usage
           </h2>
@@ -45,7 +45,7 @@ export default function PrivacyPage(): React.JSX.Element {
           </ul>
         </section>
 
-        <section className="bg-white/70 backdrop-blur-xl border border-black/[0.08] p-8 rounded-2xl shadow-card">
+        <section className="glass-card p-8 shadow-card">
           <h2 className="text-xl font-medium text-arch-text-primary mb-4">
             2. Cookies and Tracking
           </h2>
@@ -56,7 +56,7 @@ export default function PrivacyPage(): React.JSX.Element {
           </p>
         </section>
 
-        <section className="bg-white/70 backdrop-blur-xl border border-black/[0.08] p-8 rounded-2xl shadow-card">
+        <section className="glass-card p-8 shadow-card">
           <h2 className="text-xl font-medium text-arch-text-primary mb-4">
             3. Data Security and Isolation
           </h2>
@@ -67,7 +67,7 @@ export default function PrivacyPage(): React.JSX.Element {
           </p>
         </section>
 
-        <section className="bg-white/70 backdrop-blur-xl border border-black/[0.08] p-8 rounded-2xl shadow-card">
+        <section className="glass-card p-8 shadow-card">
           <h2 className="text-xl font-medium text-arch-text-primary mb-4">
             4. Compliance and Contact
           </h2>

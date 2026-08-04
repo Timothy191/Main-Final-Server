@@ -51,6 +51,38 @@ if [ -d "${PROJECT_ROOT}/redis" ]; then
   cd "${MONOREPO_DIR}"
 fi
 
+# 4.6. Redis pre-flight — verify Redis is reachable before starting the portal
+echo "🔍 Checking Redis connectivity..."
+REDIS_URL_CHECK="${REDIS_URL:-redis://localhost:6379}"
+if echo "$REDIS_URL_CHECK" | grep -qE "localhost|127\.0\.0\.1"; then
+  REDIS_PORT=$(echo "$REDIS_URL_CHECK" | sed -nE 's/.*:([0-9]+).*/\1/p')
+  REDIS_PORT="${REDIS_PORT:-6379}"
+  if timeout 3 bash -c "echo > /dev/tcp/127.0.0.1/${REDIS_PORT}" 2>/dev/null; then
+    echo "  ✅ Redis reachable on :${REDIS_PORT}"
+  else
+    echo "  ⚠️  Redis NOT reachable on :${REDIS_PORT} — cache/auth features will degrade"
+    echo "     Start it with: docker compose -f docker-compose.yml --profile infra up -d redis"
+    echo "     Or run: pnpm dev (which boots Redis automatically)"
+  fi
+fi
+
+# 4.7. Supabase pre-flight — verify auth endpoint is reachable
+echo "🔍 Checking Supabase connectivity..."
+SUPA_URL="${NEXT_PUBLIC_SUPABASE_URL:-http://127.0.0.1:54321}"
+SUPA_ANON="${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}"
+if [ -n "$SUPA_ANON" ]; then
+  SUPA_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 \
+    -H "apikey: ${SUPA_ANON}" "${SUPA_URL}/auth/v1/health" 2>/dev/null || echo 000)
+else
+  SUPA_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 \
+    "${SUPA_URL}/auth/v1/health" 2>/dev/null || echo 000)
+fi
+if [ "$SUPA_CODE" = "200" ]; then
+  echo "  ✅ Supabase auth healthy at ${SUPA_URL}"
+else
+  echo "  ⚠️  Supabase auth NOT healthy (HTTP ${SUPA_CODE}) at ${SUPA_URL} — login will fail"
+fi
+
 # 5. Start Next.js Production Server bound to 0.0.0.0 (all interfaces)
 echo "🚀 Launching Production Server on http://0.0.0.0:${PORT}..."
 echo "📱 Other devices on your Wi-Fi/LAN can access the app at: http://${LAN_IP}:${PORT}"

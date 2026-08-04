@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import RootError from './error'
 
 export default function GlobalError({
@@ -13,10 +14,13 @@ export default function GlobalError({
   unstable_retry?: () => void
 }) {
   useEffect(() => {
-    // Log to console in development; Sentry is initialized via instrumentation.ts
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Global error:', error)
-    }
+    // Capture in Sentry — this is a last-resort boundary for root layout errors
+    Sentry.captureException(error)
+    Sentry.logger.error('Global error boundary triggered', {
+      error_message: error.message,
+      error_name: error.name,
+      digest: error.digest,
+    })
   }, [error])
 
   return (

@@ -124,6 +124,19 @@ export default function RootLayout({
           href={process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://*.supabase.co'}
         />
         <link rel="preload" href="/auth-bg-poster.jpg" as="image" fetchPriority="high" />
+        {/* Blocking script to prevent theme flicker (FOUC) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.documentElement.style.colorScheme = 'light';
+                var meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.setAttribute('content', '#ffffff');
+              })();
+            `,
+          }}
+        />
         <script
           type="speculationrules"
           dangerouslySetInnerHTML={{

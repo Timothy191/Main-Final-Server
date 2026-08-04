@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, type ReactNode } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import dynamic from 'next/dynamic'
 
 const SmoothScrollProvider = dynamic(
@@ -16,9 +17,9 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
         if (registrations.length > 0) {
           Promise.all(registrations.map((r) => r.unregister())).then((results) => {
             if (results.some(Boolean)) {
-              console.warn(
-                '[sw] Unregistered stale service worker(s) in development mode. Reloading...'
-              )
+              Sentry.logger.warn('Unregistered stale service workers in dev mode', {
+                registration_count: results.filter(Boolean).length,
+              })
               window.location.reload()
             }
           })
@@ -33,7 +34,12 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
             // Service worker registered silently
           })
           .catch((registrationError) => {
-            console.error('SW registration failed: ', registrationError)
+            Sentry.logger.error('Service worker registration failed', {
+              error_message:
+                registrationError instanceof Error
+                  ? registrationError.message
+                  : String(registrationError),
+            })
           })
       })
     }

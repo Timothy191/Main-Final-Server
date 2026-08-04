@@ -1,37 +1,44 @@
+/**
+ * Next.js Instrumentation — Sentry + OpenTelemetry + Catalyst
+ *
+ * Registers server-side Sentry configuration for Agent Tracing.
+ * @see https://docs.sentry.io/platforms/javascript/guides/nextjs/agent-tracing/
+ */
+
 import type { Instrumentation } from 'next'
-import { registerOTel } from '@vercel/otel'
+import * as Sentry from '@sentry/nextjs'
 
 export async function register() {
-  registerOTel({
-    serviceName: process.env.CATALYST_SERVICE_NAME ?? process.env.OTEL_SERVICE_NAME ?? 'portal-ui',
-  })
+  // ── Sentry Server Registration ──────────────────────────────────────────
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await import('./sentry.server.config')
+  }
+  if (process.env.NEXT_RUNTIME === 'edge') {
+    await import('./sentry.edge.config')
+  }
 
-  // Catalyst tracing — only in Node.js runtime when token is present (optional dependency)
+  // ── OpenTelemetry (Vercel/Catalyst) ────────────────────────────────────
+  try {
+    const { registerOTel } = await import('@vercel/otel')
+    registerOTel({
+      serviceName:
+        process.env.CATALYST_SERVICE_NAME ?? process.env.OTEL_SERVICE_NAME ?? 'portal-ui',
+    })
+  } catch {
+    // @vercel/otel not installed — silently skip
+  }
+
+  // ── Catalyst tracing (optional) ────────────────────────────────────────
   if (process.env.NEXT_RUNTIME === 'nodejs' && process.env.CATALYST_OTLP_TOKEN) {
     try {
-      // Dynamic path prevents Turbopack/Webpack from statically resolving (and warning about) the optional dep
       const tracingModule = ['@inference/tracing'].join('')
       const { setup } = await import(/* webpackIgnore: true */ tracingModule)
-      await setup({
-        autoInstrument: true,
-      })
-    } catch (_error) {
+      await setup({ autoInstrument: true })
+    } catch {
       // Module not installed or failed to load — silently skip (expected in local dev)
     }
   }
 }
 
-export const onRequestError: Instrumentation.onRequestError = async (err, request, context) => {
-  const message = err instanceof Error ? err.message : String(err)
-  const digest =
-    typeof err === 'object' && err !== null && 'digest' in err
-      ? String((err as { digest?: string }).digest)
-      : undefined
-
-  if (process.env.NODE_ENV === 'development') {
-    console.error(
-      `[Server Error] Path: ${request.path} | Method: ${request.method} | Message: ${message}`,
-      { digest, context }
-    )
-  }
-}
+// ── Sentry Error Handler ────────────────────────────────────────────────
+export const onRequestError: Instrumentation.onRequestError = Sentry.captureRequestError

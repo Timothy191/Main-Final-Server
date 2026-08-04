@@ -92,13 +92,33 @@ auto_free_port() {
 
 wait_for_auth_health() {
   local max="${1:-60}"
+  # Read Supabase URL + anon key from environment (sourced from .env.local in Phase 1).
+  # Falls back to local Docker stack for backward compatibility.
+  local supabase_url="${NEXT_PUBLIC_SUPABASE_URL:-http://127.0.0.1:54321}"
+  local anon_key="${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}"
   for _ in $(seq 1 "$max"); do
-    code=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 1 \
-      "http://127.0.0.1:54321/auth/v1/health" 2>/dev/null || echo 000)
+    if [ -n "$anon_key" ]; then
+      code=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 2 \
+        -H "apikey: ${anon_key}" \
+        "${supabase_url}/auth/v1/health" 2>/dev/null || echo 000)
+    else
+      code=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 2 \
+        "${supabase_url}/auth/v1/health" 2>/dev/null || echo 000)
+    fi
     [[ "$code" == "200" ]] && return 0
     sleep 2
   done
   return 1
+}
+
+# Returns 0 (true) if NEXT_PUBLIC_SUPABASE_URL points to a remote host
+# (not localhost / 127.0.0.1), meaning we should skip local Docker Supabase.
+is_remote_supabase() {
+  local url="${NEXT_PUBLIC_SUPABASE_URL:-http://127.0.0.1:54321}"
+  case "$url" in
+    *127.0.0.1*|*localhost*) return 1 ;;
+    *) return 0 ;;
+  esac
 }
 
 detect_compose() {
@@ -217,7 +237,9 @@ show_results() {
   echo
   echo -e "  ${BOLD}Login:${NC}      ${CYAN}http://localhost:${PORT}/login${NC}"
   echo -e "  ${BOLD}Health:${NC}     ${CYAN}http://localhost:${PORT}/api/health${NC}"
-  if [ "$QUICK_MODE" = "false" ] || [ "$NO_INFRA" = "false" ]; then
+  if is_remote_supabase; then
+    echo -e "  ${BOLD}Supabase:${NC}   ${CYAN}${NEXT_PUBLIC_SUPABASE_URL}${NC}"
+  elif [ "$QUICK_MODE" = "false" ] || [ "$NO_INFRA" = "false" ]; then
     echo -e "  ${BOLD}Supabase:${NC}   ${CYAN}http://127.0.0.1:54321${NC}"
     echo -e "  ${BOLD}Studio:${NC}     ${CYAN}http://127.0.0.1:54323${NC}"
   fi
@@ -393,7 +415,17 @@ fi
 # ── Phase 3: Supabase ─────────────────────────────────────────────────────────
 phase 3 "Supabase"
 
-if [ "$NO_INFRA" = "true" ]; then
+if is_remote_supabase; then
+  # Remote Supabase — don't start local Docker, just probe the remote endpoint.
+  supabase_url="${NEXT_PUBLIC_SUPABASE_URL}"
+  check "Supabase start" "skip" "remote instance: ${supabase_url}"
+  if wait_for_auth_health 15; then
+    check "Supabase auth" "pass" "${supabase_url}/auth/v1/health"
+  else
+    check "Supabase auth" "fail" "remote not healthy at ${supabase_url}"
+    exit 1
+  fi
+elif [ "$NO_INFRA" = "true" ]; then
   check "Supabase start" "skip" "--no-infra — assume already running"
   if wait_for_auth_health 5; then
     check "Supabase auth" "pass" "http://127.0.0.1:54321"
@@ -557,10 +589,10 @@ elif [ "$NO_INFRA" = "true" ]; then
   fi
 fi
 
-# Supabase auth health (critical — --quick starts Supabase)
-if curl -fs "http://127.0.0.1:54321/auth/v1/health" >/dev/null 2>&1; then
-  check "Supabase auth health" "pass"
-elif [ "$NO_INFRA" = "true" ]; then
+# Supabase auth health — probe the configured Supabase URL (local or remote)
+if wait_for_auth_health 3; then
+  check "Supabase auth health" "pass" "${NEXT_PUBLIC_SUPABASE_URL:-http://127.0.0.1:54321}"
+elif [ "$NO_INFRA" = "true" ] || is_remote_supabase; then
   check "Supabase auth health" "warn" "not healthy — may affect login"
 else
   check "Supabase auth health" "fail" "required for login"
