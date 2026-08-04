@@ -1,134 +1,335 @@
-# AGENTS.md — Global Agent Policy
+# Repository Guidelines
 
-This is the **canonical policy file for all agents** working in this repository
-(Claude Code, Cursor, Codex, or any other). It is intentionally lean: it
-establishes the cross-cutting rules every agent must follow and points to the
-authoritative docs for each domain. Keep it short; put detail in the referenced
-docs.
+Canonical policy for AI agents (Cursor, Claude Code, Codex, etc.) working in this monorepo. Keep this file lean; put detail in linked docs.
 
 ---
 
-## Design system — a global rule
+## Project Overview
 
-The portal's visual system (glass/transparency, background animation, all
-tokens and visual aspects) is a **global rule**, not a suggestion. Every agent
-that touches any visual surface in `apps/`, `packages/ui`, or `packages/theme`
-**must**:
+**Arch-Systems** is a pnpm 9 monorepo (Node ≥ 22, Volta-pinned to 24.15.0) delivering a department-based operations portal for oil & gas field teams.
 
-1. **Follow** [`docs/design-system/RULES.md`](./docs/design-system/RULES.md) —
-   the enforceable must/must-not list (one glass schema; no ad-hoc
-   `backdrop-blur-*` / `bg-white/` on panels or cards; token tiers; background
-   animation is fixed; how to extend the schema).
-2. **Apply** the canonical tokens and classes from
-   [`docs/design-system/SPEC.md`](./docs/design-system/SPEC.md) — exact values
-   for `--arch-glass-*`, `--os-shell-*`, `.glass-card`, `.os-shell--*`, the
-   canvas/wave animation tokens, and every other token.
-3. **Read** [`docs/design-system/DESIGN.md`](./docs/design-system/DESIGN.md) for
-   intent, principles, surface roles, and the ambient background system before
-   changing anything visual.
+| Layer | Stack |
+| --- | --- |
+| App | Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind |
+| Data | Supabase (Postgres + RLS), Kysely types, self-hosted Docker stack |
+| Cache | Redis L1 (RAM) + L2 (cluster), Next.js cache tags |
+| UI | `@repo/theme` tokens, `@repo/ui` glass components, department modules |
+| Build | Turborepo, conventional commits (commitlint + husky) |
 
-**When you change tokens, classes, or visual contracts, you must update the
-docs in the same change:**
+**Single app:** `apps/portal` — all product work lands here or in shared `packages/*`.
 
-- Token value / new token / removed token → update **SPEC.md**.
-- Structural decision (new variant, new role, schema change) → add an **ADR**
-  in [`packages/theme/DECISIONS.md`](./packages/theme/DECISIONS.md) and update
-  **DESIGN.md**.
-- New / removed class → update the class catalog in **SPEC.md**.
+**Two-layer policy:** Product code lives in `apps/` and `packages/`. Agent infrastructure (`.cursor/`, `.agents/`, `.claude/`, etc.) must never become a runtime dependency of product code.
 
-Leaving these docs stale after a token change is a rule violation, equivalent to
-leaving tests failing.
+---
 
-### Verification gate (mandatory before "done")
+## Architecture & Data Flow
+
+### Request path
+
+```text
+Browser / Client Component
+        │
+        ▼
+proxy.ts (Next.js 16 edge middleware — NOT middleware.ts)
+  ├── Session refresh via @repo/supabase
+  ├── Department ACL from @repo/acl (single source of truth)
+  └── Redirect safety + restricted-route checks
+        │
+        ├──────────────────────┐
+        ▼                      ▼
+API Route Handlers      Server Components / Actions
+(/api/auth, /api/health)       │
+        │                      ▼
+        │              @repo/redis (L1 15s / L2 Redis)
+        └──────────┬───────────┘
+                   ▼
+        @repo/supabase → PostgreSQL + RLS
+```
+
+### Key architectural rules
+
+- **Auth at the edge:** `apps/portal/src/proxy.ts` gates every request. Never duplicate ACL logic inline — import from `@repo/acl`.
+- **Department routes:** `app/(departments)/[department]/` — slugs defined in `@repo/acl` (`drilling`, `production`, `access-control`, `engineering`, `control-room`, `safety`, `training`, `satellite-monitoring`, etc.).
+- **Backend proxy:** `/api/backend/*` → `API_BASE_URL` (default `http://localhost:3004/api`).
+- **Caching pattern:** Validate auth in an un-cached outer function; fetch data in an inner cached function with `createAdminClient()` + `cacheTag`. Never read `cookies()`/`headers()` inside `"use cache"` scopes.
+- **Supabase local-first:** Self-hosted Docker stack via `pnpm supabase:start`. Migrations in `packages/supabase/migrations/`. Never depend on remote cloud project links.
+
+### Data access layers
+
+| Package | Role |
+| --- | --- |
+| `@repo/supabase` | Auth clients (`server`, `client`, `middleware`, `service-role`, `read-replica`) |
+| `@repo/database` | Kysely DB access layer |
+| `@repo/contract` | Zod validation schemas + OpenAPI contracts |
+| `@repo/redis` | L1/L2 cache singleton (`cacheGet`, `cacheSet`, `cacheDelete`) |
+| `@repo/acl` | Department slugs, role definitions, restricted-route map |
+
+---
+
+## Key Directories
+
+```text
+apps/portal/                 # Next.js 16 portal (only app)
+  src/app/                   # App Router: (auth), (departments), api/
+  src/features/              # Domain modules: auth, hub, monitoring, departments, …
+  src/components/            # Portal-specific UI (ArchStartMenu, CommandBar, …)
+  src/lib/                   # Business logic, API helpers, department-cache
+  src/proxy.ts               # Edge auth + ACL middleware
+  e2e/                       # Playwright visual regression tests
+
+packages/
+  acl/                       # Department slugs + role definitions (SSOT)
+  contract/                  # Zod schemas + OpenAPI
+  database/                  # Kysely types
+  departments/ui/            # Shared department UI subpackage
+  errors/                    # Typed AppError subclasses
+  logger/                    # Structured logging
+  rate-limiter/              # Token bucket / sliding window
+  redis/                     # Redis client + L1/L2 cache
+  supabase/                  # Supabase client, migrations, seed
+  theme/                     # Design tokens + Tailwind (Style Dictionary)
+  typescript-config/         # Shared tsconfig presets
+  ui/                        # Shared React components (GlassCard, Button, …)
+  utils/                     # Shared utilities
+
+scripts/                     # Dev boot, smoke tests, deploy, watchdog
+tools/                       # CI gates: audit-rls, agents-verify, design-ratchet, theme-shape
+docs/
+  design-system/             # RULES.md, SPEC.md, DESIGN.md (enforceable visual contract)
+  architecture/              # ADRs, scalability reference
+  codebase-maps/             # Routes, data flow, package dependency maps
+  runbooks/                  # Operational playbooks (Redis down, cache eviction, …)
+  compliance/                # Compliance architecture
+  WAYFINDER.md               # Concept → entry point → ADR index
+  REPO-CHANGE-INDEX.md       # Append-only change log (agents must update)
+```
+
+Workspace globs: `apps/*`, `packages/*`, `packages/departments/*` (see `pnpm-workspace.yaml`).
+
+---
+
+## Development Commands
+
+### Boot & dev
 
 ```bash
-pnpm --filter @repo/theme lint:tokens              # token integrity (CI)
-pnpm exec turbo run lint type-check test --force   # MUST be 0 cached
+pnpm dev                          # Full stack: Redis → Supabase → portal (scripts/dev.sh)
+pnpm dev:quick                    # Skip Redis, start Supabase + portal
+pnpm dev:no-infra                 # Assume Redis + Supabase already running
+pnpm shutdown                     # Stop all dev processes
+```
+
+`scripts/dev.sh` boot order: Redis → Supabase → Next.js portal → smoke test → monitoring terminals → open `/login`.
+
+Flags: `--quality` (run quality gate after smoke), `--no-browser`, `--no-monitors`.
+
+### Quality gate (mandatory before declaring done)
+
+```bash
+# CRITICAL: turbo caches lint — non-forced runs can return stale PASS
+pnpm exec turbo run lint type-check test --force   # MUST show "0 cached"
+pnpm --filter @repo/theme lint:tokens
 pnpm format:check
 ```
 
-Do not trust a non-forced `pnpm quality` run — the `lint` task is turbo-cached
-and can return a stale PASS.
+### Full CI gate suite
+
+```bash
+pnpm gates    # agents:verify + design:ratchet + theme:shape + lint:tokens
+pnpm quality  # turbo lint + type-check + test, then format:check
+```
+
+### Individual checks
+
+```bash
+pnpm --filter portal lint
+pnpm --filter portal type-check
+pnpm --filter portal test
+pnpm --filter portal test -- path/to/file.test.tsx   # single test file
+pnpm audit:rls                                       # RLS policy audit
+pnpm audit:knip                                      # dead code / unused deps
+pnpm db:codegen                                      # regenerate db-types.ts
+pnpm build                                           # turbo build all
+pnpm format                                          # prettier --write
+```
+
+### Supabase & DB
+
+```bash
+pnpm supabase:start    # start local Docker stack (workdir: packages/)
+pnpm supabase:status
+pnpm supabase:stop
+pnpx supabase migration new <name>   # new migration (from repo root)
+```
+
+### Deploy & ops scripts
+
+```bash
+bash scripts/smoke-test.sh                    # route + health smoke (dev or prod)
+bash scripts/production-test-suite.sh         # full stack E2E against live instance
+bash scripts/production-test-suite.sh --url https://portal.example.com --strict
+bash scripts/portal-watchdog.sh start         # auto-restart dev server on crash
+bash scripts/open-monitoring-terminals.sh       # ops monitoring terminals
+bash deploy-production.sh                       # production deployment
+pnpm deploy:live                                # live deployment wrapper
+```
 
 ---
 
-## Other domain policies
+## Code Conventions & Common Patterns
 
-- **Portal app (Next.js 16):** see [`apps/portal/CLAUDE.md`](./apps/portal/CLAUDE.md).
-- **Codebase maps & runbooks:** [`docs/`](./docs/) (`docs/codebase-maps/`,
-  `docs/runbooks/`, `docs/architecture/`).
-- **Theme package mechanics (token generation, Style Dictionary, validation):**
-  [`packages/theme/README.md`](./packages/theme/README.md) and ADRs in
-  [`packages/theme/DECISIONS.md`](./packages/theme/DECISIONS.md).
-- **Supabase Architecture Policy (On-Premise / Local Self-Hosted):**
-  All local development and site production deployments strictly use the **On-Premise / Local Self-Hosted Supabase Docker Stack** (`pnpm supabase:start`). Never introduce dependencies on external cloud project links or remote account configurations.
-- **Method 1 Live Mirroring Policy (Turbopack HMR Standard):**
-  All agents editing visual code, typography, or UI components in `apps/portal` or `@repo/ui` must rely on **Method 1 (Next.js Turbopack HMR on `http://localhost:3000`)** via `pnpm dev`. All UI modifications must immediately hot-reload in real-time on `http://localhost:3000` to mirror visual updates without requiring manual app restarts.
+### Git & commits
 
-## Two-layer policy
+- **Conventional commits** enforced by commitlint + husky pre-commit (`lint-staged`: Prettier → ESLint on staged `.ts/.tsx/.js/.jsx`).
+- Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+- Subject must not be start-case, pascal-case, or upper-case.
+- **packageManager** pinned in root `package.json` — use corepack or declared pnpm 9.15.9.
 
-- **Product layer** (`apps/`, `packages/`): the monorepo business portal. All
-  real work happens here.
-- **Agentic layer** (`.cursor/`, `.agents/`, `.claude/`, etc.): agent
-  infrastructure only. Do not let product code depend on it; do not commit agent
-  runtime state.
+### Feature organization
 
----
+- **Thin routes, fat features:** App Router pages in `src/app/` delegate to `src/features/<domain>/`.
+- **Shared UI:** Reuse `@repo/ui` primitives; portal-specific overlays stay in `src/components/`.
+- **Validation:** Define Zod schemas in `@repo/contract`; share across server actions and API routes.
+- **Errors:** Throw typed subclasses from `@repo/errors` (`AppError`, `NotFoundError`, etc.). Re-export via `apps/portal/src/lib/errors/error-classes.ts`.
 
-## Documentation — a global rule
+### Design system (global rule)
 
-Every agent **must use and update the docs** that govern the area it touches.
-This is the same severity as the design-system rule: leaving docs stale after a
-change is a rule violation, equivalent to leaving tests failing.
+Every change touching visual surfaces in `apps/`, `packages/ui/`, or `packages/theme/` **must**:
 
-- **Before** changing a domain, read its authoritative docs (the
-  [wayfinder](./docs/WAYFINDER.md) maps each concept → entry point → ADR/trace
-  → how-to-extend).
-- **In the same change** that introduces, removes, or redefines behavior,
-  update every doc that describes the old behavior:
-  - API/contract surface → `@repo/contract` + `@repo/errors` + the relevant
-    `docs/codebase-maps/` map.
-  - Visual token/class/contract → `docs/design-system/SPEC.md` (+ ADR in
-    `packages/theme/DECISIONS.md` for structural changes), per the design-system
-    rule above.
-  - Architecture/structure decision → add an ADR in
-    [`packages/theme/DECISIONS.md`](./packages/theme/DECISIONS.md) (visual) or a
-    note in [`docs/architecture/`](./docs/architecture/) (non-visual).
-  - Anything an agent would need to know next → an `AGENT-TRACE:` breadcrumb in
-    the code and an entry in the app's `AGENT_TRACER.md`.
-- **Update the [repo change index](./docs/REPO-CHANGE-INDEX.md)** for every
-  change (see below).
+1. Follow [`docs/design-system/RULES.md`](./docs/design-system/RULES.md) — enforceable must/must-not list.
+2. Apply tokens from [`docs/design-system/SPEC.md`](./docs/design-system/SPEC.md).
+3. Read [`docs/design-system/DESIGN.md`](./docs/design-system/DESIGN.md) for intent before changing visuals.
 
-If a doc contradicts the code, fix one or the other in the same change — never
-leave the contradiction for the next agent.
+When changing tokens or classes, update docs in the same commit:
+- Token value added/removed → update **SPEC.md**.
+- Structural decision → ADR in [`packages/theme/DECISIONS.md`](./packages/theme/DECISIONS.md) + **DESIGN.md**.
 
-## Repo change index — a global rule
+Do **not** run `generate-tokens.mjs` for CSS edits — edit `packages/theme/src/css/variables.css` directly. Guarded by `tools/theme-shape-guard.mjs`.
 
-[`docs/REPO-CHANGE-INDEX.md`](./docs/REPO-CHANGE-INDEX.md) is the **canonical,
-append-only log of every change** to the repo. Every agent must append one entry
-per change (one per commit is fine) before declaring the work done. An entry is
-not optional prose — it is the record that the change happened and where to find
-it next time.
+### Documentation (global rule)
 
-Entry format (append to the table, newest at top):
+- **Before** changing a domain, read its docs via [`docs/WAYFINDER.md`](./docs/WAYFINDER.md).
+- **In the same change** that alters behavior, update every doc describing the old behavior.
+- **Append** one row to [`docs/REPO-CHANGE-INDEX.md`](./docs/REPO-CHANGE-INDEX.md) before declaring done:
 
 | Date | Agent | Area | Summary | Files | Docs updated |
 | --- | --- | --- | --- | --- | --- |
 
-- **Area** matches a wayfinder concept where possible (e.g. `acl`, `errors`,
-  `design-system`, `cache`, `portal/auth`).
-- **Docs updated** lists every doc changed in the same commit (SPEC.md, ADR,
-  codebase map, AGENT_TRACER.md, etc.) — `none` is a red flag, not an answer.
-- This index is the temporal companion to the structural
-  [wayfinder](./docs/WAYFINDER.md): the wayfinder says *what is here*, the
-  change index says *how it got here*.
+- Remove stale scratch markdown; never leave abandoned docs behind.
+
+### Agent tracing
+
+Leave `// AGENT-TRACE:` breadcrumbs in code at non-obvious integration points. Update `.agents/AGENT_TRACER.md` for significant tasks.
 
 ---
 
-## Documentation Hygiene — Removal & Maintenance Rule
+## Important Files
 
-All notes, citations, scratch files, and markdown documentation (`*.md`) across the repository must follow strict hygiene:
+| File | Purpose |
+| --- | --- |
+| `apps/portal/src/proxy.ts` | Edge auth, ACL, redirect safety |
+| `packages/acl/src/index.ts` | Department slugs + restricted roles (SSOT) |
+| `packages/supabase/migrations/` | SQL migrations (source of truth) |
+| `packages/supabase/src/db-types.ts` | Kysely-generated DB types (`pnpm db:codegen`) |
+| `packages/theme/src/tokens/generated.ts` | Style Dictionary token output |
+| `packages/theme/src/css/variables.css` | Hand-edited CSS custom properties |
+| `packages/contract/index.ts` | Zod validation entry point |
+| `packages/redis/src/cache.ts` | L1/L2 cache API |
+| `turbo.json` | Turborepo pipeline + env passthrough |
+| `pnpm-workspace.yaml` | Workspace package globs |
+| `commitlint.config.mjs` | Conventional commit rules |
+| `tools/agents-verify.mjs` | AGENTS.md link sync gate |
+| `tools/design-ratchet.mjs` | Glass pattern enforcement ratchet |
+| `tools/theme-shape-guard.mjs` | Token shape guard |
+| `tools/audit-rls.cjs` | RLS policy audit |
+| `docs/WAYFINDER.md` | Concept → entry point → ADR map |
+| `docs/REPO-CHANGE-INDEX.md` | Append-only repo change log |
 
-1. **Remove Unimportant & Stale Files**: Any temporary notes, obsolete citations, duplicate plan documents, or scratch markdown files that are no longer relevant, active, or authoritative **must be removed immediately**.
-2. **Keep Important Documentation Updated**: Any markdown document that is retained as part of the architecture, runbooks, codebase maps, or design system **must be updated** in the same change whenever code, signatures, or system behaviors change.
-3. **No Unmaintained Artifacts**: Never leave abandoned, out-of-date, or speculative documentation behind.
+---
+
+## Runtime/Tooling Preferences
+
+| Setting | Value |
+| --- | --- |
+| Node | ≥ 22 (Volta: 24.15.0) |
+| pnpm | 9.15.9 (pinned via `packageManager`) |
+| Package manager | pnpm workspaces + Turborepo |
+| `.npmrc` | `shamefully-hoist=true`, `strict-peer-dependencies=false` |
+| Dev server | Next.js 16 Turbopack on `0.0.0.0:3000` |
+| Supabase | Self-hosted Docker (`pnpm supabase:start`, workdir `packages/`) |
+| Redis | Required for auth cache + L2; started by `dev.sh` |
+| Lint cache | Turbo caches `lint` — always `--force` before claiming done |
+| Prettier | Root formatter; runs in pre-commit via lint-staged |
+
+### CI gate tools (root `package.json`)
+
+| Script | Tool | Purpose |
+| --- | --- | --- |
+| `audit:rls` | `tools/audit-rls.cjs` | Verify RLS policies on migrations |
+| `agents:verify` | `tools/agents-verify.mjs` | AGENTS.md link sync |
+| `design:ratchet` | `tools/design-ratchet.mjs` | Glass/transparency pattern ratchet |
+| `theme:shape` | `tools/theme-shape-guard.mjs` | `generated.ts` shape guard |
+| `lint:tokens` | `@repo/theme lint:tokens` | Token integrity check |
+| `gates` | All of the above | Full CI gate suite |
+
+---
+
+## Testing & QA
+
+### Unit tests (Jest)
+
+- **Portal:** `apps/portal/jest.config.cjs` — jsdom, `@swc/jest`, `@testing-library/react`.
+- **Packages:** Jest in `packages/contract`, `packages/errors`, `packages/redis`, `packages/rate-limiter`, `packages/utils`, `packages/supabase`.
+- Run: `pnpm --filter portal test` or `pnpm --filter <package> test`.
+- Single file: `pnpm --filter portal test -- src/path/to/file.test.tsx`.
+
+**Coverage thresholds** (portal, enforced in `jest.config.cjs`):
+
+| Metric | Minimum |
+| --- | --- |
+| Lines | 40% |
+| Branches | 30% |
+| Functions | 35% |
+| Statements | 40% |
+
+### E2E / visual regression (Playwright)
+
+- Config: `apps/portal/e2e/playwright.config.ts`.
+- Tests: `*.visual.test.ts` in `apps/portal/e2e/`.
+- **Requires dev server running** (`pnpm dev`) — Playwright does not start webServer.
+- Base URL: `PLAYWRIGHT_BASE_URL` or `http://localhost:3000`.
+
+### Smoke & production suites
+
+| Script | Scope |
+| --- | --- |
+| `scripts/smoke-test.sh` | Critical routes, health endpoints, infra deps |
+| `scripts/production-test-suite.sh` | Full stack: Portal → Redis → IndexedDB/SW → Supabase |
+| `scripts/portal-watchdog.sh` | Dev server crash recovery with cache clear |
+
+Smoke flags: `--port`, `--strict` (fail on warnings), `--json`.
+Production flags: `--url`, `--verbose`, `--strict`, `--json`.
+
+### Pre-merge checklist
+
+```bash
+pnpm exec turbo run lint type-check test --force
+pnpm gates
+pnpm format:check
+# Optional: bash scripts/smoke-test.sh --strict
+```
+
+Do not trust a non-forced `pnpm quality` — cached lint can mask failures.
+
+---
+
+## Portal Agent
+
+The primary AI agent for this repository is the **portal agent**, which operates on the `apps/portal` Next.js application. See [`apps/portal/CLAUDE.md`](./apps/portal/CLAUDE.md) for portal-specific guidance, commands, and architecture details.
+
+## Further reading
+
+- Portal app details: [`apps/portal/CLAUDE.md`](./apps/portal/CLAUDE.md)
+- Agent knowledge base: `.agents/knowledge/index.md`
+- Runbooks: [`docs/runbooks/`](./docs/runbooks/)
+- Theme mechanics: [`packages/theme/README.md`](./packages/theme/README.md)
