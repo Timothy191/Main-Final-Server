@@ -145,3 +145,14 @@ For significant frontend work, update:
 3. Run `pnpm --filter @repo/theme lint:tokens` to see token violations.
 4. Run `pnpm design:ratchet` to see glass violations.
 5. Ask before introducing a new dependency.
+
+## 16. Inline Code Annotations & Boundary Notes
+
+Follow the standardized inline comment conventions detailed in [`docs/codebase-maps/code-annotation-guide.md`](../docs/codebase-maps/code-annotation-guide.md):
+
+- **Server vs Client Boundaries**: Annotate why `'use client'` was added or why a component remains a Server Component.
+- **Data Caching & Revalidation**: Tag fetch/DB operations with `cacheTag` and document `revalidateTag` / `revalidatePath` targets.
+- **Server Actions**: Document authentication guards, Zod schema validations, and cache invalidation.
+- **Hydration Mismatches**: Use `suppressHydrationWarning` with an explicit `// HACK:` note when handling SSR vs client timestamp or locale differences.
+- **Environment & Routing**: Document `export const dynamic` directives and public (`NEXT_PUBLIC_`) vs secret environment variable boundaries.
+- **UI & Layout Stacking**: Document z-index stacking context and backdrop blur overlay rules.
