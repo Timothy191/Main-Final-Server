@@ -2,9 +2,10 @@
 
 import { revalidateTag } from 'next/cache'
 import { cacheTag, cacheLife } from 'next/cache'
+import { cache } from 'react'
 import { z } from 'zod'
 import { DatabaseError, ValidationError, ForbiddenError } from '@/lib/errors/error-classes'
-import { assertDeptRole } from '@/lib/dept-access'
+import { assertDeptRole, type RoleAuthResult } from '@/lib/dept-access'
 import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
 
 /* ------------------------------------------------------------------ */
@@ -57,9 +58,61 @@ const AdjustHourlyLoadSchema = z.object({
   delta: z.union([z.literal(1), z.literal(-1)]),
 })
 
+// An excavator selection may be a real platform UUID or an empty string used
+// to signal "unassign" from the hourly-loads excavator <select>.
+const ExcavatorIdField = z.union([z.string().uuid(), z.literal('')])
+
+const BookMachineBreakdownSchema = z.object({
+  machineId: z.string().uuid(),
+  machineName: z.string().trim().min(1, 'Machine name is required'),
+  machineType: z.string().trim().min(1, 'Machine type is required'),
+  reason: z.string().trim().min(1, 'Breakdown reason is required'),
+})
+
+const UpdateMachineSiteSchema = z.object({
+  machineId: z.string().uuid(),
+  siteId: z.union([z.string().uuid(), z.null()]),
+})
+
+const UpdateHourlyLoadMaterialSchema = z.object({
+  loadRowId: z.string().uuid(),
+  primaryMaterial: z.enum(['Coal', 'Waste']),
+  subMaterial: z.string().trim().min(1, 'Specific material is required').max(200),
+})
+
+const EndHaulingSessionSchema = z.object({
+  loadRowId: z.string().uuid(),
+  stopHour: z.number().int().min(1, 'Stop hour must be 1-12').max(12),
+  newMaterial: z.string().trim().min(1, 'New material is required').max(200),
+  newExcavatorId: ExcavatorIdField,
+})
+
+const ReassignDumperExcavatorSchema = z.object({
+  loadRowId: z.string().uuid(),
+  newExcavatorId: ExcavatorIdField,
+})
+
 /* ------------------------------------------------------------------ */
 /*  Auth helper                                                        */
 /* ------------------------------------------------------------------ */
+
+/* AGENT-TRACE: All control-room write actions funnel user-supplied inputs
+ * through `parseSchema` (shared Zod schemas above). Keep every new action's
+ * inputs in a schema here so validation stays consistent and testable. The
+ * multi-write flows (endHaulingSession, reassignDumperExcavator,
+ * updateHourlyLoadMaterial) are intentionally non-atomic at the JS layer;
+ * wrap them in a Postgres rpc() function/migration for true atomicity. */
+
+/** Parse an unknown payload against a schema, throwing a typed ValidationError. */
+function parseSchema<T>(schema: z.ZodType<T>, data: unknown): T {
+  const result = schema.safeParse(data)
+  if (!result.success) {
+    throw new ValidationError('Invalid request payload', {
+      issues: result.error.flatten().fieldErrors,
+    })
+  }
+  return result.data
+}
 
 async function assertControlRoomRole() {
   return assertDeptRole(['admin', 'control_room', 'supervisor'], 'control-room')
@@ -290,9 +343,12 @@ export async function bookMachineBreakdown(
 ): Promise<{ success: boolean; id: string }> {
   const { supabase, user } = await assertControlRoomRole()
 
-  if (!machineId || !machineName || !reason) {
-    throw new ValidationError('Missing required fields for booking breakdown')
-  }
+  const input = parseSchema(BookMachineBreakdownSchema, {
+    machineId,
+    machineName,
+    machineType,
+    reason,
+  })
 
   const today = new Date().toISOString().split('T')[0]
   const timeIn = new Date().toLocaleTimeString([], {
@@ -315,10 +371,10 @@ export async function bookMachineBreakdown(
   const { data, error } = await supabase
     .from('breakdowns')
     .insert({
-      fleet_id: machineId,
-      machine_name: machineName,
-      machine_type: machineType,
-      reason,
+      fleet_id: input.machineId,
+      machine_name: input.machineName,
+      machine_type: input.machineType,
+      reason: input.reason,
       status: 'active',
       date_in: today,
       time_in: timeIn,
@@ -350,15 +406,18 @@ export async function endHaulingSession(
 ): Promise<{ success: boolean }> {
   const { supabase, user } = await assertControlRoomRole()
 
-  if (!loadRowId || stopHour < 1 || stopHour > 12) {
-    throw new ValidationError('Invalid request payload for ending hauling session')
-  }
+  const input = parseSchema(EndHaulingSessionSchema, {
+    loadRowId,
+    stopHour,
+    newMaterial,
+    newExcavatorId,
+  })
 
   // 1. Fetch current hourly load row
   const { data: currentLoad, error: readError } = await supabase
     .from('hourly_loads')
     .select('*')
-    .eq('id', loadRowId)
+    .eq('id', input.loadRowId)
     .single()
 
   if (readError || !currentLoad) {
@@ -390,12 +449,12 @@ export async function endHaulingSession(
       updated_at: new Date().toISOString(),
       updated_by: user.id,
     })
-    .eq('id', loadRowId)
+    .eq('id', input.loadRowId)
 
   if (updateError) {
     throw new DatabaseError('Failed to end hauling session', {
       operation: 'update',
-      context: { loadRowId, error: updateError.message },
+      context: { loadRowId: input.loadRowId, error: updateError.message },
     })
   }
 
@@ -403,7 +462,7 @@ export async function endHaulingSession(
   const newHours: Record<string, number> = {}
   for (let i = 1; i <= 12; i++) {
     const col = `hour_${String(i).padStart(2, '0')}`
-    if (i <= stopHour) {
+    if (i <= input.stopHour) {
       newHours[col] = -1
     } else {
       newHours[col] = 0
@@ -417,7 +476,7 @@ export async function endHaulingSession(
       load_date: currentLoad.load_date,
       shift_type: currentLoad.shift_type,
       machine_id: currentLoad.machine_id,
-      material_type: newMaterial,
+      material_type: input.newMaterial,
       total_loads: 0,
       ...newHours,
       created_by: user.id,
@@ -434,13 +493,13 @@ export async function endHaulingSession(
   }
 
   // 4. Create a new assignment if a new excavator is selected
-  if (newExcavatorId) {
+  if (input.newExcavatorId) {
     // Check if there is an active excavator_activity for this excavator today/shift
     let activityId: string | null = null
     const { data: activeActivity } = await supabase
       .from('excavator_activity')
       .select('id')
-      .eq('machine_id', newExcavatorId)
+      .eq('machine_id', input.newExcavatorId)
       .eq('activity_date', currentLoad.load_date)
       .eq('shift_type', currentLoad.shift_type)
       .limit(1)
@@ -455,7 +514,7 @@ export async function endHaulingSession(
           department_id: currentLoad.department_id,
           activity_date: currentLoad.load_date,
           shift_type: currentLoad.shift_type,
-          machine_id: newExcavatorId,
+          machine_id: input.newExcavatorId,
           loads: 0,
           passes: 0,
           updated_at: new Date().toISOString(),
@@ -473,7 +532,7 @@ export async function endHaulingSession(
       await supabase.from('excavator_dumper_assignments').insert({
         dumper_machine_id: currentLoad.machine_id,
         excavator_activity_id: activityId,
-        material_type: newMaterial,
+        material_type: input.newMaterial,
         total_loads: 0,
         updated_at: new Date().toISOString(),
       })
@@ -492,22 +551,20 @@ export async function updateMachineSite(
 ): Promise<{ success: boolean }> {
   const { supabase } = await assertControlRoomRole()
 
-  if (!machineId) {
-    throw new ValidationError('Missing machineId')
-  }
+  const input = parseSchema(UpdateMachineSiteSchema, { machineId, siteId })
 
   const { error } = await supabase
     .from('machines')
     .update({
-      site_id: siteId,
+      site_id: input.siteId,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', machineId)
+    .eq('id', input.machineId)
 
   if (error) {
     throw new DatabaseError('Failed to update machine site', {
       operation: 'update',
-      context: { machineId, siteId, error: error.message },
+      context: { machineId: input.machineId, siteId: input.siteId, error: error.message },
     })
   }
 
@@ -524,24 +581,30 @@ export async function updateHourlyLoadMaterial(
 ): Promise<{ success: boolean }> {
   const { supabase, user } = await assertControlRoomRole()
 
-  if (!loadRowId || !primaryMaterial || !subMaterial) {
-    throw new ValidationError('Missing required fields for material update')
-  }
+  const input = parseSchema(UpdateHourlyLoadMaterialSchema, {
+    loadRowId,
+    primaryMaterial,
+    subMaterial,
+  })
 
   // 1. Update hourly loads material_type (restricted to 'Coal' | 'Waste')
   const { error: loadError } = await supabase
     .from('hourly_loads')
     .update({
-      material_type: primaryMaterial,
+      material_type: input.primaryMaterial,
       updated_at: new Date().toISOString(),
       updated_by: user.id,
     })
-    .eq('id', loadRowId)
+    .eq('id', input.loadRowId)
 
   if (loadError) {
     throw new DatabaseError('Failed to update hourly load material type', {
       operation: 'update',
-      context: { loadRowId, primaryMaterial, error: loadError.message },
+      context: {
+        loadRowId: input.loadRowId,
+        primaryMaterial: input.primaryMaterial,
+        error: loadError.message,
+      },
     })
   }
 
@@ -549,7 +612,7 @@ export async function updateHourlyLoadMaterial(
   const { data: loadRow } = await supabase
     .from('hourly_loads')
     .select('machine_id, load_date, shift_type')
-    .eq('id', loadRowId)
+    .eq('id', input.loadRowId)
     .single()
 
   if (loadRow) {
@@ -570,13 +633,13 @@ export async function updateHourlyLoadMaterial(
       .order('created_at')
 
     if (siblingLoads && assignments) {
-      const index = siblingLoads.findIndex((l) => l.id === loadRowId)
+      const index = siblingLoads.findIndex((l) => l.id === input.loadRowId)
       if (index !== -1 && index < assignments.length && assignments[index]) {
         const assignmentId = assignments[index].id
         await supabase
           .from('excavator_dumper_assignments')
           .update({
-            material_type: subMaterial,
+            material_type: input.subMaterial,
             updated_at: new Date().toISOString(),
           })
           .eq('id', assignmentId)
@@ -596,21 +659,19 @@ export async function reassignDumperExcavator(
 ): Promise<{ success: boolean }> {
   const { supabase } = await assertControlRoomRole()
 
-  if (!loadRowId) {
-    throw new ValidationError('Missing required loadRowId')
-  }
+  const input = parseSchema(ReassignDumperExcavatorSchema, { loadRowId, newExcavatorId })
 
   // 1. Fetch the hourly loads row
   const { data: loadRow, error: readError } = await supabase
     .from('hourly_loads')
     .select('machine_id, load_date, shift_type, material_type, department_id')
-    .eq('id', loadRowId)
+    .eq('id', input.loadRowId)
     .single()
 
   if (readError || !loadRow) {
     throw new DatabaseError('Hourly load record not found', {
       operation: 'select',
-      context: { loadRowId, error: readError?.message },
+      context: { loadRowId: input.loadRowId, error: readError?.message },
     })
   }
 
@@ -630,15 +691,15 @@ export async function reassignDumperExcavator(
     .order('created_at')
 
   if (siblingLoads && assignments) {
-    const index = siblingLoads.findIndex((l) => l.id === loadRowId)
+    const index = siblingLoads.findIndex((l) => l.id === input.loadRowId)
 
     // Find or create active excavator activity for the new excavator
     let activityId: string | null = null
-    if (newExcavatorId) {
+    if (input.newExcavatorId) {
       const { data: activeActivity } = await supabase
         .from('excavator_activity')
         .select('id')
-        .eq('machine_id', newExcavatorId)
+        .eq('machine_id', input.newExcavatorId)
         .eq('activity_date', loadRow.load_date)
         .eq('shift_type', loadRow.shift_type)
         .limit(1)
@@ -653,7 +714,7 @@ export async function reassignDumperExcavator(
             department_id: loadRow.department_id,
             activity_date: loadRow.load_date,
             shift_type: loadRow.shift_type,
-            machine_id: newExcavatorId,
+            machine_id: input.newExcavatorId,
             loads: 0,
             passes: 0,
             updated_at: new Date().toISOString(),
@@ -744,5 +805,414 @@ export async function updateReportAssignedShift(
   }
 
   revalidateTag(DEPARTMENT_CACHE_TAGS.CONTROL_ROOM, 'max')
+  return { success: true }
+}
+
+/* ------------------------------------------------------------------ */
+/*  6. SMR-based Machine Operations shift sheet                       */
+/* ------------------------------------------------------------------ */
+
+export interface MachineOperationSmrRow {
+  id: string | null
+  machineId: string
+  machineName: string
+  machineType: string
+  siteId: string | null
+  siteName: string | null
+  operatorId: string | null
+  operatorName: string | null
+  startSMR: number | null
+  closeSMR: number | null
+  smrTotal: number | null
+  naturalDelayMinutes: number
+  nonProductionDelayMinutes: number
+  productionDelayMinutes: number
+  engineeringDelayMinutes: number
+  shiftDate: string
+  shiftType: 'day' | 'night'
+  startTime: string | null
+  endTime: string | null
+  utilizationPct: number | null
+  availabilityPct: number | null
+}
+
+export interface SmrMetricInput {
+  startSMR: number | null
+  closeSMR: number | null
+  engineeringDelayMinutes: number
+}
+
+export interface MachineOperationOptions {
+  sites: { id: string; name: string }[]
+  operators: { id: string; fullName: string }[]
+}
+
+const UpsertMachineOpSchema = z.object({
+  machineId: z.string().uuid(),
+  shiftDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Shift date must be YYYY-MM-DD'),
+  shiftType: z.enum(['day', 'night']),
+  siteId: z.union([z.string().uuid(), z.literal(''), z.null()]).optional(),
+  operatorId: z.union([z.string().uuid(), z.literal(''), z.null()]).optional(),
+  startSMR: z.number().nonnegative().nullable(),
+  closeSMR: z.number().nonnegative().nullable(),
+  naturalDelayMinutes: z.number().int().min(0).default(0),
+  nonProductionDelayMinutes: z.number().int().min(0).default(0),
+  productionDelayMinutes: z.number().int().min(0).default(0),
+  engineeringDelayMinutes: z.number().int().min(0).default(0),
+})
+
+const CloseMachineOpSchema = z.object({
+  id: z.string().uuid(),
+  closeSMR: z.number().nonnegative(),
+})
+
+/**
+ * Calculate SMR-derived metrics for a shift row.
+ * Total = closeSMR - startSMR
+ * Utilization = smrTotal / 12h * 100
+ * Availability = (smrTotal - engineeringDelayHours) / smrTotal * 100
+ */
+export function calculateSmrMetrics(input: SmrMetricInput): {
+  smrTotal: number | null
+  utilizationPct: number | null
+  availabilityPct: number | null
+} {
+  const { startSMR, closeSMR, engineeringDelayMinutes } = input
+  if (startSMR == null || closeSMR == null) {
+    return { smrTotal: null, utilizationPct: null, availabilityPct: null }
+  }
+  const smrTotal = closeSMR - startSMR
+  if (smrTotal <= 0) {
+    return { smrTotal, utilizationPct: 0, availabilityPct: 0 }
+  }
+  const utilizationPct = (smrTotal / 12) * 100
+  const availabilityPct = ((smrTotal - engineeringDelayMinutes / 60) / smrTotal) * 100
+  return {
+    smrTotal,
+    utilizationPct: Math.min(100, Math.max(0, utilizationPct)),
+    availabilityPct: Math.min(100, Math.max(0, availabilityPct)),
+  }
+}
+
+async function resolveStartSmr(
+  supabase: RoleAuthResult['supabase'],
+  machine: { id: string; current_smr: number | null }
+): Promise<number | null> {
+  if (machine.current_smr != null) {
+    return machine.current_smr
+  }
+  const { data: previous } = await supabase.rpc('get_machine_previous_close_smr', {
+    p_machine_id: machine.id,
+  })
+  return previous ?? null
+}
+
+/**
+ * Load all active machines for a department, merged with any existing
+ * machine_operations rows for the selected shift. Returns rows ready for
+ * the SMR shift sheet, including auto-calculated utilization/availability.
+ */
+export const getMachineOperationsForShift = cache(
+  async (
+    deptId: string,
+    shiftDate: string,
+    shiftType: 'day' | 'night'
+  ): Promise<MachineOperationSmrRow[]> => {
+    const { supabase } = await assertControlRoomRole()
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(shiftDate)) {
+      throw new ValidationError('Invalid shift date', {
+        issues: { shiftDate: ['YYYY-MM-DD required'] },
+      })
+    }
+
+    const [{ data: machines, error: machinesError }, { data: operations, error: opsError }] =
+      await Promise.all([
+        supabase
+          .from('machines')
+          .select('id, name, machine_type, site_id, current_smr')
+          .eq('department_id', deptId)
+          .eq('active', true)
+          .order('name', { ascending: true }),
+        supabase
+          .from('machine_operations')
+          .select(
+            'id, machine_id, site_id, operator_id, start_smr, close_smr, smr_total, natural_delay_minutes, non_production_delay_minutes, production_delay_minutes, engineering_delay_minutes, shift_date, shift_type, start_time, end_time'
+          )
+          .eq('department_id', deptId)
+          .eq('shift_date', shiftDate)
+          .eq('shift_type', shiftType)
+          .order('start_time', { ascending: false }),
+      ])
+
+    if (machinesError) {
+      throw new DatabaseError('Failed to load machines', {
+        operation: 'select',
+        context: { deptId, error: machinesError.message },
+      })
+    }
+    if (opsError) {
+      throw new DatabaseError('Failed to load machine operations', {
+        operation: 'select',
+        context: { deptId, shiftDate, shiftType, error: opsError.message },
+      })
+    }
+
+    const machineRows = (machines ?? []) as {
+      id: string
+      name: string
+      machine_type: string
+      site_id: string | null
+      current_smr: number | null
+    }[]
+
+    const operationRows = (operations ?? []) as {
+      id: string
+      machine_id: string
+      site_id: string | null
+      operator_id: string | null
+      start_smr: number | null
+      close_smr: number | null
+      smr_total: number | null
+      natural_delay_minutes: number
+      non_production_delay_minutes: number
+      production_delay_minutes: number
+      engineering_delay_minutes: number
+      shift_date: string
+      shift_type: 'day' | 'night'
+      start_time: string | null
+      end_time: string | null
+    }[]
+
+    const opByMachine = new Map(operationRows.map((op) => [op.machine_id, op]))
+
+    const siteIds = new Set<string>()
+    const operatorIds = new Set<string>()
+    machineRows.forEach((m) => {
+      if (m.site_id) siteIds.add(m.site_id)
+    })
+    operationRows.forEach((op) => {
+      if (op.site_id) siteIds.add(op.site_id)
+      if (op.operator_id) operatorIds.add(op.operator_id)
+    })
+
+    const [{ data: sites }, { data: operators }] = await Promise.all([
+      siteIds.size > 0
+        ? supabase.from('sites').select('id, name').in('id', Array.from(siteIds))
+        : Promise.resolve({ data: [] } as { data: { id: string; name: string }[] | null }),
+      operatorIds.size > 0
+        ? supabase.from('operators').select('id, full_name').in('id', Array.from(operatorIds))
+        : Promise.resolve({ data: [] } as { data: { id: string; full_name: string }[] | null }),
+    ])
+
+    const siteById = new Map((sites ?? []).map((s) => [s.id, s.name]))
+    const operatorById = new Map((operators ?? []).map((o) => [o.id, o.full_name]))
+
+    const rows: MachineOperationSmrRow[] = await Promise.all(
+      machineRows.map(async (machine) => {
+        const op = opByMachine.get(machine.id)
+        const startSMR = op?.start_smr ?? (await resolveStartSmr(supabase, machine))
+        const closeSMR = op?.close_smr ?? null
+        const metrics = calculateSmrMetrics({
+          startSMR,
+          closeSMR,
+          engineeringDelayMinutes: op?.engineering_delay_minutes ?? 0,
+        })
+
+        return {
+          id: op?.id ?? null,
+          machineId: machine.id,
+          machineName: machine.name,
+          machineType: machine.machine_type,
+          siteId: op?.site_id ?? machine.site_id ?? null,
+          siteName: siteById.get(op?.site_id ?? machine.site_id ?? '') ?? null,
+          operatorId: op?.operator_id ?? null,
+          operatorName: op?.operator_id ? (operatorById.get(op.operator_id) ?? null) : null,
+          startSMR,
+          closeSMR,
+          smrTotal: metrics.smrTotal ?? op?.smr_total ?? null,
+          naturalDelayMinutes: op?.natural_delay_minutes ?? 0,
+          nonProductionDelayMinutes: op?.non_production_delay_minutes ?? 0,
+          productionDelayMinutes: op?.production_delay_minutes ?? 0,
+          engineeringDelayMinutes: op?.engineering_delay_minutes ?? 0,
+          shiftDate,
+          shiftType,
+          startTime: op?.start_time ?? null,
+          endTime: op?.end_time ?? null,
+          utilizationPct: metrics.utilizationPct,
+          availabilityPct: metrics.availabilityPct,
+        }
+      })
+    )
+
+    return rows
+  }
+)
+
+/**
+ * Load sites and operators for the machine operations shift sheet dropdowns.
+ */
+export const getMachineOperationOptions = cache(
+  async (_deptId: string): Promise<MachineOperationOptions> => {
+    const { supabase } = await assertControlRoomRole()
+
+    const [{ data: sites }, { data: operators }] = await Promise.all([
+      supabase.from('sites').select('id, name').eq('active', true).order('name'),
+      supabase.from('operators').select('id, full_name').eq('active', true).order('full_name'),
+    ])
+
+    return {
+      sites: (sites ?? []).map((s) => ({ id: s.id, name: s.name })),
+      operators: (operators ?? []).map((o) => ({ id: o.id, fullName: o.full_name })),
+    }
+  }
+)
+
+/**
+ * Create or update a machine operation row for the shift.
+ * If closeSMR is supplied the row is treated as closed and the machine
+ * current_smr cache is updated automatically.
+ */
+export async function upsertMachineOperation(formData: unknown): Promise<{
+  success: boolean
+  id: string
+}> {
+  const { supabase, user } = await assertControlRoomRole()
+  const input = parseSchema(UpsertMachineOpSchema, formData)
+
+  const siteId = input.siteId === '' ? null : (input.siteId ?? null)
+  const operatorId = input.operatorId === '' ? null : (input.operatorId ?? null)
+
+  const nowIso = new Date().toISOString()
+
+  const machineDept = await supabase
+    .from('machines')
+    .select('department_id')
+    .eq('id', input.machineId)
+    .single()
+
+  if (machineDept.error || !machineDept.data) {
+    throw new DatabaseError('Machine not found', {
+      operation: 'select',
+      context: { machineId: input.machineId, error: machineDept.error?.message },
+    })
+  }
+
+  const closeSMR = input.closeSMR
+  const isClosing = closeSMR != null
+  if (isClosing && input.startSMR != null && closeSMR < input.startSMR) {
+    throw new ValidationError('Close SMR cannot be less than start SMR', {
+      issues: { closeSMR: ['Must be greater than or equal to start SMR'] },
+    })
+  }
+
+  const row = {
+    machine_id: input.machineId,
+    department_id: machineDept.data.department_id,
+    shift_date: input.shiftDate,
+    shift_type: input.shiftType,
+    start_time: '00:00:00',
+    site_id: siteId,
+    operator_id: operatorId,
+    start_smr: input.startSMR,
+    close_smr: closeSMR,
+    end_time: isClosing ? nowIso : null,
+    natural_delay_minutes: input.naturalDelayMinutes,
+    non_production_delay_minutes: input.nonProductionDelayMinutes,
+    production_delay_minutes: input.productionDelayMinutes,
+    engineering_delay_minutes: input.engineeringDelayMinutes,
+    created_by: user.id,
+    updated_at: nowIso,
+  }
+
+  const { data: result, error } = await supabase
+    .from('machine_operations')
+    .upsert(row, { onConflict: 'machine_id, shift_date, shift_type' })
+    .select('id')
+    .single()
+
+  if (error || !result) {
+    throw new DatabaseError('Failed to save machine operation', {
+      operation: 'upsert',
+      context: { machineId: input.machineId, error: error?.message },
+    })
+  }
+
+  if (isClosing) {
+    await supabase
+      .from('machines')
+      .update({ current_smr: closeSMR, updated_at: nowIso })
+      .eq('id', input.machineId)
+  }
+
+  revalidateTag(DEPARTMENT_CACHE_TAGS.CONTROL_ROOM, 'max')
+  revalidateTag(DEPARTMENT_CACHE_TAGS.TABLE_MACHINES, 'max')
+
+  return { success: true, id: result.id }
+}
+
+/**
+ * Close out a shift operation by recording the close SMR and end time,
+ * then cache the close SMR on machines.current_smr.
+ */
+export async function closeMachineOperation(
+  id: string,
+  closeSMR: number
+): Promise<{ success: boolean }> {
+  const { supabase } = await assertControlRoomRole()
+  const input = parseSchema(CloseMachineOpSchema, { id, closeSMR })
+
+  const nowIso = new Date().toISOString()
+
+  const { data: existing } = await supabase
+    .from('machine_operations')
+    .select('machine_id, start_smr')
+    .eq('id', input.id)
+    .single()
+
+  if (!existing) {
+    throw new DatabaseError('Machine operation not found', {
+      operation: 'select',
+      context: { id: input.id },
+    })
+  }
+
+  if (existing.start_smr != null && input.closeSMR < existing.start_smr) {
+    throw new ValidationError('Close SMR cannot be less than start SMR', {
+      issues: { closeSMR: ['Must be greater than or equal to start SMR'] },
+    })
+  }
+
+  const { error: updateError } = await supabase
+    .from('machine_operations')
+    .update({
+      close_smr: input.closeSMR,
+      end_time: nowIso,
+      updated_at: nowIso,
+    })
+    .eq('id', input.id)
+
+  if (updateError) {
+    throw new DatabaseError('Failed to close machine operation', {
+      operation: 'update',
+      context: { id: input.id, error: updateError.message },
+    })
+  }
+
+  const { error: machineError } = await supabase
+    .from('machines')
+    .update({ current_smr: input.closeSMR, updated_at: nowIso })
+    .eq('id', existing.machine_id)
+
+  if (machineError) {
+    throw new DatabaseError('Failed to update machine current SMR cache', {
+      operation: 'update',
+      context: { machineId: existing.machine_id, error: machineError.message },
+    })
+  }
+
+  revalidateTag(DEPARTMENT_CACHE_TAGS.CONTROL_ROOM, 'max')
+  revalidateTag(DEPARTMENT_CACHE_TAGS.TABLE_MACHINES, 'max')
+
   return { success: true }
 }

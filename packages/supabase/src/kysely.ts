@@ -28,6 +28,53 @@ export interface KyselyDatabase {
     machine_type: string
     department_id: string
     status: string
+    current_smr: number | null
+    [key: string]: unknown
+  }
+  machine_operations: {
+    id: Generated<string>
+    close_smr: number | null
+    created_at: string
+    created_by: string | null
+    department_id: string
+    end_time: string | null
+    engineering_delay_minutes: number
+    hours_worked: number | null
+    machine_id: string
+    natural_delay_minutes: number
+    non_production_delay_minutes: number
+    operator_id: string | null
+    production_delay_minutes: number
+    shift_date: string
+    shift_type: string
+    site_id: string | null
+    smr_total: number | null
+    start_smr: number | null
+    start_time: string
+    updated_at: string
+    [key: string]: unknown
+  }
+  machine_operations_archive: {
+    id: Generated<string>
+    close_smr: number | null
+    created_at: string
+    created_by: string | null
+    department_id: string
+    end_time: string | null
+    engineering_delay_minutes: number
+    hours_worked: number | null
+    machine_id: string
+    natural_delay_minutes: number
+    non_production_delay_minutes: number
+    operator_id: string | null
+    production_delay_minutes: number
+    shift_date: string
+    shift_type: string
+    site_id: string | null
+    smr_total: number | null
+    start_smr: number | null
+    start_time: string
+    updated_at: string
     [key: string]: unknown
   }
   hourly_loads: {
@@ -36,6 +83,44 @@ export interface KyselyDatabase {
     load_time: string
     material_type: string
     tonnes: number
+    [key: string]: unknown
+  }
+  operational_delays: {
+    id: Generated<string>
+    affected_machine_id: string | null
+    category_bucket: string | null
+    created_at: string
+    created_by: string | null
+    delay_category_id: string | null
+    delay_date: string
+    delay_minutes: number
+    delay_type: string
+    department_id: string
+    description: string
+    impact_description: string
+    recovery_action: string | null
+    shift_type: string
+    status: string
+    updated_at: string
+    [key: string]: unknown
+  }
+  operational_delays_archive: {
+    id: Generated<string>
+    affected_machine_id: string | null
+    category_bucket: string | null
+    created_at: string
+    created_by: string | null
+    delay_category_id: string | null
+    delay_date: string
+    delay_minutes: number
+    delay_type: string
+    department_id: string
+    description: string
+    impact_description: string
+    recovery_action: string | null
+    shift_type: string
+    status: string
+    updated_at: string
     [key: string]: unknown
   }
   production_logs: {

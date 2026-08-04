@@ -6886,47 +6886,68 @@ export type Database = {
       }
       machine_operations: {
         Row: {
+          close_smr: number | null
           created_at: string
           created_by: string | null
           department_id: string
           end_time: string | null
+          engineering_delay_minutes: number
           hours_worked: number | null
           id: string
           machine_id: string
+          natural_delay_minutes: number
+          non_production_delay_minutes: number
           operator_id: string | null
+          production_delay_minutes: number
           shift_date: string
           shift_type: string
           site_id: string | null
+          smr_total: number | null
+          start_smr: number | null
           start_time: string
           updated_at: string
         }
         Insert: {
+          close_smr?: number | null
           created_at?: string
           created_by?: string | null
           department_id: string
           end_time?: string | null
+          engineering_delay_minutes?: number
           hours_worked?: number | null
           id?: string
           machine_id: string
+          natural_delay_minutes?: number
+          non_production_delay_minutes?: number
           operator_id?: string | null
+          production_delay_minutes?: number
           shift_date: string
           shift_type: string
           site_id?: string | null
+          smr_total?: never
+          start_smr?: number | null
           start_time: string
           updated_at?: string
         }
         Update: {
+          close_smr?: number | null
           created_at?: string
           created_by?: string | null
           department_id?: string
           end_time?: string | null
+          engineering_delay_minutes?: number
           hours_worked?: number | null
           id?: string
           machine_id?: string
+          natural_delay_minutes?: number
+          non_production_delay_minutes?: number
           operator_id?: string | null
+          production_delay_minutes?: number
           shift_date?: string
           shift_type?: string
           site_id?: string | null
+          smr_total?: never
+          start_smr?: number | null
           start_time?: string
           updated_at?: string
         }
@@ -6991,47 +7012,68 @@ export type Database = {
       }
       machine_operations_archive: {
         Row: {
+          close_smr: number | null
           created_at: string
           created_by: string | null
           department_id: string
           end_time: string | null
+          engineering_delay_minutes: number
           hours_worked: number | null
           id: string
           machine_id: string
+          natural_delay_minutes: number
+          non_production_delay_minutes: number
           operator_id: string | null
+          production_delay_minutes: number
           shift_date: string
           shift_type: string
           site_id: string | null
+          smr_total: number | null
+          start_smr: number | null
           start_time: string
           updated_at: string
         }
         Insert: {
+          close_smr?: number | null
           created_at?: string
           created_by?: string | null
           department_id: string
           end_time?: string | null
+          engineering_delay_minutes?: number
           hours_worked?: number | null
           id?: string
           machine_id: string
+          natural_delay_minutes?: number
+          non_production_delay_minutes?: number
           operator_id?: string | null
+          production_delay_minutes?: number
           shift_date: string
           shift_type: string
           site_id?: string | null
+          smr_total?: never
+          start_smr?: number | null
           start_time: string
           updated_at?: string
         }
         Update: {
+          close_smr?: number | null
           created_at?: string
           created_by?: string | null
           department_id?: string
           end_time?: string | null
+          engineering_delay_minutes?: number
           hours_worked?: number | null
           id?: string
           machine_id?: string
+          natural_delay_minutes?: number
+          non_production_delay_minutes?: number
           operator_id?: string | null
+          production_delay_minutes?: number
           shift_date?: string
           shift_type?: string
           site_id?: string | null
+          smr_total?: never
+          start_smr?: number | null
           start_time?: string
           updated_at?: string
         }
@@ -7240,6 +7282,7 @@ export type Database = {
           active: boolean
           bin_factor: number | null
           created_at: string
+          current_smr: number | null
           deleted_at: string | null
           department_id: string
           id: string
@@ -7254,6 +7297,7 @@ export type Database = {
           active?: boolean
           bin_factor?: number | null
           created_at?: string
+          current_smr?: number | null
           deleted_at?: string | null
           department_id: string
           id?: string
@@ -7268,6 +7312,7 @@ export type Database = {
           active?: boolean
           bin_factor?: number | null
           created_at?: string
+          current_smr?: number | null
           deleted_at?: string | null
           department_id?: string
           id?: string
@@ -7431,6 +7476,7 @@ export type Database = {
       operational_delays: {
         Row: {
           affected_machine_id: string | null
+          category_bucket: string | null
           created_at: string
           created_by: string | null
           delay_category_id: string | null
@@ -7448,6 +7494,7 @@ export type Database = {
         }
         Insert: {
           affected_machine_id?: string | null
+          category_bucket?: string | null
           created_at?: string
           created_by?: string | null
           delay_category_id?: string | null
@@ -7465,6 +7512,7 @@ export type Database = {
         }
         Update: {
           affected_machine_id?: string | null
+          category_bucket?: string | null
           created_at?: string
           created_by?: string | null
           delay_category_id?: string | null
@@ -7535,6 +7583,7 @@ export type Database = {
       operational_delays_archive: {
         Row: {
           affected_machine_id: string | null
+          category_bucket: string | null
           created_at: string
           created_by: string | null
           delay_category_id: string | null
@@ -7552,6 +7601,7 @@ export type Database = {
         }
         Insert: {
           affected_machine_id?: string | null
+          category_bucket?: string | null
           created_at?: string
           created_by?: string | null
           delay_category_id?: string | null
@@ -7569,6 +7619,7 @@ export type Database = {
         }
         Update: {
           affected_machine_id?: string | null
+          category_bucket?: string | null
           created_at?: string
           created_by?: string | null
           delay_category_id?: string | null
@@ -8572,6 +8623,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_machine_previous_close_smr: {
+        Args: { p_machine_id: string }
+        Returns: number
       }
       get_monolithized_department_dashboard_payload: {
         Args: { dept_id: string }
