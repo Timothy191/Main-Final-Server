@@ -59,6 +59,9 @@ jobs:
       - name: Lint (portal)
         run: pnpm --filter=portal lint
 
+      - name: Token Validation (theme)
+        run: pnpm --filter=@repo/theme lint:tokens
+
       - name: Run tests (portal)
         run: pnpm --filter=portal test
       - name: Verify AGENTS.md sync

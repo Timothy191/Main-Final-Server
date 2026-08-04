@@ -21,4 +21,4 @@ jobs:
         run: pnpm install
 
       - name: Run context-efficiency checks
-        run: ./scripts/check_context.sh
+        run: ./.scripts/check_context.sh
