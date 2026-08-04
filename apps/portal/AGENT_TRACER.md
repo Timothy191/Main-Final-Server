@@ -2,6 +2,33 @@
 
 This file maintains a record of AI agent interventions, context hand-offs, and architectural breadcrumbs for this specific package/app.
 
+## [2026-08-04] Harden control-room server actions with Zod validation + tests
+
+- **Agent**: Cline (AI)
+- **Purpose**: Address review concerns (weak/absent input validation on server actions, test coverage gap).
+- **Changes Made**:
+  - Added a shared `parseSchema` helper and five Zod schemas (`BookMachineBreakdownSchema`, `UpdateMachineSiteSchema`, `UpdateHourlyLoadMaterialSchema`, `EndHaulingSessionSchema`, `ReassignDumperExcavatorSchema`, plus the `ExcavatorIdField` union) in `control-room/actions.ts`, replacing manual `if (!x)` guards. `updateHourlyLoadMaterial` now validates `primaryMaterial` (Coal|Waste) and `subMaterial`; `endHaulingSession` validates `stopHour` 1–12 and `newExcavatorId`; `reassignDumperExcavator` validates `loadRowId`/`newExcavatorId`; `updateMachineSite` and `bookMachineBreakdown` validate UUID/required fields.
+  - Added 17 unit tests in `actions.test.ts` across the five previously-untested actions (success, validation-failure, and DatabaseError paths), built on a reusable fluent Supabase mock builder.
+  - No DB schema or migration changes. `endHaulingSession` multi-write atomicity remains a documented follow-up (Postgres `rpc()`), not performed here to avoid destabilizing a running stack.
+- **Files**: `apps/portal/src/app/(departments)/control-room/actions.ts`, `apps/portal/src/app/(departments)/control-room/actions.test.ts`
+- **Docs updated**: `docs/REPO-CHANGE-INDEX.md`, `apps/portal/AGENT_TRACER.md`
+- **Verification**: `pnpm --filter portal type-check` clean; `eslint` clean (no-cache); control-room action tests 49/49 pass; full `turbo run lint type-check test --force` still green.
+- **Next Agent Notes**: For true atomicity on `endHaulingSession`/`reassignDumperExcavator`/`updateHourlyLoadMaterial`, add a Postgres function + `supabase.rpc()` and migrate via `packages/supabase/migrations/`.
+
+## [2026-08-04] Frontend UI kit audit + frontend-docs suite
+
+- **Agent**: Claude Code
+- **Purpose**: Document the current bespoke frontend UI kit, catalog shared/portal components, and provide guidance on adopting shadcn/ui primitives without breaking the glass design system.
+- **Changes Made**:
+  - Audited `packages/ui/src/components/ui/*`, `packages/ui/src/components/*`, `apps/portal/src/components/*`, `apps/portal/src/features/*`, and `packages/theme`.
+  - Created `frontend-docs/README.md`, `UI_KIT_AUDIT.md`, `COMPONENT_CATALOG.md`, `THEME_SYSTEM.md`, `MIGRATION_GUIDE.md`, `BEST_PRACTICES.md`.
+  - Documented findings: no third-party UI kit, custom macOS glass system, 122 ad-hoc glass violations, accessibility shells (`Dialog`, `Tabs`, `Table`, `DropdownMenu`), missing form primitives, shadcn compatibility variables already present.
+  - Recommended selective shadcn adoption (copy-paste + re-theme) rather than wholesale migration.
+- **Files**: `frontend-docs/*.md`
+- **Docs updated**: `docs/REPO-CHANGE-INDEX.md`, `apps/portal/AGENT_TRACER.md`, `.agents/AGENT_TRACER.md`
+- **Verification**: `pnpm exec turbo run lint type-check test --force` → 12/12 tasks, 0 cached, 521 tests pass; `pnpm format:check` green.
+- **Next Agent Notes**: Follow-up work is in `frontend-docs/UI_KIT_AUDIT.md` priority list: P0 rebuild `Dialog`/`DropdownMenu`/`Tabs` with Radix, P1 add form primitives, P1 ratchet down ad-hoc glass, P2 consolidate command palette, P2 remove dark-mode residue.
+
 ## [2026-08-04] Bulk land pending changes
 
 - **Agent**: Claude Code

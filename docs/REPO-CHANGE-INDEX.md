@@ -1,5 +1,8 @@
 # Repo Change Index
 
+| 2026-08-04 | Claude Code | frontend-docs | Audited the full frontend UI kit (`packages/ui`, `apps/portal` components/features, `packages/theme`) and created a new `frontend-docs/` reference suite at repo root: README, `UI_KIT_AUDIT.md`, `COMPONENT_CATALOG.md`, `THEME_SYSTEM.md`, `MIGRATION_GUIDE.md` (selective shadcn adoption), `BEST_PRACTICES.md`. Documents the bespoke glass design system, token tiers, shared/portal component catalog, current gaps (accessibility shells, missing form primitives, 122 ad-hoc glass violations), and verification gates. | `frontend-docs/*.md` | `docs/REPO-CHANGE-INDEX.md`, `.agents/AGENT_TRACER.md`, `apps/portal/AGENT_TRACER.md` |
+| 2026-08-04 | Cline (AI) | control-room | Hardened `apps/portal/src/app/(departments)/control-room/actions.ts` server actions with Zod input validation (added a shared `parseSchema` helper + `BookMachineBreakdownSchema`, `UpdateMachineSiteSchema`, `UpdateHourlyLoadMaterialSchema`, `EndHaulingSessionSchema`, `ReassignDumperExcavatorSchema`, `ExcavatorIdField`), replacing ad-hoc/manual guards. Added 17 unit tests covering `bookMachineBreakdown`, `updateMachineSite`, `updateHourlyLoadMaterial`, `endHaulingSession`, and `reassignDumperExcavator` (success + validation-failure + DB-error paths) via a new fluent Supabase mock builder. No schema/migration changes; multi-write atomicity still delegated to future Postgres RPC (documented). | `apps/portal/src/app/(departments)/control-room/actions.ts`, `apps/portal/src/app/(departments)/control-room/actions.test.ts` | `docs/REPO-CHANGE-INDEX.md`, `apps/portal/AGENT_TRACER.md` |
+
 **Canonical, append-only log of every change to the Arch-System repo.**
 
 Every agent appends one entry per change (one per commit is fine) before
