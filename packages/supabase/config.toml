@@ -102,6 +102,11 @@ file_size_limit = "50MiB"
 
 [auth]
 enabled = true
+# Login methods enabled for this project. Email is the primary sign-in for the portal;
+# phone is disabled (no SMS provider configured). Without this list the CLI defaults to
+# disabling all password logins (GOTRUE_EXTERNAL_EMAIL_ENABLED=false), which breaks
+# sign-in even for pre-seeded users.
+providers = ["email"]
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
 site_url = "http://192.168.0.204:3000"

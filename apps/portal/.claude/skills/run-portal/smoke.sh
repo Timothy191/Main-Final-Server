@@ -20,9 +20,9 @@
 # ──────────────────────────────────────────────────────────────────────────────
 set -uo pipefail
 
-# Skill lives at apps/portal/.claude/skills/run-portal/ — three levels up
+# Skill lives at apps/portal/.claude/skills/run-portal/ — four levels up
 # gets us to the monorepo root.
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../" && pwd)"
 APP_DIR="$REPO_ROOT/apps/portal"
 PORT="${PORT:-3000}"
 LOG="$REPO_ROOT/portal.log"

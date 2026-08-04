@@ -55,12 +55,12 @@ classes don't fit, extend the schema (R6) — do not invent a one-off.
 
 Follow the three-tier system (DECISIONS #007):
 
-- **Primitive** (`--arch0`…`--arch15`): raw values only. Never reference them in
-  components or in `preset.ts` semantic sections.
-- **Semantic** (`--bg-primary`, `--text-body`, `--shadow-card`, `--arch-glass-*`,
-  `--os-shell-*`, `--glass-*`, …): the only tier components and utilities may use.
+- **Primitive** (`--arch0`…`--arch15`, `--palette-*`): raw values only. Never reference them in components or in `preset.ts` semantic sections.
+- **Semantic** (`--bg-*`, `--text-*`, `--border-*`, `--accent-*`, `--arch-glass-*`,
+  `--os-shell-*`, `--glass-*`, `--radius-*`, `--shadow-*`, `--canvas-*`, `--wave-*`, …
+  }: the only tier components/utilities may use. Light-only set in `:root`.
 - **Deprecated** (`--accent-cyan/indigo/violet/alert/blue/emerald`, `--bg-void`):
-  Stylelint warns. Migrate-on-touch; do not introduce new usages.
+  Map to canonical Tier 2. Stylelint warns. Migrate-on-touch; do not introduce new usages.
 
 ## R4 — Transient surfaces are out of scope (but stay light)
 
@@ -81,8 +81,8 @@ grain, and shimmer, honoring `prefers-reduced-motion`. Do not:
 - Change the playback rate / source path outside `RouteBackground.tsx` + the
   tokens (`--canvas-*`, `--wave-*`, `animate-wave-canvas-*`).
 
-To theme a page's ambient feel, adjust the `--canvas-wave-tint-*` / `--wave-*`
-tokens or the orb classes — not the video.
+To theme a page's ambient feel, adjust the `--canvas-*` / `--wave-*` tokens or
+the orb classes — not the video.
 
 ## R6 — Extending the schema
 
@@ -117,8 +117,8 @@ pnpm exec turbo run lint type-check test --force   # confirm "0 cached"
 pnpm format:check
 ```
 
-Do not claim a green quality gate from a non-forced `pnpm quality` run — the
-`lint` task is turbo-cached and can return a stale PASS. (See the
+Do not claim a green quality gate from a non-forced `pnpm quality` run —
+the `lint` task is turbo-cached and can return a stale PASS. (See the
 `turbo-eslint-cache-masking` memory.) The ratchet and shape guard are
 standalone scripts precisely so they sidestep that cache.
 
@@ -131,3 +131,116 @@ standalone scripts precisely so they sidestep that cache.
 - Class added/removed → update the class catalog in **SPEC.md**.
 - Leaving these docs stale after a token change is a rule violation, same as
   leaving tests failing.
+
+## R9 — Token Maintenance Workflow
+
+### Validation Steps
+
+Before committing any token changes:
+
+```bash
+# 1. Validate token structure
+pnpm --filter @repo/theme lint:tokens
+
+# 2. Regenerate derived outputs (if needed)
+pnpm exec turbo run codegen --filter @repo/theme --force
+
+# 3. Run shape guard
+pnpm theme:shape
+
+# 4. Full quality gate (forced, 0 cached)
+pnpm exec turbo run lint type-check test --force
+pnpm format:check
+```
+
+### CI Checks
+
+The CI pipeline enforces these checks:
+
+- **Token validation**: `scripts/validate-tokens.mjs` verifies:
+  - No duplicate token definitions
+  - All required tokens are present
+  - Color values are valid CSS colors
+  - Deprecated tokens have proper mappings
+- **Design ratchet**: `tools/design-ratchet.mjs` ensures no banned glass patterns
+  are introduced
+- **Shape guard**: verifies `generated.ts` maintains its structure
+
+### Token Update Process
+
+1. **Edit source tokens**: Modify `packages/theme/src/css/variables.css` or
+   `packages/theme/src/css/palette.css`
+2. **Regenerate output**: Run `pnpm --filter @repo/theme codegen` to update:
+   - `src/tokens/generated.ts`
+   - `src/tokens/palette.ts`
+   - `src/css/variables-generated.css`
+3. **Validate**: Run `pnpm theme:shape` and `pnpm --filter @repo/theme lint:tokens`
+4. **Update documentation**: Update **SPEC.md** with any new/changed tokens
+5. **Commit**: Include token changes and documentation updates together
+
+### Common Validation Errors
+
+| Error           | Cause                                  | Fix                                  |
+| --------------- | -------------------------------------- | ------------------------------------ |
+| Duplicate token | Token defined twice in `variables.css` | Remove duplicate definition          |
+| Missing mapping | Semantic token not mapped to primitive | Add proper mapping in Tier 2 section |
+| Invalid color   | Hex/RGB/HSL value malformed            | Fix color syntax                     |
+| Shape drift     | `generated.ts` structure changed       | Regenerate with codegen script       |
+
+---
+
+## R10 — Platform-Specific Details (macOS)
+
+The design system is optimized for macOS, with the following platform-specific
+tokens and classes:
+
+### macOS Chrome Tokens
+
+- `--mac-red`: `#ff5f56` — Traffic light red (matches macOS system)
+- `--mac-yellow`: `#ffbd2e` — Traffic light yellow
+- `--mac-green`: `#27c93f` — Traffic light green
+- `--mac-menu-bar-height`: `28px` — System menu bar height
+
+### macOS UI Patterns
+
+**Login Card (macOS-style):**
+
+- Uses `.os-shell--login` with 24px rounded corners
+- Dark ambient wallpaper behind frosted glass card
+- Gold focus ring (`--login-focus-gold-*`) for interactive elements
+- Centered, fixed-width card (max-width: 26.25rem)
+
+**Dock Implementation:**
+
+- Bottom-aligned panel using `.os-shell--dock`
+- Square corners for full-height shell
+- Centered icon arrangement
+
+**Menu Bar Integration:**
+
+- Taskbars use pill shape with `.os-shell--taskbar`
+- Respects `--mac-menu-bar-height` for positioning
+- Ultra-translucent fill (`--os-shell-taskbar-surface`)
+
+### Platform-Specific Styles
+
+```css
+/* macOS-specific overrides in glass.css */
+.os-shell--login {
+  /* Login-specific styling */
+}
+
+.login-focus-gold-ring {
+  /* Gold focus ring for macOS-like UI */
+}
+```
+
+### macOS Lockup UI
+
+The login interface follows macOS conventions:
+
+- Frosted glass card over dark ambient
+- Centered branding with wordmark
+- Apple-style traffic light red/yellow/green indicators
+- Focus ring uses gold (`--login-focus-gold-*`) rather than blue
+- Password field shows reveal/hide toggle with proper spacing

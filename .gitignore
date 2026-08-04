@@ -92,7 +92,6 @@ CLAUDE.local.md
 .claude-code-harness*
 .kiro/specs/
 .env.production.example
-.agents/knowledge/
 .agents/types/
 .agents/skills/
 .agents/teamwork_preview_*/
@@ -108,11 +107,11 @@ scratch_board/*
 !scratch_board/ACTIVE_TEMPLATE.md
 
 # Embedded git repos / independent projects
-agentic-system/
-python-web-scraper/
-redis/
-system-tools/
-SillyTavern-Launcher/
+/agentic-system/
+/python-web-scraper/
+/redis/
+/system-tools/
+/SillyTavern-Launcher/
 
 # Orphaned/rogue files
 knowledge.md
@@ -156,4 +155,3 @@ acc.db-shm
 acc.db-wal
 
 node_modules
-
