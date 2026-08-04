@@ -2,8 +2,15 @@ import { GlassCard } from '@repo/ui/GlassCard'
 import { BookOpen, Clock, Users, PlayCircle } from 'lucide-react'
 import { SearchForm } from '../components/SearchForm'
 import { FilterTabs } from '../components/FilterTabs'
-import { getCourses, formatCourseDuration } from '../actions'
+import { getCourses } from '../actions'
 import { getDepartmentContext } from '@/lib/dept-context'
+
+// AGENT-TRACE: formatCourseDuration is defined locally here to keep it synchronous and avoid Next.js Server Action constraints (where all exported functions in 'use server' files must be async).
+function formatCourseDuration(minutes: number): string {
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+}
 
 export default async function CoursesPage({
   searchParams,

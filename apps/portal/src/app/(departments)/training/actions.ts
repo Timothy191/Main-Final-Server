@@ -80,12 +80,6 @@ function certificationStatus(expiryDate: string, today: string): CertificationSt
   return 'active'
 }
 
-function mapDuration(minutes: number): string {
-  const hours = Math.floor(minutes / 60)
-  const mins = minutes % 60
-  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
-}
-
 /* ------------------------------------------------------------------ */
 /*  1. KPI Metrics (cached)                                            */
 /* ------------------------------------------------------------------ */
@@ -347,11 +341,6 @@ export async function getCourses(
       enrolledCount: course.enrolled_count,
       completionRate: course.completion_rate,
     }))
-}
-
-/** Duration helper exposed for UI rendering (e.g. "4h 30m"). */
-export function formatCourseDuration(minutes: number): string {
-  return mapDuration(minutes)
 }
 
 /* ------------------------------------------------------------------ */
