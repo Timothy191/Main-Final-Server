@@ -10,7 +10,7 @@ import {
   TableCell,
 } from '@repo/ui/components/ui/table'
 import { Badge } from '@repo/ui/components/ui/badge'
-import { ClipboardList, AlertOctagon, ShieldAlert, Wrench, Clock, CheckCircle2 } from 'lucide-react'
+import { ClipboardList, AlertOctagon, ShieldAlert, Wrench, Clock } from 'lucide-react'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
@@ -45,7 +45,7 @@ interface EngineeringNoteRow {
 }
 
 export default async function EngineeringNotesPage() {
-  const { deptId } = await getDepartmentContext({ department: 'control-room' })
+  await getDepartmentContext({ department: 'control-room' })
   const supabase = await createServerSupabaseClient()
 
   const {
