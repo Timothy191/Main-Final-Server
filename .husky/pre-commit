@@ -1,1 +1,2 @@
+./.scripts/check_doctrine_hooks.sh
 pnpm exec lint-staged

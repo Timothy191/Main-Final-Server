@@ -1,1 +1,2 @@
+./.scripts/check_doctrine_hooks.sh --commit-msg "$1"
 pnpm exec commitlint --edit "$1"
