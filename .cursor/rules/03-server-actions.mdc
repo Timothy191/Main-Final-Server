@@ -1,0 +1,24 @@
+---
+description: Next.js 16 Server Actions — async exports constraint
+globs: apps/portal/src/app/**/actions.ts,apps/portal/src/app/**/action.ts
+alwaysApply: false
+---
+
+# Next.js 16 Server Actions Rule
+
+Exported functions in any `'use server'` file are processed as Server Actions. In Next.js, all Server Actions must be asynchronous (`async`). Exporting synchronous helpers will cause compilation/bundling errors.
+
+## Constraints
+
+- **Only Async Exports**: Every function exported from a `'use server'` file must be declared as `async`.
+- **Synchronous Helpers**: If a function (e.g., date/duration formatter, map helper) needs to run synchronously:
+  - Do NOT export it from the `'use server'` file.
+  - Define it locally inside the component/page file where it is consumed, OR
+  - Place it in a shared utility file (e.g., `src/lib/utils.ts`) that does not use the `'use server'` directive.
+
+## Verification
+
+If you edit any action files, verify the build compiles successfully:
+```bash
+pnpm --filter portal build
+```

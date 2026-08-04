@@ -1,0 +1,20 @@
+---
+description: Agent tracing and change-index requirements
+alwaysApply: true
+---
+
+# Agent tracing (mandatory)
+
+For significant tasks:
+
+1. Update [`.agents/AGENT_TRACER.md`](../../.agents/AGENT_TRACER.md) with a dated entry (agent, purpose, changes, notes).
+2. For portal code changes, also update [`apps/portal/AGENT_TRACER.md`](../../apps/portal/AGENT_TRACER.md).
+3. Leave `// AGENT-TRACE:` breadcrumbs at non-obvious integration points.
+
+## Change index
+
+Append one row to [`docs/REPO-CHANGE-INDEX.md`](../../docs/REPO-CHANGE-INDEX.md) before declaring done. `Docs updated: none` is a red flag unless truly doc-neutral.
+
+## Knowledge base
+
+Durable learnings belong in [`.agents/knowledge/`](../../.agents/knowledge/) — see [`README.md`](../../.agents/knowledge/README.md) for how to add or update skills.

@@ -1,0 +1,36 @@
+---
+description: Canonical agent policy — read AGENTS.md first
+alwaysApply: true
+---
+
+# Canonical policy
+
+The monorepo root [`AGENTS.md`](../../AGENTS.md) is the **source of truth** for all agents (Cursor, Claude Code, Codex, etc.).
+
+Before non-trivial work:
+
+1. Read [`AGENTS.md`](../../AGENTS.md) and the domain row in [`docs/WAYFINDER.md`](../../docs/WAYFINDER.md).
+2. Read [`.agents/knowledge/index.md`](../../.agents/knowledge/index.md) for relevant skills.
+3. Append a row to [`docs/REPO-CHANGE-INDEX.md`](../../docs/REPO-CHANGE-INDEX.md) before declaring done.
+
+## Two-layer policy
+
+Product code lives in `apps/` and `packages/`. Agent infrastructure (`.cursor/`, `.agents/`, `.claude/`) must **never** become a runtime dependency of product code.
+
+## Portal specifics
+
+When working in `apps/portal/`, also read [`apps/portal/AGENTS.md`](../../apps/portal/AGENTS.md) and [`apps/portal/CLAUDE.md`](../../apps/portal/CLAUDE.md).
+
+- Edge auth: `apps/portal/src/proxy.ts` (not `middleware.ts`)
+- ACL single source of truth: `@repo/acl`
+- Design system: [`docs/design-system/RULES.md`](../../docs/design-system/RULES.md)
+
+## Quality gates (mandatory before done)
+
+```bash
+pnpm exec turbo run lint type-check test --force   # MUST show 0 cached
+pnpm gates
+pnpm format:check
+```
+
+Do not trust a non-forced `pnpm quality` — turbo can return a stale lint PASS.

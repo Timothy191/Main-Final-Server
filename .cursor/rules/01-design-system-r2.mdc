@@ -1,0 +1,28 @@
+---
+description: Design-system R2 — glass panels and token enforcement
+globs: apps/portal/**/*.{tsx,ts,css},packages/ui/**/*.{tsx,ts,css},packages/theme/**/*
+alwaysApply: false
+---
+
+# Design system — global rule (R2)
+
+Every visual change in `apps/`, `packages/ui/`, or `packages/theme/` must follow:
+
+- [`docs/design-system/RULES.md`](../../docs/design-system/RULES.md) — enforceable must/must-not
+- [`docs/design-system/SPEC.md`](../../docs/design-system/SPEC.md) — exact tokens and classes
+- [`docs/design-system/DESIGN.md`](../../docs/design-system/DESIGN.md) — intent and surface roles
+
+## Hard constraints
+
+- **No ad-hoc glass** on panels/cards: no raw `backdrop-blur-*` or `bg-white/` opacity fills ≥20 on structural surfaces.
+- Use `.os-shell*` (chrome) or `GlassCard` / `.glass-card` (cards), backed by `--arch-glass-*` tokens.
+- **Never** run `generate-tokens.mjs` for CSS value edits — edit `packages/theme/src/css/variables.css` directly.
+- Token/class changes → update SPEC.md in the same commit; structural changes → ADR in `packages/theme/DECISIONS.md`.
+
+## Verification
+
+```bash
+pnpm design:ratchet
+pnpm theme:shape
+pnpm --filter @repo/theme lint:tokens
+```
