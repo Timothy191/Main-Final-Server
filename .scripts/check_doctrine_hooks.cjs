@@ -13,6 +13,9 @@ const args = process.argv.slice(2);
 // Standard emoji pattern including emoticons, symbols, flags, and pictographs
 const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{2600}-\u{27BF}]|[\u{1F1E6}-\u{1F1FF}]/u;
 
+// Patterns representing sycophantic praise or validation
+const sycophancyRegex = /you(?:'re|\s+are)\s+(?:absolutely\s+)?(?:right|correct)|excellent\s+point|great\s+decision/i;
+
 if (args[0] === '--commit-msg') {
   const commitMsgFile = args[1];
   if (!commitMsgFile || !fs.existsSync(commitMsgFile)) {
@@ -22,6 +25,11 @@ if (args[0] === '--commit-msg') {
   const commitMsg = fs.readFileSync(commitMsgFile, 'utf8');
   if (emojiRegex.test(commitMsg)) {
     console.error('❌ FAIL: Commit message contains emojis (violates Doctrine Professional Communication rule).');
+    console.error(`  Message: "${commitMsg.trim()}"`);
+    process.exit(1);
+  }
+  if (sycophancyRegex.test(commitMsg)) {
+    console.error('❌ FAIL: Commit message contains sycophantic filler (violates Doctrine Sycophancy Ban).');
     console.error(`  Message: "${commitMsg.trim()}"`);
     process.exit(1);
   }
@@ -35,7 +43,7 @@ try {
     .split('\n')
     .filter(Boolean);
 
-  let emojiFound = false;
+  let violationFound = false;
 
   for (const file of stagedFiles) {
     if (/\.(ts|tsx|js|jsx|mjs|cjs)$/.test(file)) {
@@ -56,18 +64,23 @@ try {
           if (emojiRegex.test(line)) {
             console.error(`❌ FAIL: Emojis detected in added comments inside file: ${file}`);
             console.error(`  Line: ${line.trim()}`);
-            emojiFound = true;
+            violationFound = true;
+          }
+          if (sycophancyRegex.test(line)) {
+            console.error(`❌ FAIL: Sycophantic comment detected inside file: ${file}`);
+            console.error(`  Line: ${line.trim()}`);
+            violationFound = true;
           }
         }
       }
     }
   }
 
-  if (emojiFound) {
+  if (violationFound) {
     process.exit(1);
   }
 
-  console.log('  ✓ PASS: No emojis detected in staged comments or code.');
+  console.log('  ✓ PASS: No emojis or sycophantic language detected in staged comments or code.');
 } catch (error) {
   console.error('❌ Error running compliance check:', error.message);
   process.exit(1);
