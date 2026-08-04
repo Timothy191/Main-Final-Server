@@ -43,7 +43,7 @@ const nextConfig = {
     default: require.resolve("./dist/lib/next-cache-handler.js"),
   },
   experimental: {
-    optimizePackageImports: ["framer-motion"],
+    optimizePackageImports: ["framer-motion", "lucide-react", "date-fns", "recharts"],
     inlineCss: true,
     webVitalsAttribution: ["CLS", "LCP", "FCP", "TTFB", "INP"],
     viewTransition: true,
