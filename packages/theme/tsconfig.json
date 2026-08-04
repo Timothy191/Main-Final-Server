@@ -2,10 +2,12 @@
   "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "module": "esnext",
     "paths": {
       "@repo/theme/*": ["./src/*"]
     },
-    "types": ["react"]
+    "types": ["react"],
+    "moduleResolution": "node"
   },
   "include": ["src"],
   "exclude": ["node_modules", "src/tokens/generated-sd.ts"]

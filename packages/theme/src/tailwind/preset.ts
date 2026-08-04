@@ -78,7 +78,7 @@ const archTheme: Config = {
         'overlay-medium': 'var(--overlay-medium)',
 
         'border-subtle': 'var(--border-subtle)',
-        'chrome-border': 'var(--chrome-border)',
+        'chrome-border': 'var(--palette-chrome-border)',
         'border-default': 'var(--border-default)',
         'border-emphasis': 'var(--border-emphasis)',
 

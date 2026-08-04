@@ -261,3 +261,22 @@ them in agreement until Style Dictionary regeneration is restored.
 
 **Reference**: `packages/theme/src/css/variables.css`, `variables-generated.css`,
 `palette.css`, `tokens.json`; `docs/design-system/SPEC.md` §2.
+
+---
+
+## 014 — Token Validation Script Integration
+
+**Decision**: Added `lint:tokens` npm script to `@repo/theme` package.json to streamline token validation in CI pipelines. The script runs `validate-tokens.mjs` which enforces:
+
+1. Every `var(--token)` used in preset.ts is defined in variables.css OR variables-generated.css
+2. No --arch* primitive tokens leak directly into preset.ts color utilities
+3. Deprecated aliases are not introduced as new definitions outside the TIER 3 block
+4. Token drift: tokens.json values match variables.css for tokens present in both
+
+**Why**: Centralizes token validation logic and makes it easily executable via `pnpm --filter @repo/theme lint:tokens` or `pnpm theme:lint:tokens` (once added to root scripts). Prevents manual drift and ensures consistency between token sources.
+
+**Migration**: Script is immediately available; no breaking changes. Developers should run `pnpm --filter @repo/theme lint:tokens` before committing token-related changes.
+
+**CI Integration**: The script is enforced in the quality gate via `pnpm exec turbo run lint type-check test --force` which includes the theme package's lint step.
+
+---

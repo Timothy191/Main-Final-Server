@@ -27,11 +27,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const CSS_SRC = resolve(ROOT, "src/css/variables.css");
 const CSS_GEN_SRC = resolve(ROOT, "src/css/variables-generated.css");
+const PALETTE_SRC = resolve(ROOT, "src/css/palette.css");
 const PRESET_SRC = resolve(ROOT, "src/tailwind/preset.ts");
 const TOKENS_SRC = resolve(ROOT, "tokens.json");
 
 const cssText = readFileSync(CSS_SRC, "utf8");
 const cssGenText = readFileSync(CSS_GEN_SRC, "utf8");
+const paletteText = readFileSync(PALETTE_SRC, "utf8");
 const presetText = readFileSync(PRESET_SRC, "utf8");
 const tokensJson = JSON.parse(readFileSync(TOKENS_SRC, "utf8"));
 
@@ -73,6 +75,9 @@ for (const match of cssText.matchAll(/^\s*(--[\w-]+)\s*:/gm)) {
   definedTokens.add(match[1]);
 }
 for (const match of cssGenText.matchAll(/^\s*(--[\w-]+)\s*:/gm)) {
+  definedTokens.add(match[1]);
+}
+for (const match of paletteText.matchAll(/^\s*(--[\w-]+)\s*:/gm)) {
   definedTokens.add(match[1]);
 }
 console.log(
@@ -170,9 +175,12 @@ function flattenTokens(obj, prefix = "") {
 
 const jsonTokens = flattenTokens(tokensJson);
 
-// Extract values from variables.css (not generated — we want to catch manual drift)
+// Extract values from variables.css + palette.css (not generated — we want to catch manual drift)
 const cssValues = new Map();
 for (const match of cssText.matchAll(/^\s*(--[\w-]+)\s*:\s*(.+?);/gm)) {
+  cssValues.set(match[1], match[2].trim());
+}
+for (const match of paletteText.matchAll(/^\s*(--[\w-]+)\s*:\s*(.+?);/gm)) {
   cssValues.set(match[1], match[2].trim());
 }
 

@@ -16,6 +16,11 @@
   "peerDependencies": {
     "react": "^19.0.0"
   },
+  "scripts": {
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:tokens": "node scripts/validate-tokens.mjs",
+    "codegen": "node scripts/generate-tokens.mjs"
+  },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/react": "^19",

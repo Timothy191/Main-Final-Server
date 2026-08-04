@@ -24,6 +24,8 @@ const css = readFileSync(CSS_SRC, "utf8");
 /** Extract all --token: value; pairs from the :root block */
 function extractTokens(cssText) {
   const tokens = {
+    primitives: {},
+    hsl: {},
     color: { bg: {}, border: {}, text: {}, accent: {}, mac: {}, glass: {}, vibrancy: {} },
     shadow: {},
     radius: {},
@@ -38,8 +40,25 @@ function extractTokens(cssText) {
     const value = rawValue.trim();
 
     // Skip @deprecated comment lines but still capture the token
-    if (name.startsWith("--arch")) continue; // primitives — not emitted
-
+    
+    // Handle arch primitives (--arch0 through --arch15)
+    if (name.startsWith("--arch")) {
+      const key = name.replace("--arch", "arch").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      tokens.primitives[key] = `var(${name})`;
+      continue;
+    }
+    
+    // Handle HSL variables (shadcn/ui HSL tokens like --background, --foreground, etc.)
+    // These are pure HSL values (e.g., "240 5% 96%") without var() references
+    if (name.match(/^--(background|foreground|card|popover|primary|secondary|muted|accent|destructive|border|input|ring|chart-\d+|tremor-)/)) {
+      const key = name.replace(/^--/, "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      // Check if value is a pure HSL value (numbers and percentages/spaces)
+      if (value.match(/^[\d%\s]+$/)) {
+        tokens.hsl[key] = value;
+        continue;
+      }
+    }
+    
     // Categorise by name prefix
     if (name.startsWith("--bg-")) {
       const key = name.replace("--bg-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
@@ -76,16 +95,26 @@ function extractTokens(cssText) {
   return tokens;
 }
 
+function needsQuotes(key) {
+  // Keys that contain special characters or start with numbers need quotes
+  return /[-\s\d]/.test(key[0]) || /[-\s]/.test(key);
+}
+
+function quoteKey(key) {
+  return needsQuotes(key) ? `"${key}"` : key;
+}
+
 function renderObject(obj, indent = 2) {
   const pad = " ".repeat(indent);
   const innerPad = " ".repeat(indent + 2);
   const entries = Object.entries(obj);
   if (entries.length === 0) return "{}";
   const lines = entries.map(([k, v]) => {
+    const safeKey = quoteKey(k);
     if (typeof v === "object") {
-      return `${innerPad}${k}: ${renderObject(v, indent + 2)},`;
+      return `${innerPad}${safeKey}: ${renderObject(v, indent + 2)},`;
     }
-    return `${innerPad}${k}: ${JSON.stringify(v)},`;
+    return `${innerPad}${safeKey}: ${JSON.stringify(v)},`;
   });
   return `{\n${lines.join("\n")}\n${pad}}`;
 }
@@ -113,6 +142,8 @@ const output = `/**
 export const tokens = ${renderObject(tokens, 0)} as const;
 
 export type Tokens = typeof tokens;
+export type PrimitiveTokens = typeof tokens.primitives;
+export type HslTokens = typeof tokens.hsl;
 export type ColorTokens = typeof tokens.color;
 export type ShadowTokens = typeof tokens.shadow;
 export type RadiusTokens = typeof tokens.radius;
