@@ -1,47 +1,47 @@
-import RedisPkg from "ioredis";
-import { getNativeRedisClient, NativeRedisClient } from "./native-client.js";
+import RedisPkg from 'ioredis'
+import { getNativeRedisClient, NativeRedisClient } from './native-client.js'
 
-const Redis = (RedisPkg as any).default || RedisPkg;
+const Redis = (RedisPkg as any).default || RedisPkg
 
-type RedisClient = import("ioredis").Redis | NativeRedisClient;
+type RedisClient = import('ioredis').Redis | NativeRedisClient
 
 // ---------------------------------------------------------------------------
 // Connection configuration
 // ---------------------------------------------------------------------------
 
-const REDIS_URL = process.env.REDIS_URL;
+const REDIS_URL = process.env.REDIS_URL
 
 /** Redis Sentinel service name for high-availability failover. */
-const REDIS_SENTINEL_SERVICE = process.env.REDIS_SENTINEL_SERVICE;
+const REDIS_SENTINEL_SERVICE = process.env.REDIS_SENTINEL_SERVICE
 
 /**
  * Comma-separated list of sentinel nodes (host:port).
  * Example: "sentinel1:26379,sentinel2:26379,sentinel3:26379"
  */
-const REDIS_SENTINEL_NODES = process.env.REDIS_SENTINEL_NODES;
+const REDIS_SENTINEL_NODES = process.env.REDIS_SENTINEL_NODES
 
 /** Redis Sentinel password (if sentinels require auth). */
-const REDIS_SENTINEL_PASSWORD = process.env.REDIS_SENTINEL_PASSWORD;
+const REDIS_SENTINEL_PASSWORD = process.env.REDIS_SENTINEL_PASSWORD
 
 /** Redis master password to authenticate with the Redis master. */
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD
 
-const USE_SENTINEL = !!(REDIS_SENTINEL_SERVICE && REDIS_SENTINEL_NODES);
+const USE_SENTINEL = !!(REDIS_SENTINEL_SERVICE && REDIS_SENTINEL_NODES)
 const USE_NATIVE =
-  process.env.USE_NATIVE_CACHE === "true" ||
-  process.env.NODE_ENV === "test" ||
-  (!REDIS_URL && !USE_SENTINEL);
+  process.env.USE_NATIVE_CACHE === 'true' ||
+  process.env.NODE_ENV === 'test' ||
+  (!REDIS_URL && !USE_SENTINEL)
 
-let client: any = null;
-let connecting: Promise<any> | null = null;
-let connectionAttempts = 0;
-let lastFailure = 0;
+let client: any = null
+let connecting: Promise<any> | null = null
+let connectionAttempts = 0
+let lastFailure = 0
 
 /** Time between health check pings (30s). */
-const HEALTH_CHECK_INTERVAL_MS = 30_000;
+const HEALTH_CHECK_INTERVAL_MS = 30_000
 
 /** Max ioredis retries per individual command before giving up. */
-const MAX_RETRIES_PER_REQUEST = 3;
+const MAX_RETRIES_PER_REQUEST = 3
 
 /**
  * Build ioredis connection options — handles both direct Redis and Sentinel modes.
@@ -51,10 +51,10 @@ const MAX_RETRIES_PER_REQUEST = 3;
  */
 function buildConnectionOptions() {
   if (USE_SENTINEL) {
-    const sentinels = REDIS_SENTINEL_NODES!.split(",").map((node) => {
-      const [host, port] = node.trim().split(":");
-      return { host, port: port ? parseInt(port, 10) : 26379 };
-    });
+    const sentinels = REDIS_SENTINEL_NODES!.split(',').map((node) => {
+      const [host, port] = node.trim().split(':')
+      return { host, port: port ? parseInt(port, 10) : 26379 }
+    })
 
     return {
       sentinels,
@@ -70,7 +70,7 @@ function buildConnectionOptions() {
       keepAlive: 5000,
       retryStrategy,
       enableOfflineQueue: false,
-    };
+    }
   }
 
   // Direct connection (default)
@@ -82,7 +82,7 @@ function buildConnectionOptions() {
     keepAlive: 5000,
     retryStrategy,
     enableOfflineQueue: false,
-  };
+  }
 }
 
 /**
@@ -95,26 +95,26 @@ function buildConnectionOptions() {
  * Exported for testing. Internal consumers should use getRedisClient().
  */
 export function retryStrategy(times: number): number | null {
-  const maxReconnectAttempts = 6;
+  const maxReconnectAttempts = 6
   if (times > maxReconnectAttempts) {
     console.warn(
       `[RedisClient] connection lost — ${times} retries exhausted, falling back to NativeRedisClient`
-    );
-    return null; // Stop retrying — fallback to native
+    )
+    return null // Stop retrying — fallback to native
   }
 
   // Exponential backoff: 200ms, 400ms, 800ms, 1600ms, 2000ms, 2000ms
-  const delay = Math.min(200 * 2 ** (times - 1), 2000);
+  const delay = Math.min(200 * 2 ** (times - 1), 2000)
   // Add ±100ms jitter to spread reconnection across pods
-  const jitter = Math.round(Math.random() * 200 - 100);
+  const jitter = Math.round(Math.random() * 200 - 100)
   console.warn(
     `[RedisClient] reconnect attempt ${times}/${maxReconnectAttempts} in ${delay + jitter}ms`
-  );
-  return delay + jitter;
+  )
+  return delay + jitter
 }
 
 /** Periodic health check — pings Redis to keep connection alive. */
-let healthCheckTimer: ReturnType<typeof setInterval> | null = null;
+let healthCheckTimer: ReturnType<typeof setInterval> | null = null
 
 /**
  * Start periodic health check pings on the given Redis client.
@@ -122,19 +122,19 @@ let healthCheckTimer: ReturnType<typeof setInterval> | null = null;
  * calls this automatically on connection.
  */
 export function startHealthCheck(redisClient: any): void {
-  stopHealthCheck();
+  stopHealthCheck()
   healthCheckTimer = setInterval(async () => {
     try {
-      if (redisClient?.status === "ready" && typeof redisClient.ping === "function") {
-        await redisClient.ping();
+      if (redisClient?.status === 'ready' && typeof redisClient.ping === 'function') {
+        await redisClient.ping()
       }
     } catch {
       // Health check failed — ioredis's built-in reconnect will handle it
     }
-  }, HEALTH_CHECK_INTERVAL_MS);
+  }, HEALTH_CHECK_INTERVAL_MS)
   // Allow the process to exit even if the timer is still active
-  if (healthCheckTimer && typeof healthCheckTimer === "object" && "unref" in healthCheckTimer) {
-    (healthCheckTimer as any).unref();
+  if (healthCheckTimer && typeof healthCheckTimer === 'object' && 'unref' in healthCheckTimer) {
+    ;(healthCheckTimer as any).unref()
   }
 }
 
@@ -144,8 +144,8 @@ export function startHealthCheck(redisClient: any): void {
  */
 export function stopHealthCheck(): void {
   if (healthCheckTimer) {
-    clearInterval(healthCheckTimer);
-    healthCheckTimer = null;
+    clearInterval(healthCheckTimer)
+    healthCheckTimer = null
   }
 }
 
@@ -153,8 +153,8 @@ export function stopHealthCheck(): void {
  * Returns the Redis client if it is currently open, otherwise native client.
  */
 export function getClientIfOpen(): any {
-  if (USE_NATIVE) return getNativeRedisClient();
-  return client?.status === "ready" ? client : getNativeRedisClient();
+  if (USE_NATIVE) return getNativeRedisClient()
+  return client?.status === 'ready' ? client : getNativeRedisClient()
 }
 
 /**
@@ -168,79 +168,79 @@ export function getClientIfOpen(): any {
  */
 export async function getRedisClient(): Promise<any> {
   if (USE_NATIVE) {
-    return getNativeRedisClient();
+    return getNativeRedisClient()
   }
 
-  if (client?.status === "ready") return client;
-  if (connecting) return connecting;
+  if (client?.status === 'ready') return client
+  if (connecting) return connecting
 
   // Cooldown: don't hammer with connection attempts after recent failure
   if (Date.now() - lastFailure < 10_000) {
-    return getNativeRedisClient();
+    return getNativeRedisClient()
   }
 
   connecting = (async () => {
     try {
-      connectionAttempts++;
+      connectionAttempts++
       const next = USE_SENTINEL
         ? new Redis(buildConnectionOptions())
-        : new Redis(REDIS_URL!, buildConnectionOptions());
+        : new Redis(REDIS_URL!, buildConnectionOptions())
 
       // Track connection lifecycle events
-      next.on("connect", () => {
-        console.log(`[RedisClient] connected (attempt ${connectionAttempts})`);
-      });
+      next.on('connect', () => {
+        console.log(`[RedisClient] connected (attempt ${connectionAttempts})`)
+      })
 
-      next.on("ready", () => {
-        console.log(`[RedisClient] ready — connection established, starting health checks`);
-        startHealthCheck(next);
-      });
+      next.on('ready', () => {
+        console.log(`[RedisClient] ready — connection established, starting health checks`)
+        startHealthCheck(next)
+      })
 
-      next.on("end", () => {
-        console.warn(`[RedisClient] connection ended`);
-        if (client === next) client = null;
-        connecting = null;
-      });
+      next.on('end', () => {
+        console.warn(`[RedisClient] connection ended`)
+        if (client === next) client = null
+        connecting = null
+      })
 
-      next.on("error", (err: Error) => {
-        // ioredis emits 'error' for transient issues during reconnection — 
+      next.on('error', (err: Error) => {
+        // ioredis emits 'error' for transient issues during reconnection —
         // don't null the client until 'end' is emitted
-        console.warn(`[RedisClient] error: ${err.message}`);
-      });
+        console.warn(`[RedisClient] error: ${err.message}`)
+      })
 
-      next.on("reconnecting", () => {
-        console.warn(`[RedisClient] reconnecting...`);
-      });
+      next.on('reconnecting', () => {
+        console.warn(`[RedisClient] reconnecting...`)
+      })
 
-      await next.connect();
-      client = next;
-      connectionAttempts = 0;
-      return client;
+      await next.connect()
+      client = next
+      connectionAttempts = 0
+      return client
     } catch (err) {
-      lastFailure = Date.now();
-      stopHealthCheck();
+      lastFailure = Date.now()
+      stopHealthCheck()
       console.warn(
-        `[RedisClient] connection failed after ${connectionAttempts} attempts — falling back to NativeRedisClient: ${(err as Error)?.message ?? "unknown error"}`
-      );
-      return getNativeRedisClient();
+        `[RedisClient] connection failed after ${connectionAttempts} attempts — falling back to NativeRedisClient: ${(err as Error)?.message ?? 'unknown error'}`
+      )
+      return getNativeRedisClient()
     } finally {
-      connecting = null;
+      connecting = null
     }
-  })();
+  })()
 
-  return connecting;
+  return connecting
 }
 
 /**
  * Gracefully close connection and stop health checks.
  */
 export async function closeRedis(): Promise<void> {
-  stopHealthCheck();
-  if (client?.status === "ready" && typeof client.quit === "function") {
-    await client.quit();
-    client = null;
+  stopHealthCheck()
+  if (client?.status === 'ready' && typeof client.quit === 'function') {
+    await client.quit()
+    client = null
   }
-  connecting = null;
+  connecting = null
 }
 
 /**
@@ -255,13 +255,17 @@ export async function createPubSubClient(): Promise<{
 
   try {
     // Reuse existing client as publisher if available
-    const publisher = client?.status === "ready" ? client : await getRedisClient()
-    if (!publisher || typeof publisher.publish !== "function") return null
+    const publisher = client?.status === 'ready' ? client : await getRedisClient()
+    if (!publisher || typeof publisher.publish !== 'function') return null
 
     // Create dedicated subscriber connection
     const Redis = (RedisPkg as any).default || RedisPkg
     const subscriber = USE_SENTINEL
-      ? new Redis({ ...buildConnectionOptions(), maxRetriesPerRequest: 1, retryStrategy: () => null })
+      ? new Redis({
+          ...buildConnectionOptions(),
+          maxRetriesPerRequest: 1,
+          retryStrategy: () => null,
+        })
       : new Redis(REDIS_URL!, {
           maxRetriesPerRequest: 1,
           enableReadyCheck: true,
@@ -280,15 +284,15 @@ export async function createPubSubClient(): Promise<{
 
 /** Returns connection diagnostics for observability. */
 export function getRedisConnectionInfo(): {
-  connected: boolean;
-  status: string;
-  connectionAttempts: number;
-  nativeFallback: boolean;
+  connected: boolean
+  status: string
+  connectionAttempts: number
+  nativeFallback: boolean
 } {
   return {
-    connected: client?.status === "ready",
-    status: client?.status ?? "disconnected",
+    connected: client?.status === 'ready',
+    status: client?.status ?? 'disconnected',
     connectionAttempts,
     nativeFallback: USE_NATIVE || !REDIS_URL,
-  };
+  }
 }

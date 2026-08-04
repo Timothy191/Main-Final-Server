@@ -14,12 +14,12 @@
  * References: redis.io/docs/manual/patterns/distributed-locks/
  */
 
-import { recordCacheHit, recordCacheMiss, recordRedisError, getCacheStats } from "./stats.js";
+import { recordCacheHit, recordCacheMiss, recordRedisError, getCacheStats } from './stats.js'
 import {
   cacheInvalidateTags,
   cacheInvalidatePrefixes,
   indexCacheKeyByTags,
-} from "./invalidation.js";
+} from './invalidation.js'
 import {
   l1Get as memoryGet,
   l1Set as memorySet,
@@ -27,68 +27,68 @@ import {
   l1DeleteByPrefix as memoryDeleteByPrefix,
   l1IndexTags,
   l1Clear,
-} from "./l1.js";
-import { createGzip, createGunzip } from "zlib";
-import { pipeline as streamPipeline } from "stream";
-import { promisify } from "util";
-import { randomUUID } from "crypto";
+} from './l1.js'
+import { createGzip, createGunzip } from 'zlib'
+import { pipeline as streamPipeline } from 'stream'
+import { promisify } from 'util'
+import { randomUUID } from 'crypto'
 
-const pipelineAsync = promisify(streamPipeline);
+const pipelineAsync = promisify(streamPipeline)
 
 // ---------------------------------------------------------------------------
 // Feature flags
 // ---------------------------------------------------------------------------
 
 /** When true, gzip-compress all L2 Redis payloads before writing. */
-const COMPRESSION_ENABLED = process.env.CACHE_COMPRESSION === "true";
+const COMPRESSION_ENABLED = process.env.CACHE_COMPRESSION === 'true'
 
 /**
  * When true, use a Redis SET NX distributed mutex inside cacheWrap to prevent
  * thundering herd across multiple pod replicas. Requires real Redis (not native fallback).
  */
-const DISTRIBUTED_LOCK_ENABLED = process.env.ENABLE_DISTRIBUTED_LOCK === "true";
+const DISTRIBUTED_LOCK_ENABLED = process.env.ENABLE_DISTRIBUTED_LOCK === 'true'
 
 /** Alert when cache hit rate drops below this fraction (0–1). */
-const HIT_RATE_ALERT_THRESHOLD = 0.5;
+const HIT_RATE_ALERT_THRESHOLD = 0.5
 
 /** Minimum total operations before hit-rate alerting activates. */
-const HIT_RATE_ALERT_MIN_OPS = 100;
+const HIT_RATE_ALERT_MIN_OPS = 100
 
-let lastHitRateAlert = 0;
-const HIT_RATE_ALERT_COOLDOWN_MS = 60_000;
+let lastHitRateAlert = 0
+const HIT_RATE_ALERT_COOLDOWN_MS = 60_000
 
 // ---------------------------------------------------------------------------
 // Compression helpers
 // ---------------------------------------------------------------------------
 
 async function gzipBuffer(data: string): Promise<Buffer> {
-  const { Readable, Writable } = await import("stream");
-  const chunks: Buffer[] = [];
-  const input = Readable.from([Buffer.from(data, "utf8")]);
-  const gzip = createGzip();
+  const { Readable, Writable } = await import('stream')
+  const chunks: Buffer[] = []
+  const input = Readable.from([Buffer.from(data, 'utf8')])
+  const gzip = createGzip()
   const collector = new Writable({
     write(chunk, _enc, cb) {
-      chunks.push(chunk as Buffer);
-      cb();
+      chunks.push(chunk as Buffer)
+      cb()
     },
-  });
-  await pipelineAsync(input, gzip, collector);
-  return Buffer.concat(chunks);
+  })
+  await pipelineAsync(input, gzip, collector)
+  return Buffer.concat(chunks)
 }
 
 async function gunzipBuffer(data: Buffer): Promise<string> {
-  const { Readable, Writable } = await import("stream");
-  const chunks: Buffer[] = [];
-  const input = Readable.from([data]);
-  const gunzip = createGunzip();
+  const { Readable, Writable } = await import('stream')
+  const chunks: Buffer[] = []
+  const input = Readable.from([data])
+  const gunzip = createGunzip()
   const collector = new Writable({
     write(chunk, _enc, cb) {
-      chunks.push(chunk as Buffer);
-      cb();
+      chunks.push(chunk as Buffer)
+      cb()
     },
-  });
-  await pipelineAsync(input, gunzip, collector);
-  return Buffer.concat(chunks).toString("utf8");
+  })
+  await pipelineAsync(input, gunzip, collector)
+  return Buffer.concat(chunks).toString('utf8')
 }
 
 // ---------------------------------------------------------------------------
@@ -97,36 +97,36 @@ async function gunzipBuffer(data: Buffer): Promise<string> {
 
 interface CacheEnvelope<T> {
   /** The serialized value (JSON string, or base64 of gzip when compressed) */
-  v: string;
+  v: string
   /** True when v is gzip-compressed and base64-encoded */
-  gz?: true;
+  gz?: true
   /** Original typed value — used when not compressed */
-  _raw?: T;
+  _raw?: T
 }
 
 async function serialize<T>(value: T): Promise<string> {
   if (!COMPRESSION_ENABLED) {
-    const envelope: CacheEnvelope<T> = { v: JSON.stringify(value) };
-    return JSON.stringify(envelope);
+    const envelope: CacheEnvelope<T> = { v: JSON.stringify(value) }
+    return JSON.stringify(envelope)
   }
-  const json = JSON.stringify(value);
-  const compressed = await gzipBuffer(json);
-  const envelope: CacheEnvelope<T> = { v: compressed.toString("base64"), gz: true };
-  return JSON.stringify(envelope);
+  const json = JSON.stringify(value)
+  const compressed = await gzipBuffer(json)
+  const envelope: CacheEnvelope<T> = { v: compressed.toString('base64'), gz: true }
+  return JSON.stringify(envelope)
 }
 
 async function deserialize<T>(raw: string): Promise<T> {
   try {
-    const envelope = JSON.parse(raw) as CacheEnvelope<T>;
+    const envelope = JSON.parse(raw) as CacheEnvelope<T>
     if (envelope.gz) {
-      const buf = Buffer.from(envelope.v, "base64");
-      const json = await gunzipBuffer(buf);
-      return JSON.parse(json) as T;
+      const buf = Buffer.from(envelope.v, 'base64')
+      const json = await gunzipBuffer(buf)
+      return JSON.parse(json) as T
     }
-    return JSON.parse(envelope.v) as T;
+    return JSON.parse(envelope.v) as T
   } catch {
     // Legacy format — stored as plain JSON (no envelope). Graceful fallback.
-    return JSON.parse(raw) as T;
+    return JSON.parse(raw) as T
   }
 }
 
@@ -140,8 +140,8 @@ async function deserialize<T>(raw: string): Promise<T> {
  * are set with the same TTL (e.g., after a full cache flush).
  */
 function jitterTtl(ttlSeconds: number): number {
-  const jitterFraction = (Math.random() * 0.2 - 0.1); // ±10%
-  return Math.max(1, Math.round(ttlSeconds * (1 + jitterFraction)));
+  const jitterFraction = Math.random() * 0.2 - 0.1 // ±10%
+  return Math.max(1, Math.round(ttlSeconds * (1 + jitterFraction)))
 }
 
 // ---------------------------------------------------------------------------
@@ -150,10 +150,10 @@ function jitterTtl(ttlSeconds: number): number {
 
 async function getRedisClientSafe() {
   try {
-    const { getRedisClient } = await import("./client.js");
-    return await getRedisClient();
+    const { getRedisClient } = await import('./client.js')
+    return await getRedisClient()
   } catch {
-    return null;
+    return null
   }
 }
 
@@ -162,19 +162,19 @@ async function getRedisClientSafe() {
 // ---------------------------------------------------------------------------
 
 async function checkHitRateAlert(): Promise<void> {
-  const now = Date.now();
-  if (now - lastHitRateAlert < HIT_RATE_ALERT_COOLDOWN_MS) return;
+  const now = Date.now()
+  if (now - lastHitRateAlert < HIT_RATE_ALERT_COOLDOWN_MS) return
   try {
-    const stats = await getCacheStats();
-    const total = stats.hits + stats.misses;
-    if (total < HIT_RATE_ALERT_MIN_OPS) return;
-    const hitRate = stats.hits / total;
+    const stats = await getCacheStats()
+    const total = stats.hits + stats.misses
+    if (total < HIT_RATE_ALERT_MIN_OPS) return
+    const hitRate = stats.hits / total
     if (hitRate < HIT_RATE_ALERT_THRESHOLD) {
-      lastHitRateAlert = now;
+      lastHitRateAlert = now
       console.warn(
         `[Cache] ALERT: hit rate ${(hitRate * 100).toFixed(1)}% is below threshold ${(HIT_RATE_ALERT_THRESHOLD * 100).toFixed(0)}%` +
           ` (hits=${stats.hits}, misses=${stats.misses}, l1=${stats.l1Hits}, l2=${stats.l2Hits})`
-      );
+      )
     }
   } catch {
     // Non-critical — never block on alerting
@@ -186,89 +186,89 @@ async function checkHitRateAlert(): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export async function cacheGet<T>(key: string): Promise<T | null> {
-  const start = performance.now();
+  const start = performance.now()
 
-  const l1Value = memoryGet<T>(key);
+  const l1Value = memoryGet<T>(key)
   if (l1Value !== null) {
-    recordCacheHit("l1", performance.now() - start);
-    return l1Value;
+    recordCacheHit('l1', performance.now() - start)
+    return l1Value
   }
 
   try {
-    const redis = await getRedisClientSafe();
+    const redis = await getRedisClientSafe()
     if (!redis) {
-      recordCacheMiss(performance.now() - start);
-      return null;
+      recordCacheMiss(performance.now() - start)
+      return null
     }
-    const value = await redis.get(key);
+    const value = await redis.get(key)
     if (value) {
-      const parsed = await deserialize<T>(value);
-      memorySet(key, parsed, 15);
-      recordCacheHit("l2", performance.now() - start);
-      return parsed;
+      const parsed = await deserialize<T>(value)
+      memorySet(key, parsed, 15)
+      recordCacheHit('l2', performance.now() - start)
+      return parsed
     }
-    recordCacheMiss(performance.now() - start);
+    recordCacheMiss(performance.now() - start)
     // Fire-and-forget hit-rate check
-    checkHitRateAlert().catch(() => {});
-    return null;
+    checkHitRateAlert().catch(() => {})
+    return null
   } catch {
-    recordRedisError();
-    recordCacheMiss(performance.now() - start);
-    return null;
+    recordRedisError()
+    recordCacheMiss(performance.now() - start)
+    return null
   }
 }
 
 export async function cacheGetWithStats<T>(
   key: string
-): Promise<{ value: T | null; source: "l1" | "l2" | null }> {
-  const start = performance.now();
+): Promise<{ value: T | null; source: 'l1' | 'l2' | null }> {
+  const start = performance.now()
 
-  const l1Value = memoryGet<T>(key);
+  const l1Value = memoryGet<T>(key)
   if (l1Value !== null) {
-    recordCacheHit("l1", performance.now() - start);
-    return { value: l1Value, source: "l1" };
+    recordCacheHit('l1', performance.now() - start)
+    return { value: l1Value, source: 'l1' }
   }
 
   try {
-    const redis = await getRedisClientSafe();
+    const redis = await getRedisClientSafe()
     if (!redis) {
-      recordCacheMiss(performance.now() - start);
-      return { value: null, source: null };
+      recordCacheMiss(performance.now() - start)
+      return { value: null, source: null }
     }
-    const value = await redis.get(key);
+    const value = await redis.get(key)
     if (value) {
-      const parsed = await deserialize<T>(value);
-      memorySet(key, parsed, 15);
-      recordCacheHit("l2", performance.now() - start);
-      return { value: parsed, source: "l2" };
+      const parsed = await deserialize<T>(value)
+      memorySet(key, parsed, 15)
+      recordCacheHit('l2', performance.now() - start)
+      return { value: parsed, source: 'l2' }
     }
-    recordCacheMiss(performance.now() - start);
-    return { value: null, source: null };
+    recordCacheMiss(performance.now() - start)
+    return { value: null, source: null }
   } catch {
-    recordRedisError();
-    recordCacheMiss(performance.now() - start);
-    return { value: null, source: null };
+    recordRedisError()
+    recordCacheMiss(performance.now() - start)
+    return { value: null, source: null }
   }
 }
 
 export async function cacheSet<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
-  const l1Ttl = Math.min(ttlSeconds, 30);
-  memorySet(key, value, l1Ttl);
+  const l1Ttl = Math.min(ttlSeconds, 30)
+  memorySet(key, value, l1Ttl)
 
   try {
-    const redis = await getRedisClientSafe();
+    const redis = await getRedisClientSafe()
     if (redis) {
       // AGENT-TRACE: TTL jitter prevents synchronized mass expiry (cache stampede)
-      const jitteredTtl = jitterTtl(ttlSeconds);
-      const serialized = await serialize(value);
-      if (typeof redis.setex === "function") {
-        await redis.setex(key, jitteredTtl, serialized);
+      const jitteredTtl = jitterTtl(ttlSeconds)
+      const serialized = await serialize(value)
+      if (typeof redis.setex === 'function') {
+        await redis.setex(key, jitteredTtl, serialized)
       } else {
-        await redis.set(key, serialized, "EX", jitteredTtl);
+        await redis.set(key, serialized, 'EX', jitteredTtl)
       }
     }
   } catch {
-    recordRedisError();
+    recordRedisError()
   }
 }
 
@@ -278,10 +278,10 @@ export async function cacheSetWithTags<T>(
   ttlSeconds: number,
   tags?: string[]
 ): Promise<void> {
-  await cacheSet(key, value, ttlSeconds);
+  await cacheSet(key, value, ttlSeconds)
   if (tags && tags.length > 0) {
-    l1IndexTags(key, tags);
-    await indexCacheKeyByTags(key, tags);
+    l1IndexTags(key, tags)
+    await indexCacheKeyByTags(key, tags)
   }
 }
 
@@ -292,16 +292,16 @@ export async function cacheSetWithTags<T>(
 // Pattern: redis.io/docs/manual/patterns/distributed-locks/
 // ---------------------------------------------------------------------------
 
-const LOCK_TTL_MS = 5000;
-const LOCK_POLL_INTERVAL_MS = 50;
-const LOCK_MAX_WAIT_MS = 4000;
+const LOCK_TTL_MS = 5000
+const LOCK_POLL_INTERVAL_MS = 50
+const LOCK_MAX_WAIT_MS = 4000
 
 async function acquireLock(redis: any, lockKey: string, lockValue: string): Promise<boolean> {
   try {
-    const result = await redis.set(lockKey, lockValue, "NX", "PX", LOCK_TTL_MS);
-    return result === "OK";
+    const result = await redis.set(lockKey, lockValue, 'NX', 'PX', LOCK_TTL_MS)
+    return result === 'OK'
   } catch {
-    return false;
+    return false
   }
 }
 
@@ -314,12 +314,12 @@ async function releaseLock(redis: any, lockKey: string, lockValue: string): Prom
       else
         return 0
       end
-    `;
-    if (typeof redis.eval === "function") {
-      await redis.eval(luaScript, 1, lockKey, lockValue);
+    `
+    if (typeof redis.eval === 'function') {
+      await redis.eval(luaScript, 1, lockKey, lockValue)
     } else {
       // Fallback: simple DEL (less safe but better than leaving lock)
-      await redis.del(lockKey);
+      await redis.del(lockKey)
     }
   } catch {
     // Fire-and-forget
@@ -327,14 +327,14 @@ async function releaseLock(redis: any, lockKey: string, lockValue: string): Prom
 }
 
 async function waitForLockRelease(redis: any, lockKey: string): Promise<void> {
-  const deadline = Date.now() + LOCK_MAX_WAIT_MS;
+  const deadline = Date.now() + LOCK_MAX_WAIT_MS
   while (Date.now() < deadline) {
-    await new Promise((r) => setTimeout(r, LOCK_POLL_INTERVAL_MS));
+    await new Promise((r) => setTimeout(r, LOCK_POLL_INTERVAL_MS))
     try {
-      const exists = await redis.exists(lockKey);
-      if (!exists) return;
+      const exists = await redis.exists(lockKey)
+      if (!exists) return
     } catch {
-      return; // If we can't check, proceed optimistically
+      return // If we can't check, proceed optimistically
     }
   }
 }
@@ -343,11 +343,11 @@ async function waitForLockRelease(redis: any, lockKey: string): Promise<void> {
 // In-process request coalescing (single-node) + optional distributed lock
 // ---------------------------------------------------------------------------
 
-const activeFetches = new Map<string, Promise<any>>();
+const activeFetches = new Map<string, Promise<any>>()
 
 export interface CacheWrapOptions {
-  ttlSeconds?: number;
-  tags?: string[];
+  ttlSeconds?: number
+  tags?: string[]
 }
 
 export async function cacheWrap<T>(
@@ -356,68 +356,68 @@ export async function cacheWrap<T>(
   ttlSecondsOrOptions?: number | CacheWrapOptions
 ): Promise<T> {
   const options: CacheWrapOptions =
-    typeof ttlSecondsOrOptions === "number"
+    typeof ttlSecondsOrOptions === 'number'
       ? { ttlSeconds: ttlSecondsOrOptions }
-      : (ttlSecondsOrOptions ?? {});
-  const { ttlSeconds = 3600, tags } = options;
+      : (ttlSecondsOrOptions ?? {})
+  const { ttlSeconds = 3600, tags } = options
 
-  const cached = await cacheGet<T>(key);
-  if (cached !== null) return cached;
+  const cached = await cacheGet<T>(key)
+  if (cached !== null) return cached
 
   // --- Distributed lock path (multi-pod stampede prevention) ---
   if (DISTRIBUTED_LOCK_ENABLED) {
-    const redis = await getRedisClientSafe();
+    const redis = await getRedisClientSafe()
     // Only attempt distributed lock with a real Redis client (not native fallback)
-    if (redis && typeof redis.set === "function" && typeof redis.eval !== "undefined") {
-      const lockKey = `arch:lock:${key}`;
-      const lockValue = randomUUID();
-      const acquired = await acquireLock(redis, lockKey, lockValue);
+    if (redis && typeof redis.set === 'function' && typeof redis.eval !== 'undefined') {
+      const lockKey = `arch:lock:${key}`
+      const lockValue = randomUUID()
+      const acquired = await acquireLock(redis, lockKey, lockValue)
 
       if (!acquired) {
         // We are a "waiter" — wait for the winner to populate the cache
-        await waitForLockRelease(redis, lockKey);
-        const afterWait = await cacheGet<T>(key);
-        if (afterWait !== null) return afterWait;
+        await waitForLockRelease(redis, lockKey)
+        const afterWait = await cacheGet<T>(key)
+        if (afterWait !== null) return afterWait
         // Winner failed — fall through to compute ourselves
       }
 
       try {
         // Re-check cache after acquiring (another pod may have filled it)
-        const afterLock = await cacheGet<T>(key);
-        if (afterLock !== null) return afterLock;
+        const afterLock = await cacheGet<T>(key)
+        if (afterLock !== null) return afterLock
 
-        const result = await fn();
+        const result = await fn()
         if (tags && tags.length > 0) {
-          await cacheSetWithTags(key, result, ttlSeconds, tags);
+          await cacheSetWithTags(key, result, ttlSeconds, tags)
         } else {
-          await cacheSet(key, result, ttlSeconds);
+          await cacheSet(key, result, ttlSeconds)
         }
-        return result;
+        return result
       } finally {
-        await releaseLock(redis, lockKey, lockValue);
+        await releaseLock(redis, lockKey, lockValue)
       }
     }
   }
 
   // --- In-process request coalescing (single-node, always active) ---
-  let activeFetch = activeFetches.get(key);
+  let activeFetch = activeFetches.get(key)
   if (!activeFetch) {
     activeFetch = fn()
       .then(async (result) => {
         if (tags && tags.length > 0) {
-          await cacheSetWithTags(key, result, ttlSeconds, tags);
+          await cacheSetWithTags(key, result, ttlSeconds, tags)
         } else {
-          await cacheSet(key, result, ttlSeconds);
+          await cacheSet(key, result, ttlSeconds)
         }
-        return result;
+        return result
       })
       .finally(() => {
-        activeFetches.delete(key);
-      });
-    activeFetches.set(key, activeFetch);
+        activeFetches.delete(key)
+      })
+    activeFetches.set(key, activeFetch)
   }
 
-  return activeFetch as Promise<T>;
+  return activeFetch as Promise<T>
 }
 
 // ---------------------------------------------------------------------------
@@ -425,12 +425,12 @@ export async function cacheWrap<T>(
 // ---------------------------------------------------------------------------
 
 export async function cacheDelete(key: string): Promise<void> {
-  memoryDelete(key);
+  memoryDelete(key)
 
   try {
-    const redis = await getRedisClientSafe();
+    const redis = await getRedisClientSafe()
     if (redis) {
-      await redis.del(key);
+      await redis.del(key)
     }
   } catch {
     // Silent fail
@@ -438,19 +438,19 @@ export async function cacheDelete(key: string): Promise<void> {
 }
 
 export async function cacheDeletePattern(pattern: string): Promise<void> {
-  const prefix = pattern.replace("*", "");
-  memoryDeleteByPrefix(prefix);
-  await cacheInvalidatePrefixes([prefix]);
+  const prefix = pattern.replace('*', '')
+  memoryDeleteByPrefix(prefix)
+  await cacheInvalidatePrefixes([prefix])
 }
 
-export { cacheInvalidateTags, cacheInvalidatePrefixes };
+export { cacheInvalidateTags, cacheInvalidatePrefixes }
 
 export function cacheEvictL1ByPrefix(prefix: string): void {
-  memoryDeleteByPrefix(prefix);
+  memoryDeleteByPrefix(prefix)
 }
 
 export function clearMemoryCache(): void {
-  l1Clear();
+  l1Clear()
 }
 
 // ---------------------------------------------------------------------------
@@ -458,39 +458,39 @@ export function clearMemoryCache(): void {
 // ---------------------------------------------------------------------------
 
 export interface CacheOptions {
-  ttlSeconds?: number;
-  tags?: string[];
+  ttlSeconds?: number
+  tags?: string[]
 }
 
 export class Cache {
   async get<T>(key: string): Promise<T | null> {
-    return cacheGet<T>(key);
+    return cacheGet<T>(key)
   }
 
   async set<T>(key: string, value: T, options?: CacheOptions): Promise<void> {
-    const ttl = options?.ttlSeconds ?? 3600;
+    const ttl = options?.ttlSeconds ?? 3600
     if (options?.tags) {
-      await cacheSetWithTags(key, value, ttl, options.tags);
+      await cacheSetWithTags(key, value, ttl, options.tags)
     } else {
-      await cacheSet(key, value, ttl);
+      await cacheSet(key, value, ttl)
     }
   }
 
   async delete(key: string): Promise<void> {
-    await cacheDelete(key);
+    await cacheDelete(key)
   }
 
   async invalidateTags(tags: string[]): Promise<number> {
-    return cacheInvalidateTags(tags);
+    return cacheInvalidateTags(tags)
   }
 
   async invalidatePrefixes(prefixes: string[]): Promise<number> {
-    return cacheInvalidatePrefixes(prefixes);
+    return cacheInvalidatePrefixes(prefixes)
   }
 
   async wrap<T>(key: string, fn: () => Promise<T>, options?: CacheWrapOptions): Promise<T> {
-    return cacheWrap<T>(key, fn, options);
+    return cacheWrap<T>(key, fn, options)
   }
 }
 
-export const cache = new Cache();
+export const cache = new Cache()

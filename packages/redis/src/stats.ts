@@ -6,50 +6,50 @@
  * (for cross-pod aggregation under `stats:cache` and `stats:latencies`).
  */
 
-import { getRedisClient, getClientIfOpen } from "./client.js";
+import { getRedisClient, getClientIfOpen } from './client.js'
 
 /** Point-in-time snapshot of cache performance counters. */
 interface CacheStatsSnapshot {
-  hits: number;
-  misses: number;
-  l1Hits: number;
-  l2Hits: number;
-  redisErrors: number;
-  avgLatencyMs: number;
-  p95LatencyMs: number;
+  hits: number
+  misses: number
+  l1Hits: number
+  l2Hits: number
+  redisErrors: number
+  avgLatencyMs: number
+  p95LatencyMs: number
 }
 
-const globalObj = globalThis as any;
+const globalObj = globalThis as any
 globalObj.__cacheStats = globalObj.__cacheStats || {
   hits: 0,
   misses: 0,
   l1Hits: 0,
   l2Hits: 0,
   redisErrors: 0,
-};
-globalObj.__cacheLatencies = globalObj.__cacheLatencies || [];
+}
+globalObj.__cacheLatencies = globalObj.__cacheLatencies || []
 
-const stats = globalObj.__cacheStats;
-const latencies = globalObj.__cacheLatencies;
+const stats = globalObj.__cacheStats
+const latencies = globalObj.__cacheLatencies
 
-const LATENCY_BUFFER_SIZE = 1000;
+const LATENCY_BUFFER_SIZE = 1000
 
 function addLatency(latencyMs: number): void {
   if (latencies.length >= LATENCY_BUFFER_SIZE) {
-    latencies.shift();
+    latencies.shift()
   }
-  latencies.push(latencyMs);
+  latencies.push(latencyMs)
 }
 
 function computePercentile(sorted: number[], p: number): number {
-  if (sorted.length === 0) return 0;
-  const idx = Math.ceil((p / 100) * sorted.length) - 1;
-  return sorted[Math.max(0, idx)] ?? 0;
+  if (sorted.length === 0) return 0
+  const idx = Math.ceil((p / 100) * sorted.length) - 1
+  return sorted[Math.max(0, idx)] ?? 0
 }
 
 function buildSnapshot(): CacheStatsSnapshot {
-  const sorted = [...latencies].sort((a, b) => a - b);
-  const avg = sorted.length > 0 ? sorted.reduce((sum, v) => sum + v, 0) / sorted.length : 0;
+  const sorted = [...latencies].sort((a, b) => a - b)
+  const avg = sorted.length > 0 ? sorted.reduce((sum, v) => sum + v, 0) / sorted.length : 0
 
   return {
     hits: stats.hits,
@@ -59,111 +59,112 @@ function buildSnapshot(): CacheStatsSnapshot {
     redisErrors: stats.redisErrors,
     avgLatencyMs: Math.round(avg * 100) / 100,
     p95LatencyMs: Math.round(computePercentile(sorted, 95) * 100) / 100,
-  };
+  }
 }
 
 /** Record a cache hit from the specified layer with its latency. */
-export function recordCacheHit(source: "l1" | "l2", latencyMs: number): void {
-  stats.hits++;
-  if (source === "l1") stats.l1Hits++;
-  else stats.l2Hits++;
-  addLatency(latencyMs);
+export function recordCacheHit(source: 'l1' | 'l2', latencyMs: number): void {
+  stats.hits++
+  if (source === 'l1') stats.l1Hits++
+  else stats.l2Hits++
+  addLatency(latencyMs)
 
-  const redis = getClientIfOpen();
-  if (redis && typeof redis.hincrby === "function") {
-    redis.hincrby("stats:cache", "hits", 1).catch(() => {});
-    redis.hincrby("stats:cache", source === "l1" ? "l1Hits" : "l2Hits", 1).catch(() => {});
-    if (typeof redis.lpush === "function") {
+  const redis = getClientIfOpen()
+  if (redis && typeof redis.hincrby === 'function') {
+    redis.hincrby('stats:cache', 'hits', 1).catch(() => {})
+    redis.hincrby('stats:cache', source === 'l1' ? 'l1Hits' : 'l2Hits', 1).catch(() => {})
+    if (typeof redis.lpush === 'function') {
       redis
-        .lpush("stats:latencies", latencyMs.toString())
+        .lpush('stats:latencies', latencyMs.toString())
         .then(() => {
-          if (typeof redis.ltrim === "function") {
-            redis.ltrim("stats:latencies", 0, 999).catch(() => {});
+          if (typeof redis.ltrim === 'function') {
+            redis.ltrim('stats:latencies', 0, 999).catch(() => {})
           }
         })
-        .catch(() => {});
+        .catch(() => {})
     }
   }
 }
 
 /** Record a cache miss with its latency. */
 export function recordCacheMiss(latencyMs: number): void {
-  stats.misses++;
-  addLatency(latencyMs);
+  stats.misses++
+  addLatency(latencyMs)
 
-  const redis = getClientIfOpen();
-  if (redis && typeof redis.hincrby === "function") {
-    redis.hincrby("stats:cache", "misses", 1).catch(() => {});
-    if (typeof redis.lpush === "function") {
+  const redis = getClientIfOpen()
+  if (redis && typeof redis.hincrby === 'function') {
+    redis.hincrby('stats:cache', 'misses', 1).catch(() => {})
+    if (typeof redis.lpush === 'function') {
       redis
-        .lpush("stats:latencies", latencyMs.toString())
+        .lpush('stats:latencies', latencyMs.toString())
         .then(() => {
-          if (typeof redis.ltrim === "function") {
-            redis.ltrim("stats:latencies", 0, 999).catch(() => {});
+          if (typeof redis.ltrim === 'function') {
+            redis.ltrim('stats:latencies', 0, 999).catch(() => {})
           }
         })
-        .catch(() => {});
+        .catch(() => {})
     }
   }
 }
 
 /** Increment the Redis error counter. */
 export function recordRedisError(): void {
-  stats.redisErrors++;
-  const redis = getClientIfOpen();
-  if (redis && typeof redis.hincrby === "function") {
-    redis.hincrby("stats:cache", "redisErrors", 1).catch(() => {});
+  stats.redisErrors++
+  const redis = getClientIfOpen()
+  if (redis && typeof redis.hincrby === 'function') {
+    redis.hincrby('stats:cache', 'redisErrors', 1).catch(() => {})
   }
 }
 
 /** Retrieve cache statistics snapshot. */
 export async function getCacheStats(): Promise<CacheStatsSnapshot> {
   try {
-    const redis = await getRedisClient();
-    if (redis?.status === "ready" && typeof redis.hgetall === "function") {
-      const data = await redis.hgetall("stats:cache");
-      const latencyStrs = typeof redis.lrange === "function" ? await redis.lrange("stats:latencies", 0, 999) : [];
+    const redis = await getRedisClient()
+    if (redis?.status === 'ready' && typeof redis.hgetall === 'function') {
+      const data = await redis.hgetall('stats:cache')
+      const latencyStrs =
+        typeof redis.lrange === 'function' ? await redis.lrange('stats:latencies', 0, 999) : []
       const sorted = latencyStrs
         .map(Number)
         .filter((v: number) => !isNaN(v))
-        .sort((a: number, b: number) => a - b);
+        .sort((a: number, b: number) => a - b)
 
       const avg =
         sorted.length > 0
           ? sorted.reduce((sum: number, v: number) => sum + v, 0) / sorted.length
-          : 0;
+          : 0
 
       return {
-        hits: parseInt(data.hits || "0", 10),
-        misses: parseInt(data.misses || "0", 10),
-        l1Hits: parseInt(data.l1Hits || "0", 10),
-        l2Hits: parseInt(data.l2Hits || "0", 10),
-        redisErrors: parseInt(data.redisErrors || "0", 10),
+        hits: parseInt(data.hits || '0', 10),
+        misses: parseInt(data.misses || '0', 10),
+        l1Hits: parseInt(data.l1Hits || '0', 10),
+        l2Hits: parseInt(data.l2Hits || '0', 10),
+        redisErrors: parseInt(data.redisErrors || '0', 10),
         avgLatencyMs: Math.round(avg * 100) / 100,
         p95LatencyMs: Math.round(computePercentile(sorted, 95) * 100) / 100,
-      };
+      }
     }
   } catch {
     // fallback
   }
-  return buildSnapshot();
+  return buildSnapshot()
 }
 
 /** Reset stats. */
 export function resetCacheStats(): void {
-  stats.hits = 0;
-  stats.misses = 0;
-  stats.l1Hits = 0;
-  stats.l2Hits = 0;
-  stats.redisErrors = 0;
-  latencies.length = 0;
+  stats.hits = 0
+  stats.misses = 0
+  stats.l1Hits = 0
+  stats.l2Hits = 0
+  stats.redisErrors = 0
+  latencies.length = 0
 
   getRedisClient()
     .then((redis) => {
-      if (redis?.status === "ready" && typeof redis.del === "function") {
-        redis.del("stats:cache").catch(() => {});
-        redis.del("stats:latencies").catch(() => {});
+      if (redis?.status === 'ready' && typeof redis.del === 'function') {
+        redis.del('stats:cache').catch(() => {})
+        redis.del('stats:latencies').catch(() => {})
       }
     })
-    .catch(() => {});
+    .catch(() => {})
 }

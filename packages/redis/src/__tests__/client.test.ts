@@ -75,8 +75,6 @@ describe('getRedisConnectionInfo', () => {
       expect(result.nativeFallback).toBe(true)
     })
   })
-
-
 })
 
 describe('getClientIfOpen', () => {

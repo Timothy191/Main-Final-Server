@@ -1,13 +1,13 @@
-import { getRedisClient } from "./client.js";
-import { l1EvictByTags, l1DeleteByPrefix } from "./l1.js";
+import { getRedisClient } from './client.js'
+import { l1EvictByTags, l1DeleteByPrefix } from './l1.js'
 
-const TAG_PREFIX = "arch:__tags__";
+const TAG_PREFIX = 'arch:__tags__'
 
 async function getRedisClientSafe() {
   try {
-    return await getRedisClient();
+    return await getRedisClient()
   } catch {
-    return null;
+    return null
   }
 }
 
@@ -16,15 +16,15 @@ async function getRedisClientSafe() {
  * Tags are stored as Redis Sets under arch:__tags__:<tag>.
  */
 export async function indexCacheKeyByTags(key: string, tags: string[]): Promise<void> {
-  const redis = await getRedisClientSafe();
-  if (!redis) return;
+  const redis = await getRedisClientSafe()
+  if (!redis) return
 
   try {
-    const pipeline = redis.multi();
+    const pipeline = redis.multi()
     for (const tag of tags) {
-      pipeline.sadd(`${TAG_PREFIX}:${tag}`, key);
+      pipeline.sadd(`${TAG_PREFIX}:${tag}`, key)
     }
-    await pipeline.exec();
+    await pipeline.exec()
   } catch {
     // Silent fail — tag index inconsistency is acceptable
   }
@@ -36,40 +36,40 @@ export async function indexCacheKeyByTags(key: string, tags: string[]): Promise<
  * Also clears matching keys from the in-memory L1 cache.
  */
 export async function cacheInvalidateTags(tags: string[]): Promise<number> {
-  const evicted = l1EvictByTags(tags);
+  const evicted = l1EvictByTags(tags)
 
-  const redis = await getRedisClientSafe();
-  if (!redis) return evicted;
+  const redis = await getRedisClientSafe()
+  if (!redis) return evicted
 
-  let deleted = 0;
+  let deleted = 0
 
   try {
     for (const tag of tags) {
-      const tagKey = `${TAG_PREFIX}:${tag}`;
-      const keysToDelete: string[] = [];
+      const tagKey = `${TAG_PREFIX}:${tag}`
+      const keysToDelete: string[] = []
 
-      const stream = redis.sscanStream(tagKey, { count: 100 });
+      const stream = redis.sscanStream(tagKey, { count: 100 })
       for await (const member of stream) {
-        keysToDelete.push(member as string);
+        keysToDelete.push(member as string)
         if (keysToDelete.length >= 100) {
-          await redis.unlink(keysToDelete);
-          deleted += keysToDelete.length;
-          keysToDelete.length = 0;
+          await redis.unlink(keysToDelete)
+          deleted += keysToDelete.length
+          keysToDelete.length = 0
         }
       }
 
       if (keysToDelete.length > 0) {
-        await redis.unlink(keysToDelete);
-        deleted += keysToDelete.length;
+        await redis.unlink(keysToDelete)
+        deleted += keysToDelete.length
       }
 
-      await redis.unlink(tagKey);
+      await redis.unlink(tagKey)
     }
   } catch {
     // Silent fail
   }
 
-  return deleted;
+  return deleted
 }
 
 /**
@@ -79,40 +79,40 @@ export async function cacheInvalidateTags(tags: string[]): Promise<number> {
  */
 export async function cacheInvalidatePrefixes(prefixes: string[]): Promise<number> {
   for (const prefix of prefixes) {
-    l1DeleteByPrefix(prefix);
+    l1DeleteByPrefix(prefix)
   }
 
-  const redis = await getRedisClientSafe();
-  if (!redis) return 0;
+  const redis = await getRedisClientSafe()
+  if (!redis) return 0
 
-  let deleted = 0;
+  let deleted = 0
 
   try {
     for (const prefix of prefixes) {
-      const keysToDelete: string[] = [];
+      const keysToDelete: string[] = []
 
       const stream = redis.scanStream({
         match: `${prefix}*`,
         count: 100,
-      });
+      })
 
       for await (const key of stream) {
-        keysToDelete.push(key as string);
+        keysToDelete.push(key as string)
         if (keysToDelete.length >= 100) {
-          await redis.unlink(keysToDelete);
-          deleted += keysToDelete.length;
-          keysToDelete.length = 0;
+          await redis.unlink(keysToDelete)
+          deleted += keysToDelete.length
+          keysToDelete.length = 0
         }
       }
 
       if (keysToDelete.length > 0) {
-        await redis.unlink(keysToDelete);
-        deleted += keysToDelete.length;
+        await redis.unlink(keysToDelete)
+        deleted += keysToDelete.length
       }
     }
   } catch {
     // Silent fail
   }
 
-  return deleted;
+  return deleted
 }

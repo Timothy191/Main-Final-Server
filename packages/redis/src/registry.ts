@@ -16,27 +16,27 @@
  */
 export const CacheCategory = {
   // Department-level categories
-  ACCESS_CONTROL: "access_control",
-  DRILLING: "drilling",
-  HUB: "hub",
-  TRAINING: "training",
-  DEPARTMENT: "dept",
-  EQUIPMENT: "equipment",
+  ACCESS_CONTROL: 'access_control',
+  DRILLING: 'drilling',
+  HUB: 'hub',
+  TRAINING: 'training',
+  DEPARTMENT: 'dept',
+  EQUIPMENT: 'equipment',
   // System-level categories
-  AUTH: "auth",
-  METRICS: "metrics",
-  SHIFT: "shift",
-  AI_MEMORY: "ai_memory",
-} as const;
+  AUTH: 'auth',
+  METRICS: 'metrics',
+  SHIFT: 'shift',
+  AI_MEMORY: 'ai_memory',
+} as const
 
 /** String literal union derived from {@link CacheCategory} values. */
 // eslint-disable-next-line no-redeclare
-export type CacheCategory = (typeof CacheCategory)[keyof typeof CacheCategory];
+export type CacheCategory = (typeof CacheCategory)[keyof typeof CacheCategory]
 
 /** Per-category TTL configuration for L1 (memory) and L2 (Redis) cache layers. */
 export interface CacheTtlConfig {
-  l1Seconds: number;
-  l2Seconds: number;
+  l1Seconds: number
+  l2Seconds: number
 }
 
 /**
@@ -57,7 +57,7 @@ export const CACHE_TTL_REGISTRY: Record<CacheCategory, CacheTtlConfig> = {
   [CacheCategory.DRILLING]: { l1Seconds: 30, l2Seconds: 600 },
   [CacheCategory.HUB]: { l1Seconds: 30, l2Seconds: 300 },
   [CacheCategory.TRAINING]: { l1Seconds: 60, l2Seconds: 1800 },
-};
+}
 
 /**
  * Build a namespaced cache key from a category and path parts.
@@ -72,6 +72,6 @@ export function buildCacheKey(
   category: CacheCategory,
   ...parts: (string | number | undefined)[]
 ): string {
-  const clean = parts.filter((p): p is string | number => p !== undefined);
-  return `arch:${category}:${clean.join(":")}`;
+  const clean = parts.filter((p): p is string | number => p !== undefined)
+  return `arch:${category}:${clean.join(':')}`
 }
