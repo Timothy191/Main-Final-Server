@@ -2,6 +2,20 @@
 
 This file maintains a record of AI agent interventions, context hand-offs, and architectural breadcrumbs for this specific package/app.
 
+## [2026-08-04] Bulk land pending changes
+
+- **Agent**: Claude Code
+- **Purpose**: Commit the accumulated portal-side and shared changes from the working tree, plus cleanup strays.
+- **Changes Made**:
+  - Portal changes committed: training Server Actions fix, control-room engineering notes page, next.config/instrumentation updates, redis cache eviction wiring in `features/admin/tabs/UsersTab.tsx`, audit lib/tests, modbus ingest route + client.
+  - Shared/support changes committed: theme token alignment, AGENTS.md updates, Cursor rules, agent knowledge base, drift tooling, CI workflow, scraper package, vscode extensions, config/lockfile.
+  - Removed transient `.claude/hooks/state/` files and obsolete `docs/performance/insights/` directory.
+  - Cleaned strays from the working tree.
+- **Files**: See `chore/land-pending-changes` branch commit log.
+- **Docs updated**: `docs/REPO-CHANGE-INDEX.md`, `.agents/AGENT_TRACER.md`, `apps/portal/AGENT_TRACER.md`
+- **Verification**: Working tree clean; 17 commits staged on `chore/land-pending-changes`.
+- **Next Agent Notes**: Run full quality gate (`pnpm exec turbo run lint type-check test --force` + `pnpm gates` + `pnpm format:check`) before merging.
+
 ## [2026-08-03] Implement ADR-001 (L1+L2 eviction) + fix errors contract regressions + acl tools-loop
 
 - **Agent**: Claude Code (glm-5.2)
