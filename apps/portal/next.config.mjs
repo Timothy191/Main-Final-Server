@@ -47,6 +47,7 @@ const nextConfig = {
     inlineCss: true,
     webVitalsAttribution: ["CLS", "LCP", "FCP", "TTFB", "INP"],
     viewTransition: true,
+    ppr: true, // Partial Prerendering for static shell + dynamic content streaming
   },
   turbopack: {
     // AGENT-TRACE: Root must include workspaceRoot so packages/ deps compile
@@ -117,6 +118,7 @@ const nextConfig = {
           {
             // GAP-STREAM: Disable nginx response buffering so Suspense/PPR
             // streaming chunks are delivered to the client incrementally.
+            // PPR enabled via experimental.ppr = true
             key: "X-Accel-Buffering",
             value: "no",
           },

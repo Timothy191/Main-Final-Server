@@ -3,6 +3,8 @@ import { createServerSupabaseClient } from '@repo/supabase/server'
 import { getRedisClient } from '@repo/redis'
 import { generateLocalFallbackEmbedding } from '@/lib/ai/embedding-provider'
 
+export const dynamic = 'force-dynamic' // Health check should never be cached
+
 export async function GET() {
   const startedAt = Date.now()
   const checks: Record<string, unknown> = {}

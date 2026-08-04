@@ -42,12 +42,12 @@ import { NextResponse } from 'next/server'
  *               nullable: true
  */
 
+export const dynamic = 'force-dynamic' // Weather data should always be fresh
+
 export async function GET() {
   try {
     const weather = await fetchWeather()
-    return NextResponse.json(weather, {
-      headers: { 'Cache-Control': 'no-store, max-age=0' },
-    })
+    return NextResponse.json(weather)
   } catch (error) {
     await logError(error instanceof Error ? error : new Error('Weather fetch failed'), {
       context: 'weather_api',
