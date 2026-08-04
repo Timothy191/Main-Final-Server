@@ -75,7 +75,11 @@ export function DepartmentsTab() {
           entityType: 'department',
           entityId: editingDept.id,
           details: { name: formData.name, display_name: formData.display_name },
-        }).catch(() => {})
+        }).catch((auditError) => {
+          logError(auditError instanceof Error ? auditError : new Error(String(auditError)), {
+            context: 'departments_tab_record_audit_update',
+          })
+        })
     } else {
       const { data: created, error } = await supabase
         .from('departments')
@@ -92,7 +96,11 @@ export function DepartmentsTab() {
           entityType: 'department',
           entityId: created?.id,
           details: { name: formData.name, display_name: formData.display_name },
-        }).catch(() => {})
+        }).catch((auditError) => {
+          logError(auditError instanceof Error ? auditError : new Error(String(auditError)), {
+            context: 'departments_tab_record_audit_create',
+          })
+        })
     }
     setShowEditDialog(false)
     setEditingDept(null)
@@ -110,7 +118,11 @@ export function DepartmentsTab() {
         entityType: 'department',
         entityId: id,
         details: { name: target?.name ?? null, display_name: target?.display_name ?? null },
-      }).catch(() => {})
+      }).catch((auditError) => {
+        logError(auditError instanceof Error ? auditError : new Error(String(auditError)), {
+          context: 'departments_tab_record_audit_delete',
+        })
+      })
     reload()
   }
 

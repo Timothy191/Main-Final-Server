@@ -1,4 +1,4 @@
-import { logAuditEvent } from './audit'
+import { logAuditEvent, recordAdminAuditEvent } from './audit'
 
 jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: jest.fn(),
@@ -9,10 +9,14 @@ const { createServerSupabaseClient } = jest.requireMock('@repo/supabase/server')
 function buildMockSupabase({
   userId = 'auth-user-1',
   employeeId = 'emp-1',
+  employeeRole = 'admin',
+  employeeDept = 'dept-admin',
   insertError = null,
 }: {
   userId?: string
   employeeId?: string | null
+  employeeRole?: string | null
+  employeeDept?: string | null
   insertError?: unknown
 } = {}) {
   const mockInsert = jest.fn().mockResolvedValue({ error: insertError })
@@ -27,13 +31,15 @@ function buildMockSupabase({
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
               maybeSingle: jest.fn().mockResolvedValue({
-                data: employeeId ? { id: employeeId } : null,
+                data: employeeId
+                  ? { id: employeeId, role: employeeRole, department_id: employeeDept }
+                  : null,
               }),
             }),
           }),
         }
       }
-      if (table === 'audit_logs') {
+      if (table === 'audit_logs' || table === 'admin_audit_trail') {
         return { insert: mockInsert }
       }
       return {}
@@ -114,5 +120,69 @@ describe('logAuditEvent', () => {
     expect(payload.record_id).toBeUndefined()
     expect(payload.old_data).toBeUndefined()
     expect(payload.department_id).toBeNull()
+  })
+})
+
+describe('recordAdminAuditEvent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('inserts an admin audit trail event with performer and department', async () => {
+    const { mockInsert } = buildMockSupabase()
+
+    await recordAdminAuditEvent({
+      action: 'user.role_changed',
+      entityType: 'employee',
+      entityId: 'emp-9',
+      details: { full_name: 'Grace', from: 'operator', to: 'supervisor' },
+    })
+
+    expect(mockInsert).toHaveBeenCalledTimes(1)
+    const payload = mockInsert.mock.calls[0][0]
+    expect(payload.action).toBe('user.role_changed')
+    expect(payload.entity_type).toBe('employee')
+    expect(payload.entity_id).toBe('emp-9')
+    expect(payload.performed_by).toBe('emp-1')
+    expect(payload.department_id).toBe('dept-admin')
+    expect(payload.details).toEqual({ full_name: 'Grace', from: 'operator', to: 'supervisor' })
+  })
+
+  it('respects an explicit department override', async () => {
+    const { mockInsert } = buildMockSupabase()
+
+    await recordAdminAuditEvent({
+      action: 'department.created',
+      entityType: 'department',
+      entityId: 'dept-new',
+      departmentId: 'dept-other',
+    })
+
+    const payload = mockInsert.mock.calls[0][0]
+    expect(payload.department_id).toBe('dept-other')
+  })
+
+  it('throws ForbiddenError when caller is not an admin', async () => {
+    buildMockSupabase({ employeeRole: 'operator' })
+
+    await expect(
+      recordAdminAuditEvent({ action: 'user.created', entityType: 'employee' })
+    ).rejects.toThrow('Only admins can record audit events')
+  })
+
+  it('throws ForbiddenError when employee record is missing', async () => {
+    buildMockSupabase({ employeeId: null })
+
+    await expect(
+      recordAdminAuditEvent({ action: 'user.created', entityType: 'employee' })
+    ).rejects.toThrow('Only admins can record audit events')
+  })
+
+  it('throws DatabaseError when the insert fails', async () => {
+    buildMockSupabase({ insertError: new Error('constraint violation') })
+
+    await expect(
+      recordAdminAuditEvent({ action: 'user.deactivated', entityType: 'employee' })
+    ).rejects.toThrow('Failed to record audit event')
   })
 })

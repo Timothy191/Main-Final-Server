@@ -1,6 +1,7 @@
 'use server'
 
 import { updateTag, revalidateTag } from 'next/cache'
+import { headers } from 'next/headers'
 import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes'
 import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
 
@@ -110,6 +111,7 @@ export async function recordAdminAuditEvent(input: AdminAuditEventInput) {
     details: input.details ?? null,
     performed_by: employee.id,
     department_id: input.departmentId ?? employee.department_id ?? null,
+    ip_address: await resolveClientIp(),
   })
 
   if (error) {
@@ -123,5 +125,24 @@ export async function recordAdminAuditEvent(input: AdminAuditEventInput) {
     revalidateTag(DEPARTMENT_CACHE_TAGS.TABLE_ADMIN_AUDIT, 'max')
   } catch {
     // Ignore if not in rendering/action context
+  }
+}
+
+/**
+ * Best-effort client IP resolution for audit records.
+ *
+ * Reads the standard proxy headers (`x-forwarded-for`, `x-real-ip`) via
+ * `next/headers`. Falls back to `unknown` when the action runs outside a
+ * request scope (e.g. tests) — mirroring the existing `getClientIp` helper in
+ * `lib/api/rate-limit-middleware.ts`.
+ */
+async function resolveClientIp(): Promise<string> {
+  try {
+    const h = await headers()
+    const forwarded = h.get('x-forwarded-for')
+    if (forwarded) return forwarded.split(',')[0]?.trim() || 'unknown'
+    return h.get('x-real-ip') ?? 'unknown'
+  } catch {
+    return 'unknown'
   }
 }

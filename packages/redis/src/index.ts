@@ -3,6 +3,9 @@
  *
  * Provides sub-microsecond in-memory caching and Redis-compatible contracts
  * with 0 external dependency requirements.
+ *
+ * AGENT-TRACE: CacheCategory consolidated into registry.ts (single source of truth).
+ * Previously duplicated/diverged between registry.ts and this file.
  */
 import { getRedisClient, closeRedis } from './client.js'
 import { getNativeRedisClient, NativeRedisClient } from './native-client.js'
@@ -35,14 +38,9 @@ export {
   type SystemEventPayload,
 }
 
-export const CacheCategory = {
-  ACCESS_CONTROL: 'access_control',
-  AUTH: 'auth',
-  DRILLING: 'drilling',
-  HUB: 'hub',
-  METRICS: 'metrics',
-  TRAINING: 'training',
-}
+// Re-export from the single source of truth (registry.ts)
+export { CacheCategory, CACHE_TTL_REGISTRY, buildCacheKey } from './registry.js'
+export type { CacheCategory as CacheCategoryType, CacheTtlConfig } from './registry.js'
 
 export { getCacheStats } from './stats.js'
 
@@ -60,5 +58,6 @@ export {
   clearMemoryCache,
   Cache,
   type CacheOptions,
+  type CacheWrapOptions,
   cache,
 } from './cache.js'
