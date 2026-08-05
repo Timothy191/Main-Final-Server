@@ -88,6 +88,22 @@ pnpm format:check
 pnpm gates    # agents:verify + design:ratchet + theme:shape + lint:tokens
 ```
 
+## Token & Context Engineering (Mandatory From Session Start)
+
+Input tokens are re-billed every turn; the cheapest token is the one never loaded. These habits are non-optional defaults, not optimizations.
+
+1. **Just-in-time loading.** Use `Grep`, `Glob`, `LSP`, `Serena` symbol search, or subagents for orientation. Never read a whole file to "get the lay of the land." Read only the identified line range.
+2. **Delegate broad discovery.** Any scan spanning more than 1–2 files goes to a background `Agent` that returns a structured summary.
+3. **Filter shell output.** Pipe build/test/git commands through `grep`, `tail -n 25`, `head`, `--porcelain`, or `--silent`. Keep only error lines or the last N lines.
+4. **Symbol-level operations.** Prefer `LSP` / `Serena` go-to-definition and symbol-level edits over text search and large string replacements.
+5. **Batch independent calls.** Run parallel tool calls when ordering allows it.
+6. **Output discipline.** No redundant preambles; do not restate tool results unless synthesizing. Cite files as `file_path:line_number`.
+7. **Proactive compaction.** Suggest `/compact` at natural breakpoints and fresh sessions for unrelated workstreams.
+8. **Memory-first.** Read `MEMORY.md` and listed memories before coding. Write small, focused memory files for non-obvious findings.
+9. **Respect `.claudeignore`.** Do not load ignored paths unless the task explicitly requires it.
+10. **Prompt for specificity.** Vague requests ("fix auth bug") trigger expensive discovery. Ask for file paths, error messages, or expected behavior early; if the user cannot narrow it, delegate discovery to a subagent.
+11. **Reuse skill tokens.** Consult `.agents/knowledge/skills/<domain>/` and reuse verbatim tokens rather than regenerating them.
+
 ## Code Conventions
 
 - **Conventional commits** enforced by commitlint + husky pre-commit. Subject must not be start-case, pascal-case, or upper-case.
