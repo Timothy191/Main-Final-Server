@@ -6,6 +6,14 @@ jest.mock('@/lib/dept-access', () => ({
   assertDeptRole: jest.fn(),
 }))
 
+// AGENT-TRACE: mirrorEngineeringDelay imports the service-role client to bypass
+// RLS when writing a note into the Engineering department. The real module pulls
+// in `server-only`, which throws under Jest — mock it so the action under test
+// can run.
+jest.mock('@repo/supabase/service-role', () => ({
+  createServiceRoleClient: jest.fn(),
+}))
+
 jest.mock('@repo/supabase/service-role', () => ({
   createServiceRoleClient: jest.fn(),
 }))
