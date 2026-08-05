@@ -1,5 +1,69 @@
 {
   "worktree": {
     "bgIsolation": "none"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(pnpm *)",
+      "Bash(pnpm --filter *)",
+      "Bash(pnpm exec *)",
+      "Bash(git *)",
+      "Bash(node tools/*)",
+      "Bash(npx *)",
+      "Bash(rg *)",
+      "Read",
+      "Write",
+      "Edit",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.claude.com)",
+      "WebFetch(domain:docs.cocoindex.io)"
+    ],
+    "ask": [
+      "Bash(rm *)",
+      "Bash(docker *)",
+      "Bash(kill *)",
+      "Bash(ssh *)",
+      "Bash(curl *)",
+      "Bash(pnpm deploy*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "autoMemoryEnabled": true,
+  "todoFeatureEnabled": true,
+  "fileCheckpointingEnabled": true,
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_response.filePath // .tool_input.file_path' | { read -r f; [ -n \"$f\" ] && pnpm exec prettier --write \"$f\"; } 2>/dev/null || true",
+            "statusMessage": "Formatting edited file..."
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_response.filePath // .tool_input.file_path' | { read -r f; [ -n \"$f\" ] && mkdir -p .claude/hooks/state && printf '%s\\n' \"$f\" >> .claude/hooks/state/last-edited-files; } 2>/dev/null || true",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=.claude/hooks/state/last-edited-files; if [ -s \"$f\" ]; then sort -u \"$f\" | while read -r p; do git check-ignore -q \"$p\" 2>/dev/null || printf '%s\\n' \"$p\"; done | xargs -r -d '\\n' git add -- && git diff --cached --quiet || git commit -m \"chore(claude): auto stage+commit\" -m \"Co-Authored-By: Claude <noreply@anthropic.com>\"; rm -f \"$f\"; fi 2>/dev/null || true",
+            "statusMessage": "Auto-committing tracked edits..."
+          }
+        ]
+      }
+    ]
+  },
+  "attribution": {
+    "commit": "Co-Authored-By: Claude <noreply@anthropic.com>",
+    "sessionUrl": false
   }
 }
