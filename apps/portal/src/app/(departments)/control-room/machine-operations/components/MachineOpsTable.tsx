@@ -55,6 +55,15 @@ export async function MachineOpsTable({ deptId, shiftDate, shiftType }: MachineO
                 Engineering
               </TableHead>
               <TableHead className="px-3 py-3 font-semibold whitespace-nowrap text-right">
+                Lunch*
+              </TableHead>
+              <TableHead className="px-3 py-3 font-semibold whitespace-nowrap text-right">
+                Safety*
+              </TableHead>
+              <TableHead className="px-3 py-3 font-semibold whitespace-nowrap text-right">
+                GET/Diesel*
+              </TableHead>
+              <TableHead className="px-3 py-3 font-semibold whitespace-nowrap text-right">
                 Utilization
               </TableHead>
               <TableHead className="px-3 py-3 font-semibold whitespace-nowrap text-right">
@@ -77,7 +86,7 @@ export async function MachineOpsTable({ deptId, shiftDate, shiftType }: MachineO
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={13} className="px-4 py-8 text-center text-arch-text-muted">
+                <TableCell colSpan={16} className="px-4 py-8 text-center text-arch-text-muted">
                   No active machines found for this department.
                 </TableCell>
               </TableRow>

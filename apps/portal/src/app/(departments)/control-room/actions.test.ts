@@ -495,7 +495,12 @@ describe('calculateSmrMetrics', () => {
 describe('upsertMachineOperation', () => {
   it('creates a new machine operation and revalidates', async () => {
     const supabase = roleSupabase({
-      machines: fluentBuilder([{ data: { department_id: 'dept-1' }, error: null }]),
+      machines: fluentBuilder([
+        { data: { department_id: 'dept-1' }, error: null },
+        { data: { name: 'Excavator 1' }, error: null },
+      ]),
+      departments: fluentBuilder([{ data: { id: 'eng-dept' }, error: null }]),
+      engineering_notes: fluentBuilder([{ data: { id: 'note-1' }, error: null }]),
       machine_operations: fluentBuilder([{ data: { id: 'op-1' }, error: null }]),
     })
 

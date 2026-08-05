@@ -38,6 +38,9 @@ describe('MachineOpsClient Component', () => {
     nonProductionDelayMinutes: 30,
     productionDelayMinutes: 0,
     engineeringDelayMinutes: 45,
+    lunchDelayMinutes: 0,
+    safetyTalkDelayMinutes: 0,
+    getDieselDelayMinutes: 0,
     utilizationPct: 82.5,
     availabilityPct: 91.0,
   }

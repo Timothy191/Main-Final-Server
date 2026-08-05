@@ -78,6 +78,10 @@ function Row({ row, sites, operators }: RowProps) {
   const [nonProd, setNonProd] = useState<string>(row.nonProductionDelayMinutes.toString())
   const [production, setProduction] = useState<string>(row.productionDelayMinutes.toString())
   const [engineering, setEngineering] = useState<string>(row.engineeringDelayMinutes.toString())
+  // Standard 1-hour downtime buckets — present for every machine until changed.
+  const [lunch, setLunch] = useState<string>(row.lunchDelayMinutes.toString())
+  const [safetyTalk, setSafetyTalk] = useState<string>(row.safetyTalkDelayMinutes.toString())
+  const [getDiesel, setGetDiesel] = useState<string>(row.getDieselDelayMinutes.toString())
 
   const isClosed = row.closeSMR != null
 
@@ -96,6 +100,9 @@ function Row({ row, sites, operators }: RowProps) {
           nonProductionDelayMinutes: Number(nonProd || 0),
           productionDelayMinutes: Number(production || 0),
           engineeringDelayMinutes: Number(engineering || 0),
+          lunchDelayMinutes: Number(lunch || 0),
+          safetyTalkDelayMinutes: Number(safetyTalk || 0),
+          getDieselDelayMinutes: Number(getDiesel || 0),
         })
         setSaved(true)
         router.refresh()
@@ -128,6 +135,9 @@ function Row({ row, sites, operators }: RowProps) {
             nonProductionDelayMinutes: Number(nonProd || 0),
             productionDelayMinutes: Number(production || 0),
             engineeringDelayMinutes: Number(engineering || 0),
+            lunchDelayMinutes: Number(lunch || 0),
+            safetyTalkDelayMinutes: Number(safetyTalk || 0),
+            getDieselDelayMinutes: Number(getDiesel || 0),
           })
         }
         setSaved(true)
@@ -213,10 +223,14 @@ function Row({ row, sites, operators }: RowProps) {
       </TableCell>
 
       {[
-        { value: natural, setter: setNatural },
-        { value: nonProd, setter: setNonProd },
-        { value: production, setter: setProduction },
-        { value: engineering, setter: setEngineering },
+        { value: natural, setter: setNatural, label: 'Natural' },
+        { value: nonProd, setter: setNonProd, label: 'Non-Prod' },
+        { value: production, setter: setProduction, label: 'Production' },
+        { value: engineering, setter: setEngineering, label: 'Engineering' },
+        // Standard 1-hour downtime buckets — present for every machine.
+        { value: lunch, setter: setLunch, label: 'Lunch' },
+        { value: safetyTalk, setter: setSafetyTalk, label: 'Safety Talk' },
+        { value: getDiesel, setter: setGetDiesel, label: 'GET/Diesel' },
       ].map((field, idx) => (
         <TableCell key={idx} className="px-3 py-2 align-middle text-right">
           <Input
@@ -226,6 +240,7 @@ function Row({ row, sites, operators }: RowProps) {
             value={field.value}
             onChange={(e) => field.setter(e.target.value)}
             disabled={isPending || isClosed}
+            aria-label={field.label}
             className="h-8 w-20 ml-auto bg-arch-surface/50 border-arch-border text-arch-text-primary text-right text-xs disabled:opacity-50"
           />
         </TableCell>

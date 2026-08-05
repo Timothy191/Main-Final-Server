@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { DatabaseError, ValidationError, ForbiddenError } from '@/lib/errors/error-classes'
 import { assertDeptRole, type RoleAuthResult } from '@/lib/dept-access'
 import { DEPARTMENT_CACHE_TAGS } from '@/lib/department-cache'
+import { serverLogger } from '@repo/logger'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -590,6 +591,10 @@ export interface MachineOperationSmrRow {
   nonProductionDelayMinutes: number
   productionDelayMinutes: number
   engineeringDelayMinutes: number
+  // Standard 1-hour downtime buckets, present for every machine until changed.
+  lunchDelayMinutes: number
+  safetyTalkDelayMinutes: number
+  getDieselDelayMinutes: number
   shiftDate: string
   shiftType: 'day' | 'night'
   startTime: string | null
@@ -621,6 +626,9 @@ const UpsertMachineOpSchema = z.object({
   nonProductionDelayMinutes: z.number().int().min(0).default(0),
   productionDelayMinutes: z.number().int().min(0).default(0),
   engineeringDelayMinutes: z.number().int().min(0).default(0),
+  lunchDelayMinutes: z.number().int().min(0).default(1),
+  safetyTalkDelayMinutes: z.number().int().min(0).default(1),
+  getDieselDelayMinutes: z.number().int().min(0).default(1),
 })
 
 const CloseMachineOpSchema = z.object({
@@ -670,6 +678,72 @@ async function resolveStartSmr(
 }
 
 /**
+ * Mirror an engineering-related delay from the Control Room machine-ops shift
+ * sheet into the Engineering department's `engineering_notes` table. This keeps
+ * a single source of truth: a breakdown logged in Control Room also shows up in
+ * Engineering's history/breakdown views.
+ *
+ * AGENT-TRACE: notes are idempotent per (machine, shift) — re-saving the same
+ * shift sheet upserts rather than duplicating. Resolution of the engineering
+ * department id is best-effort (soft-skipped if the dept isn't found).
+ */
+async function mirrorEngineeringDelay(
+  supabase: RoleAuthResult['supabase'],
+  args: {
+    machineId: string
+    departmentId: string
+    shiftDate: string
+    shiftType: 'day' | 'night'
+    minutes: number
+    createdBy: string
+  }
+): Promise<void> {
+  const { data: engDept } = await supabase
+    .from('departments')
+    .select('id')
+    .eq('name', 'engineering')
+    .single()
+
+  if (!engDept) return // Engineering department not present — soft skip
+
+  const { data: machine } = await supabase
+    .from('machines')
+    .select('name')
+    .eq('id', args.machineId)
+    .single()
+
+  const machineName = machine?.name ?? args.machineId
+  const description = `Engineering delay of ${args.minutes} min mirrored from Control Room machine-ops (${args.shiftType} shift, ${args.shiftDate}) for ${machineName}.`
+
+  const { error } = await supabase.from('engineering_notes').upsert(
+    {
+      department_id: engDept.id,
+      note_date: args.shiftDate,
+      shift_type: args.shiftType,
+      issue_type: 'mechanical',
+      severity: 'medium',
+      machine_id: args.machineId,
+      description,
+      action_taken: 'Logged from Control Room shift sheet (engineering delay bucket).',
+      status: 'open',
+      created_by: args.createdBy,
+    },
+    {
+      // One mirrored note per machine/shift/day.
+      onConflict: 'department_id, machine_id, note_date, shift_type',
+    }
+  )
+
+  if (error) {
+    // Non-fatal: the primary machine-ops write already succeeded. Log only.
+    serverLogger().warn('Failed to mirror engineering delay to Engineering dept', {
+      machineId: args.machineId,
+      error: error.message,
+    })
+  }
+}
+
+/**
  * Load all active machines for a department, merged with any existing
  * machine_operations rows for the selected shift. Returns rows ready for
  * the SMR shift sheet, including auto-calculated utilization/availability.
@@ -699,7 +773,7 @@ export const getMachineOperationsForShift = cache(
         supabase
           .from('machine_operations')
           .select(
-            'id, machine_id, site_id, operator_id, start_smr, close_smr, smr_total, natural_delay_minutes, non_production_delay_minutes, production_delay_minutes, engineering_delay_minutes, shift_date, shift_type, start_time, end_time'
+            'id, machine_id, site_id, operator_id, start_smr, close_smr, smr_total, natural_delay_minutes, non_production_delay_minutes, production_delay_minutes, engineering_delay_minutes, lunch_delay_minutes, safety_talk_delay_minutes, get_diesel_delay_minutes, shift_date, shift_type, start_time, end_time'
           )
           .eq('department_id', deptId)
           .eq('shift_date', shiftDate)
@@ -740,6 +814,9 @@ export const getMachineOperationsForShift = cache(
       non_production_delay_minutes: number
       production_delay_minutes: number
       engineering_delay_minutes: number
+      lunch_delay_minutes: number | null
+      safety_talk_delay_minutes: number | null
+      get_diesel_delay_minutes: number | null
       shift_date: string
       shift_type: 'day' | 'night'
       start_time: string | null
@@ -797,6 +874,9 @@ export const getMachineOperationsForShift = cache(
           nonProductionDelayMinutes: op?.non_production_delay_minutes ?? 0,
           productionDelayMinutes: op?.production_delay_minutes ?? 0,
           engineeringDelayMinutes: op?.engineering_delay_minutes ?? 0,
+          lunchDelayMinutes: op?.lunch_delay_minutes ?? 1,
+          safetyTalkDelayMinutes: op?.safety_talk_delay_minutes ?? 1,
+          getDieselDelayMinutes: op?.get_diesel_delay_minutes ?? 1,
           shiftDate,
           shiftType,
           startTime: op?.start_time ?? null,
@@ -883,6 +963,12 @@ export async function upsertMachineOperation(formData: unknown): Promise<{
     non_production_delay_minutes: input.nonProductionDelayMinutes,
     production_delay_minutes: input.productionDelayMinutes,
     engineering_delay_minutes: input.engineeringDelayMinutes,
+    // AGENT-TRACE: standard 1-hour downtime buckets. Default 1h each; the
+    // operator may lower/raise them per shift. These are always recorded so
+    // availability math is consistent for every machine.
+    lunch_delay_minutes: input.lunchDelayMinutes,
+    safety_talk_delay_minutes: input.safetyTalkDelayMinutes,
+    get_diesel_delay_minutes: input.getDieselDelayMinutes,
     created_by: user.id,
     updated_at: nowIso,
   }
@@ -897,6 +983,21 @@ export async function upsertMachineOperation(formData: unknown): Promise<{
     throw new DatabaseError('Failed to save machine operation', {
       operation: 'upsert',
       context: { machineId: input.machineId, error: error?.message },
+    })
+  }
+
+  // AGENT-TRACE: any engineering-related delay (breakdown / mechanical /
+  // electrical / hydraulic) is mirrored into the Engineering department's
+  // engineering_notes so both departments share one source of truth.
+  const engineeringDelay = input.engineeringDelayMinutes ?? 0
+  if (engineeringDelay > 0) {
+    await mirrorEngineeringDelay(supabase, {
+      machineId: input.machineId,
+      departmentId: machineDept.data.department_id,
+      shiftDate: input.shiftDate,
+      shiftType: input.shiftType,
+      minutes: engineeringDelay,
+      createdBy: user.id,
     })
   }
 
