@@ -5,7 +5,7 @@
 set -e
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-MONOREPO_DIR="${PROJECT_ROOT}/monorepo"
+MONOREPO_DIR="${PROJECT_ROOT}"
 
 echo "🚀 [DEV DEPLOYMENT] Initializing Next.js Local Development Environment..."
 echo "📂 Project Root: ${PROJECT_ROOT}"
@@ -34,9 +34,12 @@ fi
 echo "🔥 Starting Next.js Dev Server (Turbopack) on http://localhost:3000..."
 # 5. Cache initialization for Redis module
 echo "🔧 Initializing Redis Cache Module..."
-cd "${MONOREPO_DIR}/redis"
-make -C modules/redis-facil test_thread || true
-make -C modules/redis-facil asan || true
+if [ -d "${MONOREPO_DIR}/packages/redis/modules/redis-facil" ]; then
+  cd "${MONOREPO_DIR}/packages/redis"
+  make -C modules/redis-facil test_thread || true
+  make -C modules/redis-facil asan || true
+fi
+cd "${MONOREPO_DIR}"
 PORT=3000 pnpm --filter portal dev &
 NEXT_PID=$!
 

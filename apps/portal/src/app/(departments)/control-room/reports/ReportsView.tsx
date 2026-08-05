@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { updateReportAssignedShift } from '../actions'
+import { ReportActions } from './ReportActions'
 
 const SHIFT_CYCLE_DAYS = 9
 const ANCHOR_DATE = new Date('2026-01-01T00:00:00Z')
@@ -610,6 +611,11 @@ export function ReportsView({ reports }: ReportsViewProps) {
             </TableBody>
           </Table>
         </div>
+      </GlassCard>
+
+      {/* Interactive report actions — operate on the currently filtered set */}
+      <GlassCard className="p-4 border border-arch-border/40 bg-arch-surface-secondary/50">
+        <ReportActions reports={filteredReports} />
       </GlassCard>
     </div>
   )
