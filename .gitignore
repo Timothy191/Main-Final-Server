@@ -34,6 +34,8 @@ yarn-debug.log*
 yarn-error.log*
 portal.log
 api.log
+logs/app-runtime.log
+.agent-recovery-state.json
 
 # Process / PID files
 *.pid

@@ -1,0 +1,108 @@
+{
+  "$schema": "./recovery-rules.schema.json",
+  "version": 1,
+  "rules": [
+    {
+      "id": "port_collision",
+      "name": "Port collision (EADDRINUSE)",
+      "patterns": [
+        "EADDRINUSE",
+        "address already in use",
+        "port is already in use",
+        "listen EADDRINUSE"
+      ],
+      "action": "port_kill",
+      "level": 1,
+      "enabled": true
+    },
+    {
+      "id": "missing_module",
+      "name": "Missing dependency / module resolution failure",
+      "patterns": [
+        "Cannot find module",
+        "MODULE_NOT_FOUND",
+        "Error: Cannot resolve",
+        "Module not found"
+      ],
+      "action": "install_deps",
+      "level": 1,
+      "enabled": true
+    },
+    {
+      "id": "stale_compile_cache",
+      "name": "Stale build / compilation cache",
+      "patterns": [
+        "Turbopack cache",
+        "Next\\.js build cache",
+        "compilation error",
+        "failed to compile",
+        "Unexpected token",
+        "SyntaxError",
+        "TypeError: .*compile"
+      ],
+      "action": "clear_cache",
+      "level": 1,
+      "enabled": true
+    },
+    {
+      "id": "missing_env_file",
+      "name": "Missing environment file or required keys",
+      "patterns": [
+        "ENOENT.*env",
+        "missing.*env",
+        "env.*missing",
+        "Cannot read properties of undefined.*SUPABASE",
+        "NEXT_PUBLIC_SUPABASE_URL is not defined",
+        "SUPABASE_SERVICE_ROLE_KEY is not defined"
+      ],
+      "action": "env_repair",
+      "level": 1,
+      "enabled": true
+    },
+    {
+      "id": "redis_connection_failure",
+      "name": "Redis connection failure",
+      "patterns": [
+        "ECONNREFUSED.*6379",
+        "Redis connection failed",
+        "Redis connection lost",
+        "connect ECONNREFUSED 127.0.0.1:6379",
+        "connect ECONNREFUSED localhost:6379"
+      ],
+      "action": "restart_redis",
+      "level": 1,
+      "enabled": true
+    },
+    {
+      "id": "supabase_connection_failure",
+      "name": "Supabase / Postgres connection failure",
+      "patterns": [
+        "fetch failed",
+        "ECONNREFUSED.*54321",
+        "Supabase.*unhealthy",
+        "auth/v1/health",
+        "postgres.*connection",
+        "pg_hba.conf",
+        "self signed certificate"
+      ],
+      "action": "restart_supabase",
+      "level": 1,
+      "enabled": true
+    },
+    {
+      "id": "unknown_failure",
+      "name": "Unclassified crash",
+      "patterns": [],
+      "action": "level2_ai_wake",
+      "level": 2,
+      "enabled": true
+    }
+  ],
+  "settings": {
+    "maxRestarts": 3,
+    "level2MaxAttempts": 1,
+    "stableRuntimeBeforeResetMs": 60000,
+    "logRingBufferLines": 300,
+    "agentPromptTemplate": "Next.js monorepo application crashed while running `{{mode}}` under the monorepo supervisor.\n\nReview the last {{lineCount}} lines of logs from `logs/app-runtime.log` and the failure reason below.\n\nFailure reason: {{failureReason}}\n\nRecent log tail:\n```\n{{logTail}}\n```\n\nTask requirements:\n1. Locate the failing source file(s) or configuration.\n2. Apply a minimal safe fix.\n3. Run `pnpm quality --force` (or the specific failing gate) and ensure it passes.\n4. Report what was changed and whether the supervisor should now restart successfully.\n\nDo not explain the plan; make the edit and verify it."
+  }
+}

@@ -2,11 +2,23 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # Arch-Systems — Production Stack Launcher
 # Minimal Overhead · Maximum Production Hardening · 0.0.0.0 LAN Binding
+#
+# Usage:
+#   bash scripts/start-prod.sh                  # background daemon (writes portal.log + .portal.pid)
+#   bash scripts/start-prod.sh --foreground     # run Next.js in foreground for supervisors
 # ──────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PORT="${PORT:-3000}"
+FOREGROUND=false
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --foreground) FOREGROUND=true; shift ;;
+    *) shift ;;
+  esac
+done
 
 # Ensure Volta node/pnpm bins are in PATH for non-interactive shells
 export PATH="/home/arch/.volta/bin:$PATH"
@@ -24,11 +36,16 @@ docker stop arch-redis supabase_analytics_supabase portal-postgres >/dev/null 2>
 # 5. Start Production Next.js Portal Server
 echo "  → Starting Production Next.js Portal on 0.0.0.0:${PORT}..."
 cd "$REPO_ROOT"
-nohup pnpm --filter portal start --hostname 0.0.0.0 --port "$PORT" > "$REPO_ROOT/portal.log" 2>&1 &
-echo $! > "$REPO_ROOT/.portal.pid"
-disown
 
-cd "$REPO_ROOT"
-echo
-echo -e "\033[1;32m  ✓ Production Server is active and listening on 0.0.0.0:${PORT}\033[0m"
-echo -e "\033[0;36m  LAN URL: http://192.168.0.151:${PORT}\033[0m"
+if [ "$FOREGROUND" = "true" ]; then
+  exec pnpm --filter portal start --hostname 0.0.0.0 --port "$PORT"
+else
+  nohup pnpm --filter portal start --hostname 0.0.0.0 --port "$PORT" > "$REPO_ROOT/portal.log" 2>&1 &
+  echo $! > "$REPO_ROOT/.portal.pid"
+  disown
+
+  cd "$REPO_ROOT"
+  echo
+  echo -e "\033[1;32m  ✓ Production Server is active and listening on 0.0.0.0:${PORT}\033[0m"
+  echo -e "\033[0;36m  LAN URL: http://192.168.0.151:${PORT}\033[0m"
+fi
