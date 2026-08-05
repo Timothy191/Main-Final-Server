@@ -1,0 +1,52 @@
+# Yamllint configuration for Arch-System
+# Extends the default configuration with project-specific rules
+
+extends: default
+
+rules:
+  # Indentation
+  indentation:
+    spaces: 2
+    indent-sequences: consistent
+    
+  # Line length - allow longer lines for URLs and comments
+  line-length:
+    max: 120
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true
+    level: warning
+
+  # Trailing spaces
+  trailing-spaces:
+    level: error
+
+  # Empty lines
+  empty-lines:
+    max: 2
+    max-start: 0
+    max-end: 1
+
+  # Document start marker
+  document-start:
+    present: false
+
+  # Truthy values
+  truthy:
+    allowed-values: [true, false, yes, no, on, off]
+
+  # Quoted strings
+  quotes:
+    required: false
+    extra-allowed: [":"]
+    
+  # Empty values
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: false
+
+  # Key ordering - don't enforce for flexibility
+  key-ordering: disable
+
+  # Custom tags
+  tags:
+    allowed: []

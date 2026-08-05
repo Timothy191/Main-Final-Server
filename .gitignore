@@ -157,3 +157,4 @@ acc.db-shm
 acc.db-wal
 
 node_modules
+mcp-workspace/
