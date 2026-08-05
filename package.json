@@ -49,7 +49,7 @@
     "audit:knip": "knip",
     "db:codegen": "kysely-codegen --out-file packages/supabase/src/db-types.ts",
     "lint:css": "stylelint --config packages/theme/.stylelintrc.mjs packages/theme/src/css/*.css && stylelint --config packages/ui/.stylelintrc.mjs packages/ui/src/*.css",
-    "lint:yaml": "yamllint .",
+    "lint:yaml": "node tools/lint-yaml.mjs",
     "check:drift": "node tools/check-drift-score.mjs",
     "size:check": "size-limit"
   },
@@ -71,7 +71,6 @@
     "stylelint": "^16.26.1",
     "stylelint-config-standard": "^36.0.1",
     "tsx": "^4.23.5",
-    "yamllint": "^1.1.0",
     "turbo": "^2.10.8",
     "typescript": "^5.7.0",
     "zod": "^3.24.0"

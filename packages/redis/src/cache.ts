@@ -445,8 +445,9 @@ export async function cacheDeletePattern(pattern: string): Promise<void> {
 
 export { cacheInvalidateTags, cacheInvalidatePrefixes }
 
-export function cacheEvictL1ByPrefix(prefix: string): void {
+export async function cacheEvictL1ByPrefix(prefix: string): Promise<void> {
   memoryDeleteByPrefix(prefix)
+  await cacheInvalidatePrefixes([prefix])
 }
 
 export function clearMemoryCache(): void {

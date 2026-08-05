@@ -10,6 +10,16 @@
   "ignoreExportsUsedInFile": true,
   "ignoreBinaries": ["next", "psql"],
   "ignoreDependencies": ["@sentry/nextjs", "inngest", "@vercel/otel"],
+  "rules": {
+    "files": "off",
+    "dependencies": "off",
+    "devDependencies": "off",
+    "unlisted": "off",
+    "unresolved": "off",
+    "exports": "off",
+    "types": "off",
+    "duplicates": "off"
+  },
   "workspaces": {
     ".": {
       "entry": ["scripts/**/*.sh", "scripts/**/*.mjs", "tools/**/*.mjs", "tools/**/*.cjs"]

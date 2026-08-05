@@ -403,9 +403,16 @@ Do not trust a non-forced `pnpm quality` — cached lint can mask failures.
 
 The primary AI agent for this repository is the **portal agent**, which operates on the `apps/portal` Next.js application. See [`apps/portal/CLAUDE.md`](./apps/portal/CLAUDE.md) for portal-specific guidance, commands, and architecture details.
 
+## Auto-Connected Agent Tools (`cocoindex-code`)
+
+All AI agents onboarding or coding in this codebase auto-connect to `cocoindex-code` for AST-based semantic and structural code search:
+- Workspace MCP settings (`.mcp.json`, `.claude/mcp.json`, `.cursor/mcp.json`, `.vscode/mcp.json`, `.kilo/kilo.jsonc`) are committed and auto-loaded by onboarding agents.
+- Agents can run `ccc grep` for zero-index AST structural search or `ccc search` / `ccc mcp` for semantic code search.
+
 ## Further reading
 
 - Portal app details: [`apps/portal/CLAUDE.md`](./apps/portal/CLAUDE.md)
 - Agent knowledge base: `.agents/knowledge/index.md`
 - Runbooks: [`docs/runbooks/`](./docs/runbooks/)
 - Theme mechanics: [`packages/theme/README.md`](./packages/theme/README.md)
+

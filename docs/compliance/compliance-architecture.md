@@ -307,16 +307,17 @@ remediation item in §11.
 
 ## 11. Remediation Plan (Open Gaps)
 
-| ID   | Gap                                                     | Action                                                                                                       | Owner              | Target |
-| ---- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------ | ------ |
-| R-1  | Jurisdiction-specific mining regs not mapped (A1)       | Confirm jurisdiction; populate §5 rows; re-scan §3/§6 impact                                                 | Regulatory Affairs | TBD    |
-| R-2  | Adjacent operational systems absent from inventory (A4) | Discovery workshop with site departments; add & classify systems                                             | System Owners      | TBD    |
-| R-3  | Ollama use-case not confirmed (A5)                      | Confirm decision-influence; reclassify if needed                                                             | Engineering Owner  | TBD    |
-| R-4  | Telemetry safety role not confirmed (A6)                | Confirm whether telemetry is sole source for any safety function                                             | IT / Safety Lead   | TBD    |
-| R-4a | SOX applicability not confirmed (A2)                    | Confirm listing status; add IPE controls if applicable                                                       | Finance / QA       | TBD    |
-| R-5  | CI gate vs. validation TM not formally linked           | Map `portal-ci.yml` jobs to OQ evidence in each system's TM                                                  | Validation Lead    | TBD    |
-| R-6  | Forced/0-cached lint not part of periodic review        | Add a quarterly forced `turbo run lint type-check --force` check (per project memory on cache masking) to §8 | Validation Lead    | TBD    |
-| R-7  | Data-processing agreements (Sentry SaaS)                | Confirm DPA & data-residency for SYS-007 (and Supabase if SaaS)                                              | IT / Legal         | TBD    |
+| ID   | Gap                                                     | Action                                                                                                       | Owner              | Target     |
+| ---- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------ | ---------- |
+| R-1  | Jurisdiction-specific mining regs not mapped (A1)       | Confirm jurisdiction; populate §5 rows; re-scan §3/§6 impact                                                 | Regulatory Affairs | 2026-09-30 |
+| R-2  | Adjacent operational systems absent from inventory (A4) | Discovery workshop with site departments; add & classify systems                                             | System Owners      | TBD        |
+| R-3  | Ollama use-case not confirmed (A5)                      | Confirm decision-influence; reclassify if needed                                                             | Engineering Owner  | TBD        |
+| R-4  | Telemetry safety role not confirmed (A6)                | Confirm whether telemetry is sole source for any safety function                                             | IT / Safety Lead   | TBD        |
+| R-4a | SOX applicability not confirmed (A2)                    | Confirm listing status; add IPE controls if applicable                                                       | Finance / QA       | TBD        |
+| R-5  | CI gate vs. validation TM not formally linked           | Map `portal-ci.yml` jobs to OQ evidence in each system's TM                                                  | Validation Lead    | TBD        |
+| R-6  | Forced/0-cached lint not part of periodic review        | Add a quarterly forced `turbo run lint type-check --force` check (per project memory on cache masking) to §8 | Validation Lead    | TBD        |
+| R-7  | Data-processing agreements (Sentry SaaS)                | Confirm DPA & data-residency for SYS-007 (and Supabase if SaaS)                                              | IT / Legal         | TBD        |
+| R-8  | User counts estimation for access control (A8)          | Audit active users and verify license alignment under ISO 27001                                              | System Owners      | 2026-08-31 |
 
 ---
 

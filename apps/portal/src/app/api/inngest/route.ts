@@ -11,6 +11,7 @@ import { automatedAuditFn } from '@/lib/jobs/automated-audit'
 import { cacheCleanupFn } from '@/lib/jobs/cache-cleanup'
 import { shiftSummarizeFn } from '@/lib/jobs/shift-summarization'
 import { autoClassifyFn } from '@/lib/jobs/auto-classification'
+import { cacheWarmingFn } from '@/lib/jobs/cache-warming'
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -26,5 +27,6 @@ export const { GET, POST, PUT } = serve({
     cacheCleanupFn,
     shiftSummarizeFn,
     autoClassifyFn,
+    cacheWarmingFn,
   ],
 })
