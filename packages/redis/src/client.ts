@@ -1,9 +1,15 @@
-import RedisPkg from 'ioredis'
 import { getNativeRedisClient, NativeRedisClient } from './native-client.js'
 
-const Redis = (RedisPkg as any).default || RedisPkg
+let RedisConstructor: any = null
+async function getRedisConstructor() {
+  if (!RedisConstructor) {
+    const pkg = (await import('ioredis')) as any
+    RedisConstructor = pkg.default?.default || pkg.default || pkg
+  }
+  return RedisConstructor
+}
 
-type RedisClient = import('ioredis').Redis | NativeRedisClient
+type RedisClient = any | NativeRedisClient
 
 // ---------------------------------------------------------------------------
 // Connection configuration
@@ -182,6 +188,7 @@ export async function getRedisClient(): Promise<any> {
   connecting = (async () => {
     try {
       connectionAttempts++
+      const Redis = await getRedisConstructor()
       const next = USE_SENTINEL
         ? new Redis(buildConnectionOptions())
         : new Redis(REDIS_URL!, buildConnectionOptions())
@@ -259,7 +266,7 @@ export async function createPubSubClient(): Promise<{
     if (!publisher || typeof publisher.publish !== 'function') return null
 
     // Create dedicated subscriber connection
-    const Redis = (RedisPkg as any).default || RedisPkg
+    const Redis = await getRedisConstructor()
     const subscriber = USE_SENTINEL
       ? new Redis({
           ...buildConnectionOptions(),

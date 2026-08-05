@@ -197,6 +197,28 @@ wait_for_health() {
       return 0
     fi
     
+    # Self-healing: if unhealthy after 10 attempts (~20s), inspect logs and auto-repair
+    if [[ $attempt -eq 10 ]]; then
+      echo
+      warn "Portal remains unhealthy — checking container logs for auto-repair..."
+      local logs
+      logs=$(docker compose -f docker-compose.production.yml logs portal --tail=50 2>&1)
+      
+      if echo "$logs" | grep -qi "redis"; then
+        warn "Self-healing: Redis connection issue detected. Restarting Redis container..."
+        docker compose -f docker-compose.production.yml restart redis || true
+        sleep 5
+      elif echo "$logs" | grep -qi -E "supabase|kong|auth"; then
+        warn "Self-healing: Supabase/Kong gateway connection issue detected. Attempting to start Supabase..."
+        pnpm supabase:start || true
+        sleep 5
+      else
+        warn "Self-healing: Unknown error pattern. Restarting portal container..."
+        docker compose -f docker-compose.production.yml restart portal || true
+        sleep 5
+      fi
+    fi
+    
     if [[ $attempt -eq $max_attempts ]]; then
       checklist_fail "Portal health" "failed after $max_attempts attempts"
       info "Checking container logs..."

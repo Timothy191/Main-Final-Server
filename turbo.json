@@ -25,27 +25,34 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "cache": true
+      "cache": true,
+      "outputLogs": "new-only"
     },
     "dev": {
+      "dependsOn": ["^dev"],
       "cache": false,
       "persistent": true
     },
     "lint": {
       "dependsOn": ["^lint"],
+      "inputs": ["$TURBO_DEFAULT$"],
       "outputs": [],
-      "cache": true
+      "cache": true,
+      "outputLogs": "new-only"
     },
     "type-check": {
       "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$"],
       "outputs": [],
-      "cache": true
+      "cache": true,
+      "outputLogs": "new-only"
     },
     "test": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$"],
       "outputs": [],
-      "cache": true
+      "cache": true,
+      "outputLogs": "new-only"
     },
     "clean": {
       "cache": false

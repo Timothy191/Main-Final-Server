@@ -360,19 +360,25 @@ describe('updateMachineSite', () => {
 
 describe('updateHourlyLoadMaterial', () => {
   it('updates the material type and matching assignment via RPC, then revalidates', async () => {
-    const supabase = roleSupabase({}, {
-      control_room_update_material: { data: { success: true }, error: null }
-    })
+    const supabase = roleSupabase(
+      {},
+      {
+        control_room_update_material: { data: { success: true }, error: null },
+      }
+    )
 
     const { updateHourlyLoadMaterial } = await import('./actions')
     const result = await updateHourlyLoadMaterial(UUID_A, 'Coal', 'Coal (High Grade)')
 
     expect(result).toEqual({ success: true })
-    expect(supabase.rpc).toHaveBeenCalledWith('control_room_update_material', expect.objectContaining({
-      p_load_row_id: UUID_A,
-      p_primary_material: 'Coal',
-      p_sub_material: 'Coal (High Grade)'
-    }))
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      'control_room_update_material',
+      expect.objectContaining({
+        p_load_row_id: UUID_A,
+        p_primary_material: 'Coal',
+        p_sub_material: 'Coal (High Grade)',
+      })
+    )
     expect(revalidateTag).toHaveBeenCalledWith('dept:control-room', 'max')
   })
 
@@ -399,20 +405,29 @@ describe('updateHourlyLoadMaterial', () => {
 
 describe('endHaulingSession', () => {
   it('locks hours and creates a new load row via RPC, then revalidates', async () => {
-    const supabase = roleSupabase({}, {
-      control_room_end_hauling_session: { data: { success: true, new_load_id: UUID_B }, error: null }
-    })
+    const supabase = roleSupabase(
+      {},
+      {
+        control_room_end_hauling_session: {
+          data: { success: true, new_load_id: UUID_B },
+          error: null,
+        },
+      }
+    )
 
     const { endHaulingSession } = await import('./actions')
     const result = await endHaulingSession(UUID_A, 3, 'Overburden', '')
 
     expect(result).toEqual({ success: true })
-    expect(supabase.rpc).toHaveBeenCalledWith('control_room_end_hauling_session', expect.objectContaining({
-      p_load_row_id: UUID_A,
-      p_stop_hour: 3,
-      p_new_material: 'Overburden',
-      p_new_excavator_id: null
-    }))
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      'control_room_end_hauling_session',
+      expect.objectContaining({
+        p_load_row_id: UUID_A,
+        p_stop_hour: 3,
+        p_new_material: 'Overburden',
+        p_new_excavator_id: null,
+      })
+    )
     expect(revalidateTag).toHaveBeenCalledWith('dept:control-room', 'max')
   })
 
@@ -599,18 +614,24 @@ describe('closeMachineOperation', () => {
 
 describe('reassignDumperExcavator', () => {
   it('reassigns excavator via RPC, then revalidates', async () => {
-    const supabase = roleSupabase({}, {
-      control_room_reassign_excavator: { data: { success: true }, error: null }
-    })
+    const supabase = roleSupabase(
+      {},
+      {
+        control_room_reassign_excavator: { data: { success: true }, error: null },
+      }
+    )
 
     const { reassignDumperExcavator } = await import('./actions')
     const result = await reassignDumperExcavator(UUID_A, UUID_B)
 
     expect(result).toEqual({ success: true })
-    expect(supabase.rpc).toHaveBeenCalledWith('control_room_reassign_excavator', expect.objectContaining({
-      p_load_row_id: UUID_A,
-      p_new_excavator_id: UUID_B
-    }))
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      'control_room_reassign_excavator',
+      expect.objectContaining({
+        p_load_row_id: UUID_A,
+        p_new_excavator_id: UUID_B,
+      })
+    )
     expect(revalidateTag).toHaveBeenCalledWith('dept:control-room', 'max')
   })
 

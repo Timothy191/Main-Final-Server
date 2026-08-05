@@ -497,3 +497,15 @@
   contain-intrinsic-size: 1px 500px;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   HIGH-GLARE / INDUSTRIAL DAYTIME MODE (Overrides)
+   ═══════════════════════════════════════════════════════════════ */
+[data-theme='high-glare'] {
+  /* hg */ --arch-glass-backdrop: none;
+  /* hg */ --arch-glass-surface: rgba(255, 255, 255, 1);
+  /* hg */ --arch-glass-surface-hover: rgba(240, 240, 240, 1);
+  /* hg */ --arch-glass-border: rgba(0, 0, 0, 0.2);
+  /* hg */ --text-primary: #000000;
+  /* hg */ --text-secondary: #333333;
+}

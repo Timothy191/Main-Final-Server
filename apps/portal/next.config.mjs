@@ -47,7 +47,6 @@ const nextConfig = {
     inlineCss: true,
     webVitalsAttribution: ["CLS", "LCP", "FCP", "TTFB", "INP"],
     viewTransition: true,
-    ppr: true, // Partial Prerendering for static shell + dynamic content streaming
   },
   turbopack: {
     // AGENT-TRACE: Root must include workspaceRoot so packages/ deps compile
@@ -90,6 +89,16 @@ const nextConfig = {
     },
   },
   reactStrictMode: true,
+  webpack: (config, { isServer, nextRuntime }) => {
+    // Exclude ioredis from client-side and Edge middleware bundles (where Node built-ins are unsupported)
+    if (!isServer || nextRuntime === 'edge') {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'ioredis': false,
+      };
+    }
+    return config;
+  },
   async headers() {
     return [
       {

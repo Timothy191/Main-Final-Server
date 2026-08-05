@@ -8,6 +8,7 @@ import { Input } from '@repo/ui/components/ui/input'
 import { Button } from '@repo/ui/components/ui/button'
 import { Badge } from '@repo/ui/components/ui/badge'
 import { Save, CheckCircle2, Cpu } from 'lucide-react'
+
 import {
   upsertMachineOperation,
   closeMachineOperation,
@@ -148,7 +149,7 @@ function Row({ row, sites, operators }: RowProps) {
 
   return (
     <TableRow className="border-b border-arch-border/50 hover:bg-arch-accent-charcoal/10 transition-colors">
-      <TableCell className="px-3 py-2 align-middle">
+      <TableCell className="px-3 py-2 align-middle sticky left-0 z-10 bg-[var(--bg-primary)] border-r border-arch-border/50">
         <div className="flex items-center gap-2">
           <Cpu className="w-4 h-4 text-arch-text-secondary shrink-0" />
           <div>

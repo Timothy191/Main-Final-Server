@@ -123,10 +123,10 @@ export function HourlyLoadsTable({ initialLoads, excavators, sites }: HourlyLoad
   const [selectedRow, setSelectedRow] = useState<HourlyLoadRow | null>(null)
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false)
   const [isEndSessionOpen, setIsEndSessionOpen] = useState(false)
-  const [loadsData, setLoadsData] = useState<HourlyLoadRow[]>(initialLoads)
+  const [loadsData, setLoadsData] = useState<HourlyLoadRow[]>(initialLoads || [])
 
   useEffect(() => {
-    setLoadsData(initialLoads)
+    setLoadsData(initialLoads || [])
   }, [initialLoads])
 
   const handleCellAdjust = (rowId: string, hourColumn: string, newValue: number) => {
@@ -381,7 +381,9 @@ export function HourlyLoadsTable({ initialLoads, excavators, sites }: HourlyLoad
       <Table className="w-full text-left border-collapse min-w-[1400px]">
         <TableHeader className="bg-arch-accent-charcoal/30 border-b border-arch-border text-arch-text-secondary text-sm">
           <TableRow>
-            <TableHead className="px-4 py-3 font-semibold">Machine_Id</TableHead>
+            <TableHead className="px-4 py-3 font-semibold sticky left-0 z-20 bg-[var(--bg-primary)]">
+              Machine_Id
+            </TableHead>
             <TableHead className="px-4 py-3 font-semibold">Site</TableHead>
             <TableHead className="px-4 py-3 font-semibold">Excavator</TableHead>
             <TableHead className="px-4 py-3 font-semibold">Material</TableHead>
@@ -422,7 +424,7 @@ export function HourlyLoadsTable({ initialLoads, excavators, sites }: HourlyLoad
                   key={row.id}
                   className="border-b border-arch-border/50 hover:bg-arch-accent-charcoal/10 transition-colors"
                 >
-                  <TableCell className="px-4 py-3 font-semibold text-arch-text-primary">
+                  <TableCell className="px-4 py-3 font-semibold text-arch-text-primary sticky left-0 z-10 bg-[var(--bg-primary)]">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className="flex items-center gap-1 hover:text-arch-accent-blue transition-colors font-semibold outline-none">

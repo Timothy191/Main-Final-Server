@@ -170,6 +170,8 @@ function MachineOpsTable({ ops }: { ops: RecentMachineOperation[] }) {
 /*  Page                                                               */
 /* ------------------------------------------------------------------ */
 
+import { SCADAAlertFeed } from './components/SCADAAlertFeed'
+
 export default async function ControlRoomPage() {
   const { deptId } = await getDepartmentContext({ department: 'control-room' })
 
@@ -187,6 +189,9 @@ export default async function ControlRoomPage() {
       >
         <ControlRoomMetricsSection deptId={deptId} />
       </Suspense>
+
+      {/* Real-time SCADA Live Telemetry Feed */}
+      <SCADAAlertFeed />
 
       {/* Machine operations table — dynamic, streamed independently */}
       <Suspense fallback={<Skeleton className="h-[320px] w-full" />}>

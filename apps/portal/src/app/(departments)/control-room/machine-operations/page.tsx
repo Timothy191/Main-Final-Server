@@ -60,7 +60,7 @@ export default async function MachineOperationsPage({ searchParams }: PageProps)
               <p className="text-arch-text-muted text-xs font-medium uppercase tracking-wider">
                 Active Machines
               </p>
-              <div className="h-8 w-12 bg-arch-border/30 animate-pulse rounded mt-0.5" />
+              <h4 className="text-2xl font-bold text-arch-text-primary mt-0.5">Live SMR</h4>
             </div>
           </div>
         </GlassCard>

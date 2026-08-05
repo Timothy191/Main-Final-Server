@@ -28,7 +28,9 @@ export async function MachineOpsTable({ deptId, shiftDate, shiftType }: MachineO
         <Table className="w-full text-left border-collapse min-w-full">
           <TableHeader className="bg-arch-accent-charcoal/30 border-b border-arch-border text-arch-text-secondary text-sm">
             <TableRow>
-              <TableHead className="px-3 py-3 font-semibold whitespace-nowrap">Machine</TableHead>
+              <TableHead className="px-3 py-3 font-semibold whitespace-nowrap sticky left-0 z-20 bg-[var(--bg-primary)] border-r border-arch-border/50">
+                Machine
+              </TableHead>
               <TableHead className="px-3 py-3 font-semibold whitespace-nowrap">Site</TableHead>
               <TableHead className="px-3 py-3 font-semibold whitespace-nowrap text-right">
                 Start SMR

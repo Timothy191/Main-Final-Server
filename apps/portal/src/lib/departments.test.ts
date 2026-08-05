@@ -142,10 +142,11 @@ describe('Tab shapes', () => {
     }
   })
 
-  it('CONTROL_ROOM_TABS includes hourly-loads and excavator-activity', () => {
+  it('CONTROL_ROOM_TABS includes hourly-loads, excavator-activity, and dozer-rollover', () => {
     const names = CONTROL_ROOM_TABS.map((t) => t.name)
     expect(names).toContain('hourly-loads')
     expect(names).toContain('excavator-activity')
+    expect(names).toContain('dozer-rollover')
   })
 
   it('ENGINEERING_TABS includes breakdowns tab', () => {

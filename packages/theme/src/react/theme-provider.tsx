@@ -1,42 +1,74 @@
 'use client'
 
-import { createContext, useContext, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+
+export type ThemeType = 'light' | 'dark' | 'high-glare'
 
 interface ArchThemeContextType {
-  theme: 'light'
-  resolvedTheme: 'light'
-  setTheme: () => void
+  theme: ThemeType
+  resolvedTheme: ThemeType
+  setTheme: (theme: ThemeType) => void
   toggleTheme: () => void
 }
 
 const ArchThemeContext = createContext<ArchThemeContextType | undefined>(undefined)
 
-const LIGHT_THEME = {
-  theme: 'light' as const,
-  resolvedTheme: 'light' as const,
-  setTheme: () => {},
-  toggleTheme: () => {},
-}
-
 /**
- * ArchThemeProvider — Light-only theme provider for the Arch System.
- *
- * Sets `data-theme="light"` and `<meta name="theme-color">` on mount.
- * No dark mode; no next-themes dependency.
+ * ArchThemeProvider — Theme provider for the Arch System supporting High-Glare Industrial mode.
  */
 export function ArchThemeProvider({ children }: { children: ReactNode }) {
-  useEffect(() => {
-    const root = document.documentElement
-    root.setAttribute('data-theme', 'light')
-    root.style.colorScheme = 'light'
+  const [theme, setTheme] = useState<ThemeType>('light')
 
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]')
-    if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', '#ffffff')
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as ThemeType
+    if (savedTheme) {
+      setTheme(savedTheme)
+      document.documentElement.setAttribute('data-theme', savedTheme)
+
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', savedTheme === 'dark' ? '#000000' : '#ffffff')
+      }
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light')
+      document.documentElement.style.colorScheme = 'light'
     }
   }, [])
 
-  return <ArchThemeContext.Provider value={LIGHT_THEME}>{children}</ArchThemeContext.Provider>
+  const handleSetTheme = (newTheme: ThemeType) => {
+    setTheme(newTheme)
+    localStorage.setItem('theme', newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
+
+    if (newTheme === 'dark') {
+      document.documentElement.style.colorScheme = 'dark'
+    } else {
+      document.documentElement.style.colorScheme = 'light'
+    }
+
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', newTheme === 'dark' ? '#000000' : '#ffffff')
+    }
+  }
+
+  const toggleTheme = () => {
+    const nextTheme: ThemeType = theme === 'light' ? 'high-glare' : 'light'
+    handleSetTheme(nextTheme)
+  }
+
+  return (
+    <ArchThemeContext.Provider
+      value={{
+        theme,
+        resolvedTheme: theme,
+        setTheme: handleSetTheme,
+        toggleTheme,
+      }}
+    >
+      {children}
+    </ArchThemeContext.Provider>
+  )
 }
 
 export function useArchTheme() {
@@ -47,7 +79,6 @@ export function useArchTheme() {
   return ctx
 }
 
-/** @deprecated use useArchTheme — light-only stub for legacy imports */
 export function useTheme() {
   return useArchTheme()
 }

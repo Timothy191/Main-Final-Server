@@ -78,6 +78,21 @@ export function ReportsView({ reports }: ReportsViewProps) {
   const [selectedShiftFilter, setSelectedShiftFilter] = useState('ALL')
 
   // Interactive schedule finder states
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [selectedReportType, setSelectedReportType] = useState('ALL')
+
+  // Get unique report types for the filter dropdown
+  const reportTypes = Array.from(
+    new Set(
+      reports.map(
+        (r) =>
+          (Array.isArray(r.template) ? r.template[0]?.name : r.template?.name) ||
+          'Operations Summary Report'
+      )
+    )
+  )
+
   const [lookupDate, setLookupDate] = useState(() => new Date().toISOString().split('T')[0])
   const [lookupShift, setLookupShift] = useState<'day' | 'night'>('day')
   const [lookupResult, setLookupResult] = useState<string>('')
@@ -167,7 +182,13 @@ export function ReportsView({ reports }: ReportsViewProps) {
     const templateData = Array.isArray(row.template) ? row.template[0] : row.template
     const creatorData = Array.isArray(row.creator) ? row.creator[0] : row.creator
     const reportName = templateData?.name || 'Operations Summary Report'
+    const reportType = reportName
     const creatorName = creatorData?.full_name || 'System Auto-Compile'
+
+    // Date filtering
+    const reportDate = new Date(row.report_date)
+    const matchesStartDate = !startDate || reportDate >= new Date(startDate)
+    const matchesEndDate = !endDate || reportDate <= new Date(endDate + 'T23:59:59.999')
 
     // Text search
     const matchesSearch =
@@ -179,7 +200,10 @@ export function ReportsView({ reports }: ReportsViewProps) {
     const assignedInfo = getAssignedShift(row)
     const matchesShift = selectedShiftFilter === 'ALL' || assignedInfo.name === selectedShiftFilter
 
-    return matchesSearch && matchesShift
+    // Report type filter
+    const matchesType = selectedReportType === 'ALL' || reportType === selectedReportType
+
+    return matchesSearch && matchesShift && matchesType && matchesStartDate && matchesEndDate
   })
 
   // Format cycle schedule for visual map
@@ -386,21 +410,64 @@ export function ReportsView({ reports }: ReportsViewProps) {
           />
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-          <SlidersHorizontal className="w-4 h-4 text-arch-text-muted shrink-0" />
-          <span className="text-xs text-arch-text-secondary font-medium whitespace-nowrap">
-            Filter by Assigned Shift:
-          </span>
-          <select
-            value={selectedShiftFilter}
-            onChange={(e) => setSelectedShiftFilter(e.target.value)}
-            className="bg-arch-surface-tertiary border border-arch-border rounded px-3 py-1.5 text-xs text-arch-text-primary outline-none focus:border-arch-accent-blue cursor-pointer font-semibold"
-          >
-            <option value="ALL">All Shifts</option>
-            <option value="Shift A">Shift A</option>
-            <option value="Shift B">Shift B</option>
-            <option value="Shift C">Shift C</option>
-          </select>
+        <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto justify-end">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5 text-arch-text-muted shrink-0" />
+            <span className="text-xs text-arch-text-secondary font-medium whitespace-nowrap">
+              Date Range:
+            </span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="bg-arch-surface-tertiary border border-arch-border rounded px-2.5 py-1.5 text-xs text-arch-text-primary outline-none focus:border-arch-accent-blue cursor-pointer"
+              title="Start Date"
+            />
+            <span className="text-arch-text-muted text-xs">to</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="bg-arch-surface-tertiary border border-arch-border rounded px-2.5 py-1.5 text-xs text-arch-text-primary outline-none focus:border-arch-accent-blue cursor-pointer"
+              title="End Date"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <FileText className="w-3.5 h-3.5 text-arch-text-muted shrink-0" />
+            <span className="text-xs text-arch-text-secondary font-medium whitespace-nowrap">
+              Report Type:
+            </span>
+            <select
+              value={selectedReportType}
+              onChange={(e) => setSelectedReportType(e.target.value)}
+              className="bg-arch-surface-tertiary border border-arch-border rounded px-3 py-1.5 text-xs text-arch-text-primary outline-none focus:border-arch-accent-blue cursor-pointer font-semibold"
+            >
+              <option value="ALL">All Types</option>
+              {reportTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <SlidersHorizontal className="w-4 h-4 text-arch-text-muted shrink-0" />
+            <span className="text-xs text-arch-text-secondary font-medium whitespace-nowrap">
+              Filter by Assigned Shift:
+            </span>
+            <select
+              value={selectedShiftFilter}
+              onChange={(e) => setSelectedShiftFilter(e.target.value)}
+              className="bg-arch-surface-tertiary border border-arch-border rounded px-3 py-1.5 text-xs text-arch-text-primary outline-none focus:border-arch-accent-blue cursor-pointer font-semibold"
+            >
+              <option value="ALL">All Shifts</option>
+              <option value="Shift A">Shift A</option>
+              <option value="Shift B">Shift B</option>
+              <option value="Shift C">Shift C</option>
+            </select>
+          </div>
         </div>
       </GlassCard>
 

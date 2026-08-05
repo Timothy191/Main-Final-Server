@@ -28,6 +28,8 @@
     "dev": "bash scripts/dev.sh",
     "dev:no-infra": "bash scripts/dev.sh --no-infra",
     "dev:quick": "bash scripts/dev.sh --quick",
+    "dev:safe": "node scripts/monorepo-supervisor.mjs dev",
+    "start:safe": "node scripts/monorepo-supervisor.mjs start",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\"",
     "lint": "turbo run lint",

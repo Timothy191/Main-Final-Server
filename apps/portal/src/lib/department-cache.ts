@@ -98,6 +98,10 @@ export const DEPARTMENT_CACHE_TAGS = {
   TABLE_ADMIN_AUDIT: 'table:admin_audit_trail',
   TABLE_CARD_PRINTS: 'table:card_print_history',
   TABLE_SATELLITE_ALERTS: 'table:satellite_alerts',
+  TABLE_HOURLY_LOADS: 'table:hourly_loads',
+  TABLE_MACHINE_OPERATIONS: 'table:machine_operations',
+  TABLE_EXCAVATOR_ACTIVITY: 'table:excavator_activity',
+  TABLE_ENGINEERING_NOTES: 'table:engineering_notes',
 } as const
 
 /**

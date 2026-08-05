@@ -179,3 +179,7 @@ public/icons/icon-*.png
 docs/.quarto/
 docs/_site/
 docs/_book/
+
+# Large generated lockfiles and legacy archives
+pnpm-lock.yaml
+archive-H82lX7/

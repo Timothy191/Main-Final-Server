@@ -678,6 +678,12 @@ export function SystemTrayPill() {
         <CheckSquare className="w-3.5 h-3.5 text-arch-text-secondary" />
       </Link>
 
+      {!network.online && (
+        <span className="flex h-[26px] items-center rounded-full bg-arch-accent-red/10 border border-arch-accent-red/20 px-2.5 text-[11px] font-medium text-arch-accent-red shadow-sm animate-pulse">
+          Offline Sync Pending
+        </span>
+      )}
+
       <Popover.Root>
         <Popover.Trigger asChild>
           <button
