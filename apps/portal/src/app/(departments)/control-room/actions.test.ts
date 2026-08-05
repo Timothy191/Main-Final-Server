@@ -6,6 +6,10 @@ jest.mock('@/lib/dept-access', () => ({
   assertDeptRole: jest.fn(),
 }))
 
+jest.mock('@repo/supabase/service-role', () => ({
+  createServiceRoleClient: jest.fn(),
+}))
+
 jest.mock('@/lib/errors/error-classes', () => ({
   AuthError: class AuthError extends Error {
     constructor(m: string) {
@@ -503,6 +507,9 @@ describe('upsertMachineOperation', () => {
       engineering_notes: fluentBuilder([{ data: { id: 'note-1' }, error: null }]),
       machine_operations: fluentBuilder([{ data: { id: 'op-1' }, error: null }]),
     })
+
+    const { createServiceRoleClient } = jest.requireMock('@repo/supabase/service-role')
+    createServiceRoleClient.mockReturnValue(supabase)
 
     const { upsertMachineOperation } = await import('./actions')
     const result = await upsertMachineOperation({
