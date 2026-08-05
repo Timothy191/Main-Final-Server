@@ -23,4 +23,5 @@ export default {
   },
   "*.{json,md,css,html,yml,yaml}": "prettier --write --ignore-unknown",
   ".agents/knowledge/**/*.md": "markdownlint --fix",
+  "packages/supabase/migrations/*.sql": () => "pnpm db:codegen",
 };

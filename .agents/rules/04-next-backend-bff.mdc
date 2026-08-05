@@ -1,0 +1,41 @@
+---
+description: Next.js Backend for Frontend (BFF) Architecture & Security Guard
+globs: apps/portal/src/app/api/**/route.ts,apps/portal/src/app/api/**/route.js,apps/portal/src/proxy.ts,apps/portal/src/proxy.js
+alwaysApply: false
+---
+
+# Next.js Backend for Frontend (BFF) Guidelines
+
+To maintain architecture stability and security, all Route Handlers and Edge Proxies must strictly follow these rules:
+
+## 1. Single Edge proxy File
+- Only **one** `proxy.ts` file is allowed per project. Do **NOT** introduce `middleware.ts` or `middleware.js` to handle edge auth or rewrites.
+
+## 2. Open Redirect Prevention
+- When redirecting (via `redirect()` or `NextResponse.redirect()`), you **must** validate that the destination is same-origin or starts with a relative path `/`:
+  ```typescript
+  const redirectUrl = new URL(destination, request.url)
+  if (redirectUrl.origin !== request.nextUrl.origin) {
+    return new Response('Invalid redirect', { status: 400 })
+  }
+  return NextResponse.redirect(redirectUrl, 303)
+  ```
+
+## 3. No Direct Header Passthrough
+- Avoid directly forwarding incoming request headers to client responses or external outgoing fetches (e.g. `headers: request.headers`). Construct clean, specific header mappings instead:
+  ```typescript
+  headers: new Headers({ 'Content-Type': 'application/json' })
+  ```
+
+## 4. No Server Component Local API Fetching
+- Server Components must fetch data **directly** from data sources (Kysely database, replica client) rather than issuing local `fetch('/api/...')` roundtrips.
+
+## 5. Security & Exception Handling
+- Use robust `try/catch` wrappers around all response builders.
+- Never expose raw exceptions, database stack traces, or credentials in client error messages.
+
+## Verification
+Any changes touching backend code must pass the guard check:
+```bash
+node tools/next-backend-guard.mjs
+```

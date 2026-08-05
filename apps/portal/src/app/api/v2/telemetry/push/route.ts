@@ -247,7 +247,7 @@ async function handlePost(req: Request) {
     return handleDirectTag(
       new Request(req.url, {
         method: req.method,
-        headers: req.headers,
+        headers: new Headers({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(body),
       }),
       { params: Promise.resolve({}) }

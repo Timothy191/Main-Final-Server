@@ -61,14 +61,19 @@ ALTER TABLE machine_operations_archive
   ADD COLUMN IF NOT EXISTS safety_talk_delay_minutes INTEGER,
   ADD COLUMN IF NOT EXISTS get_diesel_delay_minutes INTEGER;
 
+-- Unique constraint backing the Control Room -> Engineering engineering-delay
+-- mirror upsert (one mirrored note per machine/shift/day).
+ALTER TABLE engineering_notes
+  DROP CONSTRAINT IF EXISTS uq_engineering_notes_dept_machine_date_shift;
+CREATE UNIQUE INDEX IF NOT EXISTS uq_engineering_notes_dept_machine_date_shift
+  ON engineering_notes (department_id, machine_id, note_date, shift_type);
+
 -- 3. Admin-owned reference data seeds -----------------------------------------
 DO $$
 DECLARE
   admin_id UUID;
-  cr_id UUID;
 BEGIN
   SELECT id INTO admin_id FROM departments WHERE name = 'admin';
-  SELECT id INTO cr_id FROM departments WHERE name = 'control-room';
 
   -- Operators (managed only from Admin department)
   INSERT INTO operators (full_name, employee_code, role, active)
