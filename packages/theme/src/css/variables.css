@@ -274,6 +274,16 @@
     0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.03), 0 24px 56px rgba(0, 0, 0, 0.04),
     0 40px 96px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
 
+  /* Primer-style semantic aliases — same values, clearer vocabulary.
+     Resting = static surfaces; floating = elevated transient surfaces. */
+  --shadow-resting-sm: var(--shadow-diffusion-sm);
+  --shadow-resting-md: var(--shadow-diffusion-md);
+  --shadow-resting-lg: var(--shadow-diffusion-lg);
+  --shadow-floating-sm: var(--shadow-diffusion-sm);
+  --shadow-floating-md: var(--shadow-diffusion-md);
+  --shadow-floating-lg: var(--shadow-elevated);
+  --shadow-floating-xl: var(--shadow-window);
+
   /* ═══════════════════════════════════════════════════════════════
        REFRACTION SYSTEM
        ═══════════════════════════════════════════════════════════════ */
@@ -372,7 +382,7 @@
     linear-gradient(
       180deg,
       rgba(255, 255, 255, 0.38) 0%,
-      rgba(255, 255, 255, 0.20) 45%,
+      rgba(255, 255, 255, 0.2) 45%,
       rgba(246, 246, 250, 0.28) 100%
     ),
     rgba(255, 255, 255, 0.24);
@@ -418,8 +428,8 @@
 
   /* Login supporting copy */
   --login-text-muted: #475569; /* text-slate-600 */
-  --login-text-emphasis: #0F172A; /* text-slate-900 */
-  --login-text-placeholder: #94A3B8; /* text-slate-400 */
+  --login-text-emphasis: #0f172a; /* text-slate-900 */
+  --login-text-placeholder: #94a3b8; /* text-slate-400 */
   --login-chrome-band: rgba(255, 255, 255, 0.15); /* light glass band */
   --login-card-max-width: 26.25rem;
   --login-card-min-height: 40rem;
@@ -431,11 +441,16 @@
   --login-card-body-pb: 2rem;
 
   /* Login card shell */
-  --login-shell-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.4) 100%); /* bg-white/50 or bg-white/40 */
+  --login-shell-bg: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.4) 100%
+  ); /* bg-white/50 or bg-white/40 */
   --login-shell-backdrop: blur(24px) saturate(150%); /* backdrop-blur-xl / backdrop-saturate-150 */
   --login-shell-edge: rgba(255, 255, 255, 0.6); /* border border-white/60 */
   --login-shell-specular-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  --login-shell-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), var(--login-shell-specular-inset); /* shadow-2xl shadow-black/10 */
+  --login-shell-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.1), var(--login-shell-specular-inset); /* shadow-2xl shadow-black/10 */
 
   /* Login focus — golden chrome ring */
   --login-focus-gold: var(--palette-chrome-yellow);
@@ -497,15 +512,20 @@
   contain-intrinsic-size: 1px 500px;
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    HIGH-GLARE / INDUSTRIAL DAYTIME MODE (Overrides)
    ═══════════════════════════════════════════════════════════════ */
 [data-theme='high-glare'] {
-  /* hg */ --arch-glass-backdrop: none;
-  /* hg */ --arch-glass-surface: rgba(255, 255, 255, 1);
-  /* hg */ --arch-glass-surface-hover: rgba(240, 240, 240, 1);
-  /* hg */ --arch-glass-border: rgba(0, 0, 0, 0.2);
-  /* hg */ --text-primary: #000000;
-  /* hg */ --text-secondary: #333333;
+  /* hg */
+  --arch-glass-backdrop: none;
+  /* hg */
+  --arch-glass-surface: rgba(255, 255, 255, 1);
+  /* hg */
+  --arch-glass-surface-hover: rgba(240, 240, 240, 1);
+  /* hg */
+  --arch-glass-border: rgba(0, 0, 0, 0.2);
+  /* hg */
+  --text-primary: #000000;
+  /* hg */
+  --text-secondary: #333333;
 }

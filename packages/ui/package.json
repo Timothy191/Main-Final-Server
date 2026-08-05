@@ -28,8 +28,13 @@
     "./Pagination": "./src/components/ui/pagination.tsx",
     "./components/ui/pagination": "./src/components/ui/pagination.tsx",
     "./components/ui/pagination-cursor": "./src/components/ui/pagination-cursor.ts",
+    "./components/ui/overflow-list": "./src/components/ui/overflow-list.tsx",
     "./components/ui/skeleton": "./src/components/ui/skeleton.tsx",
+    "./charts": "./src/charts/index.tsx",
     "./components/ui/glass-skeleton": "./src/components/ui/glass-skeleton.tsx",
+    "./components/ui/spotlight-card": "./src/components/ui/spotlight-card.tsx",
+    "./components/ui/glass-surface": "./src/components/ui/glass-surface.tsx",
+    "./components/ui/glass-icons": "./src/components/ui/glass-icons.tsx",
     "./components/ui/badge": "./src/components/ui/badge.tsx",
     "./components/ui/card": "./src/components/ui/card.tsx",
     "./components/ui/avatar": "./src/components/ui/avatar.tsx",
@@ -47,7 +52,8 @@
   },
   "peerDependencies": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "recharts": "^2.15.0"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -62,11 +68,21 @@
     "@radix-ui/react-separator": "^1.1.1"
   },
   "devDependencies": {
+    "@repo/jest-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@swc/jest": "^0.2.39",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/jest": "^29.5.14",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.18",
+    "jest": "^30.0.0",
+    "jest-environment-jsdom": "^30.0.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }

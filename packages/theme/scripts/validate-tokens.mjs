@@ -19,244 +19,256 @@
  * Or:  pnpm --filter @repo/theme lint:tokens
  */
 
-import { readFileSync } from "fs";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
+import { readFileSync } from 'fs'
+import { resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, "..");
-const CSS_SRC = resolve(ROOT, "src/css/variables.css");
-const CSS_GEN_SRC = resolve(ROOT, "src/css/variables-generated.css");
-const PALETTE_SRC = resolve(ROOT, "src/css/palette.css");
-const PRESET_SRC = resolve(ROOT, "src/tailwind/preset.ts");
-const TOKENS_SRC = resolve(ROOT, "tokens.json");
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const ROOT = resolve(__dirname, '..')
+const CSS_SRC = resolve(ROOT, 'src/css/variables.css')
+const CSS_GEN_SRC = resolve(ROOT, 'src/css/variables-generated.css')
+const PALETTE_SRC = resolve(ROOT, 'src/css/palette.css')
+const PRESET_SRC = resolve(ROOT, 'src/tailwind/preset.ts')
+const TOKENS_SRC = resolve(ROOT, 'tokens.json')
 
-const cssText = readFileSync(CSS_SRC, "utf8");
-const cssGenText = readFileSync(CSS_GEN_SRC, "utf8");
-const paletteText = readFileSync(PALETTE_SRC, "utf8");
-const presetText = readFileSync(PRESET_SRC, "utf8");
-const tokensJson = JSON.parse(readFileSync(TOKENS_SRC, "utf8"));
+const cssText = readFileSync(CSS_SRC, 'utf8')
+const cssGenText = readFileSync(CSS_GEN_SRC, 'utf8')
+const paletteText = readFileSync(PALETTE_SRC, 'utf8')
+const presetText = readFileSync(PRESET_SRC, 'utf8')
+const tokensJson = JSON.parse(readFileSync(TOKENS_SRC, 'utf8'))
 
-let errors = 0;
-let warnings = 0;
+let errors = 0
+let warnings = 0
 
 function error(msg) {
-  console.error(`  ❌  ${msg}`);
-  errors++;
+  console.error(`  ❌  ${msg}`)
+  errors++
 }
 
 function warn(msg) {
-  console.warn(`  ⚠️   ${msg}`);
-  warnings++;
+  console.warn(`  ⚠️   ${msg}`)
+  warnings++
 }
 
 // ── Vendor/runtime tokens injected by third-party libs — not in variables.css ─
 const VENDOR_TOKENS = new Set([
-  "--radix-accordion-content-height",
-  "--radix-accordion-content-width",
-  "--radix-collapsible-content-height",
-  "--radix-collapsible-content-width",
-  "--radix-navigation-menu-viewport-width",
-  "--radix-navigation-menu-viewport-height",
-  "--radix-toast-swipe-move-x",
-  "--radix-toast-swipe-move-y",
-  "--radix-toast-swipe-end-x",
-  "--radix-toast-swipe-end-y",
-  "--font-anurati",
-  "--font-sans",
-  "--font-inter",
-  "--font-outfit",
-  "--font-mono",
-]);
+  '--radix-accordion-content-height',
+  '--radix-accordion-content-width',
+  '--radix-collapsible-content-height',
+  '--radix-collapsible-content-width',
+  '--radix-navigation-menu-viewport-width',
+  '--radix-navigation-menu-viewport-height',
+  '--radix-toast-swipe-move-x',
+  '--radix-toast-swipe-move-y',
+  '--radix-toast-swipe-end-x',
+  '--radix-toast-swipe-end-y',
+  '--font-anurati',
+  '--font-sans',
+  '--font-inter',
+  '--font-outfit',
+  '--font-mono',
+])
 
 // ── 1. Extract all defined CSS tokens ────────────────────────────────────────
-const definedTokens = new Set();
+const definedTokens = new Set()
 for (const match of cssText.matchAll(/^\s*(--[\w-]+)\s*:/gm)) {
-  definedTokens.add(match[1]);
+  definedTokens.add(match[1])
 }
 for (const match of cssGenText.matchAll(/^\s*(--[\w-]+)\s*:/gm)) {
-  definedTokens.add(match[1]);
+  definedTokens.add(match[1])
 }
 for (const match of paletteText.matchAll(/^\s*(--[\w-]+)\s*:/gm)) {
-  definedTokens.add(match[1]);
+  definedTokens.add(match[1])
 }
 console.log(
-  `\n📦  Found ${definedTokens.size} defined tokens across variables.css + variables-generated.css`,
-);
+  `\n📦  Found ${definedTokens.size} defined tokens across variables.css + variables-generated.css`
+)
 
 // ── 2. Extract all var(--token) references in preset.ts ──────────────────────
-const usedTokens = new Set();
+const usedTokens = new Set()
 for (const match of presetText.matchAll(/var\((--[\w-]+)\)/g)) {
-  usedTokens.add(match[1]);
+  usedTokens.add(match[1])
 }
-console.log(`🔗  Found ${usedTokens.size} var() references in preset.ts\n`);
+console.log(`🔗  Found ${usedTokens.size} var() references in preset.ts\n`)
 
 // ── 3. Check every used token is defined (ignoring vendor tokens) ─────────────
-console.log(
-  "── Check 1: All var() references exist in CSS ────────────────────",
-);
-let check1Pass = true;
+console.log('── Check 1: All var() references exist in CSS ────────────────────')
+let check1Pass = true
 for (const token of usedTokens) {
   if (!definedTokens.has(token) && !VENDOR_TOKENS.has(token)) {
     error(
-      `var(${token}) used in preset.ts but not defined in variables.css or variables-generated.css`,
-    );
-    check1Pass = false;
+      `var(${token}) used in preset.ts but not defined in variables.css or variables-generated.css`
+    )
+    check1Pass = false
   }
 }
-if (check1Pass) console.log("  ✅  All references are defined\n");
+if (check1Pass) console.log('  ✅  All references are defined\n')
 
 // ── 4. Check no --arch* primitives leak OUTSIDE the palette block ─────────────
 // The arch0–arch15 utilities (arch0: "var(--arch0)") are intentional Tailwind
 // color exports for the raw palette. We allow them in the primitive block but
 // reject any --arch* reference that appears in the semantic utility sections
 // (i.e., after the "Semantic aliases" comment line).
-console.log(
-  "── Check 2: No --arch* primitives in semantic utility sections ───",
-);
-const semanticSection = presetText.split("// Semantic aliases")[1] ?? "";
-const archLeaks = [...semanticSection.matchAll(/var\((--arch\d+)\)/g)];
-let check2Pass = true;
+console.log('── Check 2: No --arch* primitives in semantic utility sections ───')
+const semanticSection = presetText.split('// Semantic aliases')[1] ?? ''
+const archLeaks = [...semanticSection.matchAll(/var\((--arch\d+)\)/g)]
+let check2Pass = true
 for (const match of archLeaks) {
-  error(
-    `Primitive ${match[1]} referenced in semantic section of preset.ts — use a semantic alias`,
-  );
-  check2Pass = false;
+  error(`Primitive ${match[1]} referenced in semantic section of preset.ts — use a semantic alias`)
+  check2Pass = false
 }
-if (check2Pass) console.log("  ✅  No primitive leaks in semantic sections\n");
+if (check2Pass) console.log('  ✅  No primitive leaks in semantic sections\n')
 
 // ── 5. Warn on deprecated alias usage in preset.ts ───────────────────────────
 const DEPRECATED = [
-  "--accent-cyan",
-  "--accent-indigo",
-  "--accent-violet",
-  "--accent-alert",
-  "--accent-emerald",
-  "--bg-void",
-];
-console.log(
-  "── Check 3: Deprecated alias usage in preset.ts ──────────────────",
-);
-let check3Pass = true;
+  '--accent-cyan',
+  '--accent-indigo',
+  '--accent-violet',
+  '--accent-alert',
+  '--accent-emerald',
+  '--bg-void',
+]
+console.log('── Check 3: Deprecated alias usage in preset.ts ──────────────────')
+let check3Pass = true
 for (const dep of DEPRECATED) {
   if (presetText.includes(`var(${dep})`)) {
-    warn(
-      `Deprecated token var(${dep}) used in preset.ts — migrate to canonical alias`,
-    );
-    check3Pass = false;
+    warn(`Deprecated token var(${dep}) used in preset.ts — migrate to canonical alias`)
+    check3Pass = false
   }
 }
-if (check3Pass) console.log("  ✅  No deprecated aliases in preset.ts\n");
+if (check3Pass) console.log('  ✅  No deprecated aliases in preset.ts\n')
 
 // ── 6. Token drift check ─────────────────────────────────────────────────────
 // Flatten tokens.json into CSS variable names and compare with variables.css.
 // We skip shadows because Style Dictionary's CSS transform group mangles some
 // shadow values (e.g. --glass-shadow becomes rgba(0,0,0,0.08)).
-console.log(
-  "── Check 4: Token drift between tokens.json and variables.css ────",
-);
+console.log('── Check 4: Token drift between tokens.json and variables.css ────')
 
-function flattenTokens(obj, prefix = "") {
-  const result = new Map();
+function flattenTokens(obj, prefix = '') {
+  const result = new Map()
   for (const [key, value] of Object.entries(obj)) {
-    const fullKey = prefix ? `${prefix}-${key}` : key;
-    if (value && typeof value === "object" && !Array.isArray(value)) {
-      if ("value" in value) {
-        result.set(`--${fullKey}`, value.value);
+    const fullKey = prefix ? `${prefix}-${key}` : key
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      if ('value' in value) {
+        result.set(`--${fullKey}`, value.value)
       } else {
         for (const [k, v] of flattenTokens(value, fullKey)) {
-          result.set(k, v);
+          result.set(k, v)
         }
       }
     }
   }
-  return result;
+  return result
 }
 
-const jsonTokens = flattenTokens(tokensJson);
+const jsonTokens = flattenTokens(tokensJson)
 
-// Extract values from variables.css + palette.css (not generated — we want to catch manual drift)
-const cssValues = new Map();
-for (const match of cssText.matchAll(/^\s*(--[\w-]+)\s*:\s*(.+?);/gm)) {
-  cssValues.set(match[1], match[2].trim());
+// Extract values from variables.css + palette.css (not generated — we want to catch manual drift).
+// Only tokens inside the :root block count; theme overrides such as [data-theme='high-glare']
+// must not clobber the canonical source-of-truth values.
+function extractRootTokens(text) {
+  const result = new Map()
+  const lines = text.split('\n')
+  let inRoot = false
+  let braceDepth = 0
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (trimmed.startsWith(':root')) {
+      inRoot = true
+      braceDepth = 0
+      continue
+    }
+    if (inRoot) {
+      if (trimmed.includes('{')) braceDepth++
+      if (trimmed.includes('}')) {
+        braceDepth--
+        if (braceDepth < 0) {
+          inRoot = false
+          braceDepth = 0
+          continue
+        }
+      }
+      const match = trimmed.match(/^(--[\w-]+)\s*:\s*(.+?);$/)
+      if (match) {
+        result.set(match[1], match[2].trim())
+      }
+    }
+  }
+  return result
 }
+
+const cssValues = extractRootTokens(cssText)
 for (const match of paletteText.matchAll(/^\s*(--[\w-]+)\s*:\s*(.+?);/gm)) {
-  cssValues.set(match[1], match[2].trim());
+  cssValues.set(match[1], match[2].trim())
 }
 
 // Resolve simple references in tokens.json values
-const resolvedJson = new Map();
+const resolvedJson = new Map()
 for (const [token, rawValue] of jsonTokens) {
-  let val = rawValue;
+  let val = rawValue
   // Resolve {archN} references to the primitive hex values
-  const refs = [...val.matchAll(/\{(arch\d+)\}/g)];
+  const refs = [...val.matchAll(/\{(arch\d+)\}/g)]
   for (const ref of refs) {
-    const primitive = jsonTokens.get(`--${ref[1]}`);
-    if (primitive) val = val.replace(ref[0], primitive);
+    const primitive = jsonTokens.get(`--${ref[1]}`)
+    if (primitive) val = val.replace(ref[0], primitive)
   }
-  resolvedJson.set(token, val);
+  resolvedJson.set(token, val)
 }
 
 // Helper: resolve var(--foo) references in a CSS value using cssValues
 function resolveCssValue(value, depth = 0) {
-  if (depth > 3) return value; // prevent infinite recursion
-  const refs = [...value.matchAll(/var\((--[\w-]+)\)/g)];
-  if (refs.length === 0) return value;
-  let resolved = value;
+  if (depth > 3) return value // prevent infinite recursion
+  const refs = [...value.matchAll(/var\((--[\w-]+)\)/g)]
+  if (refs.length === 0) return value
+  let resolved = value
   for (const ref of refs) {
-    const refVal = cssValues.get(ref[1]);
+    const refVal = cssValues.get(ref[1])
     if (refVal) {
-      resolved = resolved.replace(ref[0], resolveCssValue(refVal, depth + 1));
+      resolved = resolved.replace(ref[0], resolveCssValue(refVal, depth + 1))
     }
   }
-  return resolved;
+  return resolved
 }
 
-let check4Pass = true;
+let check4Pass = true
 const SKIP_DRIFT = new Set([
   // Shadows: Style Dictionary CSS transform mangles some shadow values
-  "--glass-shadow",
-  "--shadow-sm",
-  "--shadow-md",
-  "--shadow-lg",
+  '--glass-shadow',
+  '--shadow-sm',
+  '--shadow-md',
+  '--shadow-lg',
   // Theme transition: intentionally 0ms in generated but manual may differ
-  "--theme-transition-duration",
-]);
+  '--theme-transition-duration',
+])
 
 for (const [token, jsonVal] of resolvedJson) {
-  if (SKIP_DRIFT.has(token)) continue;
-  if (!cssValues.has(token)) continue; // not in manual CSS = nothing to drift against
+  if (SKIP_DRIFT.has(token)) continue
+  if (!cssValues.has(token)) continue // not in manual CSS = nothing to drift against
 
-  const rawCssVal = cssValues.get(token);
-  const cssVal = resolveCssValue(rawCssVal);
+  const rawCssVal = cssValues.get(token)
+  const cssVal = resolveCssValue(rawCssVal)
   // Normalize whitespace for comparison
-  const normJson = jsonVal.replace(/\s+/g, " ").trim();
-  const normCss = cssVal.replace(/\s+/g, " ").trim();
+  const normJson = jsonVal.replace(/\s+/g, ' ').trim()
+  const normCss = cssVal.replace(/\s+/g, ' ').trim()
   if (normJson !== normCss) {
-    error(
-      `Token drift: ${token}\n    tokens.json: ${normJson}\n    variables.css: ${normCss}`,
-    );
-    check4Pass = false;
+    error(`Token drift: ${token}\n    tokens.json: ${normJson}\n    variables.css: ${normCss}`)
+    check4Pass = false
   }
 }
 
-if (check4Pass) console.log("  ✅  No token drift detected\n");
+if (check4Pass) console.log('  ✅  No token drift detected\n')
 
 // ── Summary ──────────────────────────────────────────────────────────────────
-console.log(
-  "─────────────────────────────────────────────────────────────────",
-);
+console.log('─────────────────────────────────────────────────────────────────')
 if (errors > 0) {
-  console.error(
-    `\n💥  Token validation FAILED — ${errors} error(s), ${warnings} warning(s)\n`,
-  );
-  process.exit(1);
+  console.error(`\n💥  Token validation FAILED — ${errors} error(s), ${warnings} warning(s)\n`)
+  process.exit(1)
 } else if (warnings > 0) {
   console.warn(
-    `\n⚠️   Token validation passed with ${warnings} warning(s). Consider migrating deprecated aliases.\n`,
-  );
+    `\n⚠️   Token validation passed with ${warnings} warning(s). Consider migrating deprecated aliases.\n`
+  )
 } else {
   console.log(
-    `\n✅  Token validation PASSED — ${definedTokens.size} tokens, ${usedTokens.size} references, all clean.\n`,
-  );
+    `\n✅  Token validation PASSED — ${definedTokens.size} tokens, ${usedTokens.size} references, all clean.\n`
+  )
 }
