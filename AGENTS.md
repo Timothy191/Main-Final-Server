@@ -397,6 +397,22 @@ pnpm format:check
 
 Do not trust a non-forced `pnpm quality` — cached lint can mask failures.
 
+## Consolidating Agent Context & Rules (`.agents/`)
+
+All agent skills, rules, and prompt profiles are consolidated in the central [`.agents/`](file:///home/timothy/Documents/Arch-System/.agents/) directory to prevent IDE index bloat:
+- **Registry**: Rules are stored in [`.agents/rules/`](file:///home/timothy/Documents/Arch-System/.agents/rules/) and skills in [`.agents/skills/`](file:///home/timothy/Documents/Arch-System/.agents/skills/).
+- **Dynamic Context Utility**: Active rules can be fetched/discarded dynamically to prevent editor memory issues:
+  ```bash
+  # List all available rules and skills in the registry
+  .agents/scripts/manage-agent-context.sh list
+
+  # Load specific rules/skills into your active IDE directories for the current task
+  .agents/scripts/manage-agent-context.sh load server-actions design-system
+
+  # Discard all active rules/skills from the system when the task is complete
+  .agents/scripts/manage-agent-context.sh clean
+  ```
+
 ---
 
 ## Portal Agent
