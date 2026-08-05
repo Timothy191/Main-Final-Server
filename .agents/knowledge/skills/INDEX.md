@@ -11,6 +11,7 @@ Token-efficient index of available AI Agent Skills for specialized tasks.
 | **dead-dependency-pruner** | [`dead-dependency-pruner/SKILL.md`](./dead-dependency-pruner/SKILL.md) | Removing unused dependencies, knip audit cleanup, and package boundary prunings |
 | **department-mutation-scaffolder** | [`department-mutation-scaffolder/SKILL.md`](./department-mutation-scaffolder/SKILL.md) | Scaffolding or modifying department routes, server actions, and `@repo/acl` route restrictions |
 | **gemini-interactions-api** | [`gemini-interactions-api/SKILL.md`](./gemini-interactions-api/SKILL.md) | Integrating or migrating Gemini API interactions and LLM features |
+| **maintain-monorepo-hygiene** | [`maintain-monorepo-hygiene/SKILL.md`](./maintain-monorepo-hygiene/SKILL.md) | Standardising imports, sharing config packages, declaring direct deps, and keeping path aliases clean |
 | **on-premise-supabase-ops** | [`on-premise-supabase-ops/SKILL.md`](./on-premise-supabase-ops/SKILL.md) | Managing local Docker Supabase stack, SQL migrations in `packages/supabase/migrations/`, and RLS policies |
 | **agy-plugin-installer** | [`agy-plugin-installer/SKILL.md`](./agy-plugin-installer/SKILL.md) | Installing and configuring remote plugins/extensions into the Antigravity CLI |
 

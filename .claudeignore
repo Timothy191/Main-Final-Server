@@ -121,6 +121,15 @@ Plans.md
 remove-dynamic.cjs
 .agents/.agents
 
+# Irrelevant globally-installed skills (R/Shiny — not this stack)
+.claude/skills/design-shiny-ui/
+.claude/skills/scaffold-shiny-app/
+.claude/skills/build-shiny-module/
+.claude/skills/deploy-shiny-app/
+.claude/skills/deploy-shinyproxy/
+.claude/skills/optimize-shiny-performance/
+.claude/skills/test-shiny-app/
+
 # Harness / agent runtime
 harness.toml
 hosts.toml
