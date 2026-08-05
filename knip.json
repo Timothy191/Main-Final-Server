@@ -10,28 +10,15 @@
   "ignoreExportsUsedInFile": true,
   "ignoreBinaries": ["next", "psql"],
   "ignoreDependencies": ["@sentry/nextjs", "inngest", "@vercel/otel"],
-  "exclude": ["exports", "types", "duplicates", "files"],
   "workspaces": {
     ".": {
-      "entry": ["scripts/**/*.sh", "scripts/**/*.mjs", "tools/**/*.mjs", "tools/**/*.cjs"],
-      "project": ["scripts/**/*.sh", "scripts/**/*.mjs", "tools/**/*.mjs", "tools/**/*.cjs"]
+      "entry": ["scripts/**/*.sh", "scripts/**/*.mjs", "tools/**/*.mjs", "tools/**/*.cjs"]
     },
     "apps/portal": {
-      "entry": ["src/app/**/page.tsx", "src/app/**/route.ts", "src/proxy.ts"],
-      "project": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "e2e/**/*.ts",
-        "public/**/*.js",
-        "jest.config.*",
-        "postcss.config.*",
-        "tailwind.config.*",
-        "next.config.*"
-      ]
+      "entry": ["src/app/**/page.tsx", "src/app/**/route.ts", "src/proxy.ts"]
     },
     "packages/*": {
-      "entry": ["src/index.ts"],
-      "project": ["src/**/*.ts", "src/**/*.tsx", "jest.config.*"]
+      "entry": ["src/index.ts"]
     }
   }
 }
