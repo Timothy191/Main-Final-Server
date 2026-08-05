@@ -1,0 +1,91 @@
+/*
+ * AGENT-TRACE: Reusable glass utility classes reverse-engineered from
+ * react-bits / Skeleton / Geist UI and mapped to Arch System canonical tokens.
+ *
+ * These are *single-purpose* utilities for buttons, inputs, chips, and badges
+ * that need the canonical frosted-glass treatment without invoking the full
+ * GlassCard component. They never duplicate values from variables.css.
+ */
+
+@layer utilities {
+  /* ── Canonical glass primitives (composable) ── */
+  .glass-backdrop {
+    backdrop-filter: var(--arch-glass-backdrop);
+    -webkit-backdrop-filter: var(--arch-glass-backdrop);
+  }
+
+  .glass-surface {
+    background: var(--arch-glass-surface);
+  }
+
+  .glass-border {
+    border: var(--arch-glass-border);
+  }
+
+  .glass-shadow {
+    box-shadow: var(--arch-glass-shadow);
+  }
+
+  /* ── Glass button ── */
+  .glass-button {
+    @apply glass-backdrop glass-surface glass-border glass-shadow;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-button;
+    @apply text-sm font-medium text-[var(--text-on-glass)];
+    @apply transition-all duration-200 ease-glass;
+  }
+
+  .glass-button:hover:not(:disabled, [aria-disabled='true']) {
+    background: var(--arch-glass-surface-hover);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .glass-button:disabled,
+  .glass-button[aria-disabled='true'] {
+    opacity: var(--opacity-disabled);
+    cursor: not-allowed;
+  }
+
+  /* ── Glass input ── */
+  .glass-input {
+    @apply glass-backdrop glass-surface glass-border;
+    @apply block w-full px-3 py-2 rounded-button;
+    @apply text-sm text-[var(--text-on-glass)] placeholder:text-[var(--text-on-glass-muted)];
+    @apply transition-all duration-200 ease-glass;
+
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+  }
+
+  .glass-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.02),
+      0 0 0 3px var(--accent-electric-blue-subtle);
+  }
+
+  /* ── Glass chip / badge ── */
+  .glass-chip,
+  .glass-badge {
+    @apply glass-backdrop glass-surface glass-border;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full;
+    @apply text-xs font-medium text-[var(--text-on-glass)];
+    @apply transition-all duration-200 ease-glass;
+  }
+
+  .glass-chip:hover:not(:disabled, [aria-disabled='true']),
+  .glass-badge:hover:not(:disabled, [aria-disabled='true']) {
+    background: var(--arch-glass-surface-hover);
+  }
+
+  /* ── Low-perf fallback (mirrors .low-perf-fallback .os-shell) ── */
+  .low-perf-fallback .glass-button,
+  .low-perf-fallback .glass-input,
+  .low-perf-fallback .glass-chip,
+  .low-perf-fallback .glass-badge {
+    background: rgba(246, 246, 250, 0.92);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-color: rgba(255, 255, 255, 0.68);
+    box-shadow: none;
+  }
+}

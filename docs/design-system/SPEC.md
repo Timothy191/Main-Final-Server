@@ -209,6 +209,8 @@ Back the canonical glass shadow/specular/border tokens.
 | `--shadow-glow-primary/blue/electric-blue` | `0 0 20px rgba(28,28,30,0.18), 0 0 60px rgba(28,28,30,0.06)`                                                                                                   |
 | `--shadow-glow-mint`                       | `0 0 20px rgba(16,185,129,0.2), 0 0 60px rgba(16,185,129,0.07)`                                                                                                |
 | `--shadow-glow-amber`                      | `0 0 20px rgba(245,158,11,0.2), 0 0 60px rgba(245,158,11,0.07)`                                                                                                |
+| `--shadow-resting-sm/md/lg`                | Aliases to `--shadow-diffusion-sm/md/lg`                                                                                                                       |
+| `--shadow-floating-sm/md/lg/xl`            | Aliases to `--shadow-diffusion-sm/md`, `--shadow-elevated`, `--shadow-window`                                                                                  |
 
 Tailwind shadow utilities (`preset.ts`): `shadow-sm/md/lg` (OKLCH), `window`, `glow-blue`, `diffusion-sm/md/lg/xl`, `diffusion-cyan`, `card`, `card-hover`, `elevated`, `glow-primary`, `glow-electric`, `glow-mint`, `tremor-input`, `tremor-card`, `tremor-dropdown`, `glass-depth`, `glass-depth-hover`, `glass-depth-active`, `liquid-depth-hover`. (`glow-amber` is CSS-only, not in Tailwind.)
 

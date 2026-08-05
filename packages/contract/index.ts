@@ -3,6 +3,27 @@ import { z } from 'zod'
 
 export type { ZodSchema } from 'zod'
 
+/**
+ * UI intent / severity contract, reverse-engineered from Palantir Blueprint.
+ * Keeps status-bearing components (toasts, badges, alerts, buttons) consistent.
+ */
+export const Intent = {
+  NONE: 'none',
+  PRIMARY: 'primary',
+  SUCCESS: 'success',
+  WARNING: 'warning',
+  DANGER: 'danger',
+} as const
+export type Intent = (typeof Intent)[keyof typeof Intent]
+
+export const intentSchema = z.enum([
+  Intent.NONE,
+  Intent.PRIMARY,
+  Intent.SUCCESS,
+  Intent.WARNING,
+  Intent.DANGER,
+])
+
 export const riskAssessmentSchema = z.object({})
 export const complianceResultSchema = z.object({})
 export const createWebhookSchema = z.object({
