@@ -8,6 +8,7 @@ import {
   Ban,
   Bookmark,
   CreditCard,
+  Database,
   Factory,
   FileText,
   HardHat,
@@ -41,6 +42,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Leaf,
   Truck,
   Mountain,
+  Database,
 }
 
 const IMAGE_MAP: Record<string, string> = {
