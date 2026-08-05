@@ -1,3 +1,13 @@
+<!-- BEGIN:nextjs-agent-rules -->
+
+# Next.js 16 Bundled Documentation Pointer
+
+This repository uses Next.js 16 (App Router + Turbopack).
+Version-matched documentation is bundled directly in `node_modules/next/dist/docs/` (or `apps/portal/node_modules/next/dist/docs/` in sub-packages).
+Before writing code or resolving App Router / React 19 / Cache Components features, consult `node_modules/next/dist/docs/`.
+
+<!-- END:nextjs-agent-rules -->
+
 # Repository Guidelines
 
 Canonical policy for AI agents (Cursor, Claude Code, Codex, etc.) working in this monorepo. Keep this file lean; put detail in linked docs.

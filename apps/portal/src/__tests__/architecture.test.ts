@@ -84,4 +84,14 @@ describe('Architectural Boundary & Layering Tests', () => {
 
     expect(violations).toEqual([])
   })
+
+  it('verifies that enterprise resiliency and distributed architecture blueprint documentation exists', () => {
+    const blueprintPath = path.join(rootDir, 'docs/architecture/enterprise-resiliency-blueprint.md')
+    expect(fs.existsSync(blueprintPath)).toBe(true)
+
+    const content = fs.readFileSync(blueprintPath, 'utf8')
+    expect(content).toContain('Distributed Frameworks & Optimization Methods')
+    expect(content).toContain('Consensus-Based Load Balancing (DGD & DIGing)')
+    expect(content).toContain('Decentralized ADMM (Operator Splitting)')
+  })
 })

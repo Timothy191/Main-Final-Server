@@ -63,3 +63,18 @@ This document specifies the enterprise architecture pillars for industrial metri
 ### 4.2 Health Check & Metrics Endpoints
 
 - `/api/health` exposes comprehensive system health indicators (database ping, Redis cache availability, memory thresholds, and version info) to orchestrators and load balancers.
+
+---
+
+## 5. Distributed Frameworks & Optimization Methods
+
+### 5.1 Distributed Infrastructure Alignment
+
+- **etcd / Sidecar Orchestration**: Self-hosted Supabase Docker containers and edge field gateways leverage etcd key-value configuration state for dynamic field site toggles without service restarts.
+- **Event-Driven Microservices Architecture (Dapr Model)**: Loose coupling between Next.js Edge proxy (`proxy.ts`), telemetry endpoints (`/api/v2/telemetry/push`), and background queue workers (`Inngest`) prevents compute blocking and enables satellite edge deployment.
+
+### 5.2 Multi-Agent Mathematical Optimization
+
+- **Consensus-Based Load Balancing (DGD & DIGing)**: Peer-to-peer field gateways in control-room operations exchange truck hauling cycle metrics to dynamically optimize pit dispatch without centralized single points of failure.
+- **Decentralized ADMM (Operator Splitting)**: Multi-site wellhead pressure optimization is decomposed into local edge sub-problems computed at individual site gateways, exchanging boundary multipliers asynchronously.
+
