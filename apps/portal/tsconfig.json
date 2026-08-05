@@ -15,13 +15,8 @@
       "@/lib/*": ["./src/lib/*"],
       "@/hooks/*": ["./src/hooks/*"],
       "@/assets/*": ["./src/assets/*"],
-      "@repo/auth/ui": ["../../packages/auth/ui/index.tsx"],
-      "@repo/auth/data-access": ["../../packages/auth/data-access/index.ts"],
-      "@repo/auth/utils": ["../../packages/auth/utils/index.ts"],
-      "@repo/shared/data-access": ["../../packages/shared/data-access/index.ts"],
-      "@repo/shared/utils": ["../../packages/shared/utils/index.ts"],
-      "@repo/shared/hooks": ["../../packages/shared/hooks/index.ts"],
-      "@repo/ui/lib/*": ["../../packages/ui/lib/*"]
+      "@repo/ui/lib/*": ["../../packages/ui/lib/*"],
+      "@repo/ui/*": ["../../packages/ui/src/*"]
     }
   },
   "include": [

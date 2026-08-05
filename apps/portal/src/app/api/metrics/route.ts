@@ -15,7 +15,7 @@
  *               type: string
  *               description: Prometheus metrics exposition format
  */
-import { getCacheStats } from '@repo/redis'
+import { getCacheStats } from '@repo/redis/stats'
 import { getObservabilityMetrics } from '@/lib/observability/metrics'
 import { requireAdmin } from '@/lib/api/auth'
 

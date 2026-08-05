@@ -1,7 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { Avatar, Kbd, Spinner, Card, CardHeader, CardTitle, CardContent, Badge } from '@repo/ui'
+import { Avatar } from '@repo/ui/components/ui/avatar'
+import { Badge } from '@repo/ui/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/components/ui/card'
+import { Kbd } from '@repo/ui/components/ui/kbd'
+import { Spinner } from '@repo/ui/components/ui/spinner'
 
 export function PrimitivesShowcase() {
   return (

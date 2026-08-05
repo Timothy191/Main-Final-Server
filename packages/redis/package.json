@@ -40,7 +40,9 @@
     "ioredis": "^5.4.1"
   },
   "devDependencies": {
+    "@repo/jest-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22",
     "ts-jest": "^29.2.0",
     "typescript": "^5.7.0"

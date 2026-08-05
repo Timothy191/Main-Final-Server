@@ -190,7 +190,7 @@ import { createServiceRoleClient } from '@repo/supabase/service-role'
 import { createServerSupabaseClient } from '@repo/supabase/server'
 import { withRateLimit } from '@/lib/api/rate-limit-middleware'
 import { RateLimiter, RedisStore, FixedWindowStrategy } from '@repo/rate-limiter'
-import { getRedisClient } from '@repo/redis'
+import { getRedisClient } from '@repo/redis/client'
 import { serverLogger } from '@repo/logger'
 
 const OPERATIONAL_TABLES = new Set([

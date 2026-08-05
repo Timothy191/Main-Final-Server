@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { getRedisClient } from '@repo/redis'
+import { getRedisClient } from '@repo/redis/client'
 
 export async function GET(_req: NextRequest) {
   const startedAt = Date.now()

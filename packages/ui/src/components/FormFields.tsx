@@ -7,7 +7,7 @@ function deriveInputId(label: string, id?: string, name?: string): string {
     .replace(/^-|-$/g, '')}`
 }
 
-import { cn } from '../lib/utils'
+import { cn } from '@repo/ui/lib/utils'
 
 const inputStyles =
   'w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 transition-colors'

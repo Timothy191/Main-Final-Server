@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@repo/supabase/server'
 import { EXTERNAL_TOOLS } from '@/lib/tools'
-import { cacheWrap } from '@repo/redis'
+import { cacheWrap } from '@repo/redis/cache'
 
 /**
  * @swagger

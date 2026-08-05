@@ -10,7 +10,7 @@ jest.mock('@/lib/env', () => ({
   getEnv: () => ({ NEXT_PUBLIC_FUXA_URL: 'http://localhost:1881' }),
 }))
 
-jest.mock('@repo/redis', () => ({
+jest.mock('@repo/redis/client', () => ({
   getRedisClient: jest.fn().mockRejectedValue(new Error('Redis disabled in tests')),
 }))
 

@@ -62,6 +62,9 @@ importers:
 
   apps/portal:
     dependencies:
+      '@google/genai':
+        specifier: ^2.15.0
+        version: 2.15.0
       '@radix-ui/react-popover':
         specifier: ^1.1.15
         version: 1.1.19(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -107,12 +110,24 @@ importers:
       '@sentry/nextjs':
         specifier: ^9.8.0
         version: 9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.10(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)(webpack@5.108.4(@swc/core@1.15.43(@swc/helpers@0.5.23))(postcss@8.5.19))
+      '@supabase/supabase-js':
+        specifier: ^2.49.0
+        version: 2.110.5
       '@vercel/otel':
         specifier: ^1.10.1
         version: 1.14.2(@opentelemetry/api-logs@0.220.0)(@opentelemetry/api@1.9.1)(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.1))(@opentelemetry/resources@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.218.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      framer-motion:
+        specifier: ^12.0.0
+        version: 12.42.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       inngest:
         specifier: ^4.4.0
         version: 4.12.1(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(express@5.2.1)(fastify@5.10.0)(hono@4.12.30)(next@16.2.10(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)(typescript@5.9.3)(zod@3.25.76)
+      ioredis:
+        specifier: ^5.4.1
+        version: 5.11.1
       js-yaml:
         specifier: ^4.1.0
         version: 4.3.0
@@ -140,6 +155,9 @@ importers:
       sonner:
         specifier: ^2.0.1
         version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      tailwind-merge:
+        specifier: ^2.5.4
+        version: 2.6.1
       zod:
         specifier: ^3.24.0
         version: 3.25.76
@@ -232,6 +250,9 @@ importers:
         specifier: ^3.24.0
         version: 3.25.76
     devDependencies:
+      '@repo/jest-config':
+        specifier: workspace:*
+        version: link:../jest-config
       '@swc/jest':
         specifier: ^0.2.39
         version: 0.2.39(@swc/core@1.15.43(@swc/helpers@0.5.23))
@@ -240,7 +261,7 @@ importers:
         version: 30.0.0
       jest:
         specifier: ^30.0.0
-        version: 30.4.2(@types/node@22.20.1)
+        version: 30.4.2(@types/node@24.13.3)
 
   packages/database:
     dependencies:
@@ -267,9 +288,18 @@ importers:
 
   packages/errors:
     devDependencies:
+      '@repo/jest-config':
+        specifier: workspace:*
+        version: link:../jest-config
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@swc/jest':
+        specifier: ^0.2.39
+        version: 0.2.39(@swc/core@1.15.43(@swc/helpers@0.5.23))
+      jest:
+        specifier: ^30.0.0
+        version: 30.4.2(@types/node@24.13.3)
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
@@ -298,13 +328,24 @@ importers:
         specifier: ^5.7.0
         version: 5.9.3
 
+  packages/jest-config: {}
+
   packages/logger: {}
 
   packages/rate-limiter:
     devDependencies:
+      '@repo/jest-config':
+        specifier: workspace:*
+        version: link:../jest-config
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@swc/jest':
+        specifier: ^0.2.39
+        version: 0.2.39(@swc/core@1.15.43(@swc/helpers@0.5.23))
+      jest:
+        specifier: ^30.0.0
+        version: 30.4.2(@types/node@24.13.3)
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
@@ -315,9 +356,15 @@ importers:
         specifier: ^5.4.1
         version: 5.11.1
     devDependencies:
+      '@repo/jest-config':
+        specifier: workspace:*
+        version: link:../jest-config
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@types/jest':
+        specifier: ^30.0.0
+        version: 30.0.0
       '@types/node':
         specifier: ^22
         version: 22.20.1
@@ -339,6 +386,9 @@ importers:
       '@repo/supabase':
         specifier: workspace:*
         version: link:../supabase
+      '@supabase/supabase-js':
+        specifier: ^2.49.0
+        version: 2.110.5
       crawlee:
         specifier: ^3.11.0
         version: 3.17.0(@types/node@20.19.43)(playwright@1.61.1)
@@ -361,6 +411,9 @@ importers:
 
   packages/supabase:
     dependencies:
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../database
       '@supabase/ssr':
         specifier: ^0.6.1
         version: 0.6.1(@supabase/supabase-js@2.110.5)
@@ -371,12 +424,21 @@ importers:
         specifier: ^16.0.0
         version: 16.2.10(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
     devDependencies:
+      '@repo/jest-config':
+        specifier: workspace:*
+        version: link:../jest-config
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@types/jest':
+        specifier: ^30.0.0
+        version: 30.0.0
       '@types/node':
         specifier: ^22
         version: 22.20.1
+      ts-jest:
+        specifier: ^29.2.0
+        version: 29.4.12(@babel/core@7.29.7)(@jest/transform@30.4.1)(@jest/types@30.4.1)(babel-jest@30.4.1(@babel/core@7.29.7))(jest-util@30.4.1)(jest@30.4.2(@types/node@22.20.1))(typescript@5.9.3)
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
@@ -464,11 +526,23 @@ importers:
         version: 4.4.0
       inngest:
         specifier: ^4.4.0
-        version: 4.12.1(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(express@5.2.1)(fastify@5.10.0)(hono@4.12.30)(next@16.2.12(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)(typescript@5.9.3)(zod@4.4.3)
+        version: 4.12.1(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(express@5.2.1)(fastify@5.10.0)(hono@4.12.30)(next@16.2.12(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)(typescript@5.9.3)(zod@4.4.3)
     devDependencies:
+      '@repo/jest-config':
+        specifier: workspace:*
+        version: link:../jest-config
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@types/jest':
+        specifier: ^30.0.0
+        version: 30.0.0
+      jest:
+        specifier: ^30.0.0
+        version: 30.4.2(@types/node@24.13.3)
+      ts-jest:
+        specifier: ^29.2.0
+        version: 29.4.12(@babel/core@7.29.7)(@jest/transform@30.4.1)(@jest/types@30.4.1)(babel-jest@30.4.1(@babel/core@7.29.7))(jest-util@30.4.1)(jest@30.4.2(@types/node@24.13.3))(typescript@5.9.3)
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
@@ -14058,7 +14132,7 @@ snapshots:
       - encoding
       - supports-color
 
-  inngest@4.12.1(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(express@5.2.1)(fastify@5.10.0)(hono@4.12.30)(next@16.2.12(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)(typescript@5.9.3)(zod@4.4.3):
+  inngest@4.12.1(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(express@5.2.1)(fastify@5.10.0)(hono@4.12.30)(next@16.2.12(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)(typescript@5.9.3)(zod@4.4.3):
     dependencies:
       '@bufbuild/protobuf': 2.12.1
       '@inngest/ai': 0.1.7
@@ -14088,7 +14162,7 @@ snapshots:
       express: 5.2.1
       fastify: 5.10.0
       hono: 4.12.30
-      next: 16.2.12(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      next: 16.2.12(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react: 19.2.7
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -14425,6 +14499,25 @@ snapshots:
       - supports-color
       - ts-node
 
+  jest-cli@30.4.2(@types/node@24.13.3):
+    dependencies:
+      '@jest/core': 30.4.2
+      '@jest/test-result': 30.4.1
+      '@jest/types': 30.4.1
+      chalk: 4.1.2
+      exit-x: 0.2.2
+      import-local: 3.2.0
+      jest-config: 30.4.2(@types/node@24.13.3)
+      jest-util: 30.4.1
+      jest-validate: 30.4.1
+      yargs: 17.7.3
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - esbuild-register
+      - supports-color
+      - ts-node
+
   jest-config@30.4.2(@types/node@22.20.1):
     dependencies:
       '@babel/core': 7.29.7
@@ -14452,6 +14545,37 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       '@types/node': 22.20.1
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+
+  jest-config@30.4.2(@types/node@24.13.3):
+    dependencies:
+      '@babel/core': 7.29.7
+      '@jest/get-type': 30.1.0
+      '@jest/pattern': 30.4.0
+      '@jest/test-sequencer': 30.4.1
+      '@jest/types': 30.4.1
+      babel-jest: 30.4.1(@babel/core@7.29.7)
+      chalk: 4.1.2
+      ci-info: 4.4.0
+      deepmerge: 4.3.1
+      glob: 10.5.0
+      graceful-fs: 4.2.11
+      jest-circus: 30.4.2
+      jest-docblock: 30.4.0
+      jest-environment-node: 30.4.1
+      jest-regex-util: 30.4.0
+      jest-resolve: 30.4.1
+      jest-runner: 30.4.2
+      jest-util: 30.4.1
+      jest-validate: 30.4.1
+      parse-json: 5.2.0
+      pretty-format: 30.4.1
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      '@types/node': 24.13.3
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -14694,6 +14818,19 @@ snapshots:
       '@jest/types': 30.4.1
       import-local: 3.2.0
       jest-cli: 30.4.2(@types/node@22.20.1)
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - esbuild-register
+      - supports-color
+      - ts-node
+
+  jest@30.4.2(@types/node@24.13.3):
+    dependencies:
+      '@jest/core': 30.4.2
+      '@jest/types': 30.4.1
+      import-local: 3.2.0
+      jest-cli: 30.4.2(@types/node@24.13.3)
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -15178,7 +15315,7 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@16.2.12(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+  next@16.2.12(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
       '@next/env': 16.2.12
       '@swc/helpers': 0.5.15
@@ -16630,6 +16767,26 @@ snapshots:
       fast-json-stable-stringify: 2.1.0
       handlebars: 4.7.9
       jest: 30.4.2(@types/node@22.20.1)
+      json5: 2.2.3
+      lodash.memoize: 4.1.2
+      make-error: 1.3.6
+      semver: 7.8.5
+      type-fest: 4.41.0
+      typescript: 5.9.3
+      yargs-parser: 21.1.1
+    optionalDependencies:
+      '@babel/core': 7.29.7
+      '@jest/transform': 30.4.1
+      '@jest/types': 30.4.1
+      babel-jest: 30.4.1(@babel/core@7.29.7)
+      jest-util: 30.4.1
+
+  ts-jest@29.4.12(@babel/core@7.29.7)(@jest/transform@30.4.1)(@jest/types@30.4.1)(babel-jest@30.4.1(@babel/core@7.29.7))(jest-util@30.4.1)(jest@30.4.2(@types/node@24.13.3))(typescript@5.9.3):
+    dependencies:
+      bs-logger: 0.2.6
+      fast-json-stable-stringify: 2.1.0
+      handlebars: 4.7.9
+      jest: 30.4.2(@types/node@24.13.3)
       json5: 2.2.3
       lodash.memoize: 4.1.2
       make-error: 1.3.6

@@ -88,37 +88,74 @@ global.Response =
   }
 
 // Global mock for redis to avoid database connection timeout/hangs in tests
+const mockCache = new Map<string, string>()
+const mockRedisClient = {
+  get: jest.fn(async (key: string) => mockCache.get(key) ?? null),
+  set: jest.fn(async (key: string, value: string) => {
+    mockCache.set(key, value)
+  }),
+  del: jest.fn(async (key: string) => {
+    mockCache.delete(key)
+  }),
+  incr: jest.fn(async (key: string) => {
+    const val = parseInt(mockCache.get(key) || '0', 10) + 1
+    mockCache.set(key, val.toString())
+    return val
+  }),
+  // AGENT-TRACE: Mock expire function - parameters prefixed with underscore to fix ESLint warnings
+  // These are unused in the mock implementation but required for interface compatibility
+  expire: jest.fn(async (_key: string, _seconds: number) => {
+    return true
+  }),
+  // AGENT-TRACE: Align flushDb name with actual client type
+  flushDb: jest.fn(async () => {
+    mockCache.clear()
+  }),
+  lrange: jest.fn(async () => []),
+  ping: jest.fn(async () => 'PONG'),
+  xadd: jest.fn(async () => 'mock-stream-id'),
+  isOpen: true,
+}
+
 jest.mock('@repo/redis', () => {
   const actual = jest.requireActual('@repo/redis')
-  const mockCache = new Map<string, string>()
-  const mockRedisClient = {
-    get: jest.fn(async (key: string) => mockCache.get(key) ?? null),
-    set: jest.fn(async (key: string, value: string) => {
-      mockCache.set(key, value)
-    }),
-    del: jest.fn(async (key: string) => {
-      mockCache.delete(key)
-    }),
-    incr: jest.fn(async (key: string) => {
-      const val = parseInt(mockCache.get(key) || '0', 10) + 1
-      mockCache.set(key, val.toString())
-      return val
-    }),
-    // AGENT-TRACE: Mock expire function - parameters prefixed with underscore to fix ESLint warnings
-    // These are unused in the mock implementation but required for interface compatibility
-    expire: jest.fn(async (_key: string, _seconds: number) => {
-      return true
-    }),
-    // AGENT-TRACE: Align flushDb name with actual client type
-    flushDb: jest.fn(async () => {
-      mockCache.clear()
-    }),
-    isOpen: true,
-  }
   return {
     ...actual,
     getRedisClient: jest.fn(async () => mockRedisClient),
     closeRedis: jest.fn(async () => {}),
+  }
+})
+
+jest.mock('@repo/redis/client', () => {
+  const actual = jest.requireActual('@repo/redis/client')
+  return {
+    ...actual,
+    getRedisClient: jest.fn(async () => mockRedisClient),
+    closeRedis: jest.fn(async () => {}),
+  }
+})
+
+jest.mock('@repo/redis/stats', () => {
+  const actual = jest.requireActual('@repo/redis/stats')
+  return {
+    ...actual,
+    getCacheStats: jest.fn(async () => ({
+      hits: 0,
+      misses: 0,
+      l1Hits: 0,
+      l2Hits: 0,
+      redisErrors: 0,
+      avgLatencyMs: 0,
+      p95LatencyMs: 0,
+    })),
+  }
+})
+
+jest.mock('@repo/redis/cache', () => {
+  const actual = jest.requireActual('@repo/redis/cache')
+  return {
+    ...actual,
+    cacheWrap: jest.fn(async (_key: string, fn: () => Promise<unknown>) => fn()),
   }
 })
 

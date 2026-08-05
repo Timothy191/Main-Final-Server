@@ -41,7 +41,7 @@
  */
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@repo/supabase/server'
-import { getRedisClient } from '@repo/redis'
+import { getRedisClient } from '@repo/redis/client'
 
 interface DependencyStatus {
   database: 'healthy' | 'degraded' | 'unhealthy'

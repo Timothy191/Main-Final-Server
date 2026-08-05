@@ -2,7 +2,7 @@
 
 import React, { useTransition } from 'react'
 import { triggerManualAudit } from './actions'
-import { Button } from '@repo/ui'
+import { Button } from '@repo/ui/components/ui/button'
 
 export function TriggerButton() {
   const [isPending, startTransition] = useTransition()

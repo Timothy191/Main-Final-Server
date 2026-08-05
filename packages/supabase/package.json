@@ -10,7 +10,8 @@
     "./client": "./src/client.ts",
     "./middleware": "./src/middleware.ts",
     "./read-replica": "./src/read-replica.ts",
-    "./service-role": "./src/service-role.ts"
+    "./service-role": "./src/service-role.ts",
+    "./types": "./src/types.ts"
   },
   "scripts": {
     "supabase:start": "pnpm dlx supabase@^2.26.0 start --workdir ..",
@@ -18,13 +19,17 @@
     "supabase:status": "pnpm dlx supabase@^2.26.0 status --workdir .."
   },
   "dependencies": {
+    "@repo/database": "workspace:*",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.0",
     "next": "^16.0.0"
   },
   "devDependencies": {
+    "@repo/jest-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22",
+    "ts-jest": "^29.2.0",
     "typescript": "^5.7.0"
   }
 }

@@ -1,6 +1,6 @@
 'use server'
 
-import type { PersonnelRow, BadgesRow, IssuedCardsRow } from '@repo/supabase'
+import type { PersonnelRow, BadgesRow, IssuedCardsRow } from '@repo/supabase/types'
 import { DatabaseError } from '@/lib/errors/error-classes'
 import { assertDeptRole } from '@/lib/dept-access'
 import { submitCupsPrintJob } from '../lib/printer-detection'

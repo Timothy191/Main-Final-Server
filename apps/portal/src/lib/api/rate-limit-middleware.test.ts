@@ -25,7 +25,7 @@ const mockRedisClient = {
   }),
 }
 
-jest.mock('@repo/redis', () => ({
+jest.mock('@repo/redis/client', () => ({
   getRedisClient: jest.fn(async () => mockRedisClient),
 }))
 

@@ -11,7 +11,10 @@
     "test": "jest"
   },
   "devDependencies": {
+    "@repo/jest-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@swc/jest": "^0.2.39",
+    "jest": "^30.0.0",
     "typescript": "^5.7.0"
   }
 }

@@ -13,7 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@repo/ui/components/ui
 import { CardActionsTab } from './components/CardActionsTab'
 import { Printer, Layers, Clock, AlertTriangle, Wifi, WifiOff } from 'lucide-react'
 import { cn } from '@repo/ui/lib/utils'
-import type { IssuedCardsRow } from '@repo/supabase'
+import type { IssuedCardsRow } from '@repo/supabase/types'
 import { getDashboardMetrics, getExpiringCards } from './actions'
 
 interface ExpiringCard extends IssuedCardsRow {

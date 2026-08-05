@@ -1,10 +1,18 @@
+/** @type {import('jest').Config} */
 module.exports = {
-  testEnvironment: "node",
-  testMatch: ["**/*.test.ts"],
+  ...require('@repo/jest-config/node'),
+  testMatch: ['**/*.test.ts'],
   transform: {
-    "^.+\\.(t|j)sx?$": "@swc/jest",
+    '^.+\\.(t|j)sx?$': [
+      '@swc/jest',
+      {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            decorators: true,
+          },
+        },
+      },
+    ],
   },
-  moduleNameMapper: {
-    "^(\\.\\.?\\/.+)\\.js$": "$1",
-  },
-};
+}

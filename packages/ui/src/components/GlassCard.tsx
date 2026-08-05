@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef, useState, useCallback, useEffect } from 'react'
-import { cn } from '../lib/utils'
+import { cn } from '@repo/ui/lib/utils'
 import {
   motion,
   useMotionTemplate,
@@ -9,7 +9,7 @@ import {
   useReducedMotion,
   HTMLMotionProps,
 } from '../lib/framer-motion-shim'
-import { glassVariants, GlassVariant } from '@repo/theme'
+import { glassVariants, type GlassVariant } from '@repo/theme/tokens'
 
 export interface GlassCardProps extends HTMLMotionProps<'div'> {
   children: React.ReactNode

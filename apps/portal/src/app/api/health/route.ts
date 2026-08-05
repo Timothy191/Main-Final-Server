@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@repo/supabase/server'
-import { getRedisClient } from '@repo/redis'
+import { getRedisClient } from '@repo/redis/client'
 import { generateLocalFallbackEmbedding } from '@/lib/ai/embedding-provider'
 
 export const dynamic = 'force-dynamic' // Health check should never be cached

@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { cn } from '../lib/utils'
+import { cn } from '@repo/ui/lib/utils'
 
 interface LogoProps {
   className?: string

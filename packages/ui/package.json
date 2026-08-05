@@ -31,6 +31,7 @@
     "./components/ui/skeleton": "./src/components/ui/skeleton.tsx",
     "./components/ui/glass-skeleton": "./src/components/ui/glass-skeleton.tsx",
     "./components/ui/badge": "./src/components/ui/badge.tsx",
+    "./components/ui/card": "./src/components/ui/card.tsx",
     "./components/ui/avatar": "./src/components/ui/avatar.tsx",
     "./components/ui/kbd": "./src/components/ui/kbd.tsx",
     "./components/ui/spinner": "./src/components/ui/spinner.tsx",

@@ -1,5 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { Avatar, Kbd, Spinner } from '@repo/ui'
+import { Avatar } from '@repo/ui/components/ui/avatar'
+import { Kbd } from '@repo/ui/components/ui/kbd'
+import { Spinner } from '@repo/ui/components/ui/spinner'
 
 describe('UI Primitives — Avatar', () => {
   it('renders fallback text when no src image is provided', () => {

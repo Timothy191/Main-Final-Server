@@ -7,7 +7,7 @@
 
 import { timingSafeEqual } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
-import { getRedisClient } from '@repo/redis'
+import { getRedisClient } from '@repo/redis/client'
 import os from 'os'
 import { getRateLimitConfig } from './rate-limit-config'
 

@@ -8,8 +8,8 @@ import {
   clearObservabilityMetrics,
 } from '@/lib/observability/metrics'
 
-// Mock @repo/redis stats
-jest.mock('@repo/redis', () => ({
+// Mock @repo/redis/stats
+jest.mock('@repo/redis/stats', () => ({
   getCacheStats: jest.fn().mockResolvedValue({
     hits: 40,
     misses: 10,

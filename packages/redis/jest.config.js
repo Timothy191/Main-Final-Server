@@ -1,17 +1,9 @@
 /** @type {import('jest').Config} */
-export default {
-  testEnvironment: "node",
+module.exports = {
+  ...require('@repo/jest-config/node'),
   transform: {
-    "^.+\\.tsx?$": ["ts-jest", { tsconfig: "tsconfig.json" }],
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },
-  moduleFileExtensions: ["ts", "js", "json"],
-  testMatch: ["**/__tests__/**/*.test.ts"],
-  moduleNameMapper: {
-    "^(\\.\\.?/.*)\\.js$": "$1",
-  },
-  collectCoverageFrom: ["src/**/*.ts", "!src/**/*.test.ts", "!src/**/*.d.ts"],
-  coverageDirectory: "coverage",
-  coverageReporters: ["text", "lcov", "html"],
   coverageThreshold: {
     global: {
       lines: 45,
@@ -20,4 +12,4 @@ export default {
       statements: 45,
     },
   },
-};
+}

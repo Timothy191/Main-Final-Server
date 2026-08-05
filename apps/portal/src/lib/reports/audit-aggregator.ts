@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@repo/supabase'
+import type { SupabaseClient } from '@repo/supabase/types'
 
 export interface DepartmentAuditMetrics {
   accessControl: {

@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@repo/supabase/server'
 import { TriggerButton } from './TriggerButton'
-import { GlassCard, PageHeader } from '@repo/ui'
+import { GlassCard } from '@repo/ui/GlassCard'
+import { PageHeader } from '@repo/ui/PageHeader'
 import {
   ShieldCheck,
   FileDown,
