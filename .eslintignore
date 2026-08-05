@@ -8,3 +8,7 @@ node_modules
 
 # Generated caches / coverage
 coverage
+
+# Root config files
+lint-staged.config.mjs
+commitlint.config.mjs
