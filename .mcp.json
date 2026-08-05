@@ -6,10 +6,6 @@
     "supermemory": {
       "command": "/home/timothy/.local/bin/supermemory-mcp"
     },
-    "codegraph": {
-      "type": "http",
-      "url": "http://localhost:6010/mcp"
-    },
     "chrome-devtools": {
       "command": "npx",
       "args": ["-y", "chrome-devtools-mcp", "--executablePath", "/usr/bin/chromium"]
