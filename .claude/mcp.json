@@ -1,3 +1,10 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "codebase-memory": {
+      "command": "/home/timothy/.local/bin/codebase-memory-mcp"
+    },
+    "supermemory": {
+      "command": "/home/timothy/.local/bin/supermemory-mcp"
+    }
+  }
 }

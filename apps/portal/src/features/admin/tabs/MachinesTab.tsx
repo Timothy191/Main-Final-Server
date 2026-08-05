@@ -75,7 +75,7 @@ export function MachinesTab() {
             ? 'Articulated Dumper'
             : category === 'rigid_dumper'
               ? 'Rigid Dumper'
-              : MACHINE_CATEGORIES.find((c) => c.value === category)?.label ?? category,
+              : (MACHINE_CATEGORIES.find((c) => c.value === category)?.label ?? category),
         machine_category: category,
         serial_number: serial.trim() || null,
         active: true,
@@ -93,7 +93,7 @@ export function MachinesTab() {
         .eq('name', name.trim())
         .maybeSingle()
 
-      let machineId: string | null = null
+      let machineId: string | undefined
       if (existing) {
         const { error } = await supabase.from('machines').update(payload).eq('id', existing.id)
         if (error) throw new Error(error.message)
@@ -117,7 +117,7 @@ export function MachinesTab() {
           .maybeSingle()
         if (!hoursRow) {
           await supabase.from('machine_hours').insert({
-            machine_id: machineId,
+            machine_id: machineId ?? undefined,
             hours: Number(machineHours),
           })
         }
@@ -128,7 +128,11 @@ export function MachinesTab() {
         entityType: 'machines',
         entityId: machineId,
         details: payload,
-      }).catch((err) => logError(err instanceof Error ? err : new Error(String(err)), { context: 'machines_tab_audit' }))
+      }).catch((err) =>
+        logError(err instanceof Error ? err : new Error(String(err)), {
+          context: 'machines_tab_audit',
+        })
+      )
 
       setMsg({ kind: 'ok', text: `Machine "${name.trim()}" saved.` })
       setName('')
@@ -143,3 +147,124 @@ export function MachinesTab() {
       setSaving(false)
     }
   }
+
+  return (
+    <div className="space-y-6 max-w-3xl mx-auto py-6">
+      <div>
+        <h2 className="text-2xl font-bold text-arch-text-primary">Machine Onboarding</h2>
+        <p className="text-arch-text-muted text-sm">
+          Register a machine in the Admin department inventory. Dumpers require a Bin Factor; all
+          machines capture Current SMR (seeds the next shift&apos;s start SMR) and Machine Hours.
+        </p>
+      </div>
+
+      <GlassCard className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-arch-text-secondary mb-2">
+                Machine ID / Name
+              </label>
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. EX-101"
+                required
+                className="bg-arch-surface-secondary border-arch-border-default"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-arch-text-secondary mb-2">
+                Serial Number
+              </label>
+              <Input
+                value={serial}
+                onChange={(e) => setSerial(e.target.value)}
+                placeholder="e.g. SER-EX-001"
+                className="bg-arch-surface-secondary border-arch-border-default"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-arch-text-secondary mb-2">
+              Machine Type
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full px-3 py-2 bg-arch-surface-secondary border-arch-border-default rounded text-arch-text-primary"
+            >
+              {MACHINE_CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {isDumper && (
+            <div>
+              <label className="block text-sm font-medium text-arch-text-secondary mb-2">
+                Bin Factor {category === 'rigid_dumper' ? '(Rigid Dumper)' : '(Articulated Dumper)'}
+              </label>
+              <Input
+                type="number"
+                step="0.1"
+                value={binFactor}
+                onChange={(e) => setBinFactor(e.target.value)}
+                placeholder="e.g. 40.5"
+                className="bg-arch-surface-secondary border-arch-border-default"
+              />
+              <p className="text-xs text-arch-text-muted mt-1">
+                Tonnage multiplier used for hourly load calculations.
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-arch-text-secondary mb-2">
+                Current SMR
+              </label>
+              <Input
+                type="number"
+                step="0.01"
+                value={currentSmr}
+                onChange={(e) => setCurrentSmr(e.target.value)}
+                placeholder="e.g. 12450.5"
+                className="bg-arch-surface-secondary border-arch-border-default"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-arch-text-secondary mb-2">
+                Machine Hours
+              </label>
+              <Input
+                type="number"
+                step="0.1"
+                value={machineHours}
+                onChange={(e) => setMachineHours(e.target.value)}
+                placeholder="e.g. 9800"
+                className="bg-arch-surface-secondary border-arch-border-default"
+              />
+            </div>
+          </div>
+
+          {msg && (
+            <p className={`text-sm ${msg.kind === 'ok' ? 'text-accent-green' : 'text-red-400'}`}>
+              {msg.text}
+            </p>
+          )}
+
+          <div className="flex justify-end">
+            <Button type="submit" disabled={saving || deptLoading} className="gap-1.5">
+              {saving ? <Save className="w-4 h-4 animate-pulse" /> : <Plus className="w-4 h-4" />}
+              Save Machine
+            </Button>
+          </div>
+        </form>
+      </GlassCard>
+    </div>
+  )
+}
