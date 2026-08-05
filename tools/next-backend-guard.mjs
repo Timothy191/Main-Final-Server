@@ -73,6 +73,15 @@ function scanSourceFiles() {
       }
     }
 
+    // 5. Restrict direct edge /docs/md/... requests check in proxy.ts
+    const isProxyFile = filePath.endsWith('proxy.ts') || filePath.endsWith('proxy.js')
+    if (isProxyFile) {
+      const hasDocsMdCheck = content.includes("startsWith('/docs/md/')") && content.includes("'x-routing-header'")
+      if (!hasDocsMdCheck) {
+        logError(`Architecture Alert: Edge proxy.ts must restrict direct requests to /docs/md/... unless routing headers match.`, filePath)
+      }
+    }
+
     // 4. Server Component data fetching best practice
     // If not a client component and under src/app/ (except api/ folder)
     const isUnderAppDir = filePath.includes(path.join('apps/portal/src/app'))

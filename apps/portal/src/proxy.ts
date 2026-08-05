@@ -237,6 +237,14 @@ async function isDepartmentAllowed(
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
+  // Restrict direct edge /docs/md/... requests unless routing headers match
+  if (pathname.startsWith('/docs/md/')) {
+    const routingHeader = request.headers.get('x-routing-header')
+    if (routingHeader !== 'bff-allowed') {
+      return new NextResponse('Forbidden direct access to markdown documentation', { status: 403 })
+    }
+  }
+
   // Next.js 16 proxy runs on every request, so explicitly skip the paths the
   // old matcher excluded: static assets, Next internals, API routes, and root
   // files that should never be intercepted.
