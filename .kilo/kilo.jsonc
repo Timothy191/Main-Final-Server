@@ -1,0 +1,27 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "mcp": {
+    "github.com/cocoindex-io/cocoindex-code": {
+      "type": "local",
+      "command": [
+        "ccc",
+        "mcp"
+      ],
+      "enabled": true
+    },
+    "codebase-memory": {
+      "type": "local",
+      "command": [
+        "/home/timothy/.local/bin/codebase-memory-mcp"
+      ],
+      "enabled": true
+    },
+    "supermemory": {
+      "type": "local",
+      "command": [
+        "/home/timothy/.local/bin/supermemory-mcp"
+      ],
+      "enabled": true
+    }
+  }
+}
