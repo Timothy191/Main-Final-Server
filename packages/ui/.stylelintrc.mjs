@@ -55,6 +55,12 @@ export default {
       { ignorePseudoElements: ["global", "local"] },
     ],
 
+    // Allow multiple declarations on one line (common in keyframes)
+    "declaration-block-single-line-max-declarations": null,
+
+    // Disable specificity ordering (not practical for component CSS)
+    "no-descending-specificity": null,
+
     "custom-property-no-missing-var-function": null,
     "color-named": null,
     "color-no-invalid-hex": true,

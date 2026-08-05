@@ -96,10 +96,28 @@ export default {
     // Vendor prefixes: -webkit-backdrop-filter required for Safari
     "property-no-vendor-prefix": null,
 
+    // Allow old-style media queries (context: ...)
+    "media-feature-range-notation": null,
+
+    // Allow quotes around font family names
+    "font-family-name-quotes": null,
+
+    // Allow duplicate selectors (intentional for reset)
+    "no-duplicate-selectors": null,
+
     // Disable rules that conflict with CSS custom properties
     "value-keyword-case": null,
     "property-no-unknown": null,
     "declaration-property-value-no-unknown": null,
+
+    // Allow multiple declarations on one line (common in keyframes)
+    "declaration-block-single-line-max-declarations": null,
+
+    // Allow BEM-style and other naming conventions (os-shell--login, etc.)
+    "selector-class-pattern": null,
+
+    // Disable specificity ordering (not practical for component CSS)
+    "no-descending-specificity": null,
 
     // Cosmetic / compat rules — off to avoid noise
     "rule-empty-line-before": null,

@@ -181,7 +181,7 @@ export function SCADAAlertFeed() {
 
   return (
     <GlassCard className="border border-white/10 rounded-lg shadow-[0_4px_6px_-1px_rgba(220,38,38,0.1),_0_2px_4px_-1px_rgba(220,38,38,0.06)]">
-      <div className="flex items-center justify-between mb-4 pb-2 border-b border-white/5 border-amber-500/10">
+      <div className="flex items-center justify-between mb-4 pb-2 border-b border-amber-500/10">
         <div className="flex items-center gap-2">
           <div className="relative">
             <Radio className="w-4 h-4 text-red-500 animate-pulse" />

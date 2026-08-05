@@ -8,7 +8,8 @@
     "**/src.backup/**"
   ],
   "ignoreExportsUsedInFile": true,
-  "ignoreDependencies": ["@sentry/nextjs", "inngest", "@vercel/otel"],
+  "ignoreBinaries": ["markdownlint", "next", "psql"],
+  "ignoreDependencies": ["@sentry/nextjs", "inngest", "@vercel/otel", "markdownlint-cli"],
   "workspaces": {
     ".": {
       "entry": ["scripts/**/*.sh", "tools/**/*.mjs", "tools/**/*.cjs"]
