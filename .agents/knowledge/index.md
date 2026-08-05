@@ -15,6 +15,7 @@ Shared, versioned context for AI agents in the Arch-Systems monorepo. Read this 
 | Dead dependency pruner | [`skills/dead-dependency-pruner/SKILL.md`](./skills/dead-dependency-pruner/SKILL.md) | Removing unused deps or running knip-style cleanup |
 | Department mutation scaffolder | [`skills/department-mutation-scaffolder/SKILL.md`](./skills/department-mutation-scaffolder/SKILL.md) | Adding or changing department routes/modules |
 | Gemini Interactions API | [`skills/gemini-interactions-api/SKILL.md`](./skills/gemini-interactions-api/SKILL.md) | Integrating or migrating Gemini API usage |
+| Maintain monorepo hygiene | [`skills/maintain-monorepo-hygiene/SKILL.md`](./skills/maintain-monorepo-hygiene/SKILL.md) | Refactoring imports, sharing config packages, declaring direct deps, cleaning aliases |
 | On-premise Supabase ops | [`skills/on-premise-supabase-ops/SKILL.md`](./skills/on-premise-supabase-ops/SKILL.md) | Local Docker Supabase stack, migrations, RLS |
 | Antigravity Plugin Installer | [`skills/agy-plugin-installer/SKILL.md`](./skills/agy-plugin-installer/SKILL.md) | Installing remote plugins/extensions into the `agy` CLI |
 
