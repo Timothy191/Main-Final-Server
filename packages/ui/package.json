@@ -54,7 +54,7 @@
     "tailwind-merge": "^2.5.4",
     "framer-motion": "^12.0.0",
     "lucide-react": "^0.469.0",
-    "next": "^16.0.0",
+    "next": "^16.2.11",
     "@repo/theme": "workspace:*",
     "@revolist/react-datagrid": "^4.0.2",
     "@revolist/revogrid": "^4.0.2",
