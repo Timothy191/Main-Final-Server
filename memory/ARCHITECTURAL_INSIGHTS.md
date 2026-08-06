@@ -60,3 +60,27 @@ _Source: `docs/performance/` and `docs/caching/`_
   - Edge proxy auth checks use Redis L2 with 300s TTL; user logout triggers `/api/cache/invalidate` with `userId` prefix eviction.
 - **CSS Selector Costs:**
   - Avoid deeply nested class selectors or wildcards (`*`) in theme custom properties. Rely on utility classes safelisted in `@repo/theme`.
+
+---
+
+## 5. Server Component & Action Boundary Rules
+
+_Source: `docs/codebase-maps/client-server-boundaries.md`_
+
+- **Server Action Isolation:**
+  - Dedicated lightweight action files (`actions.ts`) expose `'use server'` entry points to Client Components.
+  - Heavy server utilities (Inngest jobs, PDF rendering, Kysely DB adapters) live in `src/lib/` marked with `import 'server-only'` to prevent client bundle contamination.
+- **Prop Serialization & Secrets:**
+  - Props passed from RSC to Client Components must be JSON-serializable.
+  - Non-`NEXT_PUBLIC_` env vars (`SUPABASE_SERVICE_ROLE_KEY`, `REDIS_URL`) must never leak into `'use client'` files.
+
+---
+
+## 6. Architectural Tooling & Analysis Matrix
+
+_Source: `docs/codebase-maps/architectural-graph-matrix-and-tooling.md`_
+
+- **Workspace DAG & Tasks:** `turbo graph`, `pnpm graph`
+- **Module Import & Circular Dependency Analysis:** `madge`, `dependency-cruiser`
+- **Client Bundle Size Analysis:** `@next/bundle-analyzer` (`pnpm --filter portal build:analyze`), `.size-limit.json` (350 KB threshold)
+- **Production Observability:** OpenTelemetry (`@vercel/otel`), Vercel Analytics, Grafana

@@ -107,7 +107,6 @@ tools/                       # CI gates: audit-rls, agents-verify, design-ratche
 docs/
   design-system/             # RULES.md, SPEC.md, DESIGN.md (enforceable visual contract)
   architecture/              # ADRs, scalability reference
-  codebase-maps/             # Routes, data flow, package dependency maps
   runbooks/                  # Operational playbooks (Redis down, cache eviction, …)
   compliance/                # Compliance architecture
   WAYFINDER.md               # Concept → entry point → ADR index

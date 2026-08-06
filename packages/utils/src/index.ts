@@ -100,3 +100,26 @@ export const analytics = {
     }
   },
 }
+
+/**
+ * Execute an async operation with automatic retry on transient network failures.
+ */
+export async function withTransientRetry<T>(
+  fn: () => Promise<T>,
+  options?: { maxRetries?: number; delayMs?: number }
+): Promise<T> {
+  const maxRetries = options?.maxRetries ?? 1
+  const initialDelay = options?.delayMs ?? 150
+  let attempt = 0
+
+  while (true) {
+    try {
+      return await fn()
+    } catch (err) {
+      if (attempt >= maxRetries) throw err
+      attempt++
+      const jitter = Math.random() * 50
+      await sleep(initialDelay * attempt + jitter)
+    }
+  }
+}

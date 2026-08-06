@@ -25,7 +25,9 @@ export const intentSchema = z.enum([
 ])
 
 export const riskAssessmentSchema = z.object({})
+export type RiskAssessment = z.infer<typeof riskAssessmentSchema>
 export const complianceResultSchema = z.object({})
+export type ComplianceResult = z.infer<typeof complianceResultSchema>
 export const createWebhookSchema = z.object({
   url: z.string().url(),
   description: z.string().optional(),
@@ -276,3 +278,21 @@ export const acknowledgeAlertSchema = z.object({
   comment: z.string().optional(),
 })
 export type AcknowledgeAlertInput = z.infer<typeof acknowledgeAlertSchema>
+
+// Utilities
+export type ScannerBadge = z.infer<typeof scannerBadgeSchema>
+
+// 10. Access Control
+export const issueAccessBadgeSchema = z.object({
+  employeeId: z.string().min(1),
+  badgeNumber: z.string().min(1),
+  accessLevel: z.enum(['standard', 'restricted', 'admin', 'visitor']),
+  expiryDate: z.string().optional(),
+})
+export type IssueAccessBadgeInput = z.infer<typeof issueAccessBadgeSchema>
+
+export const revokeAccessBadgeSchema = z.object({
+  badgeId: z.string().min(1),
+  reason: z.string().min(3),
+})
+export type RevokeAccessBadgeInput = z.infer<typeof revokeAccessBadgeSchema>

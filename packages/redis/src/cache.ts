@@ -145,14 +145,40 @@ function jitterTtl(ttlSeconds: number): number {
 }
 
 // ---------------------------------------------------------------------------
-// Redis client helper
+// Redis client helper with adaptive Half-Open Circuit Breaker
 // ---------------------------------------------------------------------------
 
+type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN'
+let circuitState: CircuitState = 'CLOSED'
+let consecutiveFailures = 0
+let lastStateChangeTime = 0
+const FAILURE_THRESHOLD = 5
+const COOLDOWN_MS = 10_000
+
 async function getRedisClientSafe() {
+  const now = Date.now()
+  if (circuitState === 'OPEN') {
+    if (now - lastStateChangeTime > COOLDOWN_MS) {
+      circuitState = 'HALF_OPEN'
+    } else {
+      return null
+    }
+  }
+
   try {
     const { getRedisClient } = await import('./client.js')
-    return await getRedisClient()
+    const client = await getRedisClient()
+    if (client && circuitState === 'HALF_OPEN') {
+      circuitState = 'CLOSED'
+      consecutiveFailures = 0
+    }
+    return client
   } catch {
+    consecutiveFailures++
+    if (consecutiveFailures >= FAILURE_THRESHOLD) {
+      circuitState = 'OPEN'
+      lastStateChangeTime = now
+    }
     return null
   }
 }

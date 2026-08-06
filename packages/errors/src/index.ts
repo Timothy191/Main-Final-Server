@@ -314,3 +314,21 @@ export function isAuthError(err: unknown): err is AuthError {
 export function isNotFoundError(err: unknown): err is NotFoundError {
   return err instanceof NotFoundError
 }
+
+/** True when an error represents a transient network drop or temporary service outage. */
+export function isTransientError(err: unknown): boolean {
+  if (!err) return false
+  if (err instanceof ServiceUnavailableError || err instanceof WebFetchError) return true
+  if (err instanceof AppError && (err.status === 502 || err.status === 503 || err.status === 504))
+    return true
+  if (typeof err === 'object' && 'message' in err) {
+    const msg = String((err as { message: unknown }).message)
+    return (
+      msg.includes('ECONNRESET') ||
+      msg.includes('ETIMEDOUT') ||
+      msg.includes('fetch failed') ||
+      msg.includes('network error')
+    )
+  }
+  return false
+}

@@ -77,4 +77,3 @@ This document specifies the enterprise architecture pillars for industrial metri
 
 - **Consensus-Based Load Balancing (DGD & DIGing)**: Peer-to-peer field gateways in control-room operations exchange truck hauling cycle metrics to dynamically optimize pit dispatch without centralized single points of failure.
 - **Decentralized ADMM (Operator Splitting)**: Multi-site wellhead pressure optimization is decomposed into local edge sub-problems computed at individual site gateways, exchanging boundary multipliers asynchronously.
-

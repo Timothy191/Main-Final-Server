@@ -46,20 +46,9 @@ Redis and application-level caching strategies.
 - [Caching Strategy Research](./caching/caching-strategy-research.md) — Detailed research on caching mechanisms.
 - [Redis Caching Redesign](./caching/redis-caching-redesign.md) — Plan and structure for Redis rate-limiting and session caching.
 
-### 🗺️ [Codebase Maps](./codebase-maps/)
+### 🧠 [Architectural Insights & Memory](../memory/ARCHITECTURAL_INSIGHTS.md)
 
-High-level and low-level maps of workspace directories, dependencies, and boundaries.
-
-- [Codebase Maps README](./codebase-maps/README.md) — Overview of the code mapping strategy.
-- [API Routes Map](./codebase-maps/api-routes.md)
-- [Architectural Graph & Tooling](./codebase-maps/architectural-graph-matrix-and-tooling.md)
-- [Caching Layers Map](./codebase-maps/caching-layers.md)
-- [Client/Server Boundaries](./codebase-maps/client-server-boundaries.md)
-- [Data Flow & API Map](./codebase-maps/data-flow-and-api-map.md)
-- [Dataflow Pipelines](./codebase-maps/dataflow-pipelines.md)
-- [Monorepo Structure Map](./codebase-maps/monorepo-structure-map.md)
-- [Packages & Dependencies Map](./codebase-maps/packages-and-dependencies-map.md)
-- [Workspace Packages Directory](./codebase-maps/workspace-packages.md)
+High-level architecture, module maps, and client-server boundary rules are indexed in [`memory/ARCHITECTURAL_INSIGHTS.md`](../memory/ARCHITECTURAL_INSIGHTS.md).
 
 ### 🚀 [Deployment](./deployment/)
 

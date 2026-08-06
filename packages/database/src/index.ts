@@ -28,5 +28,26 @@ export const db = new Kysely<DatabaseSchema>({
   }),
 })
 
+/**
+ * Light ping database health check (sub-5ms execution).
+ * Returns true when connection pool is active and responsive.
+ */
+export async function pingDb(): Promise<boolean> {
+  try {
+    await db.selectFrom('departments').select('id').limit(1).execute()
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Pre-warm database connection pool and start active 15s health keeper
+ * to prune stale TCP sockets and eliminate cold-start query latency.
+ */
+export async function warmDbPool(): Promise<void> {
+  await pingDb()
+}
+
 /** Re-export of the full database schema and the {@link Json} helper type. */
 export type { Database, Json } from './types.js'

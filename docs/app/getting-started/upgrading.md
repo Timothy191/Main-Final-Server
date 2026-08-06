@@ -1,12 +1,12 @@
 ---
 title: Upgrading Next.js Architecture
 description: Comprehensive operational guide for upgrading Next.js, React 19, and related dependencies across the Arch-System monorepo.
-url: "https://nextjs.org/docs/app/getting-started/upgrading"
+url: 'https://nextjs.org/docs/app/getting-started/upgrading'
 docs_index: /docs/llms.txt
 version: 16.3.0
 lastUpdated: 2026-08-05
 prerequisites:
-  - "Getting Started: /docs/app/getting-started"
+  - 'Getting Started: /docs/app/getting-started'
 related:
   - app/guides/upgrading/version-16
   - app/guides/upgrading/version-15
@@ -51,13 +51,16 @@ After upgrading Next.js in `apps/portal`:
 1. **Verify Bundled Agent Docs:**
    Next.js automatically updates the bundled documentation in `node_modules/next/dist/docs/`.
    Ensure `AGENTS.md` retains the managed block:
+
    ```md
    <!-- BEGIN:nextjs-agent-rules -->
+
    ...
    <!-- END:nextjs-agent-rules -->
    ```
 
 2. **Run Full Monorepo Quality Gate (Cold Cache):**
+
    ```bash
    pnpm exec turbo run lint type-check test --force
    pnpm gates
@@ -69,6 +72,7 @@ After upgrading Next.js in `apps/portal`:
 ---
 
 ## 🔗 Related Documentation
+
 - [Next.js AI Agent Setup](/docs/app/guides/ai-agents.md)
 - [Enterprise Architecture Blueprint](/docs/architecture/enterprise-resiliency-blueprint.md)
 - [Wayfinder Index](/docs/WAYFINDER.md)
