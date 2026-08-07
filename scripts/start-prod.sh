@@ -37,9 +37,35 @@ docker stop arch-redis supabase_analytics_supabase portal-postgres >/dev/null 2>
 echo "  → Starting Production Next.js Portal on 0.0.0.0:${PORT}..."
 cd "$REPO_ROOT"
 
+# Build Rust engine for ops-babysitter daemon if not already built (production)
+if [ ! -f "$REPO_ROOT/arch-engine/rust-wiki-builder/target/release/rust-wiki-builder" ]; then
+  echo "  → Building Rust ops engine (first boot)..."
+  if command -v cargo >/dev/null 2>&1; then
+    (cd "$REPO_ROOT/arch-engine" && cargo build --release 2>&1 | grep -E "^   " | tail -2) || {
+      echo "  ⚠ Rust engine build failed; starting portal without ops-babysitter daemon"
+    }
+  else
+    echo "  ⚠ cargo not found; ops-babysitter daemon disabled"
+  fi
+fi
+
+# Launch ops-babysitter daemon only if binary exists
+babysitter_available=false
+if [ -f "$REPO_ROOT/arch-engine/rust-wiki-builder/target/release/rust-wiki-builder" ]; then
+  babysitter_available=true
+fi
+
 if [ "$FOREGROUND" = "true" ]; then
+  if [ "$babysitter_available" = "true" ]; then
+    node "$REPO_ROOT/arch-engine/ops-daemon/ops-babysitter.mjs" >/dev/null 2>&1 &
+    echo $! > "$REPO_ROOT/.babysitter.pid"
+  fi
   exec pnpm --filter portal start --hostname 0.0.0.0 --port "$PORT"
 else
+  if [ "$babysitter_available" = "true" ]; then
+    node "$REPO_ROOT/arch-engine/ops-daemon/ops-babysitter.mjs" >/dev/null 2>&1 &
+    echo $! > "$REPO_ROOT/.babysitter.pid"
+  fi
   nohup pnpm --filter portal start --hostname 0.0.0.0 --port "$PORT" > "$REPO_ROOT/portal.log" 2>&1 &
   echo $! > "$REPO_ROOT/.portal.pid"
   disown

@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────────────────────
 # Arch-Systems — Dev Script
-# Boot order: Redis → Supabase → host Next.js portal, then stack smoke,
-# monitoring terminals, and browser open to /login.
+# Boot order: Supabase → host Next.js portal (optionally boots Redis container).
 #
 # Usage:
-#   bash scripts/dev.sh                 # Full stack (Redis + Supabase + portal)
-#   bash scripts/dev.sh --quick         # Portal + DB (skip Redis, start Supabase)
+#   bash scripts/dev.sh                 # Quick mode (default: Supabase + portal; skips Redis)
+#   bash scripts/dev.sh --full-infra    # Full stack (boots Redis container + Supabase + portal)
 #   bash scripts/dev.sh --no-infra      # Assume Redis + Supabase already up
 #   bash scripts/dev.sh --quality       # Also run pnpm quality after smoke
 #   bash scripts/dev.sh --no-browser    # Skip open-login.sh
@@ -224,8 +223,9 @@ banner() {
   echo -e "  ${BOLD}${CYAN}  ╚═══════════════════════════════════════╝${NC}"
   echo
   echo -e "  ${DIM}$(date '+%a %b %d %Y  %H:%M')${NC}"
-  echo -e "  ${DIM}Boot: Redis → Supabase → Ops Gateway → portal${NC}"
+  echo -e "  ${DIM}Boot: Redis (optional) → Supabase → Ops Gateway → portal${NC}"
   echo -e "  ${DIM}Flags: ${QUICK_MODE:+--quick }${NO_INFRA:+--no-infra }${RUN_QUALITY:+--quality }${NC}"
+  echo -e "  ${DIM}Use: --full-infra to boot Redis Docker container${NC}"
   echo
 }
 
@@ -252,7 +252,7 @@ show_results() {
 }
 
 # ── Arg parsing ───────────────────────────────────────────────────────────────
-QUICK_MODE=false
+QUICK_MODE=true
 NO_INFRA=false
 RUN_QUALITY=false
 OPEN_BROWSER=true
@@ -261,6 +261,7 @@ STARTED_PORTAL=false
 STARTED_GATEWAY=false
 while [ $# -gt 0 ]; do
   case "$1" in
+    --full-infra)   QUICK_MODE=false; shift ;;
     --quick|-q)     QUICK_MODE=true; shift ;;
     --no-infra)     NO_INFRA=true;   shift ;;
     --quality)      RUN_QUALITY=true; shift ;;
@@ -717,10 +718,32 @@ fi
 
 # ── Phase 7: Daemons ──────────────────────────────────────────────────────────
 phase 7 "Daemons"
+
+# Build Rust engine for ops-babysitter daemon if not already built
+if [ ! -f "$REPO_ROOT/arch-engine/rust-wiki-builder/target/release/rust-wiki-builder" ]; then
+  check "Building Rust ops engine" "pass" "first boot"
+  if command -v cargo >/dev/null 2>&1; then
+    (cd "$REPO_ROOT/arch-engine" && cargo build --release 2>&1 | grep -v "^    " | tail -3) || {
+      check "Rust engine build" "warn" "skipping ops-babysitter daemon"
+    }
+  else
+    check "Rust engine build" "skip" "cargo not found; ops-babysitter disabled"
+  fi
+fi
+
 [ -f "$REPO_ROOT/scripts/lsp-router.sh" ] && bash "$REPO_ROOT/scripts/lsp-router.sh" start 2>/dev/null &
 [ -f "$REPO_ROOT/scripts/mcp-manager.sh" ] && bash "$REPO_ROOT/scripts/mcp-manager.sh" start 2>/dev/null &
 [ -f "$REPO_ROOT/scripts/heal-daemon.sh" ] && bash "$REPO_ROOT/scripts/heal-daemon.sh" 2>/dev/null &
 [ -f "$REPO_ROOT/scripts/monitor/serve-monitor.mjs" ] && node "$REPO_ROOT/scripts/monitor/serve-monitor.mjs" 2>/dev/null &
+
+# Launch ops-babysitter daemon only if binary exists
+if [ -f "$REPO_ROOT/arch-engine/rust-wiki-builder/target/release/rust-wiki-builder" ]; then
+  node "$REPO_ROOT/arch-engine/ops-daemon/ops-babysitter.mjs" >/dev/null 2>&1 &
+  echo $! > "$REPO_ROOT/.babysitter.pid"
+  check "Ops Babysitter daemon" "pass" "wiki generation active"
+else
+  check "Ops Babysitter daemon" "skip" "Rust binary not available"
+fi
 true
 
 # ── Done ──────────────────────────────────────────────────────────────────────

@@ -1,0 +1,24 @@
+# arch-engine — Rust dev-tooling workspace.
+#
+# Root Cargo workspace wiring the Rust utility crates so they can be compiled
+# and tested together (`cargo check --workspace`, `cargo test --workspace`)
+# instead of relying on relative-path-only resolution.
+#
+# AGENT-TRACE: init-monorepo — Step 8 "Wire Rust / Tauri Workspaces". The
+# `rust-utils` lib crate intentionally keeps `edition = 2024` while
+# `rust-wiki-builder` keeps `edition = 2021`; both override the shared
+# workspace `edition` locally so neither crate's behavior changes.
+[workspace]
+members = [
+  "rust-utils",
+  "rust-wiki-builder",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+# Keep per-crate settings explicit at the workspace root.
+[workspace.lints]

@@ -10,6 +10,13 @@ out
 build
 *.tsbuildinfo
 
+# Rust/Cargo build output (arch-engine workspace target dir; commit the lockfile)
+target
+!arch-engine/Cargo.lock
+
+# Generated live-system status wiki (produced by the ops-babysitter daemon)
+repowiki/
+
 # Turbo
 .turbo
 
@@ -43,6 +50,10 @@ logs/app-runtime.log
 .portal.pid
 .api.pid
 .portal.start
+
+# Transient runtime markers
+.babysitter_built
+
 
 # OS
 .DS_Store

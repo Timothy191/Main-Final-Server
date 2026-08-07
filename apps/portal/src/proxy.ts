@@ -181,60 +181,37 @@ interface EmployeeAuth {
   accessible_departments: string[]
 }
 
-interface CachedEmployeeEnvelope {
-  data: EmployeeAuth
-  fetchedAt: number
-}
-
-async function fetchAndCacheEmployee(
-  supabase: MiddlewareClient['supabase'],
-  userId: string,
-  cacheKey: string
-): Promise<EmployeeAuth | null> {
-  try {
-    const { data, error } = await supabase
-      .from('employees')
-      .select('role, department_id, accessible_departments')
-      .eq('auth_id', userId)
-      .single()
-    if (data && !error) {
-      const envelope: CachedEmployeeEnvelope = {
-        data: data as EmployeeAuth,
-        fetchedAt: Date.now(),
-      }
-      await cacheSet(cacheKey, envelope, 300)
-      return data as EmployeeAuth
-    }
-  } catch {
-    // Non-critical fallback
-  }
-  return null
-}
-
 async function resolveEmployee(
   supabase: MiddlewareClient['supabase'],
   userId: string
 ): Promise<EmployeeAuth | null> {
-  // AGENT-TRACE: SWR (Stale-While-Revalidate) edge auth cache seam.
-  // Serves cached role immediately for 60s (soft TTL), triggering background
-  // revalidation to Supabase while backed by 300s hard TTL L2 cache.
+  // AGENT-TRACE: Cache/auth coherence seam. This employee auth record (role,
+  // department_id, accessible_departments) is cached in Redis for CACHE_TTL
+  // (300s) keyed by userId — already user-scoped, so it can never bleed across
+  // users (cf. Supabase studio bug e88f389 where generic keys leaked one
+  // user's permissions into another's session).
+  //
+  // STALENESS WINDOW: after an admin changes this user's role / department /
+  // accessible_departments, the edge proxy continues to authorize on the OLD
+  // record for up to 300s. The role-change flow MUST evict this cache for the
+  // TARGET user by calling `POST /api/cache/invalidate { userId }` (which
+  // calls cacheDelete('arch:auth:employee:<userId>') — L1 + L2, per ADR-001).
+  // Do NOT cache the auth check in department-cache.ts tag layer — only cache
+  // data fetches, keyed by verified userId. See docs/WAYFINDER.md → "Caching"
+  // + ADR-001 (docs/architecture/adr-001-cache-auth-eviction-l1-l2.md).
   const cacheKey = `arch:auth:employee:${userId}`
-  const cached = await cacheGet<CachedEmployeeEnvelope | EmployeeAuth | null>(cacheKey)
+  const cached = await cacheGet<EmployeeAuth | null>(cacheKey)
+  if (cached) return cached
 
-  if (cached) {
-    const envelope =
-      cached && typeof cached === 'object' && 'fetchedAt' in cached
-        ? (cached as CachedEmployeeEnvelope)
-        : { data: cached as EmployeeAuth, fetchedAt: Date.now() }
-
-    const isStale = Date.now() - envelope.fetchedAt > 60_000
-    if (isStale) {
-      fetchAndCacheEmployee(supabase, userId, cacheKey).catch(() => {})
-    }
-    return envelope.data
+  const { data } = await supabase
+    .from('employees')
+    .select('role, department_id, accessible_departments')
+    .eq('auth_id', userId)
+    .single()
+  if (data) {
+    await cacheSet(cacheKey, data as EmployeeAuth, 300)
   }
-
-  return await fetchAndCacheEmployee(supabase, userId, cacheKey)
+  return (data as EmployeeAuth) ?? null
 }
 
 // isRestrictedRouteAllowed is imported from @repo/acl (canonical ACL).

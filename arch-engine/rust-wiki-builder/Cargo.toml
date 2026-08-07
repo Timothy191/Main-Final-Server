@@ -1,0 +1,8 @@
+[package]
+name = "rust-wiki-builder"
+version.workspace = true
+edition = "2021"
+license.workspace = true
+
+[dependencies]
+rust-utils = { path = "../rust-utils" }

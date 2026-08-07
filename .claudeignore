@@ -9,6 +9,10 @@ dist
 out
 build
 *.tsbuildinfo
+target
+
+# Generated live-system status wiki (ops-babysitter daemon output)
+repowiki/
 
 # Turbo
 .turbo
@@ -38,6 +42,9 @@ api.log
 
 # Process / PID files
 *.pid
+.babysitter.pid
+.babysitter_built
+
 .portal.pid
 .api.pid
 .portal.start
