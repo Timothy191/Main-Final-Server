@@ -642,11 +642,11 @@ const CloseMachineOpSchema = z.object({
  * Utilization = smrTotal / 12h * 100
  * Availability = (smrTotal - engineeringDelayHours) / smrTotal * 100
  */
-export function calculateSmrMetrics(input: SmrMetricInput): {
+export async function calculateSmrMetrics(input: SmrMetricInput): Promise<{
   smrTotal: number | null
   utilizationPct: number | null
   availabilityPct: number | null
-} {
+}> {
   const { startSMR, closeSMR, engineeringDelayMinutes } = input
   if (startSMR == null || closeSMR == null) {
     return { smrTotal: null, utilizationPct: null, availabilityPct: null }
@@ -860,7 +860,7 @@ export const getMachineOperationsForShift = cache(
         const op = opByMachine.get(machine.id)
         const startSMR = op?.start_smr ?? (await resolveStartSmr(supabase, machine))
         const closeSMR = op?.close_smr ?? null
-        const metrics = calculateSmrMetrics({
+        const metrics = await calculateSmrMetrics({
           startSMR,
           closeSMR,
           engineeringDelayMinutes: op?.engineering_delay_minutes ?? 0,

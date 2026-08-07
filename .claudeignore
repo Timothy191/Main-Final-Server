@@ -21,6 +21,7 @@ build
 .env.production.local
 .env.production
 .env.tools
+credentials.json
 
 # TLS certs / private keys
 certs/
@@ -134,7 +135,7 @@ remove-dynamic.cjs
 harness.toml
 hosts.toml
 agent-harnesses/
-hooks/
+.claude/hooks/
 bin/
 devops/
 .syncpackrc.json
@@ -192,3 +193,9 @@ docs/_book/
 # Large generated lockfiles and legacy archives
 pnpm-lock.yaml
 archive-H82lX7/
+
+# Additional local rules, indices, and tool ignores
+.eslintignore
+.cocoindex_code/
+.agents/rules/code-auto-collection.md
+

@@ -21,6 +21,7 @@ build
 .env.production.local
 .env.production
 .env.tools
+credentials.json
 
 # TLS certs / private keys (never commit)
 certs/
@@ -129,7 +130,7 @@ hosts.toml
 agent-harnesses/claude-code-harness/.skill-backups/
 agent-harnesses/claude-code-harness/scripts/
 agent-harnesses/claude-code-harness/skills-templates/
-hooks/
+.claude/hooks/
 bin/
 devops/
 .syncpackrc.json
@@ -158,3 +159,10 @@ acc.db-wal
 
 node_modules
 mcp-workspace/
+
+# Additional local rules, indices, and tool ignores
+.eslintignore
+.cocoindex_code/
+.agents/rules/code-auto-collection.md
+
+/net-commander

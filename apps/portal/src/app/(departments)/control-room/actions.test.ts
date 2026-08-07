@@ -465,10 +465,10 @@ describe('endHaulingSession', () => {
 /* ------------------------------------------------------------------ */
 
 describe('calculateSmrMetrics', () => {
-  it('returns nulls when SMR values are missing', () => {
+  it('returns nulls when SMR values are missing', async () => {
     const { calculateSmrMetrics } = require('./actions')
     expect(
-      calculateSmrMetrics({ startSMR: null, closeSMR: 100, engineeringDelayMinutes: 0 })
+      await calculateSmrMetrics({ startSMR: null, closeSMR: 100, engineeringDelayMinutes: 0 })
     ).toEqual({
       smrTotal: null,
       utilizationPct: null,
@@ -476,11 +476,11 @@ describe('calculateSmrMetrics', () => {
     })
   })
 
-  it('calculates total, utilization and availability', () => {
+  it('calculates total, utilization and availability', async () => {
     const { calculateSmrMetrics } = require('./actions')
     // 12-hour shift baseline: smrTotal = 12 => 100% utilization
     expect(
-      calculateSmrMetrics({ startSMR: 100, closeSMR: 112, engineeringDelayMinutes: 60 })
+      await calculateSmrMetrics({ startSMR: 100, closeSMR: 112, engineeringDelayMinutes: 60 })
     ).toEqual({
       smrTotal: 12,
       utilizationPct: 100,
@@ -488,10 +488,10 @@ describe('calculateSmrMetrics', () => {
     })
   })
 
-  it('returns zero utilization and availability for non-positive totals', () => {
+  it('returns zero utilization and availability for non-positive totals', async () => {
     const { calculateSmrMetrics } = require('./actions')
     expect(
-      calculateSmrMetrics({ startSMR: 100, closeSMR: 100, engineeringDelayMinutes: 0 })
+      await calculateSmrMetrics({ startSMR: 100, closeSMR: 100, engineeringDelayMinutes: 0 })
     ).toEqual({
       smrTotal: 0,
       utilizationPct: 0,
