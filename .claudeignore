@@ -208,6 +208,7 @@ archive-H82lX7/
 
 # Runtime artifacts & dev tooling with hardcoded secrets (never index)
 arch.db
+arch-cache.db
 logs/
 tools/automate-google-auth.mjs
 apps/portal/scripts/automate-google-login-headless.js

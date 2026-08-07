@@ -234,17 +234,17 @@ Note: The hub page currently uses `withCache` from `cache-utils.ts` which passes
 
 ### Phase 2 (Next — Improvements)
 
-- [ ] Wire `withCache` in hub page to Redis `cacheWrap` (or remove redundant middleware)
-- [ ] Expose `getCacheStats()` at `/api/metrics/cache` endpoint
-- [ ] Increase L1 TTL cap from 30s to 60s
-- [ ] Add cache warming script for common keys
+- [x] Wire `withCache` in hub page to Redis `cacheWrap` (or remove redundant middleware)
+- [x] Expose `getCacheStats()` at `/api/metrics/cache` endpoint
+- [x] Increase L1 TTL cap from 30s to 60s
+- [x] Add cache warming script for common keys
 
 ### Phase 3 (Future — Edge + Monitoring)
 
-- [ ] Create `EdgeCache` class (in-memory-only, no Redis)
-- [ ] Auto-detect environment and select appropriate cache layer
-- [ ] Grafana dashboard for cache hit ratios
-- [ ] Cache key naming convention documentation
+- [x] Create `EdgeCache` class (in-memory-only, no Redis)
+- [x] Auto-detect environment and select appropriate cache layer
+- [x] Grafana dashboard for cache hit ratios
+- [x] Cache key naming convention documentation
 
 ---
 

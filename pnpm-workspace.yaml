@@ -3,6 +3,13 @@ packages:
   - "packages/*"
   - "packages/departments/*"
 
+# Hoisting and peer dependency settings (migrated from .npmrc to avoid npm warnings)
+shamefully-hoist: true
+strict-peer-dependencies: false
+auto-install-peers: true
+public-hoist-pattern:
+  - "*eslint*"
+
 # Security & stability settings (aligned with Next.js monorepo conventions)
 updateNotifier: false
 blockExoticSubdeps: true

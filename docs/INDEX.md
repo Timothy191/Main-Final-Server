@@ -1,37 +1,40 @@
 ════════════════════════════════════════════════════════════════════════════════
-═════════════════════════════ Documentation Index ══════════════════════════════
+════════════════════════════════════ Documentation Index ═══════════════════════════════
 ════════════════════════════════════════════════════════════════════════════════
 
-**Generated:** 2026-08-07 10:22  
+**Generated:** 2026-08-07 11:45  
 **Root:** `/home/timothy/Documents/Arch-System/docs`  
-**Sections:** 17  
-**Total files:** 80
+**Sections:** 18  
+**Total files:** 80  
+**Duplicate files:** 0 (all unique by 4KB hash)  
+**Gap status:** 3 content overlaps flagged, 2 missing cross-references
 
 ────────────────────────────────────────────────────────────────────────────────
 
 ────────────────────────────────────────────────────────────────────────────────
-─────────────────────────────────── Metrics ────────────────────────────────────
+─────────────────────────────── Section Metrics ───────────────────────────────
 ────────────────────────────────────────────────────────────────────────────────
 
 **Section Completeness**
 
-- **_top**: ████████████████████░░░░░░░░░░░░░░░░░░░░  52.4% `11` files
-- **app**: █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   4.8% `1` files
-- **architecture**: ████████████████████░░░░░░░░░░░░░░░░░░░░  52.4% `11` files
-- **audits**: █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   4.8% `1` files
-- **caching**: █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  23.8% `5` files
-- **codebase-maps**: ███████████████░░░░░░░░░░░░░░░░░░░░░░░░░  38.1% `8` files
-- **codegraph**: █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  14.3% `3` files
-- **compliance**: █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   4.8% `1` files
-- **deployment**: ███░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   9.5% `2` files
-- **design-system**: ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  19.0% `4` files
-- **migration**: █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   4.8% `1` files
-- **onboarding**: ███░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   9.5% `2` files
-- **optimization**: █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  14.3% `3` files
-- **performance**: █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   4.8% `1` files
+- **\_top**: ████████████████████░░░░░░░░░░░░░░░░░░░░ 52.4% `11` files
+- **app**: █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 4.8% `1` files
+- **architecture**: ████████████████████░░░░░░░░░░░░░░░░░░░░ 52.4% `11` files
+- **audits**: █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 4.8% `1` files
+- **caching**: █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 23.8% `5` files
+- **codebase-maps**: ███████████████░░░░░░░░░░░░░░░░░░░░░░░░░ 38.1% `8` files
+- **codegraph**: █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 14.3% `3` files
+- **compliance**: ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 14.3% `2` files
+- **deployment**: ███░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 9.5% `2` files
+- **design-system**: ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 19.0% `4` files
+- **migration**: █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 4.8% `1` files
+- **onboarding**: ███░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 9.5% `2` files
+- **optimization**: █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 14.3% `3` files
+- **performance**: █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 4.8% `1` files
 - **performance-insights**: ████████████████████████████████████████ 100.0% `21` files
-- **proposals**: █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   4.8% `1` files
-- **runbooks**: ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  19.0% `4` files
+- **proposals**: █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 4.8% `1` files
+- **research**: ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 9.5% `2` files
+- **runbooks**: ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 19.0% `4` files
 
 **ASCII Bar Chart**
 
@@ -45,11 +48,12 @@ design-system        │█████████                             
 runbooks             │█████████                                         │   4 (  5.0%)
 codegraph            │███████                                           │   3 (  3.8%)
 optimization         │███████                                           │   3 (  3.8%)
+compliance           │████                                              │   2 (  2.5%)
 deployment           │████                                              │   2 (  2.5%)
 onboarding           │████                                              │   2 (  2.5%)
+research             │████                                              │   2 (  2.5%)
 app                  │██                                                │   1 (  1.2%)
 audits               │██                                                │   1 (  1.2%)
-compliance           │██                                                │   1 (  1.2%)
 migration            │██                                                │   1 (  1.2%)
 performance          │██                                                │   1 (  1.2%)
 proposals            │██                                                │   1 (  1.2%)
@@ -74,11 +78,12 @@ pie title Document Distribution by Section
   "runbooks" : 5.0
   "codegraph" : 3.8
   "optimization" : 3.8
+  "compliance" : 2.5
   "deployment" : 2.5
   "onboarding" : 2.5
+  "research" : 2.5
   "app" : 1.2
   "audits" : 1.2
-  "compliance" : 1.2
   "migration" : 1.2
   "performance" : 1.2
   "proposals" : 1.2
@@ -96,7 +101,7 @@ graph TD
     root --> caching["caching/ (5 files)"]
     root --> codebase-maps["codebase-maps/ (8 files)"]
     root --> codegraph["codegraph/ (3 files)"]
-    root --> compliance["compliance/ (1 files)"]
+    root --> compliance["compliance/ (2 files)"]
     root --> deployment["deployment/ (2 files)"]
     root --> design-system["design-system/ (4 files)"]
     root --> migration["migration/ (1 files)"]
@@ -105,23 +110,39 @@ graph TD
     root --> performance["performance/ (1 files)"]
     root --> performance-insights["performance-insights/ (21 files)"]
     root --> proposals["proposals/ (1 files)"]
+    root --> research["research/ (2 files)"]
     root --> runbooks["runbooks/ (4 files)"]
 ```
 
 ────────────────────────────────────────────────────────────────────────────────
 
 ────────────────────────────────────────────────────────────────────────────────
-─────────────────────────── Gap & Duplicate Analysis ───────────────────────────
+────────────────────────── Gap & Duplicate Analysis ──────────────────────────
 ────────────────────────────────────────────────────────────────────────────────
 
-**Duplicates:** None detected (all files unique by first-4KB hash).
+**Duplicates:** None detected (all files unique by 4KB hash).
 
-**Missing sections:** None — all expected sections present.
+**Content Overlaps (flagged for consolidation):**
+
+| Overlap                       | Files                                                                                                       | Severity | Action                                                     |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------- |
+| Architecture map duplicated   | `docs/ARCHITECTURE-MAP.md` ↔ `docs/codebase-maps/architecture-map.md`                                       | Low      | Keep canonical in `codebase-maps/`; root version redirects |
+| Caching overview duplicated   | `docs/HYBRID-CACHE-MAP.md` ↔ `docs/codebase-maps/caching-map.md` ↔ `docs/caching/redis-caching-redesign.md` | Medium   | Each serves different depth; add cross-refs                |
+| Compliance + research overlap | `docs/compliance/compliance-architecture.md` ↔ `docs/research/architecture-compliance-caching-gaps.md`      | Low      | Research doc extends compliance; cross-ref added           |
+
+**Missing Cross-References (gaps):**
+
+| Gap                                       | From                | To                                                      | Priority |
+| ----------------------------------------- | ------------------- | ------------------------------------------------------- | -------- |
+| Research not indexed                      | `docs/INDEX.md`     | `docs/research/architecture-compliance-caching-gaps.md` | Medium   |
+| WAYFINDER missing research                | `docs/WAYFINDER.md` | `docs/research/` section                                | Medium   |
+| `caching-system-fix-summary.md` unindexed | `docs/INDEX.md`     | Root-level fix summary                                  | Low      |
+| Compliance README missing                 | `docs/compliance/`  | `README.md` hub                                         | Low      |
 
 ────────────────────────────────────────────────────────────────────────────────
 
 ────────────────────────────────────────────────────────────────────────────────
-─────────────────────────────── Index by Section ───────────────────────────────
+────────────────────────────── Index by Section ──────────────────────────────
 ────────────────────────────────────────────────────────────────────────────────
 
 | Section              | Files | Share |
@@ -135,11 +156,12 @@ graph TD
 | runbooks             | 4     | 5.0%  |
 | codegraph            | 3     | 3.8%  |
 | optimization         | 3     | 3.8%  |
+| compliance           | 2     | 2.5%  |
 | deployment           | 2     | 2.5%  |
 | onboarding           | 2     | 2.5%  |
+| research             | 2     | 2.5%  |
 | app                  | 1     | 1.2%  |
 | audits               | 1     | 1.2%  |
-| compliance           | 1     | 1.2%  |
 | migration            | 1     | 1.2%  |
 | performance          | 1     | 1.2%  |
 | proposals            | 1     | 1.2%  |
@@ -224,6 +246,7 @@ graph TD
 | Name                       | Path                                    |
 | -------------------------- | --------------------------------------- |
 | compliance-architecture.md | `compliance/compliance-architecture.md` |
+| README.md                  | `compliance/README.md`                  |
 
 ### deployment
 
@@ -300,6 +323,13 @@ graph TD
 | -------------------------- | -------------------------------------- |
 | caching-system-proposal.md | `proposals/caching-system-proposal.md` |
 
+### research
+
+| Name                                    | Path                                               |
+| --------------------------------------- | -------------------------------------------------- |
+| architecture-compliance-caching-gaps.md | `research/architecture-compliance-caching-gaps.md` |
+| README.md                               | `research/README.md`                               |
+
 ### runbooks
 
 | Name                         | Path                                    |
@@ -311,5 +341,4 @@ graph TD
 
 ════════════════════════════════════════════════════════════════════════════════
 
-*For domain navigation (concept → entry point → ADR), see [WAYFINDER.md](./WAYFINDER.md).*
-
+_For domain navigation (concept → entry point → ADR), see [WAYFINDER.md](./WAYFINDER.md)._

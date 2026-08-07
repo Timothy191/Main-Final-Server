@@ -6,6 +6,10 @@
     "supermemory": {
       "command": "/home/timothy/.local/bin/supermemory-mcp"
     },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp", "--executablePath", "/usr/bin/chromium"]
+    },
     "codegraph": {
       "url": "http://localhost:6010/mcp"
     },
@@ -42,10 +46,6 @@
         "postgresql://postgres:postgres@localhost:54322/main"
       ]
     },
-    "redis": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-redis", "redis://localhost:6379"]
-    },
     "sqlite": {
       "command": "npx",
       "args": [
@@ -54,17 +54,38 @@
         "/home/timothy/Documents/Arch-System/benchmark-cache.db"
       ]
     },
+    "redis": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-redis", "redis://localhost:6379"]
+    },
     "github": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-github"]
+    },
+    "powerbi": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-powerbi"]
     },
     "brave-search": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-brave-search"]
     },
+    "everything-toolkit": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-everything-toolkit"]
+    },
     "genkit": {
       "command": "npx",
       "args": ["-y", "genkit-cli@^1.28.0", "mcp"]
+    },
+    "google-workspace": {
+      "command": "node",
+      "args": [
+        "/home/timothy/.antigravity-ide/extensions/mercurial.google-workspace-mcp-0.1.1-universal/dist/mcp/server.js"
+      ],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "/home/timothy/.config/gcloud/application_default_credentials.json"
+      }
     }
   }
 }

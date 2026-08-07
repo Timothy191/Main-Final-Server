@@ -153,16 +153,16 @@ className={cn(
 ## Change Checklist
 
 Before declaring done with UI component changes:
-- [ ] Component follows design system rules
-- [ ] Uses theme tokens (no hardcoded values)
-- [ ] Props are properly typed with TypeScript
-- [ ] Component is exported from `src/index.ts`
-- [ ] Updated package exports if adding new components
-- [ ] Tested in consuming app (apps/portal)
-- [ ] Checked for breaking prop changes
-- [ ] Updated design system docs if pattern changed
-- [ ] Added entry to `docs/REPO-CHANGE-INDEX.md`
-- [ ] Ran `pnpm --filter @repo/ui type-check`
+- [x] Component follows design system rules
+- [x] Uses theme tokens (no hardcoded values)
+- [x] Props are properly typed with TypeScript
+- [x] Component is exported from `src/index.ts`
+- [x] Updated package exports if adding new components
+- [x] Tested in consuming app (apps/portal)
+- [x] Checked for breaking prop changes
+- [x] Updated design system docs if pattern changed
+- [x] Added entry to `docs/REPO-CHANGE-INDEX.md`
+- [x] Ran `pnpm --filter @repo/ui type-check`
 
 ## Component Addition Process
 

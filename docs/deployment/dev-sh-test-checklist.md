@@ -7,53 +7,53 @@
 
 ## Phase 0: Pre-flight
 
-- [ ] Script starts without errors
-- [ ] Checks for stale `.portal.pid` / `.portal.start` files and cleans them
-- [ ] `PORT` variable defaults to `3000`
-- [ ] `QUICK_MODE=true` skips Docker infrastructure checks
+- [x] Script starts without errors
+- [x] Checks for stale `.portal.pid` / `.portal.start` files and cleans them
+- [x] `PORT` variable defaults to `3000`
+- [x] `QUICK_MODE=true` skips Docker infrastructure checks
 
 ## Phase 1: Environment
 
-- [ ] `.env.local` exists with required variables
-- [ ] Supabase keys are set (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`)
-- [ ] `REDIS_URL` is set (or Redis check is skipped in quick mode)
+- [x] `.env.local` exists with required variables
+- [x] Supabase keys are set (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`)
+- [x] `REDIS_URL` is set (or Redis check is skipped in quick mode)
 
 ## Phase 2: Redis (skipped in --quick mode)
 
-- [ ] Phase 2 shows as skipped/fast-check when `QUICK_MODE=true`
+- [x] Phase 2 shows as skipped/fast-check when `QUICK_MODE=true`
 
 ## Phase 3: Supabase
 
-- [ ] Verifies Supabase connection (or reports known limitations)
-- [ ] Does NOT start Docker containers (skipped in quick mode)
+- [x] Verifies Supabase connection (or reports known limitations)
+- [x] Does NOT start Docker containers (skipped in quick mode)
 
 ## Phase 4: Portal (Next.js)
 
-- [ ] Portal starts on port 3000
-- [ ] Portal ready in < 60 seconds (Turbopack HMR)
-- [ ] `.portal.pid` file created
-- [ ] `.portal.start` marker written
-- [ ] Portal log at `portal.log` has no critical errors
+- [x] Portal starts on port 3000
+- [x] Portal ready in < 60 seconds (Turbopack HMR)
+- [x] `.portal.pid` file created
+- [x] `.portal.start` marker written
+- [x] Portal log at `portal.log` has no critical errors
 
 ### Route Smoke Tests
 
-- [ ] `GET /login` → **200**
-- [ ] `GET /hub` → **200**
-- [ ] `GET /engineering` → **200**
-- [ ] `GET /drilling` → **200**
-- [ ] `GET /safety` → **200**
+- [x] `GET /login` → **200**
+- [x] `GET /hub` → **200**
+- [x] `GET /engineering` → **200**
+- [x] `GET /drilling` → **200**
+- [x] `GET /safety` → **200**
 
 ## Phase 5: Stack Smoke
 
-- [ ] Portal responds to HTTP requests within 2 seconds
-- [ ] Supabase RLS policies are active (no public access to protected tables)
-- [ ] Redis is reachable (if configured) — `curl http://localhost:3000/api/health/cache`
+- [x] Portal responds to HTTP requests within 2 seconds
+- [x] Supabase RLS policies are active (no public access to protected tables)
+- [x] Redis is reachable (if configured) — `curl http://localhost:3000/api/health/cache`
 
 ## Watchdog Integration
 
-- [ ] Watchdog script is executable: `scripts/portal-watchdog.sh`
-- [ ] Watchdog restarts portal on crash (test by killing pid)
-- [ ] Watchdog clears `.next` cache on restart
+- [x] Watchdog script is executable: `scripts/portal-watchdog.sh`
+- [x] Watchdog restarts portal on crash (test by killing pid)
+- [x] Watchdog clears `.next` cache on restart
 
 ---
 

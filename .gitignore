@@ -179,6 +179,7 @@ mcp-workspace/
 
 # Runtime artifacts & dev tooling with hardcoded secrets (never commit)
 arch.db
+arch-cache.db
 logs/
 tools/automate-google-auth.mjs
 apps/portal/scripts/automate-google-login-headless.js

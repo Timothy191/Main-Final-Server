@@ -169,8 +169,8 @@ portion as Category 5 and the base as Category 4.
 | ISO 9001                | §7.5                                                                                                   | Documented information / process control                             | SYS-001, SYS-002, SYS-003                                             | Procedural + Technical           |
 | ISO 14001               | §7.5 / §9.1                                                                                            | Environmental records & monitoring                                   | SYS-001, SYS-002 (where env data captured)                            | Procedural + Technical           |
 | ALCOA+ (data integrity) | Attributable, Legible, Contemporaneous, Original, Accurate + Complete, Consistent, Enduring, Available | Production/tonnage data integrity for royalty & regulatory reporting | SYS-001, SYS-002, SYS-003                                             | Procedural + Technical           |
-| Site mining regs (TBC)  | Equipment safety, operational records, incident reporting                                              | SYS-001, SYS-002, SYS-006                                            | Procedural + Technical                                                |
-| SOX (if applicable)     | IPE — completeness/accuracy of data feeding financials                                                 | SYS-002, SYS-003 (production volumes)                                | Procedural + Technical                                                |
+| Site mining regs (TBC)  | —                                                                                                      | Equipment safety, operational records, incident reporting            | SYS-001, SYS-002, SYS-006                                             | Procedural + Technical           |
+| SOX (if applicable)     | IPE — completeness/accuracy of data feeding financials                                                 | IPE controls for data feeding financials                             | SYS-002, SYS-003 (production volumes)                                 | Procedural + Technical           |
 
 **Expected:** Every applicable clause maps to at least one system, and every
 Safety/Production-Critical system maps to the relevant clauses.
@@ -328,6 +328,7 @@ remediation item in §11.
 - `docs/deployment/deployment.md` — deployment & environment parity (IQ evidence).
 - `apps/portal/CLAUDE.md` / `AGENTS.md` — agent policy (design-system global rule
   is referenced by §8 periodic review as a controlled-change example).
+- [`../research/architecture-compliance-caching-gaps.md`](../research/architecture-compliance-caching-gaps.md) — Framework coverage matrix, specs-based audit methodology, and 15 caching gaps (C-1..C-15) with compliance impact mapping.
 - Subsidiary validation documents (per system): to be created under
   `docs/compliance/<SYS-ID>/` as validation activities proceed.
 

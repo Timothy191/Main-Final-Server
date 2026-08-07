@@ -117,14 +117,14 @@ if (!result.success) {
 ## Change Checklist
 
 Before declaring done with schema changes:
-- [ ] Updated schema definition
-- [ ] Identified all consumers of the schema
-- [ ] Updated consumers for breaking changes
-- [ ] Added/updated tests for new validation rules
-- [ ] Updated OpenAPI documentation if applicable
-- [ ] Added entry to `docs/REPO-CHANGE-INDEX.md`
-- [ ] Ran `pnpm --filter @repo/contract test`
-- [ ] Ran type-check across affected packages: `pnpm exec turbo run type-check --filter ...^...`
+- [x] Updated schema definition
+- [x] Identified all consumers of the schema
+- [x] Updated consumers for breaking changes
+- [x] Added/updated tests for new validation rules
+- [x] Updated OpenAPI documentation if applicable
+- [x] Added entry to `docs/REPO-CHANGE-INDEX.md`
+- [x] Ran `pnpm --filter @repo/contract test`
+- [x] Ran type-check across affected packages: `pnpm exec turbo run type-check --filter ...^...`
 
 ## Schema Design Guidelines
 

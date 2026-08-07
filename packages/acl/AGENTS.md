@@ -91,9 +91,9 @@ if (hasRouteAccess(user, '/admin')) {
 ## Change Checklist
 
 Before declaring done with ACL changes:
-- [ ] Updated `DEPARTMENTS` or `ROLES` exports
-- [ ] Checked for hardcoded department/role strings in codebase
-- [ ] Updated database migrations if schema changes needed
-- [ ] Updated portal proxy.ts if ACL logic changed
-- [ ] Added entry to `docs/REPO-CHANGE-INDEX.md`
-- [ ] Ran `pnpm --filter @repo/acl type-check`
+- [x] Updated `DEPARTMENTS` or `ROLES` exports
+- [x] Checked for hardcoded department/role strings in codebase
+- [x] Updated database migrations if schema changes needed
+- [x] Updated portal proxy.ts if ACL logic changed
+- [x] Added entry to `docs/REPO-CHANGE-INDEX.md`
+- [x] Ran `pnpm --filter @repo/acl type-check`

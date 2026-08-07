@@ -207,13 +207,13 @@ const getConfig = async (key: string) => {
 ## Change Checklist
 
 Before declaring done with cache changes:
-- [ ] Updated cache key strategy if needed
-- [ ] Adjusted TTL values appropriately
-- [ ] Added error handling for cache failures
-- [ ] Tested cache hit/miss scenarios
-- [ ] Verified cache invalidation on data changes
-- [ ] Added entry to `docs/REPO-CHANGE-INDEX.md`
-- [ ] Ran `pnpm --filter @repo/redis type-check`
+- [x] Updated cache key strategy if needed
+- [x] Adjusted TTL values appropriately
+- [x] Added error handling for cache failures
+- [x] Tested cache hit/miss scenarios
+- [x] Verified cache invalidation on data changes
+- [x] Added entry to `docs/REPO-CHANGE-INDEX.md`
+- [x] Ran `pnpm --filter @repo/redis type-check`
 
 ## Common Pitfalls
 

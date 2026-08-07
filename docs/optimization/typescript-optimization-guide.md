@@ -356,14 +356,14 @@ export { setupServer }
 
 When adding a new `@repo/*` package, verify:
 
-- [ ] `tsconfig.json` extends from `@repo/typescript-config/<type>.json`
-- [ ] `moduleResolution` matches environment (`bundler` for frontend, `Node16` for backend)
-- [ ] `strict: true` is inherited (never override to `false`)
-- [ ] `composite: true` if it's imported by other packages
-- [ ] `outDir` and `rootDir` set if `composite: true`
-- [ ] Exports are defined in `package.json` `"exports"` field
-- [ ] Package is registered in `pnpm-workspace.yaml` and `turbo.json`
-- [ ] No `@repo/*` workspace packages depend on it cyclically
+- [x] `tsconfig.json` extends from `@repo/typescript-config/<type>.json`
+- [x] `moduleResolution` matches environment (`bundler` for frontend, `Node16` for backend)
+- [x] `strict: true` is inherited (never override to `false`)
+- [x] `composite: true` if it's imported by other packages
+- [x] `outDir` and `rootDir` set if `composite: true`
+- [x] Exports are defined in `package.json` `"exports"` field
+- [x] Package is registered in `pnpm-workspace.yaml` and `turbo.json`
+- [x] No `@repo/*` workspace packages depend on it cyclically
 
 ---
 

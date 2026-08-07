@@ -68,13 +68,13 @@ This document describes the migration of backend services from NestJS to Next.js
 
 ## Checklist
 
-- [ ] Phase 1 modules migrated
-- [ ] Phase 2 auth/admin migrated
-- [ ] Phase 3 data modules migrated
-- [ ] Phase 4 external integrations migrated
-- [ ] NestJS repo archived
-- [ ] CI/CD updated (no more `apps/api` build)
-- [ ] Monitoring migrated to portal metrics
+- [x] Phase 1 modules migrated
+- [x] Phase 2 auth/admin migrated
+- [x] Phase 3 data modules migrated
+- [x] Phase 4 external integrations migrated
+- [x] NestJS repo archived
+- [x] CI/CD updated (no more `apps/api` build)
+- [x] Monitoring migrated to portal metrics
 
 ## References
 

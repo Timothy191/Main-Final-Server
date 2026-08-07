@@ -228,17 +228,17 @@ pnpm audit --production
 
 ### Manual Checks
 
-- [ ] All tests pass (`pnpm test`)
-- [ ] No TypeScript errors (`pnpm type-check`)
-- [ ] No ESLint errors (`pnpm lint`)
-- [ ] Database migrations are applied
-- [ ] Environment variables documented in `.env.production` are up to date
-- [ ] SSL certificates are valid (if using HTTPS)
-- [ ] Backup strategy is current (latest backup < 24 hours old)
-- [ ] Monitoring endpoints are responding
-- [ ] No pending security advisories (`pnpm audit`)
-- [ ] CHANGELOG updated with deployment changes
-- [ ] Rollback plan reviewed and tested
+- [x] All tests pass (`pnpm test`)
+- [x] No TypeScript errors (`pnpm type-check`)
+- [x] No ESLint errors (`pnpm lint`)
+- [x] Database migrations are applied
+- [x] Environment variables documented in `.env.production` are up to date
+- [x] SSL certificates are valid (if using HTTPS)
+- [x] Backup strategy is current (latest backup < 24 hours old)
+- [x] Monitoring endpoints are responding
+- [x] No pending security advisories (`pnpm audit`)
+- [x] CHANGELOG updated with deployment changes
+- [x] Rollback plan reviewed and tested
 
 ### Pre-Flight Script
 

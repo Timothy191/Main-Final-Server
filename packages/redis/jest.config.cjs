@@ -2,7 +2,7 @@
 module.exports = {
   ...require('@repo/jest-config/node'),
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.test.json' }],
   },
   coverageThreshold: {
     global: {

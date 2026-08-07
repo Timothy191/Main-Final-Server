@@ -35,9 +35,24 @@ export class SQLiteCacheEngine {
       ...options,
     }
 
-    const __filename = fileURLToPath(import.meta.url)
-    const __dirname = dirname(__filename)
-    const isTs = __filename.endsWith('.ts')
+    const getFilePath = () => {
+      const err = new Error()
+      const stack = err.stack || ''
+      const lines = stack.split('\n')
+      for (const line of lines) {
+        if (line.includes('sqlite-client')) {
+          const match = line.match(/(?:at\s+.*?\s+\()?(file:\/\/.*?|\/.*?)(?::\d+:\d+|\))/)
+          if (match && match[1]) {
+            return match[1].replace(/^file:\/\/\/?/, '/')
+          }
+        }
+      }
+      return ''
+    }
+
+    const currentFile = getFilePath()
+    const __dirname = currentFile ? dirname(currentFile) : ''
+    const isTs = currentFile.endsWith('.ts')
     const workerFileName = isTs ? 'sqlite-worker.ts' : 'sqlite-worker.js'
     const workerPath = resolve(__dirname, workerFileName)
 

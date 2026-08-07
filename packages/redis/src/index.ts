@@ -59,6 +59,7 @@ export {
   cacheEvictL1ByPrefix,
   clearMemoryCache,
   Cache,
+  EdgeCache,
   type CacheOptions,
   type CacheWrapOptions,
   cache,

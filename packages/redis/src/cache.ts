@@ -27,6 +27,7 @@ import {
   l1DeleteByPrefix as memoryDeleteByPrefix,
   l1IndexTags,
   l1Clear,
+  l1EvictByTags,
 } from './l1.js'
 import { gzip as gzipCb, gunzip as gunzipCb } from 'zlib'
 import { randomUUID } from 'crypto'
@@ -248,7 +249,7 @@ export async function cacheGetWithStats<T>(key: string): Promise<CacheLookup<T>>
 }
 
 export async function cacheSet<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
-  const l1Ttl = Math.min(ttlSeconds, 30)
+  const l1Ttl = Math.min(ttlSeconds, 60)
   memorySet(key, value, l1Ttl)
 
   try {
@@ -467,7 +468,7 @@ export async function cacheDelete(key: string): Promise<void> {
 }
 
 export async function cacheDeletePattern(pattern: string): Promise<void> {
-  const prefix = pattern.replace(/\*/g, '')
+  const prefix = pattern.split('*')[0] ?? ''
   memoryDeleteByPrefix(prefix)
   await cacheInvalidatePrefixes([prefix])
 }
@@ -490,6 +491,42 @@ export function clearMemoryCache(): void {
 export interface CacheOptions {
   ttlSeconds?: number
   tags?: string[]
+}
+
+export class EdgeCache {
+  async get<T>(key: string): Promise<T | null> {
+    return memoryGet<T>(key)
+  }
+
+  async set<T>(key: string, value: T, options?: CacheOptions): Promise<void> {
+    const ttl = options?.ttlSeconds ?? 3600
+    memorySet(key, value, ttl) // No L1 TTL cap since it's the sole cache layer
+  }
+
+  async delete(key: string): Promise<void> {
+    memoryDelete(key)
+  }
+
+  async invalidateTags(tags: string[]): Promise<number> {
+    return l1EvictByTags(tags)
+  }
+
+  async invalidatePrefixes(prefixes: string[]): Promise<number> {
+    for (const prefix of prefixes) {
+      memoryDeleteByPrefix(prefix)
+    }
+    return 0
+  }
+
+  async wrap<T>(key: string, fn: () => Promise<T>, options?: CacheWrapOptions): Promise<T> {
+    const cached = await this.get<T>(key)
+    if (cached !== null) return cached
+
+    const ttl = options?.ttlSeconds ?? 3600
+    const result = await fn()
+    await this.set(key, result, { ttlSeconds: ttl, tags: options?.tags })
+    return result
+  }
 }
 
 export class Cache {
@@ -523,4 +560,5 @@ export class Cache {
   }
 }
 
-export const cache = new Cache()
+// Auto-detect environment: Use Cache (L1/L2 Redis) if REDIS_URL is present, otherwise fallback to EdgeCache (L1-only)
+export const cache = process.env.REDIS_URL ? new Cache() : new EdgeCache()

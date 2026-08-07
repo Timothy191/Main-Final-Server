@@ -35,6 +35,10 @@ structured JSON-RPC interface. Think of it as "USB-C for AI tools."
 | `github`              | stdio                 | GitHub API — PRs, issues, search                        |
 | `brave-search`        | stdio                 | Web search                                              |
 | `genkit`              | stdio                 | Google Genkit AI tooling                                |
+| `chrome-devtools`     | stdio                 | Headless browser and chrome debugging                   |
+| `powerbi`             | stdio                 | Power BI workspace integrations                         |
+| `everything-toolkit`  | stdio                 | Reference MCP implementation with dummy tools           |
+| `google-workspace`    | stdio                 | Integration with Gmail, Drive, Calendar, Docs, Sheets   |
 
 ## Adding a New Server
 

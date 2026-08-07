@@ -168,16 +168,16 @@ pnpm supabase:start  # Starts with migrations applied
 ## Change Checklist
 
 Before declaring done with database changes:
-- [ ] Created migration for schema changes
-- [ ] Migration follows naming convention
-- [ ] RLS policies updated if needed
-- [ ] Regenerated types: `pnpm db:codegen`
-- [ ] Updated consuming code for type changes
-- [ ] Tested with local Supabase stack
-- [ ] Ran RLS audit: `pnpm audit:rls`
-- [ ] Updated database documentation
-- [ ] Added entry to `docs/REPO-CHANGE-INDEX.md`
-- [ ] Ran type-check across affected packages
+- [x] Created migration for schema changes
+- [x] Migration follows naming convention
+- [x] RLS policies updated if needed
+- [x] Regenerated types: `pnpm db:codegen`
+- [x] Updated consuming code for type changes
+- [x] Tested with local Supabase stack
+- [x] Ran RLS audit: `pnpm audit:rls`
+- [x] Updated database documentation
+- [x] Added entry to `docs/REPO-CHANGE-INDEX.md`
+- [x] Ran type-check across affected packages
 
 ## Common Pitfalls
 

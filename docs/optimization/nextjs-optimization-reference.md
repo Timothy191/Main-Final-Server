@@ -440,16 +440,16 @@ This is essential for Suspense streaming and PPR to work correctly:
 
 ### P1 — Medium Impact
 
-- [ ] Add Tier 1 hover-based speculation rules for navigation links
-- [ ] Document and enforce `fetchpriority` conventions in code review
+- [x] Add Tier 1 hover-based speculation rules for navigation links
+- [x] Document and enforce `fetchpriority` conventions in code review
 
 ### P2 — Low Impact / Future
 
-- [ ] Set up Turbopack bundle analyzer CI integration
+- [x] Set up Turbopack bundle analyzer CI integration
 - [x] **PPR evaluation complete** — active via `cacheComponents: true`, no changes needed
-- [ ] Benchmark cache hit ratio and tune `cacheLife` profiles
-- [ ] Consider `@upstash/redis` as lighter Redis alternative for edge
-- [ ] Migrate from `stale-while-revalidate` to `stale-while-revalidate=86400` for all static assets
+- [x] Benchmark cache hit ratio and tune `cacheLife` profiles
+- [x] Consider `@upstash/redis` as lighter Redis alternative for edge
+- [x] Migrate from `stale-while-revalidate` to `stale-while-revalidate=86400` for all static assets
 
 ---
 
