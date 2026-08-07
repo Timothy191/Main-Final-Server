@@ -34,13 +34,18 @@ export async function GET() {
       .select('cups_name, id')
       .is('deleted_at', null)
 
-    const registeredNames = new Set((registered ?? []).map((r) => r.cups_name))
+    const registeredNames = new Set(
+      (registered ?? []).map((r: { cups_name: string | null }) => r.cups_name)
+    )
 
     // 3. Mark each detected printer as new or existing
     const results = detected.map((printer) => ({
       ...printer,
       isRegistered: registeredNames.has(printer.cupsName),
-      dbId: registered?.find((r) => r.cups_name === printer.cupsName)?.id ?? null,
+      dbId:
+        registered?.find(
+          (r: { cups_name: string | null; id: string }) => r.cups_name === printer.cupsName
+        )?.id ?? null,
     }))
 
     return NextResponse.json({ printers: results, count: results.length })

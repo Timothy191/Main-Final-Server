@@ -27,8 +27,14 @@ export const generateReportFn = inngest.createFunction(
         .gte('date', dateFrom)
         .lte('date', dateTo)
 
-      const totalCoal = productionLogs?.reduce((sum, log) => sum + (log.coal_tonnes ?? 0), 0)
-      const totalWaste = productionLogs?.reduce((sum, log) => sum + (log.waste_tonnes ?? 0), 0)
+      const totalCoal = productionLogs?.reduce(
+        (sum: number, log: { coal_tonnes: number | null }) => sum + (log.coal_tonnes ?? 0),
+        0
+      )
+      const totalWaste = productionLogs?.reduce(
+        (sum: number, log: { waste_tonnes: number | null }) => sum + (log.waste_tonnes ?? 0),
+        0
+      )
 
       const reportData = {
         department_id: departmentId,

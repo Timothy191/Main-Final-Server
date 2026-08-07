@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import { fetchWeather } from '@/lib/weather-api'
 import { logError } from '@/lib/errors/error-logger'
 import { NextResponse } from 'next/server'
@@ -18,19 +19,15 @@ import { NextResponse } from 'next/server'
  *             schema:
  *               type: object
  *               properties:
- *                 temperature:
+ *                 temp:
  *                   type: number
- *                 conditions:
+ *                 condition:
  *                   type: string
+ *                 wind:
+ *                   type: number
  *                 humidity:
  *                   type: number
- *                 windSpeed:
- *                   type: number
- *                 windDirection:
- *                   type: string
- *                 visibility:
- *                   type: number
- *                 timestamp:
+ *                 updatedAt:
  *                   type: string
  *                   format: date-time
  *       500:
@@ -42,10 +39,9 @@ import { NextResponse } from 'next/server'
  *               nullable: true
  */
 
-export const dynamic = 'force-dynamic' // Weather data should always be fresh
-
 export async function GET() {
   try {
+    await headers() // Force dynamic execution
     const weather = await fetchWeather()
     return NextResponse.json(weather)
   } catch (error) {

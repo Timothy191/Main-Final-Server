@@ -89,8 +89,22 @@ async function storeTelemetryData(reading: {
   try {
     const supabase = await createServerSupabaseClient()
 
+    // Fetch department ID dynamically for control-room
+    const { data: dept } = await supabase
+      .from('departments')
+      .select('id')
+      .eq('slug', 'control-room')
+      .single()
+
+    const departmentId = dept?.id
+    if (!departmentId) {
+      console.error('[Modbus] Control room department not found')
+      return
+    }
+
     // Store in modbus_telemetry table
     const { error } = await supabase.from('modbus_telemetry').insert({
+      department_id: departmentId,
       equipment_id: reading.equipmentId,
       timestamp: reading.timestamp.toISOString(),
       registers: reading.registers,

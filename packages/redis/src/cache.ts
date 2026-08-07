@@ -28,12 +28,8 @@ import {
   l1IndexTags,
   l1Clear,
 } from './l1.js'
-import { createGzip, createGunzip } from 'zlib'
-import { pipeline as streamPipeline } from 'stream'
-import { promisify } from 'util'
+import { gzip as gzipCb, gunzip as gunzipCb } from 'zlib'
 import { randomUUID } from 'crypto'
-
-const pipelineAsync = promisify(streamPipeline)
 
 // ---------------------------------------------------------------------------
 // Feature flags
@@ -61,34 +57,20 @@ const HIT_RATE_ALERT_COOLDOWN_MS = 60_000
 // Compression helpers
 // ---------------------------------------------------------------------------
 
-async function gzipBuffer(data: string): Promise<Buffer> {
-  const { Readable, Writable } = await import('stream')
-  const chunks: Buffer[] = []
-  const input = Readable.from([Buffer.from(data, 'utf8')])
-  const gzip = createGzip()
-  const collector = new Writable({
-    write(chunk, _enc, cb) {
-      chunks.push(chunk as Buffer)
-      cb()
-    },
+function gzipBuffer(data: string): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    // AGENT-TRACE: callback API — zlib's no-callback overload throws on this Node (ERR_INVALID_ARG_TYPE)
+    gzipCb(data, (err, result) => (err ? reject(err) : resolve(result)))
   })
-  await pipelineAsync(input, gzip, collector)
-  return Buffer.concat(chunks)
 }
 
-async function gunzipBuffer(data: Buffer): Promise<string> {
-  const { Readable, Writable } = await import('stream')
-  const chunks: Buffer[] = []
-  const input = Readable.from([data])
-  const gunzip = createGunzip()
-  const collector = new Writable({
-    write(chunk, _enc, cb) {
-      chunks.push(chunk as Buffer)
-      cb()
-    },
+function gunzipBuffer(data: Buffer): Promise<string> {
+  return new Promise((resolve, reject) => {
+    gunzipCb(data, (err, result) => {
+      if (err) reject(err)
+      else resolve(result.toString('utf8'))
+    })
   })
-  await pipelineAsync(input, gunzip, collector)
-  return Buffer.concat(chunks).toString('utf8')
 }
 
 // ---------------------------------------------------------------------------
@@ -211,42 +193,17 @@ async function checkHitRateAlert(): Promise<void> {
 // Core cache API
 // ---------------------------------------------------------------------------
 
-export async function cacheGet<T>(key: string): Promise<T | null> {
-  const start = performance.now()
-
-  const l1Value = memoryGet<T>(key)
-  if (l1Value !== null) {
-    recordCacheHit('l1', performance.now() - start)
-    return l1Value
-  }
-
-  try {
-    const redis = await getRedisClientSafe()
-    if (!redis) {
-      recordCacheMiss(performance.now() - start)
-      return null
-    }
-    const value = await redis.get(key)
-    if (value) {
-      const parsed = await deserialize<T>(value)
-      memorySet(key, parsed, 15)
-      recordCacheHit('l2', performance.now() - start)
-      return parsed
-    }
-    recordCacheMiss(performance.now() - start)
-    // Fire-and-forget hit-rate check
-    checkHitRateAlert().catch(() => {})
-    return null
-  } catch {
-    recordRedisError()
-    recordCacheMiss(performance.now() - start)
-    return null
-  }
+interface CacheLookup<T> {
+  value: T | null
+  source: 'l1' | 'l2' | null
 }
 
-export async function cacheGetWithStats<T>(
-  key: string
-): Promise<{ value: T | null; source: 'l1' | 'l2' | null }> {
+/**
+ * Shared read path for cacheGet / cacheGetWithStats.
+ * Checks L1, then L2 (Redis) with circuit breaker + deserialize + L1 repopulate.
+ * AGENT-TRACE: cacheGet fires the hit-rate alert on L2 miss; cacheGetWithStats does not.
+ */
+async function getInternal<T>(key: string, alertOnMiss = false): Promise<CacheLookup<T>> {
   const start = performance.now()
 
   const l1Value = memoryGet<T>(key)
@@ -269,12 +226,25 @@ export async function cacheGetWithStats<T>(
       return { value: parsed, source: 'l2' }
     }
     recordCacheMiss(performance.now() - start)
+    if (alertOnMiss) {
+      // Fire-and-forget hit-rate check
+      checkHitRateAlert().catch(() => {})
+    }
     return { value: null, source: null }
   } catch {
     recordRedisError()
     recordCacheMiss(performance.now() - start)
     return { value: null, source: null }
   }
+}
+
+export async function cacheGet<T>(key: string): Promise<T | null> {
+  const { value } = await getInternal<T>(key, true)
+  return value
+}
+
+export async function cacheGetWithStats<T>(key: string): Promise<CacheLookup<T>> {
+  return getInternal<T>(key)
 }
 
 export async function cacheSet<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
@@ -376,6 +346,72 @@ export interface CacheWrapOptions {
   tags?: string[]
 }
 
+/**
+ * Persist a freshly computed value, honoring optional tag indexing.
+ * Shared by the distributed-lock and in-process-coalescing paths.
+ */
+async function storeResult<T>(
+  key: string,
+  result: T,
+  ttlSeconds: number,
+  tags?: string[]
+): Promise<void> {
+  if (tags && tags.length > 0) {
+    await cacheSetWithTags(key, result, ttlSeconds, tags)
+  } else {
+    await cacheSet(key, result, ttlSeconds)
+  }
+}
+
+/**
+ * Try to resolve the request under a Redis distributed mutex (SET NX PX).
+ * Returns { handled: true, value } when the lock path produced a result
+ * (cache hit by the waiter or winner, or freshly computed), or
+ * { handled: false } when no real Redis is available and the caller should
+ * fall through to in-process request coalescing.
+ * AGENT-TRACE: lock release runs via finally and only when we hold the lock.
+ */
+async function withDistributedLock<T>(
+  key: string,
+  fn: () => Promise<T>,
+  ttlSeconds: number,
+  tags?: string[]
+): Promise<{ handled: true; value: T } | { handled: false }> {
+  const redis = await getRedisClientSafe()
+  // Only attempt the distributed lock with a real Redis client (not native fallback)
+  if (!redis || typeof redis.set !== 'function' || typeof redis.eval === 'undefined') {
+    return { handled: false }
+  }
+
+  const lockKey = `arch:lock:${key}`
+  const lockValue = randomUUID()
+  let lockHeld = false
+
+  try {
+    lockHeld = await acquireLock(redis, lockKey, lockValue)
+
+    if (!lockHeld) {
+      // We are a "waiter" — wait for the winner to populate the cache
+      await waitForLockRelease(redis, lockKey)
+      const afterWait = await cacheGet<T>(key)
+      if (afterWait !== null) return { handled: true, value: afterWait }
+      // Winner failed — fall through to compute ourselves
+    }
+
+    // Re-check cache after acquiring (another pod may have filled it)
+    const afterLock = await cacheGet<T>(key)
+    if (afterLock !== null) return { handled: true, value: afterLock }
+
+    const result = await fn()
+    await storeResult(key, result, ttlSeconds, tags)
+    return { handled: true, value: result }
+  } finally {
+    if (lockHeld) {
+      await releaseLock(redis, lockKey, lockValue)
+    }
+  }
+}
+
 export async function cacheWrap<T>(
   key: string,
   fn: () => Promise<T>,
@@ -392,37 +428,8 @@ export async function cacheWrap<T>(
 
   // --- Distributed lock path (multi-pod stampede prevention) ---
   if (DISTRIBUTED_LOCK_ENABLED) {
-    const redis = await getRedisClientSafe()
-    // Only attempt distributed lock with a real Redis client (not native fallback)
-    if (redis && typeof redis.set === 'function' && typeof redis.eval !== 'undefined') {
-      const lockKey = `arch:lock:${key}`
-      const lockValue = randomUUID()
-      const acquired = await acquireLock(redis, lockKey, lockValue)
-
-      if (!acquired) {
-        // We are a "waiter" — wait for the winner to populate the cache
-        await waitForLockRelease(redis, lockKey)
-        const afterWait = await cacheGet<T>(key)
-        if (afterWait !== null) return afterWait
-        // Winner failed — fall through to compute ourselves
-      }
-
-      try {
-        // Re-check cache after acquiring (another pod may have filled it)
-        const afterLock = await cacheGet<T>(key)
-        if (afterLock !== null) return afterLock
-
-        const result = await fn()
-        if (tags && tags.length > 0) {
-          await cacheSetWithTags(key, result, ttlSeconds, tags)
-        } else {
-          await cacheSet(key, result, ttlSeconds)
-        }
-        return result
-      } finally {
-        await releaseLock(redis, lockKey, lockValue)
-      }
-    }
+    const locked = await withDistributedLock(key, fn, ttlSeconds, tags)
+    if (locked.handled) return locked.value
   }
 
   // --- In-process request coalescing (single-node, always active) ---
@@ -430,11 +437,7 @@ export async function cacheWrap<T>(
   if (!activeFetch) {
     activeFetch = fn()
       .then(async (result) => {
-        if (tags && tags.length > 0) {
-          await cacheSetWithTags(key, result, ttlSeconds, tags)
-        } else {
-          await cacheSet(key, result, ttlSeconds)
-        }
+        await storeResult(key, result, ttlSeconds, tags)
         return result
       })
       .finally(() => {
@@ -464,7 +467,7 @@ export async function cacheDelete(key: string): Promise<void> {
 }
 
 export async function cacheDeletePattern(pattern: string): Promise<void> {
-  const prefix = pattern.replace('*', '')
+  const prefix = pattern.replace(/\*/g, '')
   memoryDeleteByPrefix(prefix)
   await cacheInvalidatePrefixes([prefix])
 }

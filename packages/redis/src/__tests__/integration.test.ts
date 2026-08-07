@@ -12,6 +12,8 @@ jest.mock('../client.js', () => ({
   closeRedis: jest.fn(),
 }))
 
+import { describe, it, expect, jest, beforeEach, test } from '@jest/globals'
+
 import { cacheGet, cacheSet, cacheDelete, clearMemoryCache, cacheEvictL1ByPrefix } from '../cache'
 
 beforeEach(() => {

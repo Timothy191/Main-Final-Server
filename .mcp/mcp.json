@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "codebase-memory": {
+      "command": "/home/timothy/.local/bin/codebase-memory-mcp"
+    },
+    "supermemory": {
+      "command": "/home/timothy/.local/bin/supermemory-mcp"
+    },
+    "codegraph": {
+      "url": "http://localhost:6010/mcp"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/timothy/Documents/Arch-System"
+      ]
+    }
+  }
+}

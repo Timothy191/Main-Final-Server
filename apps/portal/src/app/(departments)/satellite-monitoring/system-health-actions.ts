@@ -163,8 +163,8 @@ async function _getCachedAlertMetrics(deptId: string): Promise<AlertMetrics> {
     })
   }
 
-  const criticalCount = alerts.filter((a) => a.severity === 'critical').length
-  const warningCount = alerts.filter((a) => a.severity === 'warning').length
+  const criticalCount = alerts.filter((a: { severity: string }) => a.severity === 'critical').length
+  const warningCount = alerts.filter((a: { severity: string }) => a.severity === 'warning').length
 
   return {
     recentAlerts: alerts.slice(0, 10),

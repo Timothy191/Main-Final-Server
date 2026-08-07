@@ -296,3 +296,44 @@ export const revokeAccessBadgeSchema = z.object({
   reason: z.string().min(3),
 })
 export type RevokeAccessBadgeInput = z.infer<typeof revokeAccessBadgeSchema>
+
+/* ------------------------------------------------------------------ */
+/*  SharePoint / Power Apps Sync Schemas                                */
+/* ------------------------------------------------------------------ */
+// AGENT-TRACE: Added for SharePoint employee sync integration (init-monorepo follow-up)
+
+export const sharePointUserSchema = z.object({
+  id: z.string(),
+  displayName: z.string().nullable().optional(),
+  givenName: z.string().nullable().optional(),
+  surname: z.string().nullable().optional(),
+  mail: z.string().email().nullable().optional(),
+  userPrincipalName: z.string().nullable().optional(),
+  department: z.string().nullable().optional(),
+  jobTitle: z.string().nullable().optional(),
+  officeLocation: z.string().nullable().optional(),
+  mobilePhone: z.string().nullable().optional(),
+  businessPhones: z.array(z.string()).nullable().optional(),
+  employeeId: z.string().nullable().optional(),
+})
+export type SharePointUser = z.infer<typeof sharePointUserSchema>
+
+export const syncResultSchema = z.object({
+  success: z.boolean(),
+  total_users: z.number().int().nonnegative(),
+  upserted: z.array(
+    z.object({
+      upn: z.string(),
+      status: z.string(),
+    })
+  ),
+  errors: z.array(
+    z.object({
+      upn: z.string(),
+      error: z.string(),
+      status: z.number().optional(),
+    })
+  ),
+  error_count: z.number().int().nonnegative(),
+})
+export type SyncResult = z.infer<typeof syncResultSchema>

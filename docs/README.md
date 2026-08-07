@@ -20,6 +20,7 @@ Architectural designs, scalability references, and gap analyses.
 - [Architecture Diagrams](./architecture/architecture-diagrams.md) — Visualizations of the data flow and system structure.
 - [Foundational Architecture & Gap Analysis](./architecture/foundational-architecture-gap-analysis.md) — Comprehensive gap analysis of the existing layers.
 - [Scalability & Architecture Reference](./architecture/scalability-architecture-reference.md) — Core scalability guidelines and design principles.
+- [Next.js / React Framework Reference](./architecture/frontend-framework-references.md) — Attributed React-vs-Next.js + Real-World Next.js (2022) reference mapped to the Next.js 16 App Router.
 
 ### 🛡️ [Compliance](./compliance/)
 
@@ -46,9 +47,10 @@ Redis and application-level caching strategies.
 - [Caching Strategy Research](./caching/caching-strategy-research.md) — Detailed research on caching mechanisms.
 - [Redis Caching Redesign](./caching/redis-caching-redesign.md) — Plan and structure for Redis rate-limiting and session caching.
 
-### 🧠 [Architectural Insights & Memory](../memory/ARCHITECTURAL_INSIGHTS.md)
+### 🧠 [Architectural Insights & Memory](../memory/antigravity-memory/INDEX.md)
 
-High-level architecture, module maps, and client-server boundary rules are indexed in [`memory/ARCHITECTURAL_INSIGHTS.md`](../memory/ARCHITECTURAL_INSIGHTS.md).
+High-level architecture, module maps, and client-server boundary rules are indexed in [`memory/antigravity-memory/long/ARCHITECTURAL_INSIGHTS.md`](../memory/antigravity-memory/long/ARCHITECTURAL_INSIGHTS.md).
+For a comprehensive starburst hub connecting all codebase structures, view the [Master Map of Content (MOC)](../memory/antigravity-memory/long/MAP_OF_CONTENT.md).
 
 ### 🚀 [Deployment](./deployment/)
 
@@ -87,9 +89,3 @@ and circuit breaker monitoring stack.
   — Diagnosis and resolution for when the cache circuit breaker trips open.
 - [Redis Connection Down](./runbooks/redis-connection-down.md)
   — Recovery steps when the Redis connection is lost.
-
-### ✨ [Superpowers](./superpowers/)
-
-Experimental capabilities and visual system plan logs.
-
-- [Plans](./superpowers/plans/)

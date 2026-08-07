@@ -1,0 +1,24 @@
+{
+  "_comment": "CI profile — headless-safe servers only. No browser, no local-infra (Postgres/Redis) deps.",
+  "mcpServers": {
+    "codebase-memory": {
+      "command": "/home/timothy/.local/bin/codebase-memory-mcp"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/timothy/Documents/Arch-System"
+      ]
+    }
+  }
+}

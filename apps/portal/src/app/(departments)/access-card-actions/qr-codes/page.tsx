@@ -63,16 +63,26 @@ export default async function QrCodesPage() {
     .order('issued_at', { ascending: false })
     .limit(50)
 
-  const cards = (issuedCards ?? []).map((card) => {
-    const person = card.personnel as {
-      first_name: string
-      surname: string
-    } | null
-    const name = person ? `${person.first_name} ${person.surname}` : 'Unknown'
-    const qrTruncated =
-      card.qr_code_data.length > 16 ? `${card.qr_code_data.slice(0, 16)}…` : card.qr_code_data
-    return { ...card, entityName: name, qrTruncated }
-  })
+  const cards = (issuedCards ?? []).map(
+    (card: {
+      id: string
+      qr_code_data: string
+      personnel: unknown
+      rfid_uid: string | null
+      status: string
+      issued_at: string
+      expires_at: string | null
+    }) => {
+      const person = card.personnel as {
+        first_name: string
+        surname: string
+      } | null
+      const name = person ? `${person.first_name} ${person.surname}` : 'Unknown'
+      const qrTruncated =
+        card.qr_code_data.length > 16 ? `${card.qr_code_data.slice(0, 16)}…` : card.qr_code_data
+      return { ...card, entityName: name, qrTruncated }
+    }
+  )
 
   return (
     <div className="space-y-6">

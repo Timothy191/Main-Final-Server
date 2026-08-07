@@ -5,6 +5,9 @@
     },
     "supermemory": {
       "command": "/home/timothy/.local/bin/supermemory-mcp"
+    },
+    "codegraph": {
+      "url": "http://localhost:6010/mcp"
     }
   }
 }

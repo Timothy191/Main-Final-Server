@@ -2,6 +2,35 @@
 
 This file maintains a record of AI agent interventions, context hand-offs, and architectural breadcrumbs for this specific package/app.
 
+## [2026-08-07] Resolve control-room cache follow-ups + pre-existing type errors
+
+- **Agent**: Cline (AI)
+- **Purpose**: Implement the recommended follow-up (delegate refresh to the cache hook, removing the duplicate fetch) and resolve pre-existing TypeScript errors that surfaced once the stale `tsc` `.tsbuildinfo` cache was invalidated.
+- **Changes Made**:
+  - **Consumer consolidation (`SCADAAlertFeed.tsx`):** the component previously fetched `/api/v2/telemetry/push` TWICE — via `useControlRoomCache` AND via a separate `fetchSCADAData` polling loop. Removed the duplicate `fetchSCADAData` path; `alerts` is now derived from the cache hook's `data` (`cachedAlerts ?? DEFAULT_ALERTS`), the Sync button and the 15s `setInterval` both call the hook's `refresh`, and a `useEffect` syncs the "last updated" timestamp + a console warning on fetch error. This makes the cache hook the single source of truth (TTL + tag invalidation).
+  - **Pre-existing type cleanup:** fixed **45** `TS7006` (implicit-any callback params) and `TS18048` (possibly-undefined) errors in 18 files I had not touched — `accessible-departments.ts`, inngest jobs (`shift-summarization`, `report-generation`, `memory-persist`), export routes (`machines`, `safety-incidents`, `fuel-logs`, `monthly-report`), `api/ai/search`, `api/printers/scan`, and department actions/pages (control-room, drilling, geology, logistics-fleet, satellite-monitoring, safety, access-card-actions). Fixed by annotating Supabase `any` rows with explicit structural types (e.g. `{ id: string }`, `Record<string, unknown>` for CSV-by-key access, `[string, string]` tuples for `new Map`) and by making `entries: string[]` non-undefined in `shift-summarization`.
+- **Mechanism note:** `tsc --noEmit` had been "passing" via a stale incremental cache that skipped re-checking unchanged files. Any real tsc (CI, forced full recheck) surfaces these latent errors — worth addressing repo-wide rather than relying on cache masking.
+- **Files**: `apps/portal/src/app/(departments)/control-room/components/SCADAAlertFeed.tsx`, `apps/portal/src/hooks/useControlRoomCache.test.ts`, plus the 18 type-fix files listed in the REPO-CHANGE-INDEX row.
+- **Docs updated**: `docs/REPO-CHANGE-INDEX.md`, `apps/portal/AGENT_TRACER.md`
+- **Verification**: `turbo run lint type-check test --filter portal --force` → 7/7 tasks, 571/571 tests, 0 cached; `pnpm type-check` reports 0 errors.
+- **Next Agent Notes**: No `DRIFT SCORE:` line — fully aligned. If you see similar `TS7006` implicit-any errors elsewhere, prefer annotating the Supabase row rather than casting to `any` (lint enforces `no-explicit-any`, max-warnings 0).
+
+## [2026-08-07] Verify & harden control-room client cache spec
+
+- **Agent**: Cline (AI)
+- **Purpose**: Close coverage gaps in the `control-room-client-cache` spec and stabilize the `SCADAAlertFeed` consumer against the volatile-fetcher precondition.
+- **Changes Made**:
+  - Added two spec-scenario tests to `useControlRoomCache.test.ts`:
+    - _Unrelated entries survive tag invalidation_ (Scenario 2.2): two keys with disjoint tags; invalidating one tag evicts only its entry, the other remains cached and served.
+    - _Volatile fetcher does not loop_ (Scenario 3.1): `rerender` with a brand-new fetcher closure each time for the same key; asserts the fetcher is invoked exactly once and no extra refetch/render occurs within TTL.
+  - Hardened `SCADAAlertFeed.tsx`: wrapped the cache fetcher in `useCallback` (stable identity) and lifted TTL/tags options to a module-level const, handing stable identities to `useControlRoomCache` per the spec's "tolerate — and ideally never require — volatile fetcher/options" intent.
+  - AGENT-TRACE breadcrumb comments added inline at the cache hook call site documenting the ref-pinning stabilization mechanism.
+- **Mechanism**: the hook pins `fetcher` and `options` into `useRef` and keys its trigger `useEffect` on `[key, executeFetch]` (stable via `useCallback([key])`), so neither a changing fetcher identity nor a changing options identity re-triggers a fetch — this is what Scenario 3.1 now guards against regression.
+- **Files**: `apps/portal/src/hooks/useControlRoomCache.test.ts`, `apps/portal/src/app/(departments)/control-room/components/SCADAAlertFeed.tsx`
+- **Docs updated**: `docs/REPO-CHANGE-INDEX.md`, `apps/portal/AGENT_TRACER.md`
+- **Verification**: `turbo run lint type-check test --filter portal --force` → 7/7 tasks successful, 571/571 tests pass, 0 cached.
+- **Next Agent Notes**: No `DRIFT SCORE:` line — fully aligned with spec (0.0). New DRIFT SCORE rules do not apply.
+
 ## [2026-08-04] Implement React `cache()`, Suspense, and PPR optimizations
 
 - **Agent**: Junie (AI)

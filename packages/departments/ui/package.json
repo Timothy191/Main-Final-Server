@@ -2,8 +2,8 @@
   "name": "@repo/departments/ui",
   "version": "0.0.1",
   "private": true,
-  "main": "./index.ts",
+  "main": "./src/index.ts",
   "exports": {
-    ".": "./index.ts"
+    ".": "./src/index.ts"
   }
 }

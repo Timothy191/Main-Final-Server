@@ -79,62 +79,79 @@ const _CATEGORY_ICONS = {
   electrical: Clock,
 }
 
+// Stable cache options for the SCADA alert feed. Defined at module scope so the
+// options reference never changes between renders, satisfying the volatile-fetcher
+// stability contract consumed by `useControlRoomCache`.
+const SCADA_ALERT_CACHE_OPTIONS = {
+  ttlSeconds: 15,
+  tags: ['control-room', 'scada', 'telemetry'],
+}
+
 // Control Room SCADA Alert Feed Component
 // Enhanced with caching, trend indicators, and category support
 
 export function SCADAAlertFeed() {
-  const [alerts, setAlerts] = useState<SCADAAlert[]>(DEFAULT_ALERTS)
-  const [isRefreshing, setIsRefreshing] = useState(false)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
 
-  // Cache for SCADA alerts using the Control Room cache hook
-  const { data: cachedAlerts, refresh: _refreshSCADACache } = useControlRoomCache<SCADAAlert[]>(
+  // Cache for SCADA alerts using the Control Room cache hook.
+  // The fetcher is wrapped in `useCallback` and the options are a module-level
+  // const, so stable identities are handed to the hook (spec: tolerate — and
+  // preferably never even require — volatile fetcher/options).
+  const fetchSCADACache = useCallback(async (): Promise<SCADAAlert[]> => {
+    const res = await fetch('/api/v2/telemetry/push')
+    if (!res.ok) throw new Error('Failed to fetch SCADA data')
+    const json = await res.json()
+    return json?.alerts || []
+  }, [])
+
+  // AGENT-TRACE: the consumer delegates ALL fetching/refresh to the cache hook.
+  // The previous duplicate direct `fetch('/api/v2/telemetry/push')` that lived
+  // in `fetchSCADAData` is removed - the hook is now the single source of truth
+  // for SCADA alert data, its TTL, and its tag-based invalidation.
+  const {
+    data: cachedAlerts,
+    error,
+    isValidating: isRefreshing,
+    refresh: refreshCache,
+  } = useControlRoomCache<SCADAAlert[]>(
     'control-room:scada-alerts',
-    async () => {
-      const res = await fetch('/api/v2/telemetry/push')
-      if (!res.ok) throw new Error('Failed to fetch SCADA data')
-      const json = await res.json()
-      return json?.alerts || []
-    },
-    {
-      ttlSeconds: 15,
-      tags: ['control-room', 'scada', 'telemetry'],
-    }
+    fetchSCADACache,
+    SCADA_ALERT_CACHE_OPTIONS
   )
 
-  const fetchSCADAData = useCallback(async () => {
-    setIsRefreshing(true)
-    try {
-      const res = await fetch('/api/v2/telemetry/push')
-      if (res.ok) {
-        const json = await res.json()
-        if (json?.alerts && Array.isArray(json.alerts)) {
-          setAlerts(json.alerts)
-          setLastUpdate(new Date())
-        }
-      }
-    } catch (error) {
-      console.warn('SCADA feed error, using cached data:', error)
-      if (cachedAlerts) {
-        setAlerts(cachedAlerts)
-        setLastUpdate(new Date())
-      }
-    } finally {
-      setIsRefreshing(false)
+  // Source of truth is the cache; fall back to built-in defaults only while the
+  // initial fetch is in flight (or if it has never resolved).
+  const alerts = cachedAlerts ?? DEFAULT_ALERTS
+
+  // Refresh the "last updated" timestamp whenever fresh cached data lands.
+  useEffect(() => {
+    if (cachedAlerts) {
+      setLastUpdate(new Date())
     }
   }, [cachedAlerts])
 
-  const handleRefresh = () => {
-    fetchSCADAData()
-  }
-
+  // Surface fetch errors via the console (mirrors the previous fallback warn).
   useEffect(() => {
-    fetchSCADAData()
+    if (error) {
+      console.warn('SCADA feed error, using cached data:', error)
+    }
+  }, [error])
+
+  // Manual refresh (Sync button) delegates to the cache hook's forced refetch,
+  // which also re-populates the cache for other consumers of the same key.
+  const handleRefresh = useCallback(() => {
+    refreshCache()
+  }, [refreshCache])
+
+  // Polling: force a cache refresh on the configured interval (15s, matching the
+  // cache TTL). The initial fetch is handled by the cache hook on mount, so the
+  // interval only drives subsequent refreshes - no duplicate first request.
+  useEffect(() => {
     const timer = setInterval(() => {
-      fetchSCADAData()
-    }, 15000)
+      refreshCache()
+    }, SCADA_ALERT_CACHE_OPTIONS.ttlSeconds * 1000)
     return () => clearInterval(timer)
-  }, [fetchSCADAData])
+  }, [refreshCache])
 
   const getSeverityBadge = (severity: SCADAAlert['severity']) => {
     const style = CONTROL_ROOM_STYLES[severity] || CONTROL_ROOM_STYLES.info

@@ -10,6 +10,21 @@
 --   "invalid value for parameter hnsw.ef_search"
 -- ============================================
 
+-- Drop existing functions dynamically to avoid argument mismatch/uniqueness errors on replacement
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN 
+        SELECT oid::regprocedure AS sig 
+        FROM pg_proc 
+        WHERE proname IN ('search_memories_semantic', 'search_memories_hybrid')
+    LOOP
+        EXECUTE 'DROP FUNCTION IF EXISTS ' || r.sig || ' CASCADE';
+    END LOOP;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION search_memories_hybrid(
   query_embedding VECTOR(1536),
   query_text TEXT,

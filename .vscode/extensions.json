@@ -8,6 +8,14 @@
     "ms-azuretools.vscode-docker",
     "ms-vsliveshare.vsliveshare",
     "GitHub.copilot",
-    "GitHub.copilot-chat"
+    "GitHub.copilot-chat",
+    "formulahendry.vscode-node-red",
+    "DavidAnson.vscode-markdownlint",
+    "stylelint.vscode-stylelint",
+    "redhat.vscode-yaml",
+    "prisma.prisma",
+    "qwtel.sqlite-viewer",
+    "vercel.turbo",
+    "avwo.vscode-whistle"
   ]
 }

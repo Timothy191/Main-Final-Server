@@ -1,0 +1,97 @@
+/* Arch System — Minimalist Glassmorphic Graph & Workspace Snippet */
+
+/* 1. Base Workspace Theme: Minimalist Light Mode */
+body, .app-container, .workspace {
+    --background-primary: #f8fafc;
+    --background-primary-alt: #f1f5f9;
+    --background-secondary: #e2e8f0;
+    --background-secondary-alt: #cbd5e1;
+    --text-normal: #1e293b;
+    --text-muted: #64748b;
+    --text-accent: #0ea5e9;
+    --interactive-accent: #0ea5e9;
+    --scrollbar-active-thumb-bg: rgba(14, 165, 233, 0.2);
+    background-color: var(--background-primary) !important;
+    color: var(--text-normal) !important;
+}
+
+/* 2. Glassmorphic Settings & Controls Floating Panels */
+.graph-controls, .modal, .popover, .menu, .nav-folder-title, .workspace-ribbon {
+    background: rgba(255, 255, 255, 0.35) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.08) !important;
+}
+
+/* 3. Floating Graph UI Controls Styling */
+.graph-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 16px;
+    max-width: 320px;
+    z-index: 100;
+}
+
+.graph-controls .setting-item {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 8px 0;
+}
+
+/* 4. Graph Visualizer Node & Edge Colors mapping */
+/* Nodes & Links Custom Styling */
+.graph-view-wrapper {
+    background-color: var(--background-primary) !important;
+}
+
+/* Map specific clusters to match design-system color specs */
+.graph-node[data-folder^="packages/ui"], 
+.graph-node[data-folder^="packages/theme"], 
+.graph-node[data-folder^="packages/departments/ui"] {
+    fill: #0ea5e9 !important; /* Frontend Cluster: Cyan/Teal */
+}
+
+.graph-node[data-folder^="apps/portal/src/proxy.ts"], 
+.graph-node[data-folder^="packages/acl"], 
+.graph-node[data-folder^="packages/contract"] {
+    fill: #a855f7 !important; /* Backend BFF Cluster: Purple */
+}
+
+.graph-node[data-folder^="packages/redis"] {
+    fill: #f59e0b !important; /* Caching Cluster: Amber */
+}
+
+.graph-node[data-folder^="packages/supabase"], 
+.graph-node[data-folder^="packages/database"] {
+    fill: #10b981 !important; /* Data Cluster: Emerald */
+}
+
+.graph-node[data-folder^=".agents"], 
+.graph-node[data-folder^=".claude"], 
+.graph-node[data-folder^=".cursor"] {
+    fill: #64748b !important; /* Tooling/Agents: Slate */
+}
+
+/* Interactive transitions for graph elements */
+.graph-node {
+    transition: fill 0.3s ease, r 0.3s ease;
+    cursor: pointer;
+}
+
+.graph-node:hover {
+    fill: #3b82f6 !important;
+    r: 8px !important;
+}
+
+.graph-line {
+    stroke: rgba(148, 163, 184, 0.3) !important;
+    stroke-width: 1.5px !important;
+    transition: stroke 0.3s ease, stroke-width 0.3s ease;
+}
+
+.graph-line:hover {
+    stroke: #3b82f6 !important;
+    stroke-width: 3px !important;
+}

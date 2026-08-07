@@ -324,7 +324,7 @@ remediation item in §11.
 ## 12. Related Documents
 
 - `docs/architecture/` — system architecture diagrams and gap analysis.
-- `memory/ARCHITECTURAL_INSIGHTS.md` — data-flow, boundary rules, and API maps.
+- [`../memory/antigravity-memory/long/ARCHITECTURAL_INSIGHTS.md`](../memory/antigravity-memory/long/ARCHITECTURAL_INSIGHTS.md) — data-flow, boundary rules, and API maps.
 - `docs/deployment/deployment.md` — deployment & environment parity (IQ evidence).
 - `apps/portal/CLAUDE.md` / `AGENTS.md` — agent policy (design-system global rule
   is referenced by §8 periodic review as a controlled-change example).

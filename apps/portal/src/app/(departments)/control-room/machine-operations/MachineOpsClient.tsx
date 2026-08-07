@@ -8,6 +8,7 @@ import { Input } from '@repo/ui/components/ui/input'
 import { Button } from '@repo/ui/components/ui/button'
 import { Badge } from '@repo/ui/components/ui/badge'
 import { Save, CheckCircle2, Cpu } from 'lucide-react'
+import { toast } from 'sonner'
 
 import {
   upsertMachineOperation,
@@ -73,6 +74,8 @@ function Row({ row, sites, operators }: RowProps) {
   const [saved, setSaved] = useState(false)
   const [closeSMR, setCloseSMR] = useState<string>(row.closeSMR?.toString() ?? '')
   const [operatorId, setOperatorId] = useState<string>(row.operatorId ?? '')
+  const [manualMode, setManualMode] = useState(false)
+  const [overrideStatus, setOverrideStatus] = useState('auto')
   const [siteId, setSiteId] = useState<string>(row.siteId ?? '')
   const [natural, setNatural] = useState<string>(row.naturalDelayMinutes.toString())
   const [nonProd, setNonProd] = useState<string>(row.nonProductionDelayMinutes.toString())
@@ -252,6 +255,43 @@ function Row({ row, sites, operators }: RowProps) {
 
       <TableCell className="px-3 py-2 align-middle text-right font-mono text-arch-text-secondary">
         {availabilityDisplay}
+      </TableCell>
+
+      <TableCell className="px-3 py-2 align-middle text-center">
+        <div className="flex items-center justify-center gap-2">
+          <input
+            type="checkbox"
+            checked={manualMode}
+            onChange={(e) => {
+              const checked = e.target.checked
+              setManualMode(checked)
+              if (checked) {
+                toast.warning(`Manual override engaged for ${row.machineName}.`)
+                setOverrideStatus('standby')
+              } else {
+                toast.success(`Automation re-engaged for ${row.machineName}.`)
+                setOverrideStatus('auto')
+              }
+            }}
+            disabled={isPending || isClosed}
+            className="w-3.5 h-3.5 accent-red-500 rounded border-arch-border bg-arch-surface/50 cursor-pointer"
+          />
+          {manualMode && (
+            <select
+              value={overrideStatus}
+              onChange={(e) => {
+                setOverrideStatus(e.target.value)
+                toast.info(`${row.machineName} state set to ${e.target.value.toUpperCase()}`)
+              }}
+              className="h-7 rounded border border-red-500/30 bg-red-500/10 text-red-400 text-[10px] font-bold px-1.5 focus:outline-none"
+            >
+              <option value="standby">STANDBY</option>
+              <option value="operational">RUNNING</option>
+              <option value="maintenance">MAINT</option>
+              <option value="override">OVERRIDE</option>
+            </select>
+          )}
+        </div>
       </TableCell>
 
       <TableCell className="px-3 py-2 align-middle text-center">

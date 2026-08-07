@@ -259,7 +259,9 @@ export async function getBlastDesigns(deptId: string): Promise<BlastDesign[]> {
       .from('mine_blocks')
       .select('id, name')
       .in('id', blockIds)
-    blockNames = new Map((blocks ?? []).map((b) => [b.id, b.name]))
+    blockNames = new Map(
+      (blocks ?? []).map((b: { id: string; name: string }) => [b.id, b.name] as [string, string])
+    )
   }
 
   return rows.map((row) => ({

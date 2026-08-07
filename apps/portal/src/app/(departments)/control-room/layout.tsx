@@ -2,6 +2,7 @@ import { DepartmentLayout } from '@repo/ui/DepartmentLayout'
 import { DEPARTMENTS, getDepartmentTabs } from '@/lib/departments'
 import { notFound } from 'next/navigation'
 import { ActiveDepartmentSetter } from '@/components/nav/ActiveDepartmentSetter'
+import { EmergencyStopButton } from '@/components/control-room/EmergencyStopButton'
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const dept = DEPARTMENTS.find((d) => d.name === 'control-room')
@@ -12,7 +13,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
   return (
     <>
       <ActiveDepartmentSetter department="control-room" />
-      <DepartmentLayout department={dept} tabs={tabs}>
+      <DepartmentLayout department={dept} tabs={tabs} footerAction={<EmergencyStopButton />}>
         {children}
       </DepartmentLayout>
     </>

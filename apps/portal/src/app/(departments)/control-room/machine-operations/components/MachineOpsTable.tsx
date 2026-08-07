@@ -70,6 +70,9 @@ export async function MachineOpsTable({ deptId, shiftDate, shiftType }: MachineO
                 Availability
               </TableHead>
               <TableHead className="px-3 py-3 font-semibold whitespace-nowrap text-center">
+                Manual Override
+              </TableHead>
+              <TableHead className="px-3 py-3 font-semibold whitespace-nowrap text-center">
                 Status
               </TableHead>
             </TableRow>

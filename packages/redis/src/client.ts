@@ -1,4 +1,5 @@
 import { getNativeRedisClient, NativeRedisClient } from './native-client.js'
+import { SQLiteCacheEngine } from './sqlite-client.js'
 
 let RedisConstructor: any = null
 async function getRedisConstructor() {
@@ -9,7 +10,7 @@ async function getRedisConstructor() {
   return RedisConstructor
 }
 
-type RedisClient = any | NativeRedisClient
+type RedisClient = any | NativeRedisClient | SQLiteCacheEngine
 
 // ---------------------------------------------------------------------------
 // Connection configuration
@@ -33,10 +34,19 @@ const REDIS_SENTINEL_PASSWORD = process.env.REDIS_SENTINEL_PASSWORD
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD
 
 const USE_SENTINEL = !!(REDIS_SENTINEL_SERVICE && REDIS_SENTINEL_NODES)
-const USE_NATIVE =
-  process.env.USE_NATIVE_CACHE === 'true' ||
-  process.env.NODE_ENV === 'test' ||
-  (!REDIS_URL && !USE_SENTINEL)
+const USE_NATIVE = process.env.USE_NATIVE_CACHE === 'true' || process.env.NODE_ENV === 'test'
+
+// Shared persistent fallback local cache instance
+let _sqliteCacheFallback: SQLiteCacheEngine | null = null
+function getFallbackClient(): any {
+  if (process.env.NODE_ENV === 'test') {
+    return getNativeRedisClient()
+  }
+  if (!_sqliteCacheFallback) {
+    _sqliteCacheFallback = new SQLiteCacheEngine('arch-cache.db')
+  }
+  return _sqliteCacheFallback
+}
 
 let client: any = null
 let connecting: Promise<any> | null = null
@@ -159,8 +169,8 @@ export function stopHealthCheck(): void {
  * Returns the Redis client if it is currently open, otherwise native client.
  */
 export function getClientIfOpen(): any {
-  if (USE_NATIVE) return getNativeRedisClient()
-  return client?.status === 'ready' ? client : getNativeRedisClient()
+  if (USE_NATIVE) return getFallbackClient()
+  return client?.status === 'ready' ? client : getFallbackClient()
 }
 
 /**
@@ -169,12 +179,12 @@ export function getClientIfOpen(): any {
  * Connection strategy:
  * 1. Uses ioredis with exponential-backoff reconnection (up to 6 attempts)
  * 2. Periodic health check pings every 30s
- * 3. Falls back to NativeRedisClient when external Redis is unavailable
+ * 3. Falls back to NativeRedisClient/SQLiteCacheEngine when external Redis is unavailable
  * 4. Cooldown: waits 10s after last failure before attempting reconnection
  */
 export async function getRedisClient(): Promise<any> {
-  if (USE_NATIVE) {
-    return getNativeRedisClient()
+  if (USE_NATIVE || (!REDIS_URL && !USE_SENTINEL)) {
+    return getFallbackClient()
   }
 
   if (client?.status === 'ready') return client
@@ -182,7 +192,7 @@ export async function getRedisClient(): Promise<any> {
 
   // Cooldown: don't hammer with connection attempts after recent failure
   if (Date.now() - lastFailure < 10_000) {
-    return getNativeRedisClient()
+    return getFallbackClient()
   }
 
   connecting = (async () => {
@@ -227,9 +237,9 @@ export async function getRedisClient(): Promise<any> {
       lastFailure = Date.now()
       stopHealthCheck()
       console.warn(
-        `[RedisClient] connection failed after ${connectionAttempts} attempts — falling back to NativeRedisClient: ${(err as Error)?.message ?? 'unknown error'}`
+        `[RedisClient] connection failed after ${connectionAttempts} attempts — falling back to SQLiteCacheEngine: ${(err as Error)?.message ?? 'unknown error'}`
       )
-      return getNativeRedisClient()
+      return getFallbackClient()
     } finally {
       connecting = null
     }

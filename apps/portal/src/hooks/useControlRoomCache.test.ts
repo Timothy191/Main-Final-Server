@@ -114,9 +114,7 @@ describe('useControlRoomCache', () => {
   })
 
   it('should force refresh when calling refresh()', async () => {
-    const fetcher = jest.fn()
-      .mockResolvedValueOnce('data-1')
-      .mockResolvedValueOnce('data-2')
+    const fetcher = jest.fn().mockResolvedValueOnce('data-1').mockResolvedValueOnce('data-2')
 
     const { result } = renderHook(() => useControlRoomCache('key-refresh', fetcher))
     await act(async () => {
@@ -131,5 +129,74 @@ describe('useControlRoomCache', () => {
 
     expect(result.current.data).toBe('data-2')
     expect(fetcher).toHaveBeenCalledTimes(2)
+  })
+
+  it('should leave unrelated entries after invalidating a tag (Scenario 2.2)', async () => {
+    const fetcherA = jest.fn().mockResolvedValue('data-a')
+    const fetcherB = jest.fn().mockResolvedValue('data-b')
+
+    // Populate the cache with two keys carrying disjoint tag sets.
+    const { result: resultA } = renderHook(() =>
+      useControlRoomCache('key-a', fetcherA, { tags: ['scada'] })
+    )
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync()
+    })
+    expect(resultA.current.data).toBe('data-a')
+
+    const { result: resultB } = renderHook(() =>
+      useControlRoomCache('key-b', fetcherB, { tags: ['engineering'] })
+    )
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync()
+    })
+    expect(resultB.current.data).toBe('data-b')
+
+    // Invalidate only the 'scada' tag — the 'engineering'-tagged entry must survive.
+    act(() => {
+      invalidateClientCacheByTags(['scada'])
+    })
+
+    expect(_clientCacheStoreForTesting.has('key-a')).toBe(false)
+    expect(_clientCacheStoreForTesting.has('key-b')).toBe(true)
+    // The unrelated entry is still served from cache.
+    expect(resultB.current.data).toBe('data-b')
+  })
+
+  it('should not refetch or loop when fetcher is recreated every render (Scenario 3.1)', async () => {
+    // Each render produces a BRAND-NEW fetcher closure for the same cache key.
+    // The hook must pin the fetcher in a ref and must NOT refetch (or loop)
+    // merely because the fetcher identity changed.
+    let callCount = 0
+    const makeFetcher = () => async () => {
+      callCount += 1
+      return `volatile-${callCount}`
+    }
+
+    const { result, rerender } = renderHook(
+      ({ fetcher }) => useControlRoomCache('key-volatile', fetcher),
+      { initialProps: { fetcher: makeFetcher() } }
+    )
+
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync()
+    })
+    expect(result.current.data).toBe('volatile-1')
+    expect(callCount).toBe(1)
+
+    // Re-render several times, each with a NEW fetcher closure (same key).
+    rerender({ fetcher: makeFetcher() })
+    rerender({ fetcher: makeFetcher() })
+    rerender({ fetcher: makeFetcher() })
+
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync()
+    })
+
+    // No refetch triggered by volatile fetcher references; the data and the
+    // cached store entry are unchanged after the re-renders.
+    expect(callCount).toBe(1)
+    expect(result.current.data).toBe('volatile-1')
+    expect(_clientCacheStoreForTesting.has('key-volatile')).toBe(true)
   })
 })

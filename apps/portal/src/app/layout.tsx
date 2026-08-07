@@ -18,6 +18,7 @@ import { ArchLockOverlay } from '@/components/system/ArchLockOverlay'
 import { Toaster } from '@repo/ui/Toaster'
 import { CookieConsent } from '@repo/ui/CookieConsent'
 import { FeedbackWidget } from '@/components/FeedbackWidget'
+import { OfflineBanner } from '@/components/OfflineBanner'
 
 const HeaderWidgets = dynamic(
   () =>
@@ -219,6 +220,7 @@ export default function RootLayout({
             <ArchLockOverlay />
             <ViewportBoundaries />
             <CookieConsent />
+            <OfflineBanner />
             <Toaster />
             {modal}
           </ClientProviders>

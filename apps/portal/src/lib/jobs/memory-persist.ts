@@ -53,7 +53,8 @@ export const memoryPersistFn = inngest.createFunction(
       // The user message was already stored by loadMemoryNode.
       // The assistant response is what we're recovering.
       const assistantMemories = recentMemories?.filter(
-        (m) => m.memory_type === 'episodic' && m.content.startsWith('Assistant:')
+        (m: { memory_type: string | null; content: string }) =>
+          m.memory_type === 'episodic' && m.content.startsWith('Assistant:')
       )
 
       if (!assistantMemories || assistantMemories.length === 0) {

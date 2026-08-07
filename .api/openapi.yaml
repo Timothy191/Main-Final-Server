@@ -1,0 +1,159 @@
+openapi: "3.1.0"
+info:
+  title: Arch-System Portal Internal API
+  version: "1.0.0"
+  description: |
+    Internal API surface for the Arch-System oil & gas operations portal.
+    For agent use only — not a public API.
+    Full Zod-validated contracts live in @repo/contract (packages/contract/).
+
+    Auth: All routes are gated by proxy.ts (edge) using Supabase session cookies.
+    Department ACL: @repo/acl defines department slugs and restricted roles.
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: https://portal.arch-systems.local
+    description: Production (internal)
+
+security:
+  - sessionCookie: []
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, error]
+        redis:
+          type: boolean
+        supabase:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+
+    CacheInvalidateRequest:
+      type: object
+      description: At least one field required.
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: Evict auth cache for a specific user (L1 + L2)
+        tags:
+          type: array
+          items:
+            type: string
+          description: Next.js cache tags to revalidate
+        department:
+          type: string
+          description: Department slug (from @repo/acl)
+        allDepartments:
+          type: boolean
+          description: Evict all department caches
+
+    AppError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        statusCode:
+          type: integer
+
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      operationId: getHealth
+      security: []
+      responses:
+        "200":
+          description: System health
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /api/cache/invalidate:
+    post:
+      summary: Invalidate L1+L2 cache entries
+      operationId: invalidateCache
+      security:
+        - sessionCookie: []
+      description: Admin-only. Evicts Redis L1/L2 and Next.js cache tags.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CacheInvalidateRequest"
+      responses:
+        "200":
+          description: Cache invalidated successfully
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppError"
+        "403":
+          description: Forbidden (not admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppError"
+
+  /api/auth/callback:
+    get:
+      summary: Supabase auth callback
+      operationId: authCallback
+      security: []
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: next
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect after successful auth
+
+  /api/feedback:
+    post:
+      summary: Submit user feedback
+      operationId: submitFeedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message:
+                  type: string
+                  maxLength: 2000
+                category:
+                  type: string
+                  enum: [bug, feature, general]
+      responses:
+        "201":
+          description: Feedback submitted
+        "401":
+          description: Unauthorized

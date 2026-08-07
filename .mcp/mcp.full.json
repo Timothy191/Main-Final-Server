@@ -1,0 +1,70 @@
+{
+  "mcpServers": {
+    "codebase-memory": {
+      "command": "/home/timothy/.local/bin/codebase-memory-mcp"
+    },
+    "supermemory": {
+      "command": "/home/timothy/.local/bin/supermemory-mcp"
+    },
+    "codegraph": {
+      "url": "http://localhost:6010/mcp"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/timothy/Documents/Arch-System"
+      ]
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git",
+        "--repository",
+        "/home/timothy/Documents/Arch-System"
+      ]
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:54322/main"
+      ]
+    },
+    "redis": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-redis", "redis://localhost:6379"]
+    },
+    "sqlite": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sqlite",
+        "/home/timothy/Documents/Arch-System/benchmark-cache.db"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"]
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"]
+    },
+    "genkit": {
+      "command": "npx",
+      "args": ["-y", "genkit-cli@^1.28.0", "mcp"]
+    }
+  }
+}

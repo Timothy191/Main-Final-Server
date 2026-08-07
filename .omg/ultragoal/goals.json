@@ -1,0 +1,32 @@
+[
+  {
+    "id": "goal-1",
+    "description": "Complete NestJS to NextJS Migration Phase tasks (NESTJS_TO_NEXTJS_MIGRATION.md)",
+    "status": "in-progress",
+    "verification_criteria": "All markdown checkboxes ticked, PRs or commits address module migrations, monitoring ported, and CI updated."
+  },
+  {
+    "id": "goal-2",
+    "description": "Complete Caching Strategy Roadmap Implementation (caching-strategy-research.md)",
+    "status": "todo",
+    "verification_criteria": "withCache wired to cacheWrap, EdgeCache class created, /api/metrics/cache exposed, L1 TTL increased to 60s, cache warmer script added, and dashboard configured."
+  },
+  {
+    "id": "goal-3",
+    "description": "Next.js & TypeScript Optimization Tasks (nextjs-optimization-reference.md & typescript-optimization-guide.md)",
+    "status": "todo",
+    "verification_criteria": "Hover speculation rules, fetchpriority conventions, bundle analyzer CI, cacheLife profiles, and tsconfig verification completed."
+  },
+  {
+    "id": "goal-4",
+    "description": "Complete Pre-Deployment & Dev Script Checklist Validations (deployment.md & dev-sh-test-checklist.md)",
+    "status": "todo",
+    "verification_criteria": "All checks in deployment and dev sh checklists verified to pass, including quality gates, environment validation, and monitoring endpoint availability."
+  },
+  {
+    "id": "goal-5",
+    "description": "Execute Standard Operating Procedures across Shared Packages (acl, contract, redis, supabase, ui)",
+    "status": "todo",
+    "verification_criteria": "All packages have passed type-check, tests, and their respective AGENTS.md checklists are completed."
+  }
+]

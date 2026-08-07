@@ -17,7 +17,7 @@
     "design:ratchet": "node tools/design-ratchet.mjs",
     "theme:shape": "node tools/theme-shape-guard.mjs",
     "lint:tokens": "pnpm --filter @repo/theme lint:tokens",
-            "lint:markdown": "markdownlint \"**/*.md\" --ignore \"**/node_modules/**\" --ignore \"packages/rust-bindings/**\" --ignore \"repowiki/**\" --ignore \"**/target/**\"",
+    "lint:markdown": "markdownlint \"**/*.md\" --ignore \"**/node_modules/**\" --ignore \"packages/rust-bindings/**\" --ignore \"repowiki/**\" --ignore \"**/target/**\"",
     "guard:imports": "node tools/import-boundary-guard.mjs",
     "guard:ignoresync": "node tools/ignore-sync-guard.mjs",
     "gates": "pnpm lint:markdown && pnpm lint:css && pnpm lint:yaml && pnpm audit:knip && node tools/check-drift-score.mjs && node tools/agents-verify.mjs && node tools/design-ratchet.mjs && node tools/theme-shape-guard.mjs && node tools/next-backend-guard.mjs && node tools/performance-budget-guard.mjs && pnpm --filter @repo/theme lint:tokens && pnpm guard:imports && pnpm guard:ignoresync",

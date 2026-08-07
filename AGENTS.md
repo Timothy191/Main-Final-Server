@@ -59,8 +59,9 @@ API Route Handlers      Server Components / Actions
 ### Key architectural rules
 
 - **Auth at the edge:** `apps/portal/src/proxy.ts` gates every request. Never duplicate ACL logic inline — import from `@repo/acl`.
-- **Department routes:** `app/(departments)/[department]/` — slugs defined in `@repo/acl` (`drilling`, `production`, `access-control`, `engineering`, `control-room`, `safety`, `training`, `satellite-monitoring`, etc.).
-- **Backend proxy:** `/api/backend/*` → `API_BASE_URL` (default `http://localhost:3004/api`).
+- **Department routes:** `app/(departments)/[department]/` — slugs defined in `@repo/acl` (SSOT). Full set (mirrored in `proxy.ts` `isValidRedirect`): `drilling`, `production`, `access-control`, `engineering`, `control-room`, `safety`, `training`, `satellite-monitoring`, `environment`, `logistics-fleet`, `geology`. Non-department top-level routes: `/hub`, `/executive`, `/admin`, `/quickview`, `/offline`.
+- **No BFF proxy:** there is **no** `/api/backend/*` rewrite — `API_BASE_URL` in `env.ts` is vestigial and `next.config.mjs` defines no rewrites. The portal exposes its own `/api/*` route handlers (`/api/auth`, `/api/health`, `/api/ai/*`, `/api/modbus-ingest`, `/api/telemetry`, `/api/control-room`, `/api/cache`, …) and reaches data directly through `@repo/supabase`. The `.api/` directory indexes all route groups (`routes.json`, `openapi.yaml`).
+- **AI & observability:** `/api/ai/*` uses `@google/genai` (Gemini); provider strategy is selected via `AI_BACKEND_STRATEGY` env (`ollama | gemini | router`). Sentry (`@sentry/nextjs`) + Vercel OTel are wired via `instrumentation.ts`; Sentry config is active only when `CI=true` or `ENABLE_HEAVY_PLUGINS=true`.
 - **Caching pattern:** Validate auth in an un-cached outer function; fetch data in an inner cached function with `createAdminClient()` + `cacheTag`. Never read `cookies()`/`headers()` inside `"use cache"` scopes.
 - **Supabase local-first:** Self-hosted Docker stack via `pnpm supabase:start`. Migrations in `packages/supabase/migrations/`. Never depend on remote cloud project links.
 
@@ -71,8 +72,9 @@ API Route Handlers      Server Components / Actions
 | `@repo/supabase` | Auth clients (`server`, `client`, `middleware`, `service-role`, `read-replica`) |
 | `@repo/database` | Kysely DB access layer |
 | `@repo/contract` | Zod validation schemas + OpenAPI contracts |
-| `@repo/redis` | L1/L2 cache singleton (`cacheGet`, `cacheSet`, `cacheDelete`) |
+| `@repo/redis` | L1/L2 cache singleton (`cacheGet`, `cacheSet`, `cacheDelete`, `cacheWrap`, `cacheSetWithTags`) |
 | `@repo/acl` | Department slugs, role definitions, restricted-route map |
+| `@repo/scraper` | Standalone dev/ops web scraper (Crawlee + Gemini) — never imported by portal runtime |
 
 ---
 
@@ -90,27 +92,42 @@ apps/portal/                 # Next.js 16 portal (only app)
 packages/
   acl/                       # Department slugs + role definitions (SSOT)
   contract/                  # Zod schemas + OpenAPI
-  database/                  # Kysely types
+  database/                  # Kysely types (type-gen only — never runtime)
   departments/ui/            # Shared department UI subpackage
   errors/                    # Typed AppError subclasses
+  eslint-config/             # Shared ESLint presets
+  jest-config/               # Shared Jest presets
   logger/                    # Structured logging
   rate-limiter/              # Token bucket / sliding window
   redis/                     # Redis client + L1/L2 cache
+  scraper/                   # Standalone web scraper (Crawlee + Gemini) — dev tool, not portal runtime
   supabase/                  # Supabase client, migrations, seed
   theme/                     # Design tokens + Tailwind (Style Dictionary)
   typescript-config/         # Shared tsconfig presets
   ui/                        # Shared React components (GlassCard, Button, …)
   utils/                     # Shared utilities
 
+arch-engine/                 # Rust dev-tooling: rust-utils (lib) + rust-wiki-builder (bin),
+                             # compiles repowiki/LIVE_SYS_STATUS.md; ops-daemon/ops-babysitter.mjs
+repowiki/                    # Generated live-system status wiki (Rust-compiled — do not hand-edit)
+.api/                        # Agent-context API surface index (routes.json, openapi.yaml) — NOT runtime code
+.context/                    # ONBOARD.md agent fast-start + llms.txt
+ops/                         # Grafana / Prometheus / Alertmanager configs
+devops/                      # nginx configs + deploy scripts
+
 scripts/                     # Dev boot, smoke tests, deploy, watchdog
 tools/                       # CI gates: audit-rls, agents-verify, design-ratchet, theme-shape
 docs/
   design-system/             # RULES.md, SPEC.md, DESIGN.md (enforceable visual contract)
   architecture/              # ADRs, scalability reference
+  codebase-maps/             # Mermaid maps (architecture, request flow, deps, caching, CI)
   runbooks/                  # Operational playbooks (Redis down, cache eviction, …)
   compliance/                # Compliance architecture
+  onboarding/                # Agent onboarding material
   WAYFINDER.md               # Concept → entry point → ADR index
   REPO-CHANGE-INDEX.md       # Append-only change log (agents must update)
+  ARCHITECTURE-MAP.md        # Monorepo visual overview (mermaid)
+  HYBRID-CACHE-MAP.md        # In-process L1 heap + SQLite WAL cache design
 ```
 
 Workspace globs: `apps/*`, `packages/*`, `packages/departments/*` (see `pnpm-workspace.yaml`).
@@ -144,8 +161,11 @@ pnpm format:check
 ### Full CI gate suite
 
 ```bash
-pnpm gates    # agents:verify + design:ratchet + theme:shape + lint:tokens
-pnpm quality  # turbo lint + type-check + test, then format:check
+pnpm gates    # 13-check suite: lint:markdown + lint:css + lint:yaml + audit:knip + check:drift +
+              # agents:verify + design:ratchet + theme:shape + next-backend-guard +
+              # performance-budget-guard + lint:tokens + guard:imports + guard:ignoresync
+pnpm quality  # turbo lint + type-check + test (--concurrency=4) + format:check + lint:yaml +
+              # audit:knip + check:drift + next-backend-guard
 ```
 
 ### Individual checks
@@ -161,6 +181,13 @@ pnpm db:codegen                                      # regenerate db-types.ts
 pnpm analyze                                         # run @next/bundle-analyzer on client/server bundles
 pnpm build                                           # turbo build all
 pnpm format                                          # prettier --write
+pnpm guard:imports                                   # client/server import boundary guard
+pnpm guard:ignoresync                                # .gitignore ↔ .claudeignore sync guard
+pnpm lint:markdown                                   # markdownlint on **/*.md
+pnpm lint:css                                        # stylelint on theme + ui CSS
+pnpm lint:yaml                                       # tools/lint-yaml.mjs
+pnpm check:drift                                     # drift score from .agents/AGENT_TRACER.md
+pnpm size:check                                      # size-limit budget
 ```
 
 ### Supabase & DB
@@ -201,6 +228,7 @@ pnpm deploy:live                                # live deployment wrapper
 - **Shared UI:** Reuse `@repo/ui` primitives; portal-specific overlays stay in `src/components/`.
 - **Validation:** Define Zod schemas in `@repo/contract`; share across server actions and API routes.
 - **Errors:** Throw typed subclasses from `@repo/errors` (`AppError`, `NotFoundError`, etc.). Re-export via `apps/portal/src/lib/errors/error-classes.ts`.
+- **API route guards:** every `/api/*` handler runs `runApiGuards` from `apps/portal/src/lib/api/api-guard.ts` (rate limit, SSRF, CSRF, CORS, body limit). Extend it there, never per-route.
 
 ### Design system (global rule)
 
@@ -230,6 +258,21 @@ Do **not** run `generate-tokens.mjs` for CSS edits — edit `packages/theme/src/
 ### Agent tracing
 
 Leave `// AGENT-TRACE:` breadcrumbs in code at non-obvious integration points. Update `.agents/AGENT_TRACER.md` for significant tasks.
+
+- **Tracer format:** sequential entries with Agent, ISO timestamp, Purpose, Changes, Dependencies, Notes — separated by `---`. `apps/portal/AGENT_TRACER.md` tracks portal-only work.
+- **Drift score:** if the current work drifts from the task/plan, append a line like `DRIFT SCORE: 0.15` (0 = fully aligned). `pnpm check:drift` (part of `gates`/`quality`) fails when the latest score ≥ 0.1. No score line means "no drift" and passes.
+
+### Non-obvious gotchas
+
+- **Workflow map (`.github/workflows/`):** `portal-ci.yml` is the real CI for portal/packages (type-check + lint + test + `agents:verify`, plus build/analyze/smoke jobs). `ci-monorepo.yml` runs an affected-diff build (`turbo run build ... --filter=...[origin/main]`) on PRs. `context-check.yml` runs `.scripts/check_context.sh` (context-efficiency enforcement). `codeql.yml` and `deploy-production.yml` round out the set. **`ci.yml` is stale** — it triggers on a `redis/` module directory that no longer exists at the repo root.
+- **Root `README.md` is stale** — it still describes Nx, `apps/cms`, `apps/overview`, and workflows that no longer exist. Trust `AGENTS.md` and `docs/WAYFINDER.md` over it.
+- **pnpm catalog + release age:** `pnpm-workspace.yaml` pins shared dev-tool versions in a `catalog:` block and sets `minimumReleaseAge: 2880` (48 h) — freshly published dependency versions are ignored until 48 h old unless excluded (`@repo/*`, `next`, `react`, `react-dom`). A just-released version may silently resolve to an older one.
+- **Portal build pipeline:** `pnpm --filter portal build` runs `build:cache-handler` (compiles `tsconfig.cache-handler.json` → `dist/lib/next-cache-handler.js`, wired as `cacheHandlers.default` in `next.config.mjs`) then `node scripts/generate-openapi-spec.js` then `next build`. Heavy plugins (Sentry upload, `output: standalone`) activate only when `CI=true` or `ENABLE_HEAVY_PLUGINS=true`. `next.config.mjs` sets `cacheComponents: true` with custom `cacheLife` profiles `1 minute` / `5 minutes` / `24 hours`.
+- **`_appdata/` is a FUXA SCADA data directory** (`settings.js`, `*.fuxap.db`, uiPort 1881) used by local tooling. Treat as runtime data, not source; do not edit, index, or rely on it.
+- **`benchmark.js` and `benchmark-cache.db`** at repo root are local benchmark artifacts, not part of the build.
+- **Ignore files must stay in sync:** `guard:ignoresync` requires critical patterns (`.turbo`, `.cocoindex_code/`, etc.) to be present in both `.gitignore` and `.claudeignore`.
+- **Client/server boundary:** components, hooks, `packages/ui`, and `packages/departments/ui` must never import `@repo/redis`, `@repo/database`, or `@repo/supabase/server` — `guard:imports` enforces this. Server components in `components/` without `"use client"` are skipped.
+- **`@repo/database` (Kysely) is for type generation only** — never import it in app runtime code; use `@repo/supabase` clients.
 
 ### Working Across Package Boundaries
 
@@ -351,11 +394,20 @@ Critical shared packages have their own AGENTS.md files:
 | Script | Tool | Purpose |
 | --- | --- | --- |
 | `audit:rls` | `tools/audit-rls.cjs` | Verify RLS policies on migrations |
-| `agents:verify` | `tools/agents-verify.mjs` | AGENTS.md link sync |
+| `agents:verify` | `tools/agents-verify.mjs` | AGENTS.md link sync (also runs in CI) |
 | `design:ratchet` | `tools/design-ratchet.mjs` | Glass/transparency pattern ratchet |
 | `theme:shape` | `tools/theme-shape-guard.mjs` | `generated.ts` shape guard |
 | `lint:tokens` | `@repo/theme lint:tokens` | Token integrity check |
-| `gates` | All of the above | Full CI gate suite |
+| `lint:markdown` | `markdownlint-cli` | Markdown lint (ignores `packages/rust-bindings/**`) |
+| `lint:css` | `stylelint` | CSS lint on `packages/theme` + `packages/ui` |
+| `lint:yaml` | `tools/lint-yaml.mjs` | YAML lint (CI configs, workflows) |
+| `audit:knip` | `knip` | Dead code / unused dependency audit |
+| `check:drift` | `tools/check-drift-score.mjs` | Fails if latest `DRIFT SCORE:` line in `.agents/AGENT_TRACER.md` ≥ 0.1 |
+| `next-backend-guard` | `tools/next-backend-guard.mjs` | Forbids `middleware.ts/js`; enforces `proxy.ts` + backend proxy rules |
+| `performance-budget-guard` | `tools/performance-budget-guard.mjs` | Audits server-action files for heavy client-bundle imports |
+| `guard:imports` | `tools/import-boundary-guard.mjs` | Blocks client dirs from importing `@repo/redis`, `@repo/database`, `@repo/supabase/server` |
+| `guard:ignoresync` | `tools/ignore-sync-guard.mjs` | Critical ignore patterns must exist in both `.gitignore` and `.claudeignore` |
+| `gates` | All of the above | Full CI gate suite (13 checks) |
 
 ---
 
@@ -406,7 +458,7 @@ pnpm format:check
 
 Do not trust a non-forced `pnpm quality` — cached lint can mask failures.
 
-## Consolidating Agent Context & Rules (`.agents/`)
+## Consolidating Agent Context & Rules (`.agents/` & `memory/`)
 
 All agent skills, rules, and prompt profiles are consolidated in the central [`.agents/`](file:///home/timothy/Documents/Arch-System/.agents/) directory to prevent IDE index bloat:
 - **Registry**: Rules are stored in [`.agents/rules/`](file:///home/timothy/Documents/Arch-System/.agents/rules/) and skills in [`.agents/skills/`](file:///home/timothy/Documents/Arch-System/.agents/skills/).
@@ -422,22 +474,79 @@ All agent skills, rules, and prompt profiles are consolidated in the central [`.
   .agents/scripts/manage-agent-context.sh clean
   ```
 
+- **Agent Memory Workspace (`memory/`)**:
+  To ensure persistent context does not clash between different active agents, each agent must create and maintain its own dedicated subdirectory under `memory/` (e.g. `memory/<agent-name>-memory/`).
+  Inside each agent memory workspace:
+  *   Maintain a `short/` subdirectory for temporary task-state snapshots.
+  *   Maintain a `long/` subdirectory for permanent project-level learnings.
+  *   Individual memory entries must be stored as single, descriptive `.md` markdown files.
+  *   A central `INDEX.md` file must reside in the root of the agent's subdirectory detailing the purpose of each memory log.
+
+
 ---
 
 ## Portal Agent
 
 The primary AI agent for this repository is the **portal agent**, which operates on the `apps/portal` Next.js application. See [`apps/portal/CLAUDE.md`](./apps/portal/CLAUDE.md) for portal-specific guidance, commands, and architecture details.
 
-## Auto-Connected Agent Tools (`cocoindex-code`)
+## Advisor Agent
 
-All AI agents onboarding or coding in this codebase auto-connect to `cocoindex-code` for AST-based semantic and structural code search:
+The **advisor agent** monitors all active agents working in this repository and injects real-world verified steering, advice, and recommendations. See [`.agents/rules/05-advisor.mdc`](./.agents/rules/05-advisor.mdc) (as well as `.claude/rules/advisor.md` and `.cursor/rules/advisor.mdc`) for the full steering guidelines.
+
+## Auto-Connected Agent Tools (`cocoindex-code`, `codegraph`)
+
+All AI agents onboarding or coding in this codebase auto-connect to workspace tools:
+
+- **`cocoindex-code`**: Used for AST-based semantic and structural code search. Agents can run `ccc grep` for zero-index AST structural search or `ccc search` / `ccc mcp` for semantic code search.
+- **`codegraph`**: Used for graph-based code understanding, running at `http://localhost:6010/mcp`.
 - Workspace MCP settings (`.mcp.json`, `.claude/mcp.json`, `.cursor/mcp.json`, `.vscode/mcp.json`, `.kilo/kilo.jsonc`) are committed and auto-loaded by onboarding agents.
-- Agents can run `ccc grep` for zero-index AST structural search or `ccc search` / `ccc mcp` for semantic code search.
 
 ## Further reading
 
-- Portal app details: [`apps/portal/CLAUDE.md`](./apps/portal/CLAUDE.md)
+- Agent fast-start: [`.context/ONBOARD.md`](./.context/ONBOARD.md)
+- Portal app details: [`apps/portal/CLAUDE.md`](./apps/portal/CLAUDE.md) and [`apps/portal/AGENTS.md`](./apps/portal/AGENTS.md)
+- Package catalog: [`packages/INDEX.md`](./packages/INDEX.md)
 - Agent knowledge base: `.agents/knowledge/index.md`
 - Runbooks: [`docs/runbooks/`](./docs/runbooks/)
 - Theme mechanics: [`packages/theme/README.md`](./packages/theme/README.md)
+- Visual maps: [`docs/ARCHITECTURE-MAP.md`](./docs/ARCHITECTURE-MAP.md), [`docs/HYBRID-CACHE-MAP.md`](./docs/HYBRID-CACHE-MAP.md), [`docs/codebase-maps/`](./docs/codebase-maps/)
 
+---
+
+## Proactive Best Practices & Completeness Enforcer
+
+- **Auto-Correction & Completeness**: If performing implementation changes, always proactively include all related actions, files, imports, and features required by industry best practices and monorepo documentation, even if the user forgets to explicitly request them in the prompt.
+  - *Example*: When renaming or refactoring a symbol, file, or package, automatically trace, update, and resolve all referencing imports, paths, and configurations across the entire workspace.
+  - *Example*: When introducing new features, ensure they are fully compliant with existing design patterns, typing structures, and CI lint gates, proactively resolving any adjacent integration issues.
+
+<!-- RUNQL:BEGIN -->
+# RunQL Context
+
+This workspace stores RunQL files locally under this project folder.
+
+RunQL storage root:
+
+./RunQL
+
+Useful paths:
+
+- Queries: ./RunQL/queries
+- Query index: ./RunQL/system/queries/queryIndex.json (auto-updated when a query is saved)
+- Schemas: ./RunQL/schemas
+- Connection profiles: ./RunQL/system/connections.json
+- Prompt templates: ./RunQL/system/prompts
+
+## Required Workflow (SQL Queries)
+
+1. Search for existing queries first — check the query index and `./RunQL/queries` (including subdirectories).
+2. If nothing relevant exists, read the schema and docs under `./RunQL/schemas`. Use `./RunQL/schemas/<connection>/manifest.json` to find available schemas, then read only the relevant `./RunQL/schemas/<connection>/<schema>/schema.json` and `description.json`. Ignore `./RunQL/schemas/deleted/` and `*_deleted` folders unless the user asks for archived content.
+3. Only then create a new SQL query file. Prefer to reuse or extend existing patterns. Put saved SQL under `./RunQL/queries/<connection>/`.
+
+## Required Workflow (Documentation Requests)
+
+1. **SQL query documentation:** follow `./RunQL/system/prompts/markdownDoc.txt`. Output goes in the same directory as the query with the same base name and a `.md` extension (e.g., `olympic_gold.sql` → `olympic_gold.md`).
+2. **Schema description:** follow `./RunQL/system/prompts/describeSchema.txt`. Output goes to the matching bundle folder as `./RunQL/schemas/<connection>/<schema>/description.json`.
+3. **Inline SQL comments:** follow `./RunQL/system/prompts/inlineComments.txt`.
+
+Secrets are stored in VS Code SecretStorage and are not present in these files.
+<!-- RUNQL:END -->

@@ -8,6 +8,8 @@
  * to ensure the module is loaded fresh with each env configuration.
  */
 
+import { describe, it, expect, jest, test } from '@jest/globals'
+
 import { retryStrategy, getRedisConnectionInfo, closeRedis, getClientIfOpen } from '../client'
 
 describe('retryStrategy', () => {

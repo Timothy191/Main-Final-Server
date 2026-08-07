@@ -101,7 +101,7 @@ async function _getCachedLogisticsMetrics(deptId: string): Promise<LogisticsMetr
       .select('id')
       .in('id', logIds)
       .eq('log_date', today)
-    const todayLogIds = new Set((logs ?? []).map((l) => l.id))
+    const todayLogIds = new Set((logs ?? []).map((l: { id: string }) => l.id))
     fuelLitresToday = fuelRows
       .filter((r) => todayLogIds.has(r.daily_log_id))
       .reduce((sum, r) => sum + (Number(r.diesel_litres) || 0), 0)

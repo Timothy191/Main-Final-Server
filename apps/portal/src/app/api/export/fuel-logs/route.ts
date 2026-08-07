@@ -173,7 +173,13 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
       : { data: null }
 
   // Fetch machine names for the fuel logs
-  const machineIds = [...new Set((fuelLogsRaw ?? []).map((f) => f.machine_id))]
+  const machineIds = [
+    ...new Set(
+      (fuelLogsRaw ?? [])
+        .map((f: { machine_id: string | null }) => f.machine_id)
+        .filter((v): v is string => v !== null)
+    ),
+  ]
   const { data: machinesRaw } =
     machineIds.length > 0
       ? await supabase.from('machines').select('id, name, machine_type').in('id', machineIds)

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { createMiddlewareClient } from '@repo/supabase/middleware'
@@ -163,7 +164,7 @@ async function signOutAndRedirectToRoot(
   client: MiddlewareClient
 ): Promise<NextResponse> {
   await client.supabase.auth.signOut()
-  return client.response
+  return client.response as any
 }
 
 function hasSessionCookie(request: NextRequest): boolean {
@@ -274,7 +275,7 @@ export async function proxy(request: NextRequest) {
       return NextResponse.next()
     }
 
-    const client = await createMiddlewareClient(request)
+    const client = await createMiddlewareClient(request as any)
     const { user, shouldSignOut } = await getSessionUser(client)
 
     if (shouldSignOut) {
@@ -285,10 +286,10 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL('/hub', request.url))
     }
 
-    return client.response
+    return client.response as any
   }
 
-  const client = await createMiddlewareClient(request)
+  const client = await createMiddlewareClient(request as any)
   const { user, shouldSignOut } = await getSessionUser(client)
 
   if (shouldSignOut) {
@@ -308,7 +309,7 @@ export async function proxy(request: NextRequest) {
       redirectUrl.searchParams.set('redirect', pathname)
     }
     const redirectResponse = NextResponse.redirect(redirectUrl)
-    copyCookies(client.response, redirectResponse)
+    copyCookies(client.response as any, redirectResponse as any)
     return redirectResponse
   }
 
@@ -320,7 +321,7 @@ export async function proxy(request: NextRequest) {
   const secondSegment = pathSegments[1]
 
   if (!isRestrictedRouteAllowed(pathname, secondSegment, userRole)) {
-    return redirectWithError(request, 'unauthorized_department', client.response)
+    return redirectWithError(request, 'unauthorized_department', client.response as any)
   }
 
   if (topSegment) {
@@ -334,14 +335,14 @@ export async function proxy(request: NextRequest) {
       }
     )
     if (deptStatus === 'unknown') {
-      return redirectWithError(request, 'unknown_department', client.response)
+      return redirectWithError(request, 'unknown_department', client.response as any)
     }
     if (deptStatus === 'unauthorized') {
-      return redirectWithError(request, 'unauthorized_department', client.response)
+      return redirectWithError(request, 'unauthorized_department', client.response as any)
     }
   }
 
-  return client.response
+  return client.response as any
 }
 
 export const config = {

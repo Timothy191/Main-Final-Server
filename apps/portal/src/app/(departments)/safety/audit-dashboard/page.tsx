@@ -123,84 +123,92 @@ export default async function AuditDashboardPage() {
 
         <div className="space-y-3">
           {reports && reports.length > 0 ? (
-            reports.map((report) => {
-              const data = report.report_data as AuditReportData | null
-              return (
-                <GlassCard
-                  key={report.id}
-                  className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-slate-300 transition-all"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                        {report.report_date}
-                      </span>
-                      <span className="text-[11px] text-slate-400">
-                        Generated{' '}
-                        {new Date(report.generated_at).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
+            reports.map(
+              (report: {
+                id: string
+                report_data: unknown
+                report_date: string
+                generated_at: string
+                pdf_url: string | null
+              }) => {
+                const data = report.report_data as AuditReportData | null
+                return (
+                  <GlassCard
+                    key={report.id}
+                    className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-slate-300 transition-all"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                          {report.report_date}
+                        </span>
+                        <span className="text-[11px] text-slate-400">
+                          Generated{' '}
+                          {new Date(report.generated_at).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-2 text-[13px]">
+                        <div>
+                          <span className="text-slate-400 block text-[11px] uppercase tracking-wider">
+                            Access Badging
+                          </span>
+                          <span className="font-semibold text-slate-700">
+                            {data?.metrics?.accessControl?.checkIns || 0} In /{' '}
+                            {data?.metrics?.accessControl?.denials || 0} Denials
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block text-[11px] uppercase tracking-wider">
+                            Drilling Performance
+                          </span>
+                          <span className="font-semibold text-slate-700">
+                            {data?.metrics?.drilling?.totalHoles || 0} holes /{' '}
+                            {data?.metrics?.drilling?.totalMeters?.toFixed(1) || 0}m
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block text-[11px] uppercase tracking-wider">
+                            Drill Downtime
+                          </span>
+                          <span className="font-semibold text-slate-700">
+                            {data?.metrics?.drilling?.totalDowntimeMinutes || 0} min
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block text-[11px] uppercase tracking-wider">
+                            Production Output
+                          </span>
+                          <span className="font-semibold text-slate-700">
+                            {data?.metrics?.production?.totalCoalTonnes?.toFixed(1) || 0}t Coal /{' '}
+                            {data?.metrics?.production?.totalWasteTonnes?.toFixed(1) || 0}t Waste
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-2 text-[13px]">
-                      <div>
-                        <span className="text-slate-400 block text-[11px] uppercase tracking-wider">
-                          Access Badging
-                        </span>
-                        <span className="font-semibold text-slate-700">
-                          {data?.metrics?.accessControl?.checkIns || 0} In /{' '}
-                          {data?.metrics?.accessControl?.denials || 0} Denials
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block text-[11px] uppercase tracking-wider">
-                          Drilling Performance
-                        </span>
-                        <span className="font-semibold text-slate-700">
-                          {data?.metrics?.drilling?.totalHoles || 0} holes /{' '}
-                          {data?.metrics?.drilling?.totalMeters?.toFixed(1) || 0}m
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block text-[11px] uppercase tracking-wider">
-                          Drill Downtime
-                        </span>
-                        <span className="font-semibold text-slate-700">
-                          {data?.metrics?.drilling?.totalDowntimeMinutes || 0} min
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block text-[11px] uppercase tracking-wider">
-                          Production Output
-                        </span>
-                        <span className="font-semibold text-slate-700">
-                          {data?.metrics?.production?.totalCoalTonnes?.toFixed(1) || 0}t Coal /{' '}
-                          {data?.metrics?.production?.totalWasteTonnes?.toFixed(1) || 0}t Waste
-                        </span>
-                      </div>
+                    <div className="flex sm:justify-end">
+                      {report.pdf_url ? (
+                        <a
+                          href={report.pdf_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-sm rounded-lg transition"
+                        >
+                          <FileDown className="w-4 h-4" />
+                          Download PDF
+                        </a>
+                      ) : (
+                        <span className="text-slate-400 text-sm italic">PDF unavailable</span>
+                      )}
                     </div>
-                  </div>
-
-                  <div className="flex sm:justify-end">
-                    {report.pdf_url ? (
-                      <a
-                        href={report.pdf_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-sm rounded-lg transition"
-                      >
-                        <FileDown className="w-4 h-4" />
-                        Download PDF
-                      </a>
-                    ) : (
-                      <span className="text-slate-400 text-sm italic">PDF unavailable</span>
-                    )}
-                  </div>
-                </GlassCard>
-              )
-            })
+                  </GlassCard>
+                )
+              }
+            )
           ) : (
             <GlassCard className="p-12 text-center text-slate-400">
               No daily compliance audit reports have been generated yet. Use the button above to

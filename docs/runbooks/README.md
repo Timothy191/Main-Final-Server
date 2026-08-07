@@ -1,5 +1,9 @@
 # Runbooks
 
+> [!NOTE] Neural Connections
+> 🔙 **Upward Node:** [Master Map of Content](../../memory/antigravity-memory/long/MAP_OF_CONTENT.md)
+> 🔀 **Lateral Nodes:** [Architecture Hub](../architecture/README.md) | [Performance Insights](../performance-insights/README.md)
+
 Operational runbooks for responding to alerts from the monitoring stack.
 Each runbook corresponds to a Prometheus alert rule defined in
 [`ops/prometheus/alert-rules.yaml`](../../ops/prometheus/alert-rules.yaml).

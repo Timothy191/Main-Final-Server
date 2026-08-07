@@ -180,6 +180,20 @@ describe('cacheDeletePattern', () => {
     await expect(cacheGet('users:2')).resolves.toBeNull()
     await expect(cacheGet('other')).resolves.toBe('c')
   })
+
+  it('should delete keys matching a pattern with multiple wildcards', async () => {
+    await cacheSet('users:1', 'a', 60)
+    await cacheSet('users:data:1', 'b', 60)
+    await cacheSet('users:data:2', 'c', 60)
+    await cacheSet('other', 'd', 60)
+
+    await expect(cacheDeletePattern('users:*:data')).resolves.not.toThrow()
+
+    await expect(cacheGet('users:1')).resolves.toBeNull()
+    await expect(cacheGet('users:data:1')).resolves.toBeNull()
+    await expect(cacheGet('users:data:2')).resolves.toBeNull()
+    await expect(cacheGet('other')).resolves.toBe('d')
+  })
 })
 
 describe('cacheEvictL1ByPrefix', () => {

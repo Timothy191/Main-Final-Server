@@ -206,3 +206,9 @@ archive-H82lX7/
 .cocoindex_code/
 .agents/rules/code-auto-collection.md
 
+# Runtime artifacts & dev tooling with hardcoded secrets (never index)
+arch.db
+logs/
+tools/automate-google-auth.mjs
+apps/portal/scripts/automate-google-login-headless.js
+

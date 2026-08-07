@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (error) throw new DatabaseError(error.message)
 
     // Fetch fuel_logs and production_logs separately (batched by daily_log_id)
-    const logIds = (logs ?? []).map((l) => l.id)
+    const logIds = (logs ?? []).map((l: { id: string }) => l.id)
     const [{ data: fuelLogsData }, { data: prodLogsData }] =
       logIds.length > 0
         ? await Promise.all([
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       prodByLogId.set(pl.daily_log_id, arr)
     }
 
-    const enrichedLogs = (logs ?? []).map((log) => ({
+    const enrichedLogs = (logs ?? []).map((log: { id: string } & Record<string, unknown>) => ({
       ...log,
       fuel_logs: fuelByLogId.get(log.id) ?? [],
       production_logs: prodByLogId.get(log.id) ?? [],

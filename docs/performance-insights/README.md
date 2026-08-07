@@ -1,5 +1,9 @@
 # DevTools Performance Insights
 
+> [!NOTE] Neural Connections
+> 🔙 **Upward Node:** [Master Map of Content](../../memory/antigravity-memory/long/MAP_OF_CONTENT.md)
+> 🔀 **Lateral Nodes:** [Caching Hub](../caching/README.md)
+
 This directory contains reference guides and optimization strategies for various DevTools Performance Panel insights.
 
 ## Index of Insights

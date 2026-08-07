@@ -48,7 +48,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ["scripts/*.js", "e2e/**/*.ts"],
+      files: ["scripts/*.js", "e2e/**/*.ts", ".eslintrc.cjs"],
       env: { node: true },
       parserOptions: {
         project: null,
@@ -73,7 +73,8 @@ module.exports = {
       },
     },
     {
-      files: ["src/components/**/*.tsx", "src/hooks/**/*.ts"],
+      // Target Client Components specifically (with client directives/hooks/render contexts)
+      files: ["src/components/**/*.client.tsx", "src/hooks/**/*.ts", "src/hooks/**/*.tsx"],
       rules: {
         "no-restricted-imports": [
           "error",
@@ -87,10 +88,45 @@ module.exports = {
                 name: "server-only",
                 message: "server-only package cannot be imported into Client Components.",
               },
+              {
+                name: "@repo/redis",
+                message: "Server package @repo/redis must not be imported into Client Components or Hooks. Use clientCache from '@/lib/client-data-cache' instead.",
+              },
+              {
+                name: "@repo/database",
+                message: "Server database package @repo/database must not be imported into Client Components or Hooks.",
+              },
+              {
+                name: "@repo/supabase/server",
+                message: "Server auth client @repo/supabase/server must not be imported into Client Components or Hooks.",
+              },
             ],
           },
         ],
       },
     },
+    {
+      // Target all Portal components to enforce server-side dependency boundary
+      files: ["src/components/**/*.tsx"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "@repo/redis",
+                message: "Server package @repo/redis must not be imported in components. Use client-side data fetching or proxy actions.",
+              },
+              {
+                name: "@repo/database",
+                message: "Server database package @repo/database must not be imported in components. Queries must be handled by server actions or Supabase client helpers.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+
+
   ],
 };

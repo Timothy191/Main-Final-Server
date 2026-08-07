@@ -1,5 +1,7 @@
 'use server'
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { encodeCursor, decodeCursor } from '@repo/ui/components/ui/pagination-cursor'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { cacheTag, cacheLife } from 'next/cache'
@@ -59,13 +61,151 @@ async function assertAccessControlRole() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  1. KPI Metrics                                                     */
+/*  Shared pagination + metrics loaders                                */
 /* ------------------------------------------------------------------ */
 
-async function _getCachedMetrics(deptId: string): Promise<AccessControlMetrics> {
-  'use cache'
-  cacheLife('5 minutes')
-  cacheTag(DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL, `dept:access-control:${deptId}`)
+const BADGES_SELECT = `
+  id,
+  qr_code,
+  entity_type,
+  is_active,
+  issued_at,
+  expires_at,
+  personnel:personnel_id(first_name, surname),
+  visitor:visitor_id(first_name, surname),
+  fleet:fleet_id(fleet_code, vehicle_type),
+  equipment:equipment_id(equip_code, equipment_type)
+`
+
+const VISITORS_SELECT = `
+  id,
+  first_name,
+  surname,
+  id_number,
+  company,
+  visiting,
+  reason_for_entry,
+  check_in_time,
+  check_out_time,
+  status
+`
+
+const ACCESS_LOGS_SELECT = `
+  id,
+  scanned_at,
+  gate_location,
+  access_granted,
+  denial_reason,
+  access_type,
+  direction,
+  badge:badges!inner(qr_code, entity_type, personnel:personnel_id(first_name, surname), visitor:visitor_id(first_name, surname))
+`
+
+interface PaginationConfig {
+  table: 'badges' | 'visitors' | 'access_logs'
+  select: string
+  sortColumn: string
+  errorLabel: string
+}
+
+/** Offset (page/pageSize) fetch with exact count. */
+async function paginateOffset<T>(
+  deptId: string,
+  config: PaginationConfig,
+  page = 1,
+  pageSize = 50
+): Promise<{ items: T[]; totalCount: number }> {
+  const { supabase } = await assertAccessControlRole()
+  const { table, select, sortColumn, errorLabel } = config
+
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  const { data, count, error } = await supabase
+    .from(table)
+    .select(select, { count: 'exact' })
+    .eq('department_id', deptId)
+    .order(sortColumn, { ascending: false })
+    .range(from, to)
+
+  if (error) {
+    throw new DatabaseError(errorLabel, {
+      operation: 'select',
+      context: { error: error.message },
+    })
+  }
+
+  return { items: (data ?? []) as unknown as T[], totalCount: count ?? 0 }
+}
+
+/**
+ * Cursor-based fetch for forward/backward navigation.
+ * Fetches limit+1 rows to detect if a next page exists.
+ */
+async function paginateCursor<T extends { id: string }>(
+  deptId: string,
+  config: PaginationConfig,
+  cursor?: string,
+  limit = 50,
+  direction: 'forward' | 'backward' = 'forward'
+): Promise<{ items: T[]; nextCursor: string | null; hasMore: boolean; totalCount: number }> {
+  const { supabase } = await assertAccessControlRole()
+  const { table, select, sortColumn, errorLabel } = config
+
+  let query = supabase
+    .from(table)
+    .select(select, { count: 'exact' })
+    .eq('department_id', deptId)
+    .order(sortColumn, { ascending: direction === 'backward' })
+    .order('id', { ascending: direction === 'backward' })
+    .limit(limit + 1)
+
+  if (cursor) {
+    const decoded = decodeCursor(cursor)
+    if (decoded) {
+      const { s: sortVal, i: idVal } = decoded
+      if (direction === 'forward') {
+        query = query.or(
+          `${sortColumn}.lt.${sortVal},and(${sortColumn}.eq.${sortVal},id.lt.${idVal})`
+        )
+      } else {
+        query = query.or(
+          `${sortColumn}.gt.${sortVal},and(${sortColumn}.eq.${sortVal},id.gt.${idVal})`
+        )
+      }
+    }
+  }
+
+  const { data, error, count } = await query
+
+  if (error) {
+    throw new DatabaseError(errorLabel, {
+      operation: 'select',
+      context: { error: error.message },
+    })
+  }
+
+  const rows = (data ?? []) as unknown as T[]
+  const hasMore = rows.length > limit
+  const items = hasMore ? rows.slice(0, limit) : rows
+
+  // For backward pagination, reverse back to original order
+  if (direction === 'backward') {
+    items.reverse()
+  }
+
+  const lastRow = items[items.length - 1]
+  const sortValue = (lastRow as Record<string, unknown>)[sortColumn] as string | undefined
+  const nextCursor = hasMore && lastRow ? encodeCursor(sortValue ?? '', lastRow.id) : null
+
+  return { items, nextCursor, hasMore, totalCount: count ?? 0 }
+}
+
+/** Shared loader for the get_access_control_metrics_jsonb RPC payload. */
+async function getAccessControlMetricsPayload(
+  deptId: string,
+  errorLabel = 'Failed to load access control metrics'
+): Promise<Record<string, unknown>> {
   const { createAdminClient } = await import('@repo/supabase/server')
   const supabase = createAdminClient()
 
@@ -74,13 +214,26 @@ async function _getCachedMetrics(deptId: string): Promise<AccessControlMetrics> 
   })
 
   if (error) {
-    throw new DatabaseError('Failed to load access control metrics', {
+    throw new DatabaseError(errorLabel, {
       operation: 'rpc',
       context: { error: error.message },
     })
   }
 
-  const metrics = (data as Record<string, unknown>)?.metrics as Record<string, number> | undefined
+  return (data as Record<string, unknown>) ?? {}
+}
+
+/* ------------------------------------------------------------------ */
+/*  1. KPI Metrics                                                     */
+/* ------------------------------------------------------------------ */
+
+async function _getCachedMetrics(deptId: string): Promise<AccessControlMetrics> {
+  'use cache'
+  cacheLife('5 minutes')
+  cacheTag(DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL, `dept:access-control:${deptId}`)
+  const payload = await getAccessControlMetricsPayload(deptId)
+
+  const metrics = payload?.metrics as Record<string, number> | undefined
 
   const activeQrCodes = metrics?.active_qr_codes ?? 0
   const totalEntities = metrics?.total_entities ?? 0
@@ -191,21 +344,9 @@ async function _getCachedEntityBadgeStatus(deptId: string): Promise<EntityBadgeS
   'use cache'
   cacheLife('5 minutes')
   cacheTag(DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL_TAG, `dept:access-control:${deptId}:badges`)
-  const { createAdminClient } = await import('@repo/supabase/server')
-  const supabase = createAdminClient()
+  const payload = await getAccessControlMetricsPayload(deptId, 'Failed to load entity badge status')
 
-  const { data, error } = await supabase.rpc('get_access_control_metrics_jsonb', {
-    p_department_id: deptId,
-  })
-
-  if (error) {
-    throw new DatabaseError('Failed to load entity badge status', {
-      operation: 'rpc',
-      context: { error: error.message },
-    })
-  }
-
-  const status = (data as Record<string, unknown>)?.entity_badge_status as
+  const status = payload?.entity_badge_status as
     | Record<
         string,
         {
@@ -299,22 +440,12 @@ async function _getCachedBadgeStatusDistribution(
   'use cache'
   cacheLife('5 minutes')
   cacheTag(DEPARTMENT_CACHE_TAGS.ACCESS_CONTROL_TAG, `dept:access-control:${deptId}:distribution`)
-  const { createAdminClient } = await import('@repo/supabase/server')
-  const supabase = createAdminClient()
+  const payload = await getAccessControlMetricsPayload(
+    deptId,
+    'Failed to load badge status distribution'
+  )
 
-  const { data, error } = await supabase.rpc('get_access_control_metrics_jsonb', {
-    p_department_id: deptId,
-  })
-
-  if (error) {
-    throw new DatabaseError('Failed to load badge status distribution', {
-      operation: 'rpc',
-      context: { error: error.message },
-    })
-  }
-
-  const dist = (data as Record<string, unknown>)?.badge_status_distribution as
-    Record<string, number> | undefined
+  const dist = payload?.badge_status_distribution as Record<string, number> | undefined
 
   return [
     { name: 'Active', value: dist?.active ?? 0, fill: 'var(--success)' },
@@ -344,44 +475,18 @@ export async function getBadgeStatusDistribution(
 /* ------------------------------------------------------------------ */
 
 export async function getBadgesForDepartment(deptId: string, page = 1, pageSize = 50) {
-  const { supabase } = await assertAccessControlRole()
-
-  const from = (page - 1) * pageSize
-  const to = from + pageSize - 1
-
-  const {
-    data: badges,
-    count,
-    error,
-  } = await supabase
-    .from('badges')
-    .select(
-      `
-      id,
-      qr_code,
-      entity_type,
-      is_active,
-      issued_at,
-      expires_at,
-      personnel:personnel_id(first_name, surname),
-      visitor:visitor_id(first_name, surname),
-      fleet:fleet_id(fleet_code, vehicle_type),
-      equipment:equipment_id(equip_code, equipment_type)
-    `,
-      { count: 'exact' }
-    )
-    .eq('department_id', deptId)
-    .order('issued_at', { ascending: false })
-    .range(from, to)
-
-  if (error) {
-    throw new DatabaseError('Failed to load badges', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
-  return { badges: badges ?? [], totalCount: count ?? 0 }
+  const { items, totalCount } = await paginateOffset<any>(
+    deptId,
+    {
+      table: 'badges',
+      select: BADGES_SELECT,
+      sortColumn: 'issued_at',
+      errorLabel: 'Failed to load badges',
+    },
+    page,
+    pageSize
+  )
+  return { badges: items, totalCount }
 }
 
 /**
@@ -394,110 +499,34 @@ export async function getBadgesForDepartmentCursor(
   limit = 50,
   direction: 'forward' | 'backward' = 'forward'
 ) {
-  const { supabase } = await assertAccessControlRole()
-
-  let query = supabase
-    .from('badges')
-    .select(
-      `
-      id,
-      qr_code,
-      entity_type,
-      is_active,
-      issued_at,
-      expires_at,
-      personnel:personnel_id(first_name, surname),
-      visitor:visitor_id(first_name, surname),
-      fleet:fleet_id(fleet_code, vehicle_type),
-      equipment:equipment_id(equip_code, equipment_type)
-    `,
-      { count: 'exact' }
-    )
-    .eq('department_id', deptId)
-    .order('issued_at', { ascending: direction === 'backward' })
-    .order('id', { ascending: direction === 'backward' })
-    .limit(limit + 1)
-
-  if (cursor) {
-    const decoded = decodeCursor(cursor)
-    if (decoded) {
-      const { s: sortVal, i: idVal } = decoded
-      if (direction === 'forward') {
-        query = query.or(`issued_at.lt.${sortVal},and(issued_at.eq.${sortVal},id.lt.${idVal})`)
-      } else {
-        query = query.or(`issued_at.gt.${sortVal},and(issued_at.eq.${sortVal},id.gt.${idVal})`)
-      }
-    }
-  }
-
-  const { data, error, count } = await query
-
-  if (error) {
-    throw new DatabaseError('Failed to load badges (cursor)', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
-  const rows = data ?? []
-  const hasMore = rows.length > limit
-  const items = hasMore ? rows.slice(0, limit) : rows
-
-  // For backward pagination, reverse back to original order
-  if (direction === 'backward') {
-    items.reverse()
-  }
-
-  const lastRow = items[items.length - 1]
-  const nextCursor = hasMore && lastRow ? encodeCursor(lastRow.issued_at ?? '', lastRow.id) : null
-
-  return {
-    badges: items,
-    nextCursor,
-    hasMore,
-    totalCount: count ?? 0,
-  }
+  const { items, nextCursor, hasMore, totalCount } = await paginateCursor<any>(
+    deptId,
+    {
+      table: 'badges',
+      select: BADGES_SELECT,
+      sortColumn: 'issued_at',
+      errorLabel: 'Failed to load badges (cursor)',
+    },
+    cursor,
+    limit,
+    direction
+  )
+  return { badges: items, nextCursor, hasMore, totalCount }
 }
 
 export async function getVisitorsForDepartment(deptId: string, page = 1, pageSize = 50) {
-  const { supabase } = await assertAccessControlRole()
-
-  const from = (page - 1) * pageSize
-  const to = from + pageSize - 1
-
-  const {
-    data: visitors,
-    count,
-    error,
-  } = await supabase
-    .from('visitors')
-    .select(
-      `
-      id,
-      first_name,
-      surname,
-      id_number,
-      company,
-      visiting,
-      reason_for_entry,
-      check_in_time,
-      check_out_time,
-      status
-    `,
-      { count: 'exact' }
-    )
-    .eq('department_id', deptId)
-    .order('check_in_time', { ascending: false })
-    .range(from, to)
-
-  if (error) {
-    throw new DatabaseError('Failed to load visitors', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
-  return { visitors: visitors ?? [], totalCount: count ?? 0 }
+  const { items, totalCount } = await paginateOffset<any>(
+    deptId,
+    {
+      table: 'visitors',
+      select: VISITORS_SELECT,
+      sortColumn: 'check_in_time',
+      errorLabel: 'Failed to load visitors',
+    },
+    page,
+    pageSize
+  )
+  return { visitors: items, totalCount }
 }
 
 /**
@@ -509,73 +538,19 @@ export async function getVisitorsForDepartmentCursor(
   limit = 50,
   direction: 'forward' | 'backward' = 'forward'
 ) {
-  const { supabase } = await assertAccessControlRole()
-
-  let query = supabase
-    .from('visitors')
-    .select(
-      `
-      id,
-      first_name,
-      surname,
-      id_number,
-      company,
-      visiting,
-      reason_for_entry,
-      check_in_time,
-      check_out_time,
-      status
-    `,
-      { count: 'exact' }
-    )
-    .eq('department_id', deptId)
-    .order('check_in_time', { ascending: direction === 'backward' })
-    .order('id', { ascending: direction === 'backward' })
-    .limit(limit + 1)
-
-  if (cursor) {
-    const decoded = decodeCursor(cursor)
-    if (decoded) {
-      const { s: sortVal, i: idVal } = decoded
-      if (direction === 'forward') {
-        query = query.or(
-          `check_in_time.lt.${sortVal},and(check_in_time.eq.${sortVal},id.lt.${idVal})`
-        )
-      } else {
-        query = query.or(
-          `check_in_time.gt.${sortVal},and(check_in_time.eq.${sortVal},id.gt.${idVal})`
-        )
-      }
-    }
-  }
-
-  const { data, error, count } = await query
-
-  if (error) {
-    throw new DatabaseError('Failed to load visitors (cursor)', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
-  const rows = data ?? []
-  const hasMore = rows.length > limit
-  const items = hasMore ? rows.slice(0, limit) : rows
-
-  if (direction === 'backward') {
-    items.reverse()
-  }
-
-  const lastRow = items[items.length - 1]
-  const nextCursor =
-    hasMore && lastRow ? encodeCursor(lastRow.check_in_time ?? '', lastRow.id) : null
-
-  return {
-    visitors: items,
-    nextCursor,
-    hasMore,
-    totalCount: count ?? 0,
-  }
+  const { items, nextCursor, hasMore, totalCount } = await paginateCursor<any>(
+    deptId,
+    {
+      table: 'visitors',
+      select: VISITORS_SELECT,
+      sortColumn: 'check_in_time',
+      errorLabel: 'Failed to load visitors (cursor)',
+    },
+    cursor,
+    limit,
+    direction
+  )
+  return { visitors: items, nextCursor, hasMore, totalCount }
 }
 
 export async function registerVisitor(formData: FormData) {
@@ -631,42 +606,18 @@ export async function registerVisitor(formData: FormData) {
 }
 
 export async function getAccessLogsForDepartment(deptId: string, page = 1, pageSize = 50) {
-  const { supabase } = await assertAccessControlRole()
-
-  const from = (page - 1) * pageSize
-  const to = from + pageSize - 1
-
-  const {
-    data: logs,
-    count,
-    error,
-  } = await supabase
-    .from('access_logs')
-    .select(
-      `
-      id,
-      scanned_at,
-      gate_location,
-      access_granted,
-      denial_reason,
-      access_type,
-      direction,
-      badge:badges!inner(qr_code, entity_type, personnel:personnel_id(first_name, surname), visitor:visitor_id(first_name, surname))
-    `,
-      { count: 'exact' }
-    )
-    .eq('department_id', deptId)
-    .order('scanned_at', { ascending: false })
-    .range(from, to)
-
-  if (error) {
-    throw new DatabaseError('Failed to load access logs', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
-  return { logs: logs ?? [], totalCount: count ?? 0 }
+  const { items, totalCount } = await paginateOffset<any>(
+    deptId,
+    {
+      table: 'access_logs',
+      select: ACCESS_LOGS_SELECT,
+      sortColumn: 'scanned_at',
+      errorLabel: 'Failed to load access logs',
+    },
+    page,
+    pageSize
+  )
+  return { logs: items, totalCount }
 }
 
 /**
@@ -678,64 +629,17 @@ export async function getAccessLogsForDepartmentCursor(
   limit = 50,
   direction: 'forward' | 'backward' = 'forward'
 ) {
-  const { supabase } = await assertAccessControlRole()
-
-  let query = supabase
-    .from('access_logs')
-    .select(
-      `
-      id,
-      scanned_at,
-      gate_location,
-      access_granted,
-      denial_reason,
-      access_type,
-      direction,
-      badge:badges!inner(qr_code, entity_type, personnel:personnel_id(first_name, surname), visitor:visitor_id(first_name, surname))
-    `,
-      { count: 'exact' }
-    )
-    .eq('department_id', deptId)
-    .order('scanned_at', { ascending: direction === 'backward' })
-    .order('id', { ascending: direction === 'backward' })
-    .limit(limit + 1)
-
-  if (cursor) {
-    const decoded = decodeCursor(cursor)
-    if (decoded) {
-      const { s: sortVal, i: idVal } = decoded
-      if (direction === 'forward') {
-        query = query.or(`scanned_at.lt.${sortVal},and(scanned_at.eq.${sortVal},id.lt.${idVal})`)
-      } else {
-        query = query.or(`scanned_at.gt.${sortVal},and(scanned_at.eq.${sortVal},id.gt.${idVal})`)
-      }
-    }
-  }
-
-  const { data, error, count } = await query
-
-  if (error) {
-    throw new DatabaseError('Failed to load access logs (cursor)', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
-  const rows = data ?? []
-  const hasMore = rows.length > limit
-  const items = hasMore ? rows.slice(0, limit) : rows
-
-  if (direction === 'backward') {
-    items.reverse()
-  }
-
-  const lastRow = items[items.length - 1]
-  const nextCursor = hasMore && lastRow ? encodeCursor(lastRow.scanned_at ?? '', lastRow.id) : null
-
-  return {
-    logs: items,
-    nextCursor,
-    hasMore,
-    totalCount: count ?? 0,
-  }
+  const { items, nextCursor, hasMore, totalCount } = await paginateCursor<any>(
+    deptId,
+    {
+      table: 'access_logs',
+      select: ACCESS_LOGS_SELECT,
+      sortColumn: 'scanned_at',
+      errorLabel: 'Failed to load access logs (cursor)',
+    },
+    cursor,
+    limit,
+    direction
+  )
+  return { logs: items, nextCursor, hasMore, totalCount }
 }

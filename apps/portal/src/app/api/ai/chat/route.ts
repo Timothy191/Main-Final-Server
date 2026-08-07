@@ -66,15 +66,11 @@ async function handleChat(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'AI service not configured' }, { status: 503 })
   }
 
-  // 4. Call Gemini Interactions API
+  // 4. Call Gemini Graph RAG Flow
   try {
-    const { geminiChat } = await import('@/lib/ai/gemini-client')
+    const { executeGraphRagFlow } = await import('@/lib/ai/graph-rag')
 
-    const result = await geminiChat(body.message, {
-      systemInstruction: body.systemInstruction,
-      previousInteractionId: body.previousInteractionId,
-      store: false, // Stateless — don't store portal chat interactions
-    })
+    const result = await executeGraphRagFlow(body.message, body.systemInstruction)
 
     // 5. Log usage (fire-and-forget)
     try {
@@ -112,8 +108,6 @@ async function handleChat(request: NextRequest): Promise<NextResponse> {
 // ---------------------------------------------------------------------------
 // Export with rate limiting
 // ---------------------------------------------------------------------------
-
-export const dynamic = 'force-dynamic' // AI chat should never be cached
 
 export async function POST(request: NextRequest) {
   return withRateLimit(request, () => handleChat(request))

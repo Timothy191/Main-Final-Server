@@ -31,6 +31,8 @@ jest.mock('../client.js', () => ({
   getClientIfOpen: jest.fn(() => null),
 }))
 
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals'
+
 import { cacheGet, cacheSetWithTags, clearMemoryCache } from '../cache'
 import { cacheInvalidateTags, cacheInvalidatePrefixes } from '../invalidation'
 import { l1Set, l1Get, l1IndexTags, l1EvictByTags, l1DeleteByPrefix, l1Clear } from '../l1'

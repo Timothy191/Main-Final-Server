@@ -217,7 +217,9 @@ export async function getMineBlocks(): Promise<MineBlock[]> {
   if (rows.some((r) => r.site_id)) {
     const siteIds = [...new Set(rows.map((r) => r.site_id).filter(Boolean))] as string[]
     const { data: sites } = await supabase.from('sites').select('id, name').in('id', siteIds)
-    siteNames = new Map((sites ?? []).map((s) => [s.id, s.name]))
+    siteNames = new Map(
+      (sites ?? []).map((s: { id: string; name: string }) => [s.id, s.name] as [string, string])
+    )
   }
 
   return rows.map((row) => ({

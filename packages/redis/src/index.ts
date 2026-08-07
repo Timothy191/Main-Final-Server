@@ -38,6 +38,8 @@ export {
   type SystemEventPayload,
 }
 
+export { publishAlarm, subscribeToAlarms, type AlarmNotification } from './alarm-pubsub.js'
+
 // Re-export from the single source of truth (registry.ts)
 export { CacheCategory, CACHE_TTL_REGISTRY, buildCacheKey } from './registry.js'
 export type { CacheCategory as CacheCategoryType, CacheTtlConfig } from './registry.js'

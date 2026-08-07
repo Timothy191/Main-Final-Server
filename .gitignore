@@ -54,7 +54,6 @@ logs/app-runtime.log
 # Transient runtime markers
 .babysitter_built
 
-
 # OS
 .DS_Store
 Thumbs.db
@@ -177,3 +176,10 @@ mcp-workspace/
 .agents/rules/code-auto-collection.md
 
 /net-commander
+
+# Runtime artifacts & dev tooling with hardcoded secrets (never commit)
+arch.db
+logs/
+tools/automate-google-auth.mjs
+apps/portal/scripts/automate-google-login-headless.js
+

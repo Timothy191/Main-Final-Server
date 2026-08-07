@@ -82,12 +82,14 @@ async function handleSearch(request: NextRequest): Promise<NextResponse> {
         .ilike('content', `%${body.query}%`)
         .limit(body.limit)
 
-      const results = (fallbackData ?? []).map((row) => ({
-        content: row.content,
-        similarity: 0.5, // approximate for text match
-        metadata: row.metadata,
-        type: row.memory_type,
-      }))
+      const results = (fallbackData ?? []).map(
+        (row: { content: string | null; metadata: unknown; memory_type: string | null }) => ({
+          content: row.content,
+          similarity: 0.5, // approximate for text match
+          metadata: row.metadata,
+          type: row.memory_type,
+        })
+      )
 
       return NextResponse.json({
         results,

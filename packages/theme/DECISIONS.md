@@ -213,7 +213,7 @@ double-render and fight the ambient layer.
 video source/playback rate outside `RouteBackground.tsx`. See `docs/design-system/RULES.md` (R5).
 
 **Reference**: `apps/portal/src/components/RouteBackground.tsx`; plan
-`docs/superpowers/plans/2026-07-17-wave-ambient-permanent-mp4.md`.
+tracked in theme decisions log.
 
 ---
 

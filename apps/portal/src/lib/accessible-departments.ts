@@ -56,7 +56,7 @@ export async function resolveAccessibleDepartmentNames(
     .in('id', [...uuidSet])
 
   const names = (deptData ?? [])
-    .map((d) => d.name)
+    .map((d: { name: string | null }) => d.name)
     .filter((n): n is string => typeof n === 'string' && n.length > 0)
 
   return { role, names }

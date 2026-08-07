@@ -1,0 +1,57 @@
+# Arch-System Portal
+
+> An oil & gas field operations portal built as a pnpm 9 monorepo (Turborepo).
+> Single Next.js 16 app (`apps/portal`) + 16 shared packages. Department-based routing
+> with Redis L1/L2 caching, Supabase Postgres, and edge auth via `proxy.ts`.
+
+## Agent Policy (Required Reading)
+
+- [AGENTS.md](../AGENTS.md): Canonical policy — commands, architecture, conventions, CI gates
+
+## Architecture
+
+- [docs/WAYFINDER.md](../docs/WAYFINDER.md): Structural index — concept → entry point → ADR
+- [docs/architecture/](../docs/architecture/): ADRs and architecture references
+- [apps/portal/CLAUDE.md](../apps/portal/CLAUDE.md): Portal-specific agent guidance
+
+## Design System
+
+- [docs/design-system/RULES.md](../docs/design-system/RULES.md): Enforceable visual contract
+- [docs/design-system/SPEC.md](../docs/design-system/SPEC.md): Token specifications
+- [docs/design-system/DESIGN.md](../docs/design-system/DESIGN.md): Design intent
+
+## Key Source Files
+
+- [apps/portal/src/proxy.ts](../apps/portal/src/proxy.ts): Edge auth + ACL (ALL requests pass through)
+- [packages/acl/src/index.ts](../packages/acl/src/index.ts): Department slugs + roles (SSOT)
+- [packages/contract/index.ts](../packages/contract/index.ts): Zod validation schemas
+- [packages/redis/src/cache.ts](../packages/redis/src/cache.ts): L1/L2 cache API
+- [packages/supabase/src/index.ts](../packages/supabase/src/index.ts): Database clients
+
+## MCP Servers (Agent Tools)
+
+- [.mcp/README.md](./../.mcp/README.md): MCP server registry + profiles
+- [.mcp/mcp.json](./../.mcp/mcp.json): Default profile (for most agents)
+- [.mcp/mcp.full.json](./../.mcp/mcp.full.json): Full profile (all servers)
+- [.mcp/mcp.ci.json](./../.mcp/mcp.ci.json): CI/headless profile
+
+## API Surface
+
+- [.api/README.md](./../.api/README.md): Internal API route index
+- [.api/routes.json](./../.api/routes.json): Machine-readable route manifest
+- [.api/openapi.yaml](./../.api/openapi.yaml): Partial OpenAPI 3.1 spec
+
+## LSP Guidance
+
+- [.lsp/README.md](./../.lsp/README.md): Language server guidance for agents
+- [.lsp/servers.json](./../.lsp/servers.json): LSP capability manifest
+
+## Operations
+
+- [docs/runbooks/](../docs/runbooks/): Operational playbooks
+- [scripts/](../scripts/): Dev boot, smoke test, deploy scripts
+
+## Optional
+
+- [docs/optimization/](../docs/optimization/): Performance checklists
+- [docs/design-system/](../docs/design-system/): Design system rules, specs, and theme decisions

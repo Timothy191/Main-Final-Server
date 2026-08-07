@@ -29,6 +29,8 @@ jest.mock('../client.js', () => ({
   getRedisClient: jest.fn().mockResolvedValue(mockRedis),
 }))
 
+import { describe, it, expect, jest, beforeEach } from '@jest/globals'
+
 import { indexCacheKeyByTags, cacheInvalidateTags, cacheInvalidatePrefixes } from '../invalidation'
 
 beforeEach(() => {

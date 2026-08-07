@@ -8,7 +8,7 @@
     "**/src.backup/**"
   ],
   "ignoreExportsUsedInFile": true,
-  "ignoreBinaries": ["next", "psql"],
+  "ignoreBinaries": ["next", "psql", "cargo-cp-artifact"],
   "ignoreDependencies": ["@sentry/nextjs", "inngest", "@vercel/otel"],
   "rules": {
     "files": "off",
@@ -25,7 +25,18 @@
       "entry": ["scripts/**/*.sh", "scripts/**/*.mjs", "tools/**/*.mjs", "tools/**/*.cjs"]
     },
     "apps/portal": {
-      "entry": ["src/app/**/page.tsx", "src/app/**/route.ts", "src/proxy.ts"]
+      "entry": ["src/app/**/page.tsx", "src/app/**/route.ts", "src/proxy.ts"],
+      "ignore": [
+        ".claude/skills/run-portal/drive.mjs",
+        "e2e/playwright.config.ts",
+        "public/sw.js",
+        "src/features/ai/components/AiChat.tsx",
+        "src/features/departments/index.ts",
+        "src/lib/ai/scripts/backfill-embeddings.ts",
+        "src/lib/api/api-guard.ts",
+        "src/lib/errors/error-handler.ts",
+        "src/lib/utils.ts"
+      ]
     },
     "packages/*": {
       "entry": ["src/index.ts"]

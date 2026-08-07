@@ -107,7 +107,7 @@ Tokens that theme the background live in `variables.css`:
 `animations.css` (`animate-wave-canvas-*`, plus the `.os-shell-enter-*` chrome
 entrance animations).
 
-See the implementation plan: `docs/superpowers/plans/2026-07-17-wave-ambient-permanent-mp4.md`.
+See the implementation plan tracked in the theme decisions log.
 
 **Constraint (RULES R5):** do not add a second page-level background or overlap
 the ambient layer. To adjust a page's ambient feel, change the `--canvas-*` /
@@ -150,3 +150,13 @@ Changing the system is governed by [RULES.md](./RULES.md): use canonical tokens,
 no ad-hoc glass, update SPEC.md + an ADR for structural changes, and verify with
 the forced quality gate. The token validator (`lint:tokens`) is the CI
 enforcement for token integrity; the rest is review-enforced.
+
+## 10. Graph Workspace Customization
+
+To align the local Markdown knowledge graph visualization (e.g., Obsidian graph view) with the Arch System design principles, a custom stylesheet is provided at [`docs/design-system/graph-minimal-glass.css`](./graph-minimal-glass.css).
+
+This styling applies:
+
+- **Minimalist Light Mode**: Smooth background colors (`#f8fafc` and `#f1f5f9`) transitioning the workspace from standard dark backgrounds.
+- **Glassmorphic Floating Panels**: Translucent blurs (`backdrop-filter: blur(20px)`) and subtle borders on graph controls, settings panels, and navigation overlays.
+- **Color-Coded Domain Clusters**: Maps graph nodes directly to their design system cluster colors (e.g. Cyan/Teal for Frontend, Purple for Backend BFF, Amber for Caching, Emerald for Data, Slate for Tooling/Agents).

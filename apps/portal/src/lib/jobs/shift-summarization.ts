@@ -26,7 +26,7 @@ export const shiftSummarizeFn = inngest.createFunction(
     try {
       // 1. Fetch shift logs from DB if not provided in event
       const supabase = await createServerSupabaseClient()
-      let entries = logEntries as string[] | undefined
+      let entries: string[] = (logEntries as string[] | undefined) ?? []
 
       if (!entries || entries.length === 0) {
         const { data: logs } = await supabase
@@ -35,7 +35,7 @@ export const shiftSummarizeFn = inngest.createFunction(
           .eq('shift_id', shiftId)
           .order('created_at', { ascending: true })
 
-        entries = logs?.map((l) => l.content as string) ?? []
+        entries = logs?.map((l: { content: string | null }) => l.content as string) ?? []
       }
 
       if (entries.length === 0) {

@@ -107,11 +107,11 @@ Designing large-scale distributed systems requires balancing reliability, consis
 
 ## 5. Architectural Alignment in Arch Systems Monorepo
 
-| Principle / Pattern             | Monorepo Implementation                                                               | File Reference                                                                 |
-| :------------------------------ | :------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------- |
-| **BFF & Next.js App Router**    | Unified Portal UI (`apps/portal`) using Next.js 16 Server Components & Server Actions | [`apps/portal`](file:///home/timothy/Projects/apps/portal)                     |
-| **Separated API Contracts**     | Framework-agnostic Zod schemas and contract definitions                               | [`packages/contract`](file:///home/timothy/Projects/packages/contract)         |
-| **Resilient Auth & DB Access**  | Supabase PostgreSQL + Auth with RLS enforcement and admin client fallback             | [`packages/supabase`](file:///home/timothy/Projects/packages/supabase)         |
-| **Distributed Caching & Locks** | Redis cache abstraction (`@repo/redis`) with health probes & TTL jitter               | [`packages/redis`](file:///home/timothy/Projects/packages/redis)               |
-| **Health Probes & Liveness**    | Operational smoke tests and `/api/health/*` route endpoints                           | [`scripts/smoke-test.sh`](file:///home/timothy/Projects/scripts/smoke-test.sh) |
-| **Pre-Commit Quality Gate**     | Turborepo lint, type-check, Jest tests, and Prettier checks                           | [`package.json`](file:///home/timothy/Projects/package.json)                   |
+| Principle / Pattern             | Monorepo Implementation                                                               | File Reference                                      |
+| :------------------------------ | :------------------------------------------------------------------------------------ | :-------------------------------------------------- |
+| **BFF & Next.js App Router**    | Unified Portal UI (`apps/portal`) using Next.js 16 Server Components & Server Actions | [`apps/portal`](../apps/portal)                     |
+| **Separated API Contracts**     | Framework-agnostic Zod schemas and contract definitions                               | [`packages/contract`](../packages/contract)         |
+| **Resilient Auth & DB Access**  | Supabase PostgreSQL + Auth with RLS enforcement and admin client fallback             | [`packages/supabase`](../packages/supabase)         |
+| **Distributed Caching & Locks** | Redis cache abstraction (`@repo/redis`) with health probes & TTL jitter               | [`packages/redis`](../packages/redis)               |
+| **Health Probes & Liveness**    | Operational smoke tests and `/api/health/*` route endpoints                           | [`scripts/smoke-test.sh`](../scripts/smoke-test.sh) |
+| **Pre-Commit Quality Gate**     | Turborepo lint, type-check, Jest tests, and Prettier checks                           | [`package.json`](../package.json)                   |

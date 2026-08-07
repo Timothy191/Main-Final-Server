@@ -174,15 +174,18 @@ async function _getCachedControlRoomMetrics(deptId: string): Promise<ControlRoom
   ])
 
   // Sum all hourly loads for today's total tonnage
-  const totalTonnageToday = (hourlyLoads ?? []).reduce((sum, row) => {
-    return (
-      sum +
-      Object.values(row as Record<string, number>).reduce(
-        (h, v) => h + (typeof v === 'number' ? v : 0),
-        0
+  const totalTonnageToday = (hourlyLoads ?? []).reduce(
+    (sum: number, row: Record<string, number>) => {
+      return (
+        sum +
+        Object.values(row as Record<string, number>).reduce(
+          (h, v) => h + (typeof v === 'number' ? v : 0),
+          0
+        )
       )
-    )
-  }, 0)
+    },
+    0
+  )
 
   // Get distinct machine count for active ops
   const { data: distinctMachines } = await supabase
@@ -191,7 +194,9 @@ async function _getCachedControlRoomMetrics(deptId: string): Promise<ControlRoom
     .eq('department_id', deptId)
     .eq('shift_date', today)
 
-  const totalMachinesInOps = new Set((distinctMachines ?? []).map((r) => r.machine_id)).size
+  const totalMachinesInOps = new Set(
+    (distinctMachines ?? []).map((r: { machine_id: string }) => r.machine_id)
+  ).size
 
   return {
     activeMachineOps: activeMachineOps ?? 0,

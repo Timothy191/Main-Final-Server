@@ -48,6 +48,7 @@ const nextConfig = {
     webVitalsAttribution: ["CLS", "LCP", "FCP", "TTFB", "INP"],
     viewTransition: true,
   },
+  reactCompiler: true,
   turbopack: {
     // AGENT-TRACE: Root must include workspaceRoot so packages/ deps compile
     root: workspaceRoot,

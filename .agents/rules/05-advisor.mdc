@@ -1,0 +1,47 @@
+---
+description: Advisor Agent Profile — Codebase steering guidelines for real-world verified methodologies
+alwaysApply: true
+---
+
+# 🤖 Advisor Agent Profile & Steering Guidelines
+
+This rule pack defines the behavior of the **Advisor Agent**, who monitors all active agents working in this repository and injects real-world verified steering, advice, and recommendations.
+
+## 1. Core Mandates for All Agents
+
+Every agent working on this codebase must follow these professional engineering methodologies. The Advisor Agent will warn, steer, and block deviations from these patterns:
+
+### ⚠️ A. Monorepo Layer Boundaries (Strict Import Isolation)
+- **Rule**: Client-side directories (`apps/portal/src/hooks`, `src/components`, `packages/ui/src`) must **never** import backend packages:
+  - ❌ `@repo/redis`
+  - ❌ `@repo/database`
+  - ❌ `@repo/supabase/server`
+- **Steering**: If a client component requires state or data caching, steer the agent to use client-side hooks with local memory state and TTL/tag invalidation rather than importing server packages directly. Enforced by `import-boundary-guard.mjs`.
+
+### 📦 B. Zod Validation Contracts (SSOT)
+- **Rule**: Do **not** declare local Zod schemas for database entities, mutations, or API payloads within `apps/portal`.
+- **Steering**: Steer agents to place all validation schemas in the shared `@repo/contract` package. This allows client components, API routes, and Server Actions to import the exact same validation rules, avoiding contract drift.
+
+### 💾 C. Database Resiliency & Connection Pooling
+- **Rule**: Raw queries and ad-hoc query builders that do not clean up connection pools are prohibited.
+- **Steering**: Guide agents to use the database pool keeper pattern in `@repo/database`, enforce transaction limits, and verify pgBouncer/Supavisor configuration compatibility.
+
+### ⚡ D. Hybrid Caching Rules (L1/L2 Redis & SQLite WAL)
+- **Rule**: Never leave L1/L2 caching implementations without explicit invalidation tags (`cacheDelete`) and correct TTL configurations.
+- **Steering**: Ensure that local fallbacks (like SQLite WAL caching) are checked, verified, and active if the main Redis instance is unreachable.
+
+### 🎨 E. Design System & Glassmorphism Cohesion
+- **Rule**: Banned ad-hoc visual styling (e.g. random `backdrop-blur-*` overrides).
+- **Steering**: Guide agents to use canonical design tokens and glass component primitives (`.glass-card`, `.glass-input`, and `.os-shell` glass classes). Enforced by `design-ratchet.mjs`.
+
+### 🧠 F. AI Chat & Graph RAG Retrieval
+- **Rule**: Avoid generic chatbot implementations that rely purely on a model's parametric memory.
+- **Steering**: Steer agents building AI features to implement conditional retrieval nodes (Graph RAG) referencing `memory/antigravity-memory/long/GRAPH_RAG_ARCHITECTURE.md`. Enforce dynamic retrieval and self-correcting verification loops to guarantee domain-aware, hallucination-free outputs.
+
+## 2. Quality Verification Procedures
+Before declaring any task complete, agents must run:
+```bash
+pnpm exec turbo run lint type-check test --force
+pnpm gates
+```
+Stale build caches are **unacceptable**. If an agent fails to run forced verification checks, the Advisor Agent will flag it as incomplete.

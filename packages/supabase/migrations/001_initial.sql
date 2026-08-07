@@ -31,6 +31,17 @@ CREATE TABLE IF NOT EXISTS employees (
   full_name TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'operator',
   accessible_departments UUID[] DEFAULT '{}',
+  -- Power Apps / SharePoint integration fields
+  power_apps_id TEXT,
+  power_apps_upn TEXT,
+  power_apps_mail TEXT,
+  power_apps_department TEXT,
+  power_apps_job_title TEXT,
+  power_apps_office TEXT,
+  power_apps_employee_id TEXT,
+  power_apps_mobile TEXT,
+  power_apps_business_phones TEXT[],
+  power_apps_synced_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

@@ -19,6 +19,7 @@
     "@types/jest": "^30.0.0",
     "jest": "^30.0.0",
     "ts-jest": "^29.2.0",
-    "typescript": "^5.7.0"
-  }
+    "typescript": "catalog:"
+  },
+  "sideEffects": false
 }

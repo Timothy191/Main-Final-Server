@@ -72,12 +72,10 @@ export interface _RealtimeExtensions {
 }
 
 export interface _RealtimeFeatureFlags {
-  bucket_key: string | null
   enabled: Generated<boolean>
   id: string
   inserted_at: Timestamp
   name: string
-  rollout_percentage: Generated<number>
   updated_at: Timestamp
 }
 
@@ -142,6 +140,18 @@ export interface AccessLogsArchive {
   scanned_at: Generated<Timestamp | null>
 }
 
+export interface AdminAuditTrail {
+  action: string
+  created_at: Generated<Timestamp>
+  department_id: string
+  details: Json | null
+  entity_id: string | null
+  entity_type: string
+  id: Generated<string>
+  ip_address: string | null
+  performed_by: string | null
+}
+
 export interface AiUsageLogs {
   completion_tokens: Generated<number>
   created_at: Generated<Timestamp>
@@ -154,6 +164,41 @@ export interface AiUsageLogs {
   session_id: string
   total_tokens: Generated<number>
   user_id: string | null
+}
+
+export interface AlarmEscalationPolicy {
+  created_at: Generated<Timestamp>
+  delay_seconds: Generated<number>
+  department_id: string
+  id: Generated<string>
+  notification_channels: Generated<string[]>
+  severity: string
+  updated_at: Generated<Timestamp>
+}
+
+export interface AlarmEvents {
+  acknowledged_at: Timestamp | null
+  acknowledged_by: string | null
+  created_at: Generated<Timestamp>
+  department_id: string
+  equipment_id: string
+  id: Generated<string>
+  message: string
+  severity: string
+  status: Generated<string>
+  updated_at: Generated<Timestamp>
+  value: Numeric | null
+}
+
+export interface AuditActivityLogs {
+  created_at: Generated<Timestamp | null>
+  id: Generated<string>
+  new_data: Json | null
+  old_data: Json | null
+  operation: string
+  performed_by: Generated<string | null>
+  record_id: string | null
+  table_name: string
 }
 
 export interface AuditLogs {
@@ -202,7 +247,6 @@ export interface AuthCustomOauthProviders {
   client_id: string
   client_secret: string
   created_at: Generated<Timestamp>
-  custom_claims_allowlist: Generated<string[]>
   discovery_cached_at: Timestamp | null
   discovery_url: string | null
   email_optional: Generated<boolean>
@@ -539,6 +583,26 @@ export interface Badges {
   visitor_id: string | null
 }
 
+export interface BlastDesigns {
+  actual_holes: number | null
+  actual_tonnes: Numeric | null
+  blast_date: Timestamp | null
+  blast_name: string
+  block_id: string | null
+  created_at: Generated<Timestamp>
+  department_id: string
+  designed_by: string | null
+  designed_holes: Generated<number>
+  designed_tonnes: Numeric | null
+  explosive_type: string | null
+  id: Generated<string>
+  notes: string | null
+  pattern_id: string | null
+  status: Generated<string>
+  total_explosive_kg: Numeric | null
+  updated_at: Generated<Timestamp>
+}
+
 export interface Breakdowns {
   completed_by: string | null
   created_at: Generated<Timestamp>
@@ -579,6 +643,35 @@ export interface Breakdowns {
   sync_status: Generated<string | null>
   time_in: Generated<string | null>
   time_out: string | null
+  updated_at: Generated<Timestamp>
+}
+
+export interface CardPrintHistory {
+  badge_id: string | null
+  card_type: string
+  department_id: string
+  employee_name: string
+  id: Generated<string>
+  notes: string | null
+  print_status: Generated<string>
+  printed_at: Generated<Timestamp>
+  printed_by: string | null
+  printer_name: string | null
+  qr_code: string | null
+}
+
+export interface Certifications {
+  certification: string
+  created_at: Generated<Timestamp>
+  department_id: string
+  employee_id: string | null
+  employee_name: string
+  expiry_date: Timestamp
+  id: Generated<string>
+  issue_date: Timestamp
+  issued_by: string | null
+  notes: string | null
+  role: string | null
   updated_at: Generated<Timestamp>
 }
 
@@ -854,6 +947,28 @@ export interface DrillOperationsArchive {
   updated_by: string | null
 }
 
+export interface DrillPatterns {
+  approved_by: string | null
+  block_id: string | null
+  burden_m: Generated<Numeric>
+  created_at: Generated<Timestamp>
+  department_id: string
+  designed_by: string | null
+  hole_depth_m: Generated<Numeric>
+  hole_diameter_mm: Generated<Numeric>
+  id: Generated<string>
+  notes: string | null
+  pattern_name: string
+  pattern_type: string
+  powder_factor: Numeric | null
+  spacing_m: Generated<Numeric>
+  status: Generated<string>
+  stemming_m: Generated<Numeric>
+  sub_drill_m: Generated<Numeric>
+  total_holes: Generated<number>
+  updated_at: Generated<Timestamp>
+}
+
 export interface EmbeddingCache {
   created_at: Generated<Timestamp>
   embedding: string
@@ -944,6 +1059,39 @@ export interface EngineeringNotesArchive {
   updated_at: Generated<Timestamp>
 }
 
+export interface EnvironmentalIncidents {
+  closed_at: Timestamp | null
+  corrective_action: string | null
+  created_at: Generated<Timestamp>
+  department_id: string
+  description: string
+  id: Generated<string>
+  incident_date: Timestamp
+  incident_type: string
+  location: string | null
+  regulatory_notified: Generated<boolean>
+  reported_by: string | null
+  root_cause: string | null
+  severity: Generated<string>
+  status: Generated<string>
+  updated_at: Generated<Timestamp>
+}
+
+export interface EnvironmentalReadings {
+  created_at: Generated<Timestamp>
+  department_id: string
+  id: Generated<string>
+  location: string | null
+  notes: string | null
+  reading_date: Timestamp
+  reading_type: string
+  recorded_by: string | null
+  status: Generated<string>
+  unit: Generated<string>
+  updated_at: Generated<Timestamp>
+  value: Generated<Numeric>
+}
+
 export interface Equipment {
   assigned_to: string | null
   calibration_expiry: Timestamp | null
@@ -1016,6 +1164,7 @@ export interface ExcavatorDumperAssignments {
   id: Generated<string>
   material_type: Generated<string>
   notes: string | null
+  session_index: Generated<number>
   /**
    * Total bank cubic metres moved
    */
@@ -1040,10 +1189,10 @@ export interface ExcavatorDumperAssignmentsArchive {
 }
 
 export interface ExtensionsPgStatStatements {
-  blk_read_time: number | null
-  blk_write_time: number | null
   calls: Int8 | null
   dbid: number | null
+  jit_deform_count: Int8 | null
+  jit_deform_time: number | null
   jit_emission_count: Int8 | null
   jit_emission_time: number | null
   jit_functions: Int8 | null
@@ -1052,6 +1201,8 @@ export interface ExtensionsPgStatStatements {
   jit_inlining_time: number | null
   jit_optimization_count: Int8 | null
   jit_optimization_time: number | null
+  local_blk_read_time: number | null
+  local_blk_write_time: number | null
   local_blks_dirtied: Int8 | null
   local_blks_hit: Int8 | null
   local_blks_read: Int8 | null
@@ -1062,14 +1213,18 @@ export interface ExtensionsPgStatStatements {
   mean_plan_time: number | null
   min_exec_time: number | null
   min_plan_time: number | null
+  minmax_stats_since: Timestamp | null
   plans: Int8 | null
   query: string | null
   queryid: Int8 | null
   rows: Int8 | null
+  shared_blk_read_time: number | null
+  shared_blk_write_time: number | null
   shared_blks_dirtied: Int8 | null
   shared_blks_hit: Int8 | null
   shared_blks_read: Int8 | null
   shared_blks_written: Int8 | null
+  stats_since: Timestamp | null
   stddev_exec_time: number | null
   stddev_plan_time: number | null
   temp_blk_read_time: number | null
@@ -1106,6 +1261,26 @@ export interface Fleet {
   year: number | null
 }
 
+export interface FleetMaintenanceSchedule {
+  actual_cost: Numeric | null
+  actual_hours: Numeric | null
+  assigned_to: string | null
+  completed_date: Timestamp | null
+  cost_estimate: Numeric | null
+  created_at: Generated<Timestamp>
+  department_id: string
+  description: string
+  estimated_hours: Numeric | null
+  fleet_id: string | null
+  id: Generated<string>
+  notes: string | null
+  parts_used: string[] | null
+  scheduled_date: Timestamp
+  service_type: string
+  status: Generated<string>
+  updated_at: Generated<Timestamp>
+}
+
 export interface FuelLogs {
   created_at: Generated<Timestamp>
   created_by: string | null
@@ -1116,6 +1291,7 @@ export interface FuelLogs {
    */
   diesel_litres: Generated<Numeric>
   id: Generated<string>
+  log_date: Timestamp
   machine_id: string
   updated_at: Timestamp | null
   updated_by: string | null
@@ -1138,6 +1314,27 @@ export interface GeneratedReports {
   shift_type: string | null
   template_id: string | null
   updated_at: Timestamp | null
+}
+
+export interface GradeControlSamples {
+  ash_pct: Numeric | null
+  block_id: string | null
+  calorific_value: Numeric | null
+  created_at: Generated<Timestamp>
+  department_id: string
+  id: Generated<string>
+  lab_ref: string | null
+  location: string | null
+  moisture_pct: Numeric | null
+  sample_date: Timestamp
+  sample_type: string
+  sample_weight_kg: Numeric | null
+  sampled_by: string | null
+  seam: string | null
+  status: Generated<string>
+  sulphur_pct: Numeric | null
+  updated_at: Generated<Timestamp>
+  volatile_matter_pct: Numeric | null
 }
 
 export interface HourlyLoads {
@@ -1163,6 +1360,7 @@ export interface HourlyLoads {
    * Type of material: Waste or Coal
    */
   material_type: Generated<string>
+  session_index: Generated<number>
   shift_type: string
   total_loads: Generated<number | null>
   updated_at: Generated<Timestamp>
@@ -1200,6 +1398,24 @@ export interface HourlyLoadsLegacy {
   updated_by: string | null
 }
 
+export interface JobSafetyAnalyses {
+  approved_by: string | null
+  created_at: Generated<Timestamp>
+  department_id: string
+  hazards_identified: Generated<number>
+  id: Generated<string>
+  job_description: string
+  jsa_number: string
+  location: string | null
+  prepared_by: string | null
+  reviewed_by: string | null
+  risk_level: Generated<string>
+  status: Generated<string>
+  updated_at: Generated<Timestamp>
+  valid_from: Timestamp
+  valid_to: Timestamp | null
+}
+
 export interface MachineConfigurations {
   created_at: Generated<Timestamp>
   created_by: string | null
@@ -1222,12 +1438,17 @@ export interface MachineHours {
    */
   hours_worked: Generated<Numeric>
   id: Generated<string>
+  log_date: Timestamp
   machine_id: string
   updated_at: Timestamp | null
   updated_by: string | null
 }
 
 export interface MachineOperations {
+  /**
+   * Service meter reading at shift close (entered by operator/supervisor)
+   */
+  close_smr: Numeric | null
   created_at: Generated<Timestamp>
   created_by: string | null
   department_id: string
@@ -1236,15 +1457,51 @@ export interface MachineOperations {
    */
   end_time: string | null
   /**
+   * Engineering/breakdown delays
+   */
+  engineering_delay_minutes: Generated<number>
+  /**
+   * Standard 1h GET / diesel-refill downtime, applied to every machine until changed.
+   */
+  get_diesel_delay_minutes: Generated<number>
+  /**
    * Generated: computed from end_time - start_time
    */
   hours_worked: Generated<Numeric | null>
   id: Generated<string>
+  /**
+   * Standard 1h lunch downtime, applied to every machine until changed.
+   */
+  lunch_delay_minutes: Generated<number>
   machine_id: string
+  /**
+   * Natural/weather delays
+   */
+  natural_delay_minutes: Generated<number>
+  /**
+   * Non-production delays (e.g. shift change, meetings)
+   */
+  non_production_delay_minutes: Generated<number>
   operator_id: string | null
+  /**
+   * Production-related delays (e.g. material shortage)
+   */
+  production_delay_minutes: Generated<number>
+  /**
+   * Standard 1h safety-talk downtime, applied to every machine until changed.
+   */
+  safety_talk_delay_minutes: Generated<number>
   shift_date: Timestamp
   shift_type: string
   site_id: string | null
+  /**
+   * Auto-calculated close_smr - start_smr
+   */
+  smr_total: Generated<Numeric | null>
+  /**
+   * Service meter reading at shift start (pulled from previous close)
+   */
+  start_smr: Numeric | null
   /**
    * Operation start time
    */
@@ -1253,6 +1510,7 @@ export interface MachineOperations {
 }
 
 export interface MachineOperationsArchive {
+  close_smr: Numeric | null
   created_at: Generated<Timestamp>
   created_by: string | null
   department_id: string
@@ -1260,16 +1518,25 @@ export interface MachineOperationsArchive {
    * Operation end time (null if ongoing)
    */
   end_time: string | null
+  engineering_delay_minutes: Generated<number>
+  get_diesel_delay_minutes: number | null
   /**
    * Generated: computed from end_time - start_time
    */
   hours_worked: Generated<Numeric | null>
   id: Generated<string>
+  lunch_delay_minutes: number | null
   machine_id: string
+  natural_delay_minutes: Generated<number>
+  non_production_delay_minutes: Generated<number>
   operator_id: string | null
+  production_delay_minutes: Generated<number>
+  safety_talk_delay_minutes: number | null
   shift_date: Timestamp
   shift_type: string
   site_id: string | null
+  smr_total: Numeric | null
+  start_smr: Numeric | null
   /**
    * Operation start time
    */
@@ -1285,11 +1552,19 @@ export interface Machines {
   bin_factor: Numeric | null
   created_at: Generated<Timestamp>
   /**
+   * Latest known close_smr; updated by control-room shift close
+   */
+  current_smr: Numeric | null
+  /**
    * Soft delete timestamp
    */
   deleted_at: Timestamp | null
   department_id: string
   id: Generated<string>
+  /**
+   * Equipment class. Dumpers (articulated/rigid) require a bin_factor for tonnage math.
+   */
+  machine_category: string | null
   /**
    * Category of equipment (Drill Rig, Dump Truck, Excavator, etc.)
    */
@@ -1416,9 +1691,32 @@ export interface MineBlocks {
   updated_at: Timestamp | null
 }
 
+export interface ModbusConnections {
+  created_at: Generated<Timestamp>
+  department_id: string
+  equipment_id: string
+  host: string
+  id: Generated<string>
+  last_connected: Timestamp | null
+  port: Generated<number>
+  status: Generated<string>
+  unit_id: Generated<number>
+  updated_at: Generated<Timestamp>
+}
+
+export interface ModbusTelemetry {
+  created_at: Generated<Timestamp>
+  department_id: string
+  equipment_id: string
+  id: Generated<string>
+  registers: Json
+  status: Generated<string>
+  timestamp: Generated<Timestamp>
+}
+
 export interface NetHttpRequestQueue {
   body: Buffer | null
-  headers: Json
+  headers: Json | null
   id: Generated<Int8>
   method: string
   timeout_milliseconds: number
@@ -1438,6 +1736,10 @@ export interface NetHttpResponse {
 
 export interface OperationalDelays {
   affected_machine_id: string | null
+  /**
+   * Roll-up bucket for SMR delay reporting
+   */
+  category_bucket: string | null
   created_at: Generated<Timestamp>
   created_by: string | null
   delay_category_id: string | null
@@ -1465,6 +1767,7 @@ export interface OperationalDelays {
 
 export interface OperationalDelaysArchive {
   affected_machine_id: string | null
+  category_bucket: string | null
   created_at: Generated<Timestamp>
   created_by: string | null
   delay_category_id: string | null
@@ -1487,6 +1790,15 @@ export interface OperationalDelaysArchive {
    * Active, recovered, or extended
    */
   status: Generated<string>
+  updated_at: Generated<Timestamp>
+}
+
+export interface OperatorLogs {
+  created_at: Generated<Timestamp>
+  department_id: string
+  id: Generated<string>
+  message: string
+  operator_name: string
   updated_at: Generated<Timestamp>
 }
 
@@ -1533,6 +1845,7 @@ export interface ProductionLogs {
   daily_log_id: string
   department_id: string
   id: Generated<string>
+  log_date: Timestamp
   updated_at: Timestamp | null
   updated_by: string | null
   /**
@@ -1628,6 +1941,23 @@ export interface SafetyIncidents {
   updated_at: Generated<Timestamp>
 }
 
+export interface SafetyObservations {
+  assigned_to: string | null
+  closed_at: Timestamp | null
+  corrective_action: string | null
+  created_at: Generated<Timestamp>
+  department_id: string
+  description: string
+  id: Generated<string>
+  location: string | null
+  observation_date: Timestamp
+  observation_type: string
+  observed_by: string | null
+  risk_level: Generated<string>
+  status: Generated<string>
+  updated_at: Generated<Timestamp>
+}
+
 export interface SafetySeverities {
   color: Generated<string>
   id: Generated<string>
@@ -1638,6 +1968,22 @@ export interface SafetySeverities {
    * Numeric weight for severity scoring
    */
   weight: Generated<number>
+}
+
+export interface SatelliteAlerts {
+  alert_type: string
+  confidence_pct: Generated<Numeric>
+  created_at: Generated<Timestamp>
+  department_id: string
+  description: string | null
+  detected_at: Generated<Timestamp>
+  id: Generated<string>
+  location: Json | null
+  notes: string | null
+  reviewed: Generated<boolean>
+  reviewed_by: string | null
+  severity: Generated<string>
+  source: string
 }
 
 export interface ShiftStatus {
@@ -1819,14 +2165,141 @@ export interface SupabaseMigrationsSchemaMigrations {
   version: string
 }
 
-export interface SupabaseMigrationsSeedFiles {
-  hash: string
-  path: string
+export interface SurveyMeasurements {
+  block_id: string | null
+  created_at: Generated<Timestamp>
+  department_id: string
+  id: Generated<string>
+  location: string | null
+  measurement_value: Numeric | null
+  notes: string | null
+  survey_date: Timestamp
+  survey_type: string
+  surveyed_by: string | null
+  unit: string | null
+  updated_at: Generated<Timestamp>
+}
+
+export interface SurveyPlans {
+  accuracy_requirement: string | null
+  area_size_ha: Numeric | null
+  assigned_surveyor: string | null
+  block_id: string | null
+  completed_date: Timestamp | null
+  created_at: Generated<Timestamp>
+  department_id: string
+  id: Generated<string>
+  notes: string | null
+  plan_name: string
+  planned_date: Timestamp | null
+  point_count: number | null
+  status: Generated<string>
+  survey_type: string
+  updated_at: Generated<Timestamp>
 }
 
 export interface SyncWatermarks {
   last_processed_id: string
   table_name: string
+  updated_at: Generated<Timestamp>
+}
+
+export interface Tires {
+  created_at: Generated<Timestamp>
+  department_id: string
+  fleet_id: string | null
+  id: Generated<string>
+  installed_at: Timestamp | null
+  machine_name: string | null
+  notes: string | null
+  position: string | null
+  pressure_psi: Numeric | null
+  replaced_at: Timestamp | null
+  size: string | null
+  status: Generated<string>
+  tread_depth_mm: Numeric | null
+  updated_at: Generated<Timestamp>
+}
+
+export interface TrainingArchivedDocuments {
+  archived_at: Generated<Timestamp>
+  archived_by: string | null
+  department_id: string
+  document_name: string
+  document_type: string
+  employee_name: string | null
+  file_size_bytes: number | null
+  file_url: string | null
+  id: Generated<string>
+  notes: string | null
+}
+
+export interface TrainingCourses {
+  active: Generated<boolean>
+  category: Generated<string>
+  completion_rate: Generated<Numeric>
+  created_at: Generated<Timestamp>
+  created_by: string | null
+  department_id: string
+  description: string | null
+  duration_minutes: Generated<number>
+  enrolled_count: Generated<number>
+  id: Generated<string>
+  lessons: Generated<number>
+  level: Generated<string>
+  title: string
+  updated_at: Generated<Timestamp>
+}
+
+export interface TrainingInstructors {
+  active: Generated<boolean>
+  certifications: string[] | null
+  created_at: Generated<Timestamp>
+  current_sessions: Generated<number>
+  department_id: string
+  employee_id: string | null
+  id: Generated<string>
+  instructor_name: string
+  max_concurrent_sessions: Generated<number>
+  rating: Numeric | null
+  specialization: string | null
+  updated_at: Generated<Timestamp>
+}
+
+export interface TrainingSchedules {
+  capacity: Generated<number>
+  course_id: string | null
+  course_name: string
+  created_at: Generated<Timestamp>
+  created_by: string | null
+  department_id: string
+  end_time: string | null
+  filled: Generated<number>
+  id: Generated<string>
+  instructor: string | null
+  location: string | null
+  session_date: Timestamp
+  session_type: Generated<string>
+  start_time: string | null
+  status: Generated<string>
+  updated_at: Generated<Timestamp>
+}
+
+export interface TrainingTrainees {
+  avg_score: Numeric | null
+  courses_completed: Generated<number>
+  courses_in_progress: Generated<number>
+  created_at: Generated<Timestamp>
+  department_id: string
+  employee_id: string | null
+  employee_name: string
+  enrolled_date: Timestamp
+  id: Generated<string>
+  last_activity_date: Timestamp | null
+  notes: string | null
+  role: string | null
+  status: Generated<string>
+  total_hours_logged: Generated<Numeric>
   updated_at: Generated<Timestamp>
 }
 
@@ -1934,8 +2407,12 @@ export interface DB {
   '_realtime.tenants': _RealtimeTenants
   access_logs: AccessLogs
   access_logs_archive: AccessLogsArchive
+  admin_audit_trail: AdminAuditTrail
   ai_usage_logs: AiUsageLogs
+  alarm_escalation_policy: AlarmEscalationPolicy
+  alarm_events: AlarmEvents
   audit_logs: AuditLogs
+  'audit.activity_logs': AuditActivityLogs
   'auth.audit_log_entries': AuthAuditLogEntries
   'auth.custom_oauth_providers': AuthCustomOauthProviders
   'auth.flow_state': AuthFlowState
@@ -1960,7 +2437,10 @@ export interface DB {
   'auth.webauthn_challenges': AuthWebauthnChallenges
   'auth.webauthn_credentials': AuthWebauthnCredentials
   badges: Badges
+  blast_designs: BlastDesigns
   breakdowns: Breakdowns
+  card_print_history: CardPrintHistory
+  certifications: Certifications
   'cron.job': CronJob
   'cron.job_run_details': CronJobRunDetails
   daily_logs: DailyLogs
@@ -1973,10 +2453,13 @@ export interface DB {
   dozer_rolls_archive: DozerRollsArchive
   drill_operations: DrillOperations
   drill_operations_archive: DrillOperationsArchive
+  drill_patterns: DrillPatterns
   embedding_cache: EmbeddingCache
   employees: Employees
   engineering_notes: EngineeringNotes
   engineering_notes_archive: EngineeringNotesArchive
+  environmental_incidents: EnvironmentalIncidents
+  environmental_readings: EnvironmentalReadings
   equipment: Equipment
   excavator_activity: ExcavatorActivity
   excavator_activity_archive: ExcavatorActivityArchive
@@ -1985,10 +2468,13 @@ export interface DB {
   'extensions.pg_stat_statements': ExtensionsPgStatStatements
   'extensions.pg_stat_statements_info': ExtensionsPgStatStatementsInfo
   fleet: Fleet
+  fleet_maintenance_schedule: FleetMaintenanceSchedule
   fuel_logs: FuelLogs
   generated_reports: GeneratedReports
+  grade_control_samples: GradeControlSamples
   hourly_loads: HourlyLoads
   hourly_loads_legacy: HourlyLoadsLegacy
+  job_safety_analyses: JobSafetyAnalyses
   machine_configurations: MachineConfigurations
   machine_hours: MachineHours
   machine_operations: MachineOperations
@@ -1999,10 +2485,13 @@ export interface DB {
   materialized_view_refresh_log: MaterializedViewRefreshLog
   memory_embeddings: MemoryEmbeddings
   mine_blocks: MineBlocks
+  modbus_connections: ModbusConnections
+  modbus_telemetry: ModbusTelemetry
   'net._http_response': NetHttpResponse
   'net.http_request_queue': NetHttpRequestQueue
   operational_delays: OperationalDelays
   operational_delays_archive: OperationalDelaysArchive
+  operator_logs: OperatorLogs
   operators: Operators
   personnel: Personnel
   production_logs: ProductionLogs
@@ -2012,7 +2501,9 @@ export interface DB {
   report_templates: ReportTemplates
   safety_incident_categories: SafetyIncidentCategories
   safety_incidents: SafetyIncidents
+  safety_observations: SafetyObservations
   safety_severities: SafetySeverities
+  satellite_alerts: SatelliteAlerts
   shift_status: ShiftStatus
   sites: Sites
   slow_queries_summary: SlowQueriesSummary
@@ -2029,8 +2520,15 @@ export interface DB {
   'supabase_functions.hooks': SupabaseFunctionsHooks
   'supabase_functions.migrations': SupabaseFunctionsMigrations
   'supabase_migrations.schema_migrations': SupabaseMigrationsSchemaMigrations
-  'supabase_migrations.seed_files': SupabaseMigrationsSeedFiles
+  survey_measurements: SurveyMeasurements
+  survey_plans: SurveyPlans
   sync_watermarks: SyncWatermarks
+  tires: Tires
+  training_archived_documents: TrainingArchivedDocuments
+  training_courses: TrainingCourses
+  training_instructors: TrainingInstructors
+  training_schedules: TrainingSchedules
+  training_trainees: TrainingTrainees
   'vault.decrypted_secrets': VaultDecryptedSecrets
   'vault.secrets': VaultSecrets
   vector_search_cache: VectorSearchCache

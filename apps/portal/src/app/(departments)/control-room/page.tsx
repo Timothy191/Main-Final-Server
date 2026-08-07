@@ -171,6 +171,8 @@ function MachineOpsTable({ ops }: { ops: RecentMachineOperation[] }) {
 /* ------------------------------------------------------------------ */
 
 import { SCADAAlertFeed } from './components/SCADAAlertFeed'
+import { OperatorLogs } from './components/OperatorLogs'
+import { ShiftHandover } from './components/ShiftHandover'
 
 export default async function ControlRoomPage() {
   const { deptId } = await getDepartmentContext({ department: 'control-room' })
@@ -197,6 +199,12 @@ export default async function ControlRoomPage() {
       <Suspense fallback={<Skeleton className="h-[320px] w-full" />}>
         <MachineOpsSection deptId={deptId} />
       </Suspense>
+
+      {/* Operator Communication Logs & Shift Handover protocols */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <OperatorLogs />
+        <ShiftHandover />
+      </div>
     </div>
   )
 }

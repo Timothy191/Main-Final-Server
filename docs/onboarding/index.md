@@ -1,5 +1,9 @@
 # Onboarding Guide
 
+> [!NOTE] Neural Connections
+> 🔙 **Upward Node:** [Master Map of Content](../../memory/antigravity-memory/long/MAP_OF_CONTENT.md)
+> 🔀 **Lateral Nodes:** [Architecture Hub](../architecture/README.md) | [Codebase Maps](../codebase-maps/README.md)
+
 Welcome to the Arch Systems Portal! This guide walks you through setting up the development environment and understanding the project structure.
 
 ## Prerequisites

@@ -9,6 +9,83 @@
     "chrome-devtools": {
       "command": "npx",
       "args": ["-y", "chrome-devtools-mcp", "--executablePath", "/usr/bin/chromium"]
+    },
+    "codegraph": {
+      "url": "http://localhost:6010/mcp"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/timothy/Documents/Arch-System"
+      ]
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git",
+        "--repository",
+        "/home/timothy/Documents/Arch-System"
+      ]
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:54322/main"
+      ]
+    },
+    "sqlite": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sqlite",
+        "/home/timothy/Documents/Arch-System/benchmark-cache.db"
+      ]
+    },
+    "redis": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-redis", "redis://localhost:6379"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"]
+    },
+    "powerbi": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-powerbi"]
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"]
+    },
+    "everything-toolkit": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-everything-toolkit"]
+    },
+    "genkit": {
+      "command": "npx",
+      "args": ["-y", "genkit-cli@^1.28.0", "mcp"]
+    },
+    "google-workspace": {
+      "command": "node",
+      "args": [
+        "/home/timothy/.antigravity-ide/extensions/mercurial.google-workspace-mcp-0.1.1-universal/dist/mcp/server.js"
+      ],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "/home/timothy/.config/gcloud/application_default_credentials.json"
+      }
     }
   }
 }

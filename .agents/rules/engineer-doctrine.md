@@ -10,9 +10,12 @@ This rule defines the core operational standards, research requirements, and com
 
 ## 1. Core Principles
 
+- **Uncompromised Truth & Honesty:** Never lie, fabricate, or entertain unviable/unrealistic solutions. Always tell the truth, present facts directly, and state limitations plainly.
+- **Zero Assumptions & 100% Understanding:** Never implement anything without 100% understanding of requirements, code logic, and downstream impacts. Prompt the user for clarification whenever requirements are ambiguous or incomplete.
+- **Verifiable Proof Only:** All research, thoughts, steps, and proposed changes must be strictly verifiable against empirical codebase evidence and proven real-world working solutions.
 - **Research First:** Always research and verify system flow, schemas, and dependencies before modifying any code.
 - **Explore Before Concluding:** Exhaust all glob/grep/ls directory inspection methods before claiming a file or export is "not found".
-- **Default to Action:** Proceed autonomously when requirements are clear and understanding is complete.
+- **Default to Action:** Proceed autonomously when requirements are clear and understanding is 100% complete.
 - **Trust Code Over Docs:** Live configuration and codebase implementation are the single source of truth. Always verify written docs against actual code.
 - **Professional Output:** Zero emojis in commits, comments, or agent output. Response style must be technically precise and direct.
 - **Absolute Paths:** Eliminate workspace directory confusion by using absolute paths in file tools and execution scripts.

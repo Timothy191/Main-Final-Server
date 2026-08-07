@@ -81,6 +81,319 @@ function certificationStatus(expiryDate: string, today: string): CertificationSt
 }
 
 /* ------------------------------------------------------------------ */
+/*  Shared list + filter helpers                                       */
+/* ------------------------------------------------------------------ */
+
+const CERTIFICATIONS_SELECT = 'id, employee_name, role, certification, issue_date, expiry_date'
+
+const COURSES_SELECT =
+  'id, title, category, description, lessons, duration_minutes, level, enrolled_count, completion_rate'
+
+const SCHEDULES_SELECT =
+  'id, course_name, location, session_date, start_time, end_time, instructor, capacity, filled, session_type, status'
+
+const TRAINEES_SELECT =
+  'id, employee_name, role, enrolled_date, courses_completed, courses_in_progress, total_hours_logged, avg_score, status'
+
+const INSTRUCTORS_SELECT =
+  'id, instructor_name, specialization, certifications, active, max_concurrent_sessions, current_sessions, rating'
+
+const ARCHIVED_DOCS_SELECT =
+  'id, document_name, document_type, employee_name, file_url, archived_at, notes'
+
+const REPORTS_SELECT = 'id, report_type, report_date, report_data, pdf_url, generated_at'
+
+interface CertificationRow {
+  id: string
+  employee_name: string
+  role: string | null
+  certification: string
+  issue_date: string
+  expiry_date: string
+}
+
+interface CourseRow {
+  id: string
+  title: string
+  category: TrainingCourse['category']
+  description: string | null
+  lessons: number
+  duration_minutes: number
+  level: TrainingCourse['level']
+  enrolled_count: number
+  completion_rate: number
+}
+
+interface ScheduleRow {
+  id: string
+  course_name: string
+  location: string | null
+  session_date: string
+  start_time: string | null
+  end_time: string | null
+  instructor: string | null
+  capacity: number
+  filled: number
+  session_type: TrainingSchedule['sessionType']
+  status: TrainingSchedule['status']
+}
+
+interface TraineeRow {
+  id: string
+  employee_name: string
+  role: string | null
+  enrolled_date: string
+  courses_completed: number
+  courses_in_progress: number
+  total_hours_logged: number
+  avg_score: number | null
+  status: string
+}
+
+interface InstructorRow {
+  id: string
+  instructor_name: string
+  specialization: string | null
+  certifications: string[] | null
+  active: boolean
+  max_concurrent_sessions: number
+  current_sessions: number
+  rating: number | null
+}
+
+interface ArchivedDocumentRow {
+  id: string
+  document_name: string
+  document_type: string
+  employee_name: string | null
+  file_url: string | null
+  archived_at: string
+  notes: string | null
+}
+
+interface TrainingReportRow {
+  id: string
+  report_type: string | null
+  report_date: string
+  report_data: { name?: string } | null
+  pdf_url: string | null
+  generated_at: string
+}
+
+/** snake_case row -> Certification, deriving status from expiry vs today. */
+function toCertification(row: CertificationRow, today: string): Certification {
+  return {
+    id: row.id,
+    employeeName: row.employee_name,
+    role: row.role,
+    certification: row.certification,
+    issueDate: row.issue_date,
+    expiryDate: row.expiry_date,
+    status: certificationStatus(row.expiry_date, today),
+  }
+}
+
+function toCourse(row: CourseRow): TrainingCourse {
+  return {
+    id: row.id,
+    title: row.title,
+    category: row.category,
+    description: row.description,
+    lessons: row.lessons,
+    durationMinutes: row.duration_minutes,
+    level: row.level,
+    enrolledCount: row.enrolled_count,
+    completionRate: row.completion_rate,
+  }
+}
+
+function toSchedule(row: ScheduleRow): TrainingSchedule {
+  return {
+    id: row.id,
+    courseName: row.course_name,
+    location: row.location,
+    sessionDate: row.session_date,
+    startTime: row.start_time,
+    endTime: row.end_time,
+    instructor: row.instructor,
+    capacity: row.capacity,
+    filled: row.filled,
+    sessionType: row.session_type,
+    status: row.status,
+  }
+}
+
+function toTrainee(row: TraineeRow): TraineeRecord {
+  return {
+    id: row.id,
+    employeeName: row.employee_name,
+    role: row.role,
+    enrolledDate: row.enrolled_date,
+    coursesCompleted: row.courses_completed,
+    coursesInProgress: row.courses_in_progress,
+    totalHoursLogged: row.total_hours_logged,
+    avgScore: row.avg_score,
+    status: row.status as TraineeRecord['status'],
+  }
+}
+
+function toInstructor(row: InstructorRow): InstructorRecord {
+  return {
+    id: row.id,
+    instructorName: row.instructor_name,
+    specialization: row.specialization,
+    certifications: row.certifications,
+    active: row.active,
+    maxConcurrentSessions: row.max_concurrent_sessions,
+    currentSessions: row.current_sessions,
+    rating: row.rating,
+  }
+}
+
+function toArchivedDocument(row: ArchivedDocumentRow): ArchivedDocument {
+  return {
+    id: row.id,
+    documentName: row.document_name,
+    documentType: row.document_type,
+    employeeName: row.employee_name,
+    fileUrl: row.file_url,
+    archivedAt: row.archived_at,
+    notes: row.notes,
+  }
+}
+
+function toTrainingReport(row: TrainingReportRow): TrainingReport {
+  return {
+    id: row.id,
+    name:
+      row.report_data?.name ??
+      (row.report_type ? `Training report (${row.report_type})` : 'Training report'),
+    reportType: row.report_type,
+    reportDate: row.report_date,
+    generatedAt: row.generated_at,
+    pdfUrl: row.pdf_url,
+  }
+}
+
+/**
+ * Runs a department-scoped list query, maps each snake_case row via
+ * `mapRow`, and throws a typed DatabaseError on failure.
+ */
+async function listTrainingRows<T>(
+  deptId: string,
+  config: {
+    table: string
+    select: string
+    errorLabel: string
+    limit?: number
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped supabase query builder
+    configure: (query: any) => any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped supabase row data
+    mapRow: (row: any) => T
+  }
+): Promise<T[]> {
+  const { supabase } = await assertTrainingRole()
+
+  let query = supabase.from(config.table).select(config.select).eq('department_id', deptId)
+  query = config.configure(query)
+  if (config.limit !== undefined) {
+    query = query.limit(config.limit)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    throw new DatabaseError(config.errorLabel, {
+      operation: 'select',
+      context: { error: error.message },
+    })
+  }
+
+  return (data ?? []).map(config.mapRow)
+}
+
+/** Case-insensitive `includes` across nullable fields; no-op when q is empty. */
+function matchesSearch(q: string | undefined, ...fields: (string | null | undefined)[]): boolean {
+  if (!q) return true
+  return fields.some((field) => (field ?? '').toLowerCase().includes(q))
+}
+
+/** Enum-style filter: no filter, 'All', or exact equality. */
+function matchesExactFilter(filter: string | undefined, value: string): boolean {
+  return !filter || filter === 'All' || value === filter
+}
+
+/* ------------------------------------------------------------------ */
+/*  Metrics helpers (pure reductions over raw query rows)              */
+/* ------------------------------------------------------------------ */
+
+function countCertStatuses(
+  rows: { expiry_date: string }[],
+  today: string
+): { active: number; expiring: number; expired: number } {
+  let active = 0
+  let expiring = 0
+  let expired = 0
+  for (const cert of rows) {
+    const status = certificationStatus(cert.expiry_date, today)
+    if (status === 'expired') expired++
+    else if (status === 'expiring') expiring++
+    else active++
+  }
+  return { active, expiring, expired }
+}
+
+function courseCompliance(
+  rows: {
+    enrolled_count: number
+    completion_rate: number
+    duration_minutes: number
+    created_at: string
+  }[]
+): { activeTrainees: number; lmsCompliance: number } {
+  const activeTrainees = rows.reduce((sum, c) => sum + (c.enrolled_count || 0), 0)
+  const lmsCompliance =
+    rows.length > 0
+      ? Math.round(
+          (rows.reduce((sum, c) => sum + (c.completion_rate || 0), 0) / rows.length) * 10
+        ) / 10
+      : 0
+  return { activeTrainees, lmsCompliance }
+}
+
+function scheduleStats(
+  rows: {
+    session_date: string
+    status: string
+    start_time: string | null
+    end_time: string | null
+  }[],
+  today: string,
+  monthStart: string
+): { upcomingSessions: number; hoursLoggedMtd: number } {
+  const upcomingSessions = rows.filter(
+    (s) => s.session_date >= today && s.status !== 'Cancelled'
+  ).length
+
+  // Estimate hours logged MTD from scheduled session durations (>= month start)
+  const hoursLoggedMtd = rows
+    .filter((s) => s.session_date >= monthStart && s.session_date <= today)
+    .reduce((sum, s) => {
+      if (!s.start_time || !s.end_time) return sum
+      const partsStart = s.start_time.split(':').map(Number)
+      const sh = partsStart[0] ?? 0
+      const sm = partsStart[1] ?? 0
+      const partsEnd = s.end_time.split(':').map(Number)
+      const eh = partsEnd[0] ?? 0
+      const em = partsEnd[1] ?? 0
+      const diff = (eh * 60 + em - (sh * 60 + sm)) / 60
+      return sum + (diff > 0 ? diff : 0)
+    }, 0)
+
+  return { upcomingSessions, hoursLoggedMtd: Math.round(hoursLoggedMtd) }
+}
+
+/* ------------------------------------------------------------------ */
 /*  1. KPI Metrics (cached)                                            */
 /* ------------------------------------------------------------------ */
 
@@ -113,65 +426,33 @@ async function _getCachedTrainingMetrics(deptId: string): Promise<TrainingMetric
       .eq('department_id', deptId),
   ])
 
-  let activeCertifications = 0
-  let expiringCertifications = 0
-  let expiredCertifications = 0
-  for (const cert of (certifications ?? []) as { expiry_date: string }[]) {
-    const status = certificationStatus(cert.expiry_date, today)
-    if (status === 'expired') expiredCertifications++
-    else if (status === 'expiring') expiringCertifications++
-    else activeCertifications++
-  }
-
+  const certRows = (certifications ?? []) as { expiry_date: string }[]
   const courseRows = (courses ?? []) as {
     enrolled_count: number
     completion_rate: number
     duration_minutes: number
     created_at: string
   }[]
-  const activeTrainees = courseRows.reduce((sum, c) => sum + (c.enrolled_count || 0), 0)
-  const lmsCompliance =
-    courseRows.length > 0
-      ? Math.round(
-          (courseRows.reduce((sum, c) => sum + (c.completion_rate || 0), 0) / courseRows.length) *
-            10
-        ) / 10
-      : 0
-
   const scheduleRows = (schedules ?? []) as {
     session_date: string
     status: string
     start_time: string | null
     end_time: string | null
   }[]
-  const upcomingSessions = scheduleRows.filter(
-    (s) => s.session_date >= today && s.status !== 'Cancelled'
-  ).length
 
-  // Estimate hours logged MTD from scheduled session durations (>= month start)
-  const hoursLoggedMtd = scheduleRows
-    .filter((s) => s.session_date >= monthStart && s.session_date <= today)
-    .reduce((sum, s) => {
-      if (!s.start_time || !s.end_time) return sum
-      const partsStart = s.start_time.split(':').map(Number)
-      const sh = partsStart[0] ?? 0
-      const sm = partsStart[1] ?? 0
-      const partsEnd = s.end_time.split(':').map(Number)
-      const eh = partsEnd[0] ?? 0
-      const em = partsEnd[1] ?? 0
-      const diff = (eh * 60 + em - (sh * 60 + sm)) / 60
-      return sum + (diff > 0 ? diff : 0)
-    }, 0)
+  const certCounts = countCertStatuses(certRows, today)
+  const { activeTrainees, lmsCompliance } = courseCompliance(courseRows)
+  const { upcomingSessions, hoursLoggedMtd } = scheduleStats(scheduleRows, today, monthStart)
 
   return {
     lmsCompliance,
     activeTrainees,
     upcomingSessions,
     totalCourses: courseRows.length,
-    activeCertifications,
-    expiringCertifications,
-    expiredCertifications,
-    hoursLoggedMtd: Math.round(hoursLoggedMtd),
+    activeCertifications: certCounts.active,
+    expiringCertifications: certCounts.expiring,
+    expiredCertifications: certCounts.expired,
+    hoursLoggedMtd,
   }
 }
 
@@ -188,94 +469,37 @@ export async function getCertifications(
   deptId: string,
   filters?: { q?: string; status?: string }
 ): Promise<Certification[]> {
-  const { supabase } = await assertTrainingRole()
-
   const today = new Date().toISOString().slice(0, 10)
-
-  const { data, error } = await supabase
-    .from('certifications')
-    .select('id, employee_name, role, certification, issue_date, expiry_date')
-    .eq('department_id', deptId)
-    .order('expiry_date', { ascending: true })
-    .limit(200)
-
-  if (error) {
-    throw new DatabaseError('Failed to load certifications', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
   const q = filters?.q?.trim().toLowerCase()
   const statusFilter = filters?.status
 
-  return (
-    (data ?? []) as {
-      id: string
-      employee_name: string
-      role: string | null
-      certification: string
-      issue_date: string
-      expiry_date: string
-    }[]
+  const certifications = await listTrainingRows<Certification>(deptId, {
+    table: 'certifications',
+    select: CERTIFICATIONS_SELECT,
+    errorLabel: 'Failed to load certifications',
+    configure: (query) => query.order('expiry_date', { ascending: true }),
+    limit: 200,
+    mapRow: (row) => toCertification(row, today),
+  })
+
+  return certifications.filter(
+    (cert) =>
+      matchesSearch(q, cert.employeeName, cert.certification, cert.role) &&
+      matchesExactFilter(statusFilter, cert.status)
   )
-    .map((row) => ({
-      id: row.id,
-      employeeName: row.employee_name,
-      role: row.role,
-      certification: row.certification,
-      issueDate: row.issue_date,
-      expiryDate: row.expiry_date,
-      status: certificationStatus(row.expiry_date, today),
-    }))
-    .filter((cert) => {
-      const matchesSearch =
-        !q ||
-        cert.employeeName.toLowerCase().includes(q) ||
-        cert.certification.toLowerCase().includes(q) ||
-        (cert.role ?? '').toLowerCase().includes(q)
-      const matchesStatus = !statusFilter || statusFilter === 'All' || cert.status === statusFilter
-      return matchesSearch && matchesStatus
-    })
 }
 
 export async function getRecentCertifications(deptId: string, limit = 6): Promise<Certification[]> {
-  const { supabase } = await assertTrainingRole()
-
   const today = new Date().toISOString().slice(0, 10)
 
-  const { data, error } = await supabase
-    .from('certifications')
-    .select('id, employee_name, role, certification, issue_date, expiry_date')
-    .eq('department_id', deptId)
-    .order('created_at', { ascending: false })
-    .limit(limit)
-
-  if (error) {
-    throw new DatabaseError('Failed to load recent certifications', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
-  return (
-    (data ?? []) as {
-      id: string
-      employee_name: string
-      role: string | null
-      certification: string
-      issue_date: string
-      expiry_date: string
-    }[]
-  ).map((row) => ({
-    id: row.id,
-    employeeName: row.employee_name,
-    role: row.role,
-    certification: row.certification,
-    issueDate: row.issue_date,
-    expiryDate: row.expiry_date,
-    status: certificationStatus(row.expiry_date, today),
-  }))
+  return listTrainingRows<Certification>(deptId, {
+    table: 'certifications',
+    select: CERTIFICATIONS_SELECT,
+    errorLabel: 'Failed to load recent certifications',
+    configure: (query) => query.order('created_at', { ascending: false }),
+    limit,
+    mapRow: (row) => toCertification(row, today),
+  })
 }
 
 /* ------------------------------------------------------------------ */
@@ -286,61 +510,23 @@ export async function getCourses(
   deptId: string,
   filters?: { q?: string; category?: string }
 ): Promise<TrainingCourse[]> {
-  const { supabase } = await assertTrainingRole()
-
-  const { data, error } = await supabase
-    .from('training_courses')
-    .select(
-      'id, title, category, description, lessons, duration_minutes, level, enrolled_count, completion_rate'
-    )
-    .eq('department_id', deptId)
-    .eq('active', true)
-    .order('title', { ascending: true })
-    .limit(200)
-
-  if (error) {
-    throw new DatabaseError('Failed to load training courses', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
   const q = filters?.q?.trim().toLowerCase()
   const categoryFilter = filters?.category
 
-  return (
-    (data ?? []) as {
-      id: string
-      title: string
-      category: TrainingCourse['category']
-      description: string | null
-      lessons: number
-      duration_minutes: number
-      level: TrainingCourse['level']
-      enrolled_count: number
-      completion_rate: number
-    }[]
+  const courses = await listTrainingRows<TrainingCourse>(deptId, {
+    table: 'training_courses',
+    select: COURSES_SELECT,
+    errorLabel: 'Failed to load training courses',
+    configure: (query) => query.eq('active', true).order('title', { ascending: true }),
+    limit: 200,
+    mapRow: toCourse,
+  })
+
+  return courses.filter(
+    (course) =>
+      matchesSearch(q, course.title, course.description) &&
+      matchesExactFilter(categoryFilter, course.category)
   )
-    .filter((course) => {
-      const matchesSearch =
-        !q ||
-        course.title.toLowerCase().includes(q) ||
-        (course.description ?? '').toLowerCase().includes(q)
-      const matchesCategory =
-        !categoryFilter || categoryFilter === 'All' || course.category === categoryFilter
-      return matchesSearch && matchesCategory
-    })
-    .map((course) => ({
-      id: course.id,
-      title: course.title,
-      category: course.category,
-      description: course.description,
-      lessons: course.lessons,
-      durationMinutes: course.duration_minutes,
-      level: course.level,
-      enrolledCount: course.enrolled_count,
-      completionRate: course.completion_rate,
-    }))
 }
 
 /* ------------------------------------------------------------------ */
@@ -351,117 +537,40 @@ export async function getSchedules(
   deptId: string,
   filters?: { q?: string; type?: string }
 ): Promise<TrainingSchedule[]> {
-  const { supabase } = await assertTrainingRole()
-
-  const { data, error } = await supabase
-    .from('training_schedules')
-    .select(
-      'id, course_name, location, session_date, start_time, end_time, instructor, capacity, filled, session_type, status'
-    )
-    .eq('department_id', deptId)
-    .order('session_date', { ascending: true })
-    .limit(200)
-
-  if (error) {
-    throw new DatabaseError('Failed to load training schedules', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
   const q = filters?.q?.trim().toLowerCase()
   const typeFilter = filters?.type
 
-  return (
-    (data ?? []) as {
-      id: string
-      course_name: string
-      location: string | null
-      session_date: string
-      start_time: string | null
-      end_time: string | null
-      instructor: string | null
-      capacity: number
-      filled: number
-      session_type: TrainingSchedule['sessionType']
-      status: TrainingSchedule['status']
-    }[]
+  const schedules = await listTrainingRows<TrainingSchedule>(deptId, {
+    table: 'training_schedules',
+    select: SCHEDULES_SELECT,
+    errorLabel: 'Failed to load training schedules',
+    configure: (query) => query.order('session_date', { ascending: true }),
+    limit: 200,
+    mapRow: toSchedule,
+  })
+
+  return schedules.filter(
+    (s) =>
+      matchesSearch(q, s.courseName, s.instructor, s.location) &&
+      matchesExactFilter(typeFilter, s.sessionType)
   )
-    .filter((s) => {
-      const matchesSearch =
-        !q ||
-        s.course_name.toLowerCase().includes(q) ||
-        (s.instructor ?? '').toLowerCase().includes(q) ||
-        (s.location ?? '').toLowerCase().includes(q)
-      const matchesType = !typeFilter || typeFilter === 'All' || s.session_type === typeFilter
-      return matchesSearch && matchesType
-    })
-    .map((s) => ({
-      id: s.id,
-      courseName: s.course_name,
-      location: s.location,
-      sessionDate: s.session_date,
-      startTime: s.start_time,
-      endTime: s.end_time,
-      instructor: s.instructor,
-      capacity: s.capacity,
-      filled: s.filled,
-      sessionType: s.session_type,
-      status: s.status,
-    }))
 }
 
 /** Upcoming sessions (today onwards, not cancelled) — used on the dashboard. */
 export async function getUpcomingSessions(deptId: string, limit = 6): Promise<TrainingSchedule[]> {
-  const { supabase } = await assertTrainingRole()
-
   const today = new Date().toISOString().split('T')[0]
 
-  const { data, error } = await supabase
-    .from('training_schedules')
-    .select(
-      'id, course_name, location, session_date, start_time, end_time, instructor, capacity, filled, session_type, status'
-    )
-    .eq('department_id', deptId)
-    .neq('status', 'Cancelled')
-    .gte('session_date', today)
-    .order('session_date', { ascending: true })
-    .limit(limit)
-
-  if (error) {
-    throw new DatabaseError('Failed to load upcoming training sessions', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
-  return (
-    (data ?? []) as {
-      id: string
-      course_name: string
-      location: string | null
-      session_date: string
-      start_time: string | null
-      end_time: string | null
-      instructor: string | null
-      capacity: number
-      filled: number
-      session_type: TrainingSchedule['sessionType']
-      status: TrainingSchedule['status']
-    }[]
-  ).map((s) => ({
-    id: s.id,
-    courseName: s.course_name,
-    location: s.location,
-    sessionDate: s.session_date,
-    startTime: s.start_time,
-    endTime: s.end_time,
-    instructor: s.instructor,
-    capacity: s.capacity,
-    filled: s.filled,
-    sessionType: s.session_type,
-    status: s.status,
-  }))
+  return listTrainingRows<TrainingSchedule>(deptId, {
+    table: 'training_schedules',
+    select: SCHEDULES_SELECT,
+    errorLabel: 'Failed to load upcoming training sessions',
+    configure: (query) =>
+      query.neq('status', 'Cancelled').gte('session_date', today).order('session_date', {
+        ascending: true,
+      }),
+    limit,
+    mapRow: toSchedule,
+  })
 }
 
 /* ------------------------------------------------------------------ */
@@ -549,47 +658,14 @@ export async function getTraineeMetrics(deptId: string): Promise<TraineeMetrics>
 }
 
 export async function getTrainees(deptId: string): Promise<TraineeRecord[]> {
-  const { supabase } = await assertTrainingRole()
-
-  const { data, error } = await supabase
-    .from('training_trainees')
-    .select(
-      'id, employee_name, role, enrolled_date, courses_completed, courses_in_progress, total_hours_logged, avg_score, status'
-    )
-    .eq('department_id', deptId)
-    .order('enrolled_date', { ascending: false })
-    .limit(200)
-
-  if (error) {
-    throw new DatabaseError('Failed to load trainees', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
-  return (
-    (data ?? []) as {
-      id: string
-      employee_name: string
-      role: string | null
-      enrolled_date: string
-      courses_completed: number
-      courses_in_progress: number
-      total_hours_logged: number
-      avg_score: number | null
-      status: string
-    }[]
-  ).map((row) => ({
-    id: row.id,
-    employeeName: row.employee_name,
-    role: row.role,
-    enrolledDate: row.enrolled_date,
-    coursesCompleted: row.courses_completed,
-    coursesInProgress: row.courses_in_progress,
-    totalHoursLogged: row.total_hours_logged,
-    avgScore: row.avg_score,
-    status: row.status as TraineeRecord['status'],
-  }))
+  return listTrainingRows<TraineeRecord>(deptId, {
+    table: 'training_trainees',
+    select: TRAINEES_SELECT,
+    errorLabel: 'Failed to load trainees',
+    configure: (query) => query.order('enrolled_date', { ascending: false }),
+    limit: 200,
+    mapRow: toTrainee,
+  })
 }
 
 /* ------------------------------------------------------------------ */
@@ -608,44 +684,13 @@ export interface InstructorRecord {
 }
 
 export async function getInstructors(deptId: string): Promise<InstructorRecord[]> {
-  const { supabase } = await assertTrainingRole()
-
-  const { data, error } = await supabase
-    .from('training_instructors')
-    .select(
-      'id, instructor_name, specialization, certifications, active, max_concurrent_sessions, current_sessions, rating'
-    )
-    .eq('department_id', deptId)
-    .order('instructor_name', { ascending: true })
-
-  if (error) {
-    throw new DatabaseError('Failed to load instructors', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
-  return (
-    (data ?? []) as {
-      id: string
-      instructor_name: string
-      specialization: string | null
-      certifications: string[] | null
-      active: boolean
-      max_concurrent_sessions: number
-      current_sessions: number
-      rating: number | null
-    }[]
-  ).map((row) => ({
-    id: row.id,
-    instructorName: row.instructor_name,
-    specialization: row.specialization,
-    certifications: row.certifications,
-    active: row.active,
-    maxConcurrentSessions: row.max_concurrent_sessions,
-    currentSessions: row.current_sessions,
-    rating: row.rating,
-  }))
+  return listTrainingRows<InstructorRecord>(deptId, {
+    table: 'training_instructors',
+    select: INSTRUCTORS_SELECT,
+    errorLabel: 'Failed to load instructors',
+    configure: (query) => query.order('instructor_name', { ascending: true }),
+    mapRow: toInstructor,
+  })
 }
 
 /* ------------------------------------------------------------------ */
@@ -666,41 +711,14 @@ export async function getArchivedDocuments(
   deptId: string,
   limit = 100
 ): Promise<ArchivedDocument[]> {
-  const { supabase } = await assertTrainingRole()
-
-  const { data, error } = await supabase
-    .from('training_archived_documents')
-    .select('id, document_name, document_type, employee_name, file_url, archived_at, notes')
-    .eq('department_id', deptId)
-    .order('archived_at', { ascending: false })
-    .limit(limit)
-
-  if (error) {
-    throw new DatabaseError('Failed to load archived documents', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
-  return (
-    (data ?? []) as {
-      id: string
-      document_name: string
-      document_type: string
-      employee_name: string | null
-      file_url: string | null
-      archived_at: string
-      notes: string | null
-    }[]
-  ).map((row) => ({
-    id: row.id,
-    documentName: row.document_name,
-    documentType: row.document_type,
-    employeeName: row.employee_name,
-    fileUrl: row.file_url,
-    archivedAt: row.archived_at,
-    notes: row.notes,
-  }))
+  return listTrainingRows<ArchivedDocument>(deptId, {
+    table: 'training_archived_documents',
+    select: ARCHIVED_DOCS_SELECT,
+    errorLabel: 'Failed to load archived documents',
+    configure: (query) => query.order('archived_at', { ascending: false }),
+    limit,
+    mapRow: toArchivedDocument,
+  })
 }
 
 /* ------------------------------------------------------------------ */
@@ -717,41 +735,14 @@ export interface TrainingReport {
 }
 
 export async function getTrainingReports(deptId: string, limit = 15): Promise<TrainingReport[]> {
-  const { supabase } = await assertTrainingRole()
-
-  const { data, error } = await supabase
-    .from('generated_reports')
-    .select('id, report_type, report_date, report_data, pdf_url, generated_at')
-    .eq('department_id', deptId)
-    .order('report_date', { ascending: false })
-    .limit(limit)
-
-  if (error) {
-    throw new DatabaseError('Failed to load training reports', {
-      operation: 'select',
-      context: { error: error.message },
-    })
-  }
-
-  return (
-    (data ?? []) as {
-      id: string
-      report_type: string | null
-      report_date: string
-      report_data: { name?: string } | null
-      pdf_url: string | null
-      generated_at: string
-    }[]
-  ).map((row) => ({
-    id: row.id,
-    name:
-      row.report_data?.name ??
-      (row.report_type ? `Training report (${row.report_type})` : 'Training report'),
-    reportType: row.report_type,
-    reportDate: row.report_date,
-    generatedAt: row.generated_at,
-    pdfUrl: row.pdf_url,
-  }))
+  return listTrainingRows<TrainingReport>(deptId, {
+    table: 'generated_reports',
+    select: REPORTS_SELECT,
+    errorLabel: 'Failed to load training reports',
+    configure: (query) => query.order('report_date', { ascending: false }),
+    limit,
+    mapRow: toTrainingReport,
+  })
 }
 
 /* ------------------------------------------------------------------ */

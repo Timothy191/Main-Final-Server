@@ -1,11 +1,30 @@
 /**
  * @repo/supabase/service-role
- * Service-role Supabase client mock (SQLite fallback).
+ * Service-role Supabase client — full bypass of RLS. Use with care.
  */
 import 'server-only'
-import { SupabaseClient } from '@supabase/supabase-js'
-import { createMockSupabaseClient } from './kysely-shim'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
-export function createServiceRoleClient(): SupabaseClient<any, 'public', any> {
-  return createMockSupabaseClient() as any
+function getEnv(key: string): string {
+  const val = process.env[key]
+  if (!val) {
+    throw new Error(
+      `[supabase/service-role] Missing environment variable: ${key}. ` +
+        'Check your apps/portal/.env.local file.'
+    )
+  }
+  return val
+}
+
+export function createServiceRoleClient() {
+  return createSupabaseClient(
+    getEnv('NEXT_PUBLIC_SUPABASE_URL'),
+    getEnv('SUPABASE_SERVICE_ROLE_KEY'),
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  )
 }

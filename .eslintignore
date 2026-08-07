@@ -12,3 +12,7 @@ coverage
 # Root config files
 lint-staged.config.mjs
 commitlint.config.mjs
+
+# Non-web tools and data
+arch-engine
+_appdata

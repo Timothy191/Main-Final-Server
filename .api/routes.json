@@ -1,0 +1,166 @@
+{
+  "_note": "Agent-context-only route index. Hand-authored. Keep in sync when adding new /api/* route groups.",
+  "_generated": "2026-08-06",
+  "_source": "apps/portal/src/app/api/",
+  "baseUrl": "http://localhost:3000",
+  "authMechanism": "Supabase session cookie (edge-verified in proxy.ts)",
+  "routes": [
+    {
+      "path": "/api/admin",
+      "methods": ["GET", "POST", "PATCH", "DELETE"],
+      "auth": "admin",
+      "notes": "User + role management"
+    },
+    {
+      "path": "/api/ai",
+      "methods": ["POST"],
+      "auth": "employee",
+      "notes": "AI inference endpoints"
+    },
+    {
+      "path": "/api/auth/callback",
+      "methods": ["GET"],
+      "auth": "public",
+      "notes": "Supabase auth callback"
+    },
+    {
+      "path": "/api/auth/confirm",
+      "methods": ["GET"],
+      "auth": "public",
+      "notes": "Email confirmation"
+    },
+    {
+      "path": "/api/cache/invalidate",
+      "methods": ["POST"],
+      "auth": "admin",
+      "notes": "L1+L2 cache eviction. Body: { userId?, tags?, department?, allDepartments? }"
+    },
+    {
+      "path": "/api/c66",
+      "methods": ["GET", "POST"],
+      "auth": "department",
+      "notes": "C66 SCADA integration"
+    },
+    {
+      "path": "/api/cleanup",
+      "methods": ["POST"],
+      "auth": "admin",
+      "notes": "Data cleanup utilities"
+    },
+    {
+      "path": "/api/control-room",
+      "methods": ["GET", "POST", "PATCH"],
+      "auth": "department",
+      "notes": "Machine operations + SMR data"
+    },
+    {
+      "path": "/api/csp-violations",
+      "methods": ["POST"],
+      "auth": "public",
+      "notes": "Content Security Policy violation reporting"
+    },
+    {
+      "path": "/api/doc",
+      "methods": ["GET"],
+      "auth": "employee",
+      "notes": "Documentation endpoint"
+    },
+    {
+      "path": "/api/export",
+      "methods": ["GET", "POST"],
+      "auth": "department",
+      "notes": "CSV/PDF data export"
+    },
+    {
+      "path": "/api/feedback",
+      "methods": ["POST"],
+      "auth": "employee",
+      "notes": "User feedback submission"
+    },
+    {
+      "path": "/api/health",
+      "methods": ["GET"],
+      "auth": "public",
+      "notes": "Health check — returns { status, redis, supabase, timestamp }"
+    },
+    {
+      "path": "/api/inngest",
+      "methods": ["POST"],
+      "auth": "inngest-signed",
+      "notes": "Inngest background job webhooks"
+    },
+    {
+      "path": "/api/log",
+      "methods": ["POST"],
+      "auth": "employee",
+      "notes": "Structured log ingestion"
+    },
+    { "path": "/api/metrics", "methods": ["GET"], "auth": "admin", "notes": "Application metrics" },
+    {
+      "path": "/api/modbus-ingest",
+      "methods": ["POST"],
+      "auth": "service-key",
+      "notes": "Modbus SCADA data ingestion"
+    },
+    {
+      "path": "/api/ops",
+      "methods": ["GET", "POST"],
+      "auth": "admin",
+      "notes": "Operations management"
+    },
+    {
+      "path": "/api/plugins",
+      "methods": ["GET", "POST", "DELETE"],
+      "auth": "admin",
+      "notes": "Plugin management"
+    },
+    {
+      "path": "/api/printers",
+      "methods": ["GET", "POST"],
+      "auth": "department",
+      "notes": "Print queue management"
+    },
+    { "path": "/api/sync", "methods": ["POST"], "auth": "admin", "notes": "Data sync triggers" },
+    {
+      "path": "/api/telemetry",
+      "methods": ["POST"],
+      "auth": "service-key",
+      "notes": "OpenTelemetry trace ingestion"
+    },
+    {
+      "path": "/api/tools",
+      "methods": ["GET", "POST"],
+      "auth": "admin",
+      "notes": "Internal tool endpoints"
+    },
+    {
+      "path": "/api/v2",
+      "methods": ["GET", "POST"],
+      "auth": "varies",
+      "notes": "v2 API surface — check sub-routes"
+    },
+    {
+      "path": "/api/weather",
+      "methods": ["GET"],
+      "auth": "department",
+      "notes": "Weather data proxy"
+    },
+    {
+      "path": "/api/webhooks",
+      "methods": ["POST"],
+      "auth": "webhook-signed",
+      "notes": "Incoming webhook handlers"
+    }
+  ],
+  "sharedContracts": {
+    "package": "@repo/contract",
+    "entryPoint": "packages/contract/index.ts",
+    "schemas": "packages/contract/validation/"
+  },
+  "errorContract": {
+    "package": "@repo/errors",
+    "entryPoint": "packages/errors/src/index.ts",
+    "baseClass": "AppError",
+    "reExport": "apps/portal/src/lib/errors/error-classes.ts"
+  }
+}

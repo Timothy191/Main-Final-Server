@@ -37,6 +37,19 @@ else
   echo -e "  – No Ops Gateway PID file found"
 fi
 
+# Kill Ops Babysitter
+if [ -f "$REPO_ROOT/.babysitter.pid" ]; then
+  pid=$(cat "$REPO_ROOT/.babysitter.pid")
+  if kill "$pid" 2>/dev/null; then
+    echo -e "  ${GREEN}✓${NC} Ops Babysitter daemon (PID $pid) stopped"
+  else
+    echo -e "  – Ops Babysitter PID $pid not running"
+  fi
+  rm -f "$REPO_ROOT/.babysitter.pid"
+else
+  echo -e "  – No Ops Babysitter daemon PID file found"
+fi
+
 
 # Optionally stop Supabase + Docker Compose infra (Redis)
 if [ "${1:-}" = "--infra" ]; then

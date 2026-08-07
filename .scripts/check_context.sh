@@ -18,7 +18,7 @@ else
 fi
 
 # Check 2: No inline test commands in CLAUDE.md
-if grep -qE '(pytest|jest|mvn|gradle|xcodebuild|cargo test)' CLAUDE.md 2>/dev/null; then
+if grep -qE '(^|[[:space:]])(jest|pytest|mvn|gradle|xcodebuild|cargo[[:space:]]+test|pnpm[[:space:]]+test)([[:space:]]|$)' CLAUDE.md 2>/dev/null; then
   echo "  ❌ FAIL: CLAUDE.md contains inline test commands (should use progressive disclosure)"
   exit 1
 else
@@ -33,7 +33,7 @@ else
   echo "  ✓ PASS: AGENT_TRACER.md exists"
 fi
 
-# Check 4: No unsafe agent state (allow .agents/knowledge/** and .agents/AGENT_TRACER.md)
+# Check 4: No unsafe agent state (allow .agents/knowledge/**, .agents/skills/**, .agents/rules/**, and bootstrap docs AGENT_TRACER.md / KIRO.md)
 AGENT_KNOWLEDGE_DIR=".agents/knowledge"
 if [ ! -d "$AGENT_KNOWLEDGE_DIR" ]; then
   echo "  ❌ FAIL: Knowledge directory $AGENT_KNOWLEDGE_DIR missing"
@@ -48,11 +48,12 @@ ALLOWED_FILES=(
 )
 
 # Capture all *.md files in .agents excluding allowed files
-AGENT_STATE_FILES=$(find .agents -type f -name "*.md" -not -path "$AGENT_KNOWLEDGE_DIR/*" -a -not -name "AGENT_TRACER.md" -a -not -name "README*" -a -not -path "*/venv/*" 2>/dev/null | wc -l)
+AGENT_STATE_FILES=$(find .agents -type f -name "*.md" -not -path "$AGENT_KNOWLEDGE_DIR/*" -a -not -name "AGENT_TRACER.md" -a -not -name "KIRO.md" -a -not -name "README*" -a -not -path "*/venv/*" -a -not -path ".agents/skills/*" -a -not -path ".agents/rules/*" 2>/dev/null | wc -l)
 
 if [ "$AGENT_STATE_FILES" -gt 0 ]; then
   echo "  ❌ FAIL: Found $AGENT_STATE_FILES non-allowed agent files (potential state leakage)"
-  echo "  Detected: $(find .agents -type f -name "*.md" -not -path "$AGENT_KNOWLEDGE_DIR/*" -a -not -name "AGENT_TRACER.md" -a -not -name "README*" -a -not -path "*/venv/*" -exec echo "- {}" \;) "
+  echo "  Detected: $(find .agents -type f -name "*.md" -not -path "$AGENT_KNOWLEDGE_DIR/*" -a -not -name "AGENT_TRACER.md" -a -not -name "KIRO.md" -a -not -name "README*" -a -not -path "*/venv/*" -a -not -path ".agents/skills/*" -a -not -path ".agents/rules/*" -exec echo "- {}" \;) "
+  exit 1
 else
   echo "  ✓ PASS: No agent runtime state files detected"
 fi

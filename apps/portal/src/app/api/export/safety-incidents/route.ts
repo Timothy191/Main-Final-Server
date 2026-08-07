@@ -167,7 +167,9 @@ async function handleExportRequest(req: NextRequest) {
     ] as const
     const csv = [
       keys.join(','),
-      ...(data ?? []).map((r) => keys.map((k) => sanitizeCsvCell(String(r[k] ?? ''))).join(',')),
+      ...(data ?? []).map((r: Record<string, unknown>) =>
+        keys.map((k) => sanitizeCsvCell(String(r[k] ?? ''))).join(',')
+      ),
     ].join('\n')
     const response = new NextResponse(csv, {
       headers: {

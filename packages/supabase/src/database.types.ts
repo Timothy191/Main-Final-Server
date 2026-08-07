@@ -28,6 +28,174 @@ export type Database = {
   }
   public: {
     Tables: {
+      alarm_escalation_policy: {
+        Row: {
+          id: string
+          department_id: string
+          severity: string
+          delay_seconds: number
+          notification_channels: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          department_id: string
+          severity: string
+          delay_seconds?: number
+          notification_channels?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          department_id?: string
+          severity?: string
+          delay_seconds?: number
+          notification_channels?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      alarm_events: {
+        Row: {
+          id: string
+          department_id: string
+          equipment_id: string
+          severity: string
+          message: string
+          value: number | null
+          status: string
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          department_id: string
+          equipment_id: string
+          severity: string
+          message: string
+          value?: number | null
+          status?: string
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          department_id?: string
+          equipment_id?: string
+          severity?: string
+          message?: string
+          value?: number | null
+          status?: string
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      modbus_connections: {
+        Row: {
+          id: string
+          department_id: string
+          equipment_id: string
+          host: string
+          port: number
+          unit_id: number
+          status: string
+          last_connected: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          department_id: string
+          equipment_id: string
+          host: string
+          port?: number
+          unit_id?: number
+          status?: string
+          last_connected?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          department_id?: string
+          equipment_id?: string
+          host?: string
+          port?: number
+          unit_id?: number
+          status?: string
+          last_connected?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      modbus_telemetry: {
+        Row: {
+          id: string
+          department_id: string
+          equipment_id: string
+          timestamp: string
+          registers: Json
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          department_id: string
+          equipment_id: string
+          timestamp?: string
+          registers: Json
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          department_id?: string
+          equipment_id?: string
+          timestamp?: string
+          registers?: Json
+          status?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      operator_logs: {
+        Row: {
+          id: string
+          department_id: string
+          operator_name: string
+          message: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          department_id: string
+          operator_name: string
+          message: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          department_id?: string
+          operator_name?: string
+          message?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       access_logs: {
         Row: {
           access_granted: boolean | null

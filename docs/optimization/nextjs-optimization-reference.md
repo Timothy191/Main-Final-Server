@@ -46,7 +46,7 @@
 >
 > - [`docs/caching/caching-strategy-research.md`](../caching/caching-strategy-research.md) — L1/L2 Redis cache architecture, request coalescing, tag-based invalidation
 > - [`docs/caching/redis-caching-redesign.md`](../caching/redis-caching-redesign.md) — Proposed `Cache` class redesign with unified interface and graceful degradation
-> - [`memory/ARCHITECTURAL_INSIGHTS.md`](../../memory/ARCHITECTURAL_INSIGHTS.md) — Multi-tier caching architecture and auth decoupling protocol
+> - [`memory/antigravity-memory/long/ARCHITECTURAL_INSIGHTS.md`](../../memory/antigravity-memory/long/ARCHITECTURAL_INSIGHTS.md) — Multi-tier caching architecture and auth decoupling protocol
 
 ### Architecture
 

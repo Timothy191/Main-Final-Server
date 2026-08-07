@@ -21,6 +21,7 @@ interface DepartmentLayoutProps {
   }
   tabs: readonly Tab[]
   children: React.ReactNode
+  footerAction?: React.ReactNode
 }
 
 function TabGlyph({ active }: { active?: boolean }) {
@@ -35,7 +36,12 @@ function TabGlyph({ active }: { active?: boolean }) {
   )
 }
 
-export function DepartmentLayout({ department, tabs, children }: DepartmentLayoutProps) {
+export function DepartmentLayout({
+  department,
+  tabs,
+  children,
+  footerAction,
+}: DepartmentLayoutProps) {
   const pathname = usePathname()
   const basePath = `/${department.name}`
 
@@ -100,7 +106,8 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
           })}
         </nav>
 
-        <div className="p-3 border-t border-black/[0.06] flex items-center justify-between gap-2">
+        <div className="p-3 border-t border-black/[0.06] flex flex-col gap-2">
+          {footerAction && <div className="w-full">{footerAction}</div>}
           <div className="flex-1 flex items-center gap-2 px-2 py-1.5 rounded-md bg-[var(--accent-green)]/8 border border-[var(--accent-green)]/15">
             <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent-green)] animate-pulse" />
             <span className="text-[11px] text-[var(--text-muted)] font-medium tracking-wide">

@@ -19,6 +19,6 @@
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^20.12.7",
     "tsx": "^4.19.1",
-    "typescript": "^5.4.5"
+    "typescript": "catalog:"
   }
 }

@@ -1,0 +1,69 @@
+{
+  "_note": "Agent-readable LSP capability manifest. Not auto-loaded by language servers — this is for agent orchestrators and onboarding context.",
+  "workspace": "/home/timothy/Documents/Arch-System",
+  "servers": [
+    {
+      "id": "typescript-language-server",
+      "language": ["typescript", "typescriptreact", "javascript"],
+      "command": "typescript-language-server",
+      "args": ["--stdio"],
+      "configFile": "tsconfig.json",
+      "capabilities": [
+        "goto-definition",
+        "find-references",
+        "rename",
+        "hover",
+        "completion",
+        "inlay-hints",
+        "diagnostics"
+      ],
+      "notes": "Root tsconfig.json uses composite + project references. Portal app has its own tsconfig at apps/portal/tsconfig.json."
+    },
+    {
+      "id": "prisma-language-server",
+      "language": ["prisma"],
+      "command": "prisma-language-server",
+      "args": ["--stdio"],
+      "configFile": "packages/supabase/",
+      "capabilities": ["completion", "format", "goto-definition", "diagnostics"],
+      "notes": "Supabase uses raw SQL migrations, not Prisma ORM. Prisma LSP is present but only for schema syntax support."
+    },
+    {
+      "id": "eslint-ls",
+      "language": ["typescript", "typescriptreact", "javascript"],
+      "command": "vscode-eslint-language-server",
+      "args": ["--stdio"],
+      "capabilities": ["diagnostics", "code-action"],
+      "notes": "ESLint v9 flat config. Tailwind plugin, import boundary checks, and custom rules enforced."
+    },
+    {
+      "id": "tailwindcss-intellisense",
+      "language": ["typescriptreact", "css"],
+      "command": "@tailwindcss/language-server",
+      "args": ["--stdio"],
+      "capabilities": ["completion", "hover", "diagnostics"],
+      "notes": "Tailwind v4 config. Custom design token classes are in packages/theme/src/css/variables.css."
+    },
+    {
+      "id": "css-languageserver",
+      "language": ["css"],
+      "command": "vscode-css-language-server",
+      "args": ["--stdio"],
+      "capabilities": ["completion", "hover", "goto-definition", "diagnostics"],
+      "notes": "Primary CSS is in packages/theme/src/css/variables.css. Do NOT run generate-tokens.mjs."
+    }
+  ],
+  "agentGuidance": {
+    "preferToolOrder": [
+      "codebase-memory MCP (search_graph / trace_path / get_code_snippet)",
+      "codegraph MCP",
+      "mcp-language-server (LSP over MCP bridge, if configured)",
+      "grep_search (only for string literals / config values)"
+    ],
+    "neverGrep": [
+      "node_modules/ for type definitions",
+      "function callers (use trace_path instead)",
+      "import paths (use search_graph instead)"
+    ]
+  }
+}
