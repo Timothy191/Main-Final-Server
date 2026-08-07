@@ -2,6 +2,22 @@
 
 This file maintains a record of AI agent interventions, context hand-offs, and architectural breadcrumbs for this specific package/app.
 
+## [2026-08-07] Add auto-resume (retry-on-error) to control-room client cache
+
+- **Agent**: Cline (AI)
+- **Purpose**: Make `useControlRoomCache` resilient to transient telemetry failures by auto-resuming (retrying) a failed fetch after a delay, matching the field expectation of "wait 10 seconds then retry."
+- **Changes Made**:
+  - Added `retryDelayMs?: number` option (default `10_000` ms) to `UseControlRoomCacheOptions`.
+  - In `executeFetch`, a failed fetch now schedules a background retry via `setTimeout(retryDelayMs)` that re-invokes `executeFetch(false)`; the cache is consulted first so a still-valid entry short-circuits the network call on retry.
+  - Added `retryTimerRef` + `clearRetry` to guarantee a single pending retry: any fresh attempt (initial, manual refresh) cancels a lingering timer, and the timer is cleared on unmount (`useEffect` cleanup) — no stacked retries, no render loop.
+  - `retryDelayMs: 0` disables auto-retry for consumers that opt out.
+- **Mechanism note**: The retry reuses the stable `executeFetch` (`useCallback([key])`) and triggers no state that re-runs the mount effect, so recovery is a pure timer callback — it cannot create an infinite loop.
+- **Files**: `apps/portal/src/hooks/useControlRoomCache.ts`, `apps/portal/src/hooks/useControlRoomCache.test.ts`
+- **Tests added**: (1) retry fires once the 10s delay elapses and recovers (fetcher 1×→2×, error cleared); (2) `retryDelayMs: 0` never retries.
+- **Docs updated**: `docs/REPO-CHANGE-INDEX.md`, `apps/portal/AGENT_TRACER.md`
+- **Verification**: `useControlRoomCache.test.ts` → 9/9 pass; `pnpm --filter portal type-check` → 0 errors; prettier clean.
+- **Next Agent Notes**: No `DRIFT SCORE:` line — fully aligned. When wiring new consumers, prefer default `retryDelayMs` (10s) for telemetry; pass `0` only where a manual-retry-only UX is required.
+
 ## [2026-08-07] Resolve control-room cache follow-ups + pre-existing type errors
 
 - **Agent**: Cline (AI)

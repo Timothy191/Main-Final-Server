@@ -199,4 +199,58 @@ describe('useControlRoomCache', () => {
     expect(result.current.data).toBe('volatile-1')
     expect(_clientCacheStoreForTesting.has('key-volatile')).toBe(true)
   })
+
+  it('should auto-resume (retry) after an error once the retry delay elapses', async () => {
+    // First call throws; subsequent calls succeed. This models a transient
+    // downstream failure that the hook should recover from on its own.
+    const fetcher = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('network down'))
+      .mockResolvedValueOnce('recovered-data')
+
+    const { result } = renderHook(() =>
+      useControlRoomCache('key-retry', fetcher, { retryDelayMs: 10_000 })
+    )
+
+    // Initial attempt fails -> error surfaced; the retry timer is pending but
+    // has NOT fired yet (flush microtasks only, do not run timers).
+    await act(async () => {})
+    expect(result.current.error).toBeInstanceOf(Error)
+    expect(result.current.data).toBeNull()
+    expect(fetcher).toHaveBeenCalledTimes(1)
+
+    // Before the delay elapses, no retry has fired.
+    act(() => {
+      jest.advanceTimersByTime(9_999)
+    })
+    expect(fetcher).toHaveBeenCalledTimes(1)
+
+    // After the 10s delay elapses, the background retry fires and succeeds.
+    await act(async () => {
+      jest.advanceTimersByTime(1)
+    })
+    expect(fetcher).toHaveBeenCalledTimes(2)
+    expect(result.current.error).toBeNull()
+    expect(result.current.data).toBe('recovered-data')
+  })
+
+  it('should not auto-retry when retryDelayMs is 0', async () => {
+    const fetcher = jest.fn().mockRejectedValue(new Error('persistent failure'))
+
+    const { result } = renderHook(() =>
+      useControlRoomCache('key-no-retry', fetcher, { retryDelayMs: 0 })
+    )
+
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync()
+    })
+    expect(result.current.error).toBeInstanceOf(Error)
+    expect(fetcher).toHaveBeenCalledTimes(1)
+
+    // Even after a long wait, no retry is scheduled.
+    act(() => {
+      jest.advanceTimersByTime(60_000)
+    })
+    expect(fetcher).toHaveBeenCalledTimes(1)
+  })
 })

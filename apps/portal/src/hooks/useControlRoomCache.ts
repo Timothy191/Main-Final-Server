@@ -6,7 +6,16 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 export interface UseControlRoomCacheOptions {
   ttlSeconds?: number
   tags?: string[]
+  /**
+   * Auto-resume delay in milliseconds. When a fetch throws, the hook schedules a
+   * background retry after this delay so the data source can recover on its own.
+   * Defaults to 10_000 ms. Set to 0 to disable the automatic retry.
+   */
+  retryDelayMs?: number
 }
+
+// Default auto-resume delay (10 seconds) when a fetch errors.
+const DEFAULT_RETRY_DELAY_MS = 10_000
 
 interface CacheEntry<T> {
   data: T
@@ -55,6 +64,17 @@ export function useControlRoomCache<T>(
   const fetcherRef = useRef(fetcher)
   const optionsRef = useRef(options)
 
+  // Holds the pending auto-resume retry timer so it can be cleared on unmount or
+  // superseded by a newer attempt (prevents stacked retries).
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearRetry = useCallback(() => {
+    if (retryTimerRef.current !== null) {
+      clearTimeout(retryTimerRef.current)
+      retryTimerRef.current = null
+    }
+  }, [])
+
   useEffect(() => {
     fetcherRef.current = fetcher
   }, [fetcher])
@@ -65,6 +85,9 @@ export function useControlRoomCache<T>(
 
   const executeFetch = useCallback(
     async (force = false) => {
+      // Cancel any pending auto-resume retry since a fresh attempt is beginning;
+      // this prevents retries from stacking up.
+      clearRetry()
       setIsValidating(true)
       setError(null)
       try {
@@ -93,11 +116,22 @@ export function useControlRoomCache<T>(
         setData(freshData)
       } catch (err) {
         setError(err instanceof Error ? err : new Error(String(err)))
+
+        // Auto-resume: schedule a background retry after the configured delay
+        // (default 10s) so the hook recovers on its own without an infinite
+        // render loop. A later successful/intervening attempt cancels it.
+        const retryDelayMs = optionsRef.current?.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS
+        if (retryDelayMs > 0) {
+          retryTimerRef.current = setTimeout(() => {
+            retryTimerRef.current = null
+            void executeFetch(false)
+          }, retryDelayMs)
+        }
       } finally {
         setIsValidating(false)
       }
     },
-    [key]
+    [key, clearRetry]
   )
 
   const refresh = useCallback(() => {
@@ -112,7 +146,8 @@ export function useControlRoomCache<T>(
     } else {
       executeFetch(false)
     }
-  }, [key, executeFetch])
+    return clearRetry
+  }, [key, executeFetch, clearRetry])
 
   return {
     data,
